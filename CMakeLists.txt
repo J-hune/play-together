@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(SDL2Test)
+project(play-together)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/)
@@ -25,7 +25,7 @@ endforeach()
 file(COPY ${ASSETS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets)
 
 # Create the executable
-add_executable(SDL2Test WIN32 ${SOURCES} ${HEADERS})
+add_executable(play-together WIN32 ${SOURCES} ${HEADERS})
 
 # Link libraries
-target_link_libraries(SDL2Test ${SDL2_LIBRARIES})
+target_link_libraries(play-together ${SDL2_LIBRARIES})

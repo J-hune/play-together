@@ -71,6 +71,11 @@
 # "SDL.h", not <SDL/SDL.h>.  This is done for portability reasons
 # because not all systems place things in SDL/ (see FreeBSD).
 
+cmake_minimum_required(VERSION 3.5)
+
+# Set Warning level to maximum
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
 if(NOT SDL2_DIR)
   set(SDL2_DIR "" CACHE PATH "SDL2 directory")
 endif()

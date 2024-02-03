@@ -1,3 +1,6 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "../../include/Game/Game.h"
 
 /**
@@ -6,35 +9,52 @@
  */
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
-        : window(window), renderer(renderer), player(initialPlayer) {
+        : window(window), renderer(renderer), player(initialPlayer) {}
 
-    // Initialize obstacles and player
-    Polygon obstacle1;
-    obstacle1.vertices.push_back({200, 200});
-    obstacle1.vertices.push_back({300, 100});
-    obstacle1.vertices.push_back({400, 200});
-    obstacles.push_back(obstacle1);
+void Game::loadPolygonsFromMap(const std::string& mapName) {
+    obstacles.clear();
 
-    Polygon obstacle2;
-    obstacle2.vertices.push_back({500, 300});
-    obstacle2.vertices.push_back({600, 200});
-    obstacle2.vertices.push_back({730, 200});
-    obstacle2.vertices.push_back({700, 300});
-    obstacles.push_back(obstacle2);
+    // Define the file path for the polygon data
+    std::string filePath = "../assets/maps/" + mapName + "/polygons.txt";
+    std::cout << "File path: " << filePath << std::endl;
+
+    std::ifstream file(filePath);
+
+    if (file.is_open()) {
+        std::string line;
+
+        // Read each line from the file
+        while (std::getline(file, line)) {
+            Polygon currentPolygon;
+            std::istringstream iss(line);
+            char dummy;
+
+            // Extract points from each line
+            while (iss >> dummy >> std::ws && dummy == '(') {
+                int x;
+                int y;
+                iss >> x >> dummy >> y >> dummy;
+                currentPolygon.vertices.emplace_back(x, y);
+                iss >> dummy;
+            }
+
+            // Add the completed polygon to the obstacles vector
+            obstacles.push_back(currentPolygon);
+        }
+
+        file.close();
+    } else {
+        std::cerr << "Unable to open the file." << std::endl;
+    }
 }
 
-Game::~Game() {
-    // Destroy the renderer and window when the game ends
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-}
-
-void Game::handleEvents(int &moveX, int &moveY) const {
+void Game::handleEvents(int &moveX, int &moveY) {
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
-            SDL_Quit();
+            printf("Quit event detected\n");
+            stop();
             exit(0);
         }
 
@@ -52,6 +72,10 @@ void Game::handleEvents(int &moveX, int &moveY) const {
                     break;
                 case SDLK_RIGHT:
                     moveX = player.speed;
+                    break;
+                case SDLK_m:
+                    printf("Loading map 'vow'\n");
+                    loadPolygonsFromMap("vow");
                     break;
                 default:
                     break;
@@ -193,10 +217,6 @@ bool Game::isConvex(const Polygon &polygon) {
 
     int moveX = 0;
     int moveY = 0;
-
-    // Print the sum of angles for each obstacle
-    printf("Sum of angles for obstacle1: %f\n", obstacles[0].totalAngles());
-    printf("Sum of angles for obstacle2: %f\n", obstacles[1].totalAngles());
 
     // Game loop
     while (true) {

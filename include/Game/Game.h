@@ -27,6 +27,12 @@ public:
      */
     [[noreturn]] void run();
 
+/**
+ * @brief Loads obstacles from a map file.
+ * @param mapName The name of the map file.
+ */
+void loadPolygonsFromMap(const std::string &mapName);
+
 private:
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
@@ -38,7 +44,7 @@ private:
      * @param moveX Reference to the X-axis movement variable.
      * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(int &moveX, int &moveY) const;
+    void handleEvents(int &moveX, int &moveY);
 
     /**
      * @brief Applies player movement based on the current movement variables.

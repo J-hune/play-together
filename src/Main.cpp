@@ -9,6 +9,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
 
     Player initialPlayer(50, 50, 2, 20, 30);
     Game game(window, renderer, initialPlayer);
+    game.loadPolygonsFromMap("experimentation");
+
     game.run();
 
     return 0;}

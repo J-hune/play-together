@@ -213,17 +213,25 @@ bool Game::isConvex(const Polygon &polygon) {
     return polygon.totalAngles() == static_cast<double>((n - 2) * 180);
 }
 
-[[noreturn]] void Game::run() {
-
+void Game::run() {
     int moveX = 0;
     int moveY = 0;
 
     // Game loop
-    while (true) {
+    while (isRunning) {
         // Handle events, apply player movement, check collisions, and render
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
         handleCollisions(moveX, moveY);
         render();
     }
+
+    // Close the window and clean up resources
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
+void Game::stop() {
+    isRunning = false;
 }

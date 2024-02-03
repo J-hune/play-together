@@ -6,6 +6,7 @@
 #include "Polygon.h"
 #include "Player.h"
 #include <climits>
+#include <string>
 
 /**
  * @file Game.h
@@ -19,13 +20,16 @@
 class Game {
 public:
     Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
-    ~Game();
 
     /**
      * @brief Runs the game loop.
-     * @noreturn This function does not return.
      */
-    [[noreturn]] void run();
+    void run();
+
+    /**
+     * @brief Stops the game loop and cleans up resources.
+     */
+    void stop();
 
 /**
  * @brief Loads obstacles from a map file.
@@ -38,6 +42,7 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
+    bool isRunning = true; /**< Flag indicating if the game is running. */
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.

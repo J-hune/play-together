@@ -209,8 +209,9 @@ bool Game::isConvex(const Polygon &polygon) {
         return false;
     }
 
-    // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property)
-    return polygon.totalAngles() == static_cast<double>((n - 2) * 180);
+    // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
+    const double tolerance = 1e-6;
+    return fabs(polygon.totalAngles() - static_cast<double>((n - 2) * 180)) < tolerance;
 }
 
 void Game::run() {

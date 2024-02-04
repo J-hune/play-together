@@ -1,7 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include "../../include/Game/Game.h"
+#include <ranges>
+bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
+    // Check for AABB collision
+    return (a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y);
+}
 
 /**
  * @file Game.cpp
@@ -10,6 +15,21 @@
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
         : window(window), renderer(renderer), player(initialPlayer) {}
+
+void Game::addCharacter(const Player &character) {
+    characters.push_back(character);
+}
+
+void Game::removeCharacter(const Player &character) {
+    // Find the iterator corresponding to the character in the vector
+    std::input_iterator auto it = std::ranges::find(characters.begin(), characters.end(), character);
+
+    // Check if the character was found
+    if (it != characters.end()) {
+        // Erase the character from the vector
+        characters.erase(it);
+    }
+}
 
 void Game::loadPolygonsFromMap(const std::string& mapName) {
     obstacles.clear();
@@ -74,8 +94,8 @@ void Game::handleEvents(int &moveX, int &moveY) {
                     moveX = player.speed;
                     break;
                 case SDLK_m:
-                    printf("Loading map 'vow'\n");
-                    loadPolygonsFromMap("vow");
+                    printf("Loading map 'assurance'\n");
+                    loadPolygonsFromMap("assurance");
                     break;
                 default:
                     break;
@@ -96,10 +116,8 @@ void Game::handleEvents(int &moveX, int &moveY) {
         }
 
         // Handle SDL_MOUSEBUTTONDOWN events
-        else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (e.button.button == SDL_BUTTON_LEFT) {
-                printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
-            }
+        else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
         }
     }
 }
@@ -123,6 +141,15 @@ void Game::handleCollisions(int moveX, int moveY) {
                 player.y -= moveY;
             }
         }
+
+        // Check for collisions with other characters
+        for (Player const &character : characters) {
+            if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
+                printf("Collision detected with another character\n");
+                player.x -= moveX;
+                player.y -= moveY;
+            }
+        }
     }
 }
 
@@ -135,6 +162,13 @@ void Game::render() {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_Rect playerRect = {player.x, player.y, player.width, player.height};
     SDL_RenderFillRect(renderer, &playerRect);
+
+    // Draw the characters
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    for (const Player &character : characters) {
+        SDL_Rect characterRect = {character.x, character.y, character.width, character.height};
+        SDL_RenderFillRect(renderer, &characterRect);
+    }
 
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -236,3 +270,4 @@ void Game::run() {
 void Game::stop() {
     isRunning = false;
 }
+

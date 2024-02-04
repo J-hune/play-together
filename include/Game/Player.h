@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_PLAYER_H
 
 #include <vector>
+#include <SDL_rect.h>
 #include "Point.h"
 
 /**
@@ -37,6 +38,16 @@ public:
      * @return A vector of Point representing the vertices.
      */
     [[nodiscard]] std::vector<Point> getVertices() const;
+
+    [[nodiscard]] SDL_Rect getBoundingBox() const {
+        SDL_Rect boundingBox = {x, y, width, height};
+        return boundingBox;
+    }
+
+    // Equality operator for comparing two players
+    bool operator==(const Player &other) const {
+        return (x == other.x && y == other.y && width == other.width && height == other.height);
+    }
 };
 
 #endif //PLAY_TOGETHER_PLAYER_H

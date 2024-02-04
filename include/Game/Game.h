@@ -7,6 +7,9 @@
 #include "Player.h"
 #include <climits>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 /**
  * @file Game.h
@@ -42,6 +45,7 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
+    std::vector<Player> characters; /**< Collection of characters in the game. */
     bool isRunning = true; /**< Flag indicating if the game is running. */
 
     /**
@@ -84,6 +88,19 @@ private:
      * @return True if the polygon is convex, false otherwise.
      */
     static bool isConvex(const Polygon &polygon);
+
+public:
+    /**
+    * @brief Adds a character to the game.
+    * @param character The character to add.
+    */
+    void addCharacter(const Player &character);
+
+    /**
+     * @brief Removes a character from the game.
+     * @param character The character to remove.
+     */
+    void removeCharacter(const Player &character);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

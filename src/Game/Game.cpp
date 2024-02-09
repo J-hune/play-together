@@ -1,5 +1,5 @@
 #include "../../include/Game/Game.h"
-#include <ranges>
+
 bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
     // Check for AABB collision
     return (a.x < b.x + b.w &&
@@ -18,6 +18,11 @@ Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlay
 
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);
+}
+
+void Game::teleportPlayer(int x, int y) {
+    player.x = x;
+    player.y = y;
 }
 
 void Game::removeCharacter(const Player &character) {

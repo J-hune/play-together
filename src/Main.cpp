@@ -1,7 +1,10 @@
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
 
+#include <thread>
+#include <mutex>
 #include "../include/Game/Game.h"
+#include "../include/Utils/GameConsole.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -38,6 +41,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Player character3(200, 50, 2, 20, 30);
 
     Game game(window, renderer, initialPlayer);
+    GameConsole console(&game);
 
     game.loadPolygonsFromMap("experimentation");
 
@@ -47,7 +51,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     game.removeCharacter(character3);
 
-    game.run();
+
+    // Launch the game loop in a separate thread
+    std::jthread gameThread(&Game::run, &game);
+
+    // Launch the game console in a separate thread
+    std::jthread consoleThread(&GameConsole::Run, &console);
+
+    // Wait for the game loop to finish
+    gameThread.join();
+
+    // Join the console thread
+    consoleThread.join();
 
     return 0;
 }

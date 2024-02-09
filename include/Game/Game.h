@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <ranges>
 
 /**
  * @file Game.h
@@ -101,6 +102,13 @@ public:
      * @param character The character to remove.
      */
     void removeCharacter(const Player &character);
+
+    /**
+     * @brief Teleports the player to a specific location.
+     * @param x The X-coordinate of the location.
+     * @param y The Y-coordinate of the location.
+     */
+    void teleportPlayer(int x, int y);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

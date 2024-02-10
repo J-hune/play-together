@@ -172,6 +172,15 @@ void Game::handleCollisions(int moveX, int moveY) {
                 player.y -= moveY;
             }
         }
+
+        // Check for collisions with camera borders
+        if (player.x < camera.x || player.x > camera.x + camera.w - player.width ||
+            player.y < camera.y || player.y > camera.y + camera.h - player.height) {
+
+            printf("Collision detected with a camera border\n");
+            player.x -= moveX;
+            player.y -= moveY;
+        }
     }
 }
 
@@ -276,11 +285,11 @@ void Game::run() {
 
     // Game loop
     while (isRunning) {
-        // Handle events, apply player movement, check collisions, and render
+        // Handle events, apply player movement, check collisions, apply camera movement, and render
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
-        applyCameraMovement();
         handleCollisions(moveX, moveY);
+        applyCameraMovement();
         render();
     }
 

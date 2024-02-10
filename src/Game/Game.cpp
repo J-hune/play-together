@@ -133,10 +133,11 @@ void Game::applyPlayerMovement(int moveX, int moveY) {
 }
 
 void Game::applyCameraMovement() {
+    // Initialization on the initial player
     int x_min = player.x, x_max = player.x;
     int y_min = player.y, y_max = player.y;
 
-    // Get the
+    // Get the x positions of the leftmost and rightmost player and y positions of the highest and lowest player
     for (const Player &character : characters) {
         if (character.x > x_max) x_max = character.x;
         else if (character.x < x_min) x_min = character.x;
@@ -146,9 +147,6 @@ void Game::applyCameraMovement() {
 
     camera.x = x_min + ((x_max - x_min) / 2) - (camera.w / 2);
     camera.y = y_min + ((y_max - y_min) / 2) - (camera.h / 2);
-
-    //printf("XMAX : %d  XMIN : %d  YMAX : %d  YMIN : %d\n", x_max, x_min, y_max, y_min);
-    //printf("Moving camera to (%d, %d)\n", camera.x, camera.y);
 }
 
 void Game::handleCollisions(int moveX, int moveY) {

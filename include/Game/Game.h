@@ -68,7 +68,7 @@ private:
     void applyPlayerMovement(int moveX, int moveY);
 
     /**
-     * @brief Renders the camera.
+     * @brief Applies camera movement based on the positions of all players.
      */
     void applyCameraMovement();
 

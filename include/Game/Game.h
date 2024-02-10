@@ -12,6 +12,9 @@
 #include <sstream>
 #include <ranges>
 
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.

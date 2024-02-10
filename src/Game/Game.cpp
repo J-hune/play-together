@@ -14,7 +14,7 @@ bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
  */
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
-        : window(window), renderer(renderer), player(initialPlayer) {}
+        : window(window), renderer(renderer), player(initialPlayer), camera({0, 0, 800, 600}) {}
 
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);
@@ -132,6 +132,25 @@ void Game::applyPlayerMovement(int moveX, int moveY) {
     player.y += moveY;
 }
 
+void Game::applyCameraMovement() {
+    int x_min = player.x, x_max = player.x;
+    int y_min = player.y, y_max = player.y;
+
+    // Get the
+    for (const Player &character : characters) {
+        if (character.x > x_max) x_max = character.x;
+        else if (character.x < x_min) x_min = character.x;
+        if (character.y > y_max) y_max = character.y;
+        else if (character.y < y_min) y_min = character.y;
+    }
+
+    camera.x = x_min + ((x_max - x_min) / 2) - (camera.w / 2);
+    camera.y = y_min + ((y_max - y_min) / 2) - (camera.h / 2);
+
+    //printf("XMAX : %d  XMIN : %d  YMAX : %d  YMIN : %d\n", x_max, x_min, y_max, y_min);
+    //printf("Moving camera to (%d, %d)\n", camera.x, camera.y);
+}
+
 void Game::handleCollisions(int moveX, int moveY) {
     if (moveX != 0 || moveY != 0) {
         printf("Moving player to (%d, %d)\n", player.x, player.y);
@@ -165,13 +184,13 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_Rect playerRect = {player.x, player.y, player.width, player.height};
+    SDL_Rect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
     SDL_RenderFillRect(renderer, &playerRect);
 
     // Draw the characters
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     for (const Player &character : characters) {
-        SDL_Rect characterRect = {character.x, character.y, character.width, character.height};
+        SDL_Rect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
         SDL_RenderFillRect(renderer, &characterRect);
     }
 
@@ -181,7 +200,7 @@ void Game::render() {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+            SDL_RenderDrawLine(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
         }
     }
 
@@ -262,6 +281,7 @@ void Game::run() {
         // Handle events, apply player movement, check collisions, and render
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
+        applyCameraMovement();
         handleCollisions(moveX, moveY);
         render();
     }

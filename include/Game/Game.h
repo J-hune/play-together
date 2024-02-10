@@ -47,6 +47,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
+    SDL_Rect camera;
     bool isRunning = true; /**< Flag indicating if the game is running. */
 
     /**
@@ -62,6 +63,11 @@ private:
      * @param moveY The movement along the Y-axis.
      */
     void applyPlayerMovement(int moveX, int moveY);
+
+    /**
+     * @brief Renders the camera.
+     */
+    void applyCameraMovement();
 
     /**
      * @brief Handles collisions between the player and obstacles.

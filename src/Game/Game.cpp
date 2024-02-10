@@ -134,19 +134,35 @@ void Game::applyPlayerMovement(int moveX, int moveY) {
 
 void Game::applyCameraMovement() {
     // Initialization on the initial player
-    int x_min = player.x, x_max = player.x;
-    int y_min = player.y, y_max = player.y;
+    int x = player.x, y = player.y, i = 1;
 
-    // Get the x positions of the leftmost and rightmost player and y positions of the highest and lowest player
+    // Add x and y position of all players
     for (const Player &character : characters) {
-        if (character.x > x_max) x_max = character.x;
-        else if (character.x < x_min) x_min = character.x;
-        if (character.y > y_max) y_max = character.y;
-        else if (character.y < y_min) y_min = character.y;
+        x += character.x;
+        y += character.y;
+        i++;
     }
 
-    camera.x = x_min + ((x_max - x_min) / 2) - (camera.w / 2);
-    camera.y = y_min + ((y_max - y_min) / 2) - (camera.h / 2);
+    // Average x and y position of all players
+    x = (x / i);
+    y = (y / i);
+
+    // The point is on the right of the area
+    if (x > camera.x + camera.w - (camera.w / 2)) {
+        camera.x += x - (camera.x + camera.w - (camera.w / 2));
+    }
+    // The point is on the left of the area
+    else if (x < camera.x + (camera.w / 5)) {
+        camera.x -= (camera.x + (camera.w / 5)) - x;
+    }
+    // The point is on the bottom of the area
+    if (y > camera.y + (camera.h - (camera.h / 5))) {
+        camera.y += y - (camera.y + (camera.h - (camera.h / 5)));
+    }
+    // The point is on the top of the area
+    else if (y < camera.y + (camera.h / 5)) {
+        camera.y -= (camera.y + (camera.h / 5)) - y;
+    }
 }
 
 void Game::handleCollisions(int moveX, int moveY) {

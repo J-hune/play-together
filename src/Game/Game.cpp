@@ -122,7 +122,7 @@ void Game::handleEvents(int &moveX, int &moveY) {
 
         // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
+            printf("Mouse clicked at (%d, %d)\n", e.button.x + camera.x, e.button.y + camera.y);
         }
     }
 }

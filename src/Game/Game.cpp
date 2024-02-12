@@ -48,7 +48,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
     }
 }
 
-void Game::handleEvents(int &moveX, int &moveY) {
+void Game::handleEvents(int &direction, int &moveY) {
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
@@ -61,17 +61,27 @@ void Game::handleEvents(int &moveX, int &moveY) {
         // Handle SDL_KEYDOWN and SDL_KEYUP events
         else if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
-                case SDLK_UP:
-                    moveY = -player.speed;
+                case SDLK_UP :
+                case SDLK_z:
+                case SDLK_SPACE:
+                    if (player.isOnPlatform && !player.isJumping){
+                        player.wantToJump = true;
+                    }
+                    //moveY = -player.speed;
                     break;
                 case SDLK_DOWN:
+                case SDLK_s:
                     moveY = player.speed;
                     break;
                 case SDLK_LEFT:
-                    moveX = -player.speed;
+                case SDLK_q:
+                    direction = player.LEFT;
+                    player.wantMove = true;
                     break;
                 case SDLK_RIGHT:
-                    moveX = player.speed;
+                case SDLK_d:
+                    direction = player.RIGHT;
+                    player.wantMove = true;
                     break;
                 case SDLK_m:
                     printf("Loading map 'vow'\n");
@@ -84,11 +94,16 @@ void Game::handleEvents(int &moveX, int &moveY) {
             switch (e.key.keysym.sym) {
                 case SDLK_UP:
                 case SDLK_DOWN:
-                    moveY = 0;
+                case SDLK_z:
+                case SDLK_SPACE:
+                    player.wantToJump = false;
                     break;
                 case SDLK_LEFT:
                 case SDLK_RIGHT:
-                    moveX = 0;
+                case SDLK_d:
+                case SDLK_q:
+                    player.wantMove = false;
+                    direction = 0;
                     break;
                 default:
                     break;

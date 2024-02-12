@@ -151,6 +151,39 @@ void Game::render() {
     SDL_Rect playerRect = {player.x, player.y, player.width, player.height};
     SDL_RenderFillRect(renderer, &playerRect);
 
+    /*
+    // Utils for debugs
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    std::vector<Point> vertexRight = player.getVerticesHorizontal(1);
+    for (size_t i = 0; i < vertexRight.size(); ++i) {
+        const auto &vertex1 = vertexRight[i];
+        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+    }
+    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+    std::vector<Point> vertexLeft = player.getVerticesHorizontal(-1);
+    for (size_t i = 0; i < vertexLeft.size(); ++i) {
+        const auto &vertex1 = vertexLeft[i];
+        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+    }
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertex = player.getVerticesRoof();
+    for (size_t i = 0; i < vertex.size(); ++i) {
+        const auto &vertex1 = vertex[i];
+        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+    }
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertexGround = player.getVerticesGround();
+    for (size_t i = 0; i < vertexGround.size(); ++i) {
+        const auto &vertex1 = vertexGround[i];
+        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+    }
+    */
+
+
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (const Polygon &obstacle: obstacles) {

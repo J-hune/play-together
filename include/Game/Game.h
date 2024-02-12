@@ -7,7 +7,10 @@
 #include "Player.h"
 #include <climits>
 #include <string>
-
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cmath>
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
@@ -54,16 +57,18 @@ private:
     /**
      * @brief Applies player movement based on the current movement variables.
      * @param moveX The movement along the X-axis.
+     * @param direction The direction along the X-axis.
+     * @param timeSpeed The time that has elapsed since the player started running.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(int moveX, int moveY);
+    void applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int &moveY);
 
     /**
      * @brief Handles collisions between the player and obstacles.
-     * @param moveX The movement along the X-axis.
+     * @param direction The direction along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(int moveX, int moveY);
+    void handleCollisions(int direction, int moveY);
 
     /**
      * @brief Renders the game by drawing the player and obstacles.
@@ -72,11 +77,11 @@ private:
 
     /**
      * @brief Checks for collision between the player and a polygon obstacle.
-     * @param player The player object.
+     * @param playerVertices The vector of Point representing the vertices of the player object.
      * @param obstacle The polygon obstacle.
      * @return True if a collision is detected, false otherwise.
      */
-    static bool checkCollision(const Player &player, const Polygon &obstacle);
+    static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
 
     /**
      * @brief Checks if a polygon is convex.

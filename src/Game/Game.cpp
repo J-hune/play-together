@@ -119,23 +119,72 @@ void Game::handleEvents(int &direction, int &moveY) {
     }
 }
 
-void Game::applyPlayerMovement(int moveX, int moveY) {
-    player.x += moveX;
+void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int &moveY) {
+    if(player.wantMove){
+        timeSpeed += 0.1F;
+        moveX = player.speedMax * player.speed*timeSpeed;
+        printf("\n%d\n\n\n\n",moveX > player.speedMax);
+        if (moveX > player.speedMax){
+            moveX = player.speedMax;
+        }
+        moveX = direction*moveX;
+    }
+    else{
+        timeSpeed = 0;
+        moveX = 0;
+    }
+
+    // The player press "jump button" and he doesn't maintain more than 6
+    if( player.wantToJump && player.timeJump < player.LIMIT_TIME_JUMP){
+
+        // Player jump with the following mathematical function
+        player.isJumping = true;
+        moveY = (int)-(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
+        player.timeJump+=0.1F;
+    }
+    else {
+        player.timeJump=0;
+        player.isJumping = false;
+        player.wantToJump = false;
+        if (player.isOnPlatform){
+            moveY = 0;
+        }
+        else{
+            moveY = 2;
+        }
+
+    }
+    //printf("\nOn descends de y : %d et on est sur une platforme = %d\n", moveY, player.isOnPlatform);
+    handleCollisions(direction, moveY);
+    if(player.canMove){
+        player.x += moveX;
+    }
     player.y += moveY;
 }
 
-void Game::handleCollisions(int moveX, int moveY) {
-    if (moveX != 0 || moveY != 0) {
-        printf("Moving player to (%d, %d)\n", player.x, player.y);
+void Game::handleCollisions(int direction, int moveY) {
+    player.canMove = true;
+    if (moveY != 0 || direction != 0) {
 
+        //printf("Moving player to (%d, %d)\n", player.x, player.y);
+        player.isOnPlatform = false;
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
 
-            // If collision detected, revert player position
-            if (checkCollision(player, obstacle)) {
-                printf("Collision detected\n");
-                player.x -= moveX;
-                player.y -= moveY;
+            if (checkCollision(player.getVerticesRoof(), obstacle)) {
+                printf("Collision detected on head\n");
+                player.timeJump = player.LIMIT_TIME_JUMP;
+            }
+
+            // If collision detected with the ground, the player is on platform
+            if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
+                printf("Collision detected on foot\n");
+                player.isOnPlatform = true;
+            }
+            // If collision detected with the wall, the player can't move
+            if (player.canMove && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
+                printf("Collision detected for horizontal movement\n");
+                player.canMove = false;
             }
         }
     }
@@ -199,7 +248,7 @@ void Game::render() {
     SDL_Delay(4);
 }
 
-bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
+bool Game::checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle) {
     // Check for convexity of the obstacle
     if (!isConvex(obstacle)) {
         printf("The obstacle is not convex\n");
@@ -227,7 +276,7 @@ bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
         int playerProjectionMin = INT_MAX;
         int playerProjectionMax = INT_MIN;
 
-        for (const Point &vertex: player.getVertices()) {
+        for (const Point &vertex: playerVertices) {
             int projection = vertex.x * axis.x + vertex.y * axis.y;
             playerProjectionMin = std::min(playerProjectionMin, projection);
             playerProjectionMax = std::max(playerProjectionMax, projection);
@@ -263,15 +312,15 @@ bool Game::isConvex(const Polygon &polygon) {
 }
 
 void Game::run() {
+    int direction = 0;
     int moveX = 0;
     int moveY = 0;
-
+    float timeSpeed = 0;
     // Game loop
     while (isRunning) {
         // Handle events, apply player movement, check collisions, and render
-        handleEvents(moveX, moveY);
-        applyPlayerMovement(moveX, moveY);
-        handleCollisions(moveX, moveY);
+        handleEvents(direction, moveY);
+        applyPlayerMovement(moveX,direction, timeSpeed, moveY);
         render();
     }
 

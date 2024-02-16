@@ -8,34 +8,46 @@
 #include <SDL2_gfxPrimitives.h>
 
 /**
+ * @brief A struct representing the position of a button.
+ */
+struct ButtonPosition {
+    int x;
+    int y;
+    int w;
+    int h;
+};
+
+/**
  * @brief A class representing a clickable button in SDL.
  */
 class Button {
 public:
     /**
-     * @brief Constructor for Button class.
+     * @brief Constructor for the Button class.
      * @param renderer The SDL_Renderer to render the button.
-     * @param font The TTF_Font to render the button text.
-     * @param buttonText The text displayed on the button.
-     * @param x The x-coordinate of the button's top-left corner.
-     * @param y The y-coordinate of the button's top-left corner.
-     * @param w The width of the button.
-     * @param h The height of the button.
+     * @param font The TTF_Font to render the text on the button.
+     * @param position The position of the button.
+     * @param buttonText The text to be displayed on the button.
+     * @param normalColor The color of the button when not hovered.
+     * @param hoverColor The color of the button when hovered.
+     * @param textColor The color of the text on the button.
      */
-    [[maybe_unused]] Button(SDL_Renderer* renderer, TTF_Font* font, std::string buttonText, int x, int y, int w, int h);
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
+           SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor);
 
     /**
-     * @brief Constructor for Button class.
-     * @param renderer The SDL_Renderer to render the button.
-     * @param font The TTF_Font to render the button text.
-     * @param buttonText The text displayed on the button.
-     * @param x The x-coordinate of the button's top-left corner.
-     * @param y The y-coordinate of the button's top-left corner.
-     * @param w The width of the button.
-     * @param h The height of the button.
-     * @param borderRadius The border radius of the button.
+     * @brief Constructor for the Button class.
+     * @param renderer
+     * @param font
+     * @param position
+     * @param buttonText
+     * @param normalColor
+     * @param hoverColor
+     * @param textColor
+     * @param borderRadius
      */
-    [[maybe_unused]] Button(SDL_Renderer* renderer, TTF_Font* font, std::string buttonText, int x, int y, int w, int h, short borderRadius);
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
+           SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
 
     /**
      * @brief Render the button on the screen.
@@ -90,15 +102,13 @@ private:
     SDL_Renderer* renderer;
     TTF_Font* font;
     std::string buttonText;
-    int x;
-    int y;
-    int w;
-    int h;
+    ButtonPosition position;
     short borderRadius = 0;
     bool clicked = false;
     bool hovered = false;
     SDL_Color normalColor = { 0, 255, 0, 255 };
     SDL_Color hoverColor = { 255, 0, 0, 255 };
+    SDL_Color textColor = { 0, 0, 0, 255 };
 };
 
 #endif //PLAY_TOGETHER_BUTTON_H

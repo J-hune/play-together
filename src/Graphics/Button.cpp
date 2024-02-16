@@ -18,7 +18,7 @@ void Button::render() {
 
     // Render the text on the button
     SDL_Color textColor = { 255, 255, 255, 255 };
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, buttonText.c_str(), textColor);
+    SDL_Surface* textSurface = TTF_RenderUTF8_Solid(font, buttonText.c_str(), textColor);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     SDL_Rect textRect = { x + w / 2 - textSurface->w / 2, y + h / 2 - textSurface->h / 2, textSurface->w, textSurface->h };
 

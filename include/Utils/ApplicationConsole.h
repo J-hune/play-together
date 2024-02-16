@@ -8,15 +8,15 @@
 #include "../../include/Game/Game.h"
 
 /**
- * @brief The GameConsole class represents a console for interacting with a Game.
+ * @brief The ApplicationConsole class represents a console for interacting with a Game.
  */
-class GameConsole {
+class ApplicationConsole {
 public:
     /**
-     * @brief Constructs a GameConsole object.
+     * @brief Constructs a ApplicationConsole object.
      * @param game A pointer to the Game object that the console interacts with.
      */
-    explicit GameConsole(Game* game);
+    explicit ApplicationConsole(Game* game);
 
     /**
      * @brief Runs the console, allowing the user to input commands.

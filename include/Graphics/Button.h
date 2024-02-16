@@ -98,6 +98,11 @@ public:
      */
     void setBorderRadius(short radius);
 
+    /**
+     * @brief Reset the button to its initial state.
+     */
+    void reset();
+
 private:
     SDL_Renderer* renderer;
     TTF_Font* font;

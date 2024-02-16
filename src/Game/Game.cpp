@@ -98,9 +98,8 @@ void Game::handleEvents(int &moveX, int &moveY) {
                 case SDLK_RIGHT:
                     moveX = player.speed;
                     break;
-                case SDLK_m:
-                    printf("Loading map 'assurance'\n");
-                    loadPolygonsFromMap("assurance");
+                case SDLK_ESCAPE:
+                    stop();
                     break;
                 default:
                     break;
@@ -256,6 +255,7 @@ bool Game::isConvex(const Polygon &polygon) {
 void Game::run() {
     int moveX = 0;
     int moveY = 0;
+    isRunning = true;
 
     // Game loop
     while (isRunning) {
@@ -265,14 +265,12 @@ void Game::run() {
         handleCollisions(moveX, moveY);
         render();
     }
-
-    // Close the window and clean up resources
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
 }
 
 void Game::stop() {
     isRunning = false;
 }
 
+bool Game::isGameRunning() const {
+    return isRunning;
+}

@@ -99,3 +99,8 @@ void Button::setBorderRadius(short radius) {
     // Set the border radius of the button
     borderRadius = radius;
 }
+
+void Button::reset() {
+    clicked = false;
+    hovered = false;
+}

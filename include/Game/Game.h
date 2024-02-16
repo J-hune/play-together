@@ -13,11 +13,6 @@
 #include <ranges>
 
 /**
- * @file Game.h
- * @brief Defines the Game class responsible for handling the main game logic.
- */
-
-/**
  * @class Game
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
  */
@@ -35,6 +30,8 @@ public:
      */
     void stop();
 
+    bool isGameRunning() const;
+
 /**
  * @brief Loads obstacles from a map file.
  * @param mapName The name of the map file.
@@ -47,7 +44,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    bool isRunning = true; /**< Flag indicating if the game is running. */
+    bool isRunning = false; /**< Flag indicating if the game is running. */
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.

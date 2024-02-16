@@ -14,7 +14,7 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
  */
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
-        : window(window), renderer(renderer), player(initialPlayer), camera({0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}) {}
+        : window(window), renderer(renderer), player(initialPlayer) {}
 
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);

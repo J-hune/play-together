@@ -50,7 +50,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    SDL_FRect camera;
+    SDL_FRect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
     bool isRunning = true; /**< Flag indicating if the game is running. */
 
     /**

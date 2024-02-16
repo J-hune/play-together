@@ -133,8 +133,9 @@ void Game::applyPlayerMovement(int moveX, int moveY) {
 }
 
 void Game::applyCameraMovement() {
-    // Initialization on the initial player
-    int x = player.x, y = player.y, i = 1;
+    int i = 1;  // Number of player in the game (at least one)
+    int x = player.x, y = player.y;  // Initialization of the camera point on the initial player
+
 
     // Add x and y position of all players
     for (const Player &character : characters) {

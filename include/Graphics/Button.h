@@ -5,6 +5,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <utility>
+#include <SDL2_gfxPrimitives.h>
 
 /**
  * @brief A class representing a clickable button in SDL.
@@ -21,15 +22,20 @@ public:
      * @param w The width of the button.
      * @param h The height of the button.
      */
-    Button(SDL_Renderer* renderer, TTF_Font* font, std::string buttonText, int x, int y, int w, int h);
+    [[maybe_unused]] Button(SDL_Renderer* renderer, TTF_Font* font, std::string buttonText, int x, int y, int w, int h);
 
     /**
-     * @brief Check if the button is clicked.
-     * @param mouseX The x-coordinate of the mouse pointer.
-     * @param mouseY The y-coordinate of the mouse pointer.
-     * @return True if the button is clicked, false otherwise.
+     * @brief Constructor for Button class.
+     * @param renderer The SDL_Renderer to render the button.
+     * @param font The TTF_Font to render the button text.
+     * @param buttonText The text displayed on the button.
+     * @param x The x-coordinate of the button's top-left corner.
+     * @param y The y-coordinate of the button's top-left corner.
+     * @param w The width of the button.
+     * @param h The height of the button.
+     * @param borderRadius The border radius of the button.
      */
-    [[nodiscard]] bool isClicked(int mouseX, int mouseY) const;
+    [[maybe_unused]] Button(SDL_Renderer* renderer, TTF_Font* font, std::string buttonText, int x, int y, int w, int h, short borderRadius);
 
     /**
      * @brief Render the button on the screen.
@@ -74,6 +80,12 @@ public:
      */
     void setButtonText(std::string text);
 
+    /**
+     * @brief Set the border radius of the button.
+     * @param radius The new border radius of the button.
+     */
+    void setBorderRadius(short radius);
+
 private:
     SDL_Renderer* renderer;
     TTF_Font* font;
@@ -82,6 +94,7 @@ private:
     int y;
     int w;
     int h;
+    short borderRadius = 0;
     bool clicked = false;
     bool hovered = false;
     SDL_Color normalColor = { 0, 255, 0, 255 };

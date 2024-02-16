@@ -50,7 +50,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    SDL_Rect camera;
+    SDL_FRect camera;
     bool isRunning = true; /**< Flag indicating if the game is running. */
 
     /**
@@ -58,14 +58,14 @@ private:
      * @param moveX Reference to the X-axis movement variable.
      * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(int &moveX, int &moveY);
+    void handleEvents(float &moveX, float &moveY);
 
     /**
      * @brief Applies player movement based on the current movement variables.
      * @param moveX The movement along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(int moveX, int moveY);
+    void applyPlayerMovement(float moveX, float moveY);
 
     /**
      * @brief Applies camera movement based on the positions of all players.
@@ -77,7 +77,7 @@ private:
      * @param moveX The movement along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(int moveX, int moveY);
+    void handleCollisions(float moveX, float moveY);
 
     /**
      * @brief Renders the game by drawing the player and obstacles.
@@ -117,7 +117,7 @@ public:
      * @param x The X-coordinate of the location.
      * @param y The Y-coordinate of the location.
      */
-    void teleportPlayer(int x, int y);
+    void teleportPlayer(float x, float y);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

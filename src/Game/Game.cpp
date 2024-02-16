@@ -1,6 +1,6 @@
 #include "../../include/Game/Game.h"
 
-bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
+bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
     // Check for AABB collision
     return (a.x < b.x + b.w &&
             a.x + a.w > b.x &&
@@ -20,7 +20,7 @@ void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
 
-void Game::teleportPlayer(int x, int y) {
+void Game::teleportPlayer(float x, float y) {
     player.x = x;
     player.y = y;
 }
@@ -73,7 +73,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
     }
 }
 
-void Game::handleEvents(int &moveX, int &moveY) {
+void Game::handleEvents(float &moveX, float &moveY) {
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
@@ -122,19 +122,19 @@ void Game::handleEvents(int &moveX, int &moveY) {
 
         // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%d, %d)\n", e.button.x + camera.x, e.button.y + camera.y);
+            printf("Mouse clicked at (%f, %f)\n", e.button.x + camera.x, e.button.y + camera.y);
         }
     }
 }
 
-void Game::applyPlayerMovement(int moveX, int moveY) {
+void Game::applyPlayerMovement(float moveX, float moveY) {
     player.x += moveX;
     player.y += moveY;
 }
 
 void Game::applyCameraMovement() {
-    int i = 1;  // Number of player in the game (at least one)
-    int x = player.x, y = player.y;  // Initialization of the camera point on the initial player
+    float i = 1;  // Number of player in the game (at least one)
+    float x = player.x, y = player.y;  // Initialization of the camera point on the initial player
 
 
     // Add x and y position of all players
@@ -166,9 +166,9 @@ void Game::applyCameraMovement() {
     }
 }
 
-void Game::handleCollisions(int moveX, int moveY) {
+void Game::handleCollisions(float moveX, float moveY) {
     if (moveX != 0 || moveY != 0) {
-        printf("Moving player to (%d, %d)\n", player.x, player.y);
+        printf("Moving player to (%f, %f)\n", player.x, player.y);
 
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
@@ -208,14 +208,14 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_Rect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
-    SDL_RenderFillRect(renderer, &playerRect);
+    SDL_FRect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
+    SDL_RenderFillRectF(renderer, &playerRect);
 
     // Draw the characters
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     for (const Player &character : characters) {
-        SDL_Rect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
-        SDL_RenderFillRect(renderer, &characterRect);
+        SDL_FRect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
+        SDL_RenderFillRectF(renderer, &characterRect);
     }
 
     // Draw the obstacles
@@ -224,7 +224,7 @@ void Game::render() {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLine(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
         }
     }
 
@@ -297,8 +297,8 @@ bool Game::isConvex(const Polygon &polygon) {
 }
 
 void Game::run() {
-    int moveX = 0;
-    int moveY = 0;
+    float moveX = 0;
+    float moveY = 0;
 
     // Game loop
     while (isRunning) {

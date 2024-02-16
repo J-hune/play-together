@@ -150,7 +150,7 @@ void Game::applyCameraMovement() {
 
     // The point is on the right of the area
     if (x > camera.x + camera.w - (camera.w / 2)) {
-        camera.x += x - (camera.x + camera.w - (camera.w / 2));
+        camera.x += x - (camera.x + (camera.w - (camera.w / 2)));
     }
     // The point is on the left of the area
     else if (x < camera.x + (camera.w / 5)) {

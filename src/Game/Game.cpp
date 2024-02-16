@@ -145,24 +145,23 @@ void Game::applyCameraMovement() {
     }
 
     // Average x and y position of all players
-    x = (x / i);
-    y = (y / i);
+    x /= i; y /= i;
 
     // The point is on the right of the area
     if (x > camera.x + camera.w - (camera.w / 2)) {
-        camera.x += (x - (camera.x + (camera.w - (camera.w / 2)))) * 0.05f;
+        camera.x += (x - (camera.x + (camera.w - (camera.w / 2)))) * LERP_SMOOTHING_FACTOR;
     }
     // The point is on the left of the area
     else if (x < camera.x + (camera.w / 5)) {
-        camera.x -= ((camera.x + (camera.w / 5)) - x) * 0.05f;
+        camera.x -= ((camera.x + (camera.w / 5)) - x) * LERP_SMOOTHING_FACTOR;
     }
     // The point is on the bottom of the area
     if (y > camera.y + (camera.h - (camera.h / 5))) {
-        camera.y += (y - (camera.y + (camera.h - (camera.h / 5)))) * 0.05f;
+        camera.y += (y - (camera.y + (camera.h - (camera.h / 5)))) * LERP_SMOOTHING_FACTOR;
     }
     // The point is on the top of the area
     else if (y < camera.y + (camera.h / 5)) {
-        camera.y -= ((camera.y + (camera.h / 5)) - y) * 0.05f;
+        camera.y -= ((camera.y + (camera.h / 5)) - y) * LERP_SMOOTHING_FACTOR;
     }
 }
 

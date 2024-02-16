@@ -14,6 +14,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+#define LERP_SMOOTHING_FACTOR 0.05f
 
 /**
  * @file Game.h

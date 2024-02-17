@@ -122,7 +122,7 @@ void Game::handleEvents(float &moveX, float &moveY) {
 
         // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%f, %f)\n", e.button.x + camera.x, e.button.y + camera.y);
+            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.x, (float)e.button.y + camera.y);
         }
     }
 }
@@ -132,9 +132,10 @@ void Game::applyPlayerMovement(float moveX, float moveY) {
     player.y += moveY;
 }
 
-void Game::getAveragePlayersPositions(float *x, float *y) {
+void Game::getAveragePlayersPositions(float *x, float *y) const {
     float i = 1;  // Number of player in the game (at least one)
-    *x = player.x, *y = player.y;  // Initialization of the point on the initial player
+    *x = player.x; // Initialization of the point on the initial player
+    *y = player.y;
 
     // Add x and y position of all players
     for (const Player &character : characters) {
@@ -148,7 +149,8 @@ void Game::getAveragePlayersPositions(float *x, float *y) {
 }
 
 void Game::initializeCameraPosition() {
-    float x, y;
+    float x;
+    float y;
     getAveragePlayersPositions(&x, &y);
 
     // Initialize the camera so that players are bottom left
@@ -173,7 +175,8 @@ void Game::initializeCameraPosition() {
 }
 
 void Game::applyCameraMovement() {
-    float x, y;
+    float x;
+    float y;
     getAveragePlayersPositions(&x, &y);
 
     // The point is on the right of the area
@@ -286,20 +289,20 @@ bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
 
     for (Point axis: axes) {
         // Project the rectangle and the polygon onto the axis
-        int playerProjectionMin = INT_MAX;
-        int playerProjectionMax = INT_MIN;
+        auto playerProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
+        auto playerProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: player.getVertices()) {
-            int projection = vertex.x * axis.x + vertex.y * axis.y;
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
             playerProjectionMin = std::min(playerProjectionMin, projection);
             playerProjectionMax = std::max(playerProjectionMax, projection);
         }
 
-        int obstacleProjectionMin = INT_MAX;
-        int obstacleProjectionMax = INT_MIN;
+        auto obstacleProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
+        auto obstacleProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: obstacle.vertices) {
-            int projection = vertex.x * axis.x + vertex.y * axis.y;
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
             obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
             obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
         }
@@ -320,8 +323,8 @@ bool Game::isConvex(const Polygon &polygon) {
     }
 
     // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
-    const double tolerance = 1e-5;
-    return fabs(polygon.totalAngles() - static_cast<double>((n - 2) * 180)) < tolerance;
+    const double tolerance = 1e-3;
+    return std::abs(polygon.totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
 }
 
 void Game::run() {

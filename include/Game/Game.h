@@ -78,7 +78,7 @@ private:
      * @param[out] x The x-coordinate of the average players position
      * @param[out] y The y-coordinate of the average players position
      */
-    void getAveragePlayersPositions(float *x, float *y);
+    void getAveragePlayersPositions(float *x, float *y) const;
 
     /**
      * @brief Applies camera movement based on the positions of all players.

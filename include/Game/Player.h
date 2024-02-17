@@ -16,15 +16,15 @@
 
 class Player {
 public:
-    const int RIGHT = 1;/**< Constant to the direction of the player here right*/
-    const int LEFT = -1;/**< Constant to the direction of the player here left*/
+    const int RIGHT = 1;/**< Constant to the direction of the player here right. */
+    const int LEFT = -1;/**< Constant to the direction of the player here left. */
 
-    const float LIMIT_TIME_JUMP = 7;/**< Constant for jump time limit*/
-    const float MIN_LIMIT_TIME_JUMP = 4;/**< Constant for the jump time limit minimum*/
+    const float LIMIT_TIME_JUMP = 7;/**< Constant for jump time limit. */
+    const float MIN_LIMIT_TIME_JUMP = 4;/**< Constant for the jump time limit minimum. */
 
-    const float ALLOWED_TIME_TO_FALL = 2;
+    const float ALLOWED_TIME_TO_FALL = 2;/**< Time allowed for jumping after a fall. */
 
-    bool minimumReach = true;
+    bool minimumReach = true;/**<If the minimum jump time is reached  */
 
     int x; /**< The x-coordinate of the player's position. (in pixels) */
     int y; /**< The y-coordinate of the player's position. */
@@ -33,7 +33,7 @@ public:
     int width; /**< The width of the player. (in pixels) */
     int height; /**< The height of the player. */
 
-    float timeAfterFall;/**< The time that has elapsed since the player started falling*/
+    float timeAfterFall = ALLOWED_TIME_TO_FALL;/**< The time that must elapse since the player started falling*/
 
     bool canMove = true; /**< If the player can move */
     bool wantMove = false; /**< If the player try to move */

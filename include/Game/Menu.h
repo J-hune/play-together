@@ -3,7 +3,9 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <map>
 #include "../Graphics/Button.h"
+#include "Game.h"
 
 class Menu {
 public:
@@ -27,10 +29,10 @@ public:
     void handleEvent(const SDL_Event& event);
 
     /**
-     * @brief Check if the game should start.
-     * @return True if the game should start, false otherwise.
+     * @brief Check if the menu is displaying.
+     * @return
      */
-    bool shouldStartGame() const;
+    bool isDisplayingMenu() const;
 
     /**
      * @brief Reset the menu.
@@ -38,16 +40,16 @@ public:
     void reset();
 
     /**
-     * @brief Set whether the game should start.
-     * @param shouldStartGame True if the game should start, false otherwise.
+     * @brief Set the menu to display or not.
      */
-    void setShouldStartGame(bool shouldStartGame);
+    void setDisplayMenu(bool displayMenu);
 
 private:
     SDL_Renderer* renderer;
     TTF_Font* font;
-    bool gameShouldStart = false;
-    Button playButton;
+    bool displayMenu = true;
+    Game* game;
+    std::map<GameState, std::vector<Button>> buttons;
 };
 
 #endif //PLAY_TOGETHER_MENU_H

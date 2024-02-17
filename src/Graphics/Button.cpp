@@ -5,13 +5,13 @@ Uint32 RGBA(Uint32 r, Uint32 g, Uint32 b, Uint32 a) {
     return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
-Button::Button(SDL_Renderer* renderer, TTF_Font* font, ButtonPosition position, std::string buttonText, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor)
-        : renderer(renderer), font(font), buttonText(std::move(buttonText)), position(position), normalColor(normalColor), hoverColor(hoverColor), textColor(textColor)  {
+Button::Button(SDL_Renderer* renderer, TTF_Font* font, ButtonPosition position, std::string buttonText, ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor)
+        : renderer(renderer), font(font), buttonText(std::move(buttonText)), position(position), buttonAction(buttonAction), normalColor(normalColor), hoverColor(hoverColor), textColor(textColor)  {
 }
 
-Button::Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius)
+Button::Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText, ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius)
         : renderer(renderer), font(font), buttonText(std::move(buttonText)), position(position),
-          borderRadius(borderRadius), normalColor(normalColor), hoverColor(hoverColor), textColor(textColor) {
+          borderRadius(borderRadius), buttonAction(buttonAction), normalColor(normalColor), hoverColor(hoverColor), textColor(textColor) {
 }
 
 void Button::render() {
@@ -98,6 +98,11 @@ void Button::setButtonText(std::string text) {
 void Button::setBorderRadius(short radius) {
     // Set the border radius of the button
     borderRadius = radius;
+}
+
+ButtonAction Button::getButtonAction() const {
+    // Return the action of the button
+    return buttonAction;
 }
 
 void Button::reset() {

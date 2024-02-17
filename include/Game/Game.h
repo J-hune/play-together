@@ -12,6 +12,12 @@
 #include <sstream>
 #include <ranges>
 
+enum class GameState {
+    RUNNING,
+    PAUSED,
+    STOPPED
+};
+
 /**
  * @class Game
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
@@ -26,11 +32,16 @@ public:
     void run();
 
     /**
-     * @brief Stops the game loop and cleans up resources.
+     * @brief Pauses the game loop.
+     */
+    void pause();
+
+    /**
+     * @brief Stops the game loop and exits the game.
      */
     void stop();
 
-    bool isGameRunning() const;
+    GameState getGameState() const;
 
 /**
  * @brief Loads obstacles from a map file.
@@ -44,7 +55,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    bool isRunning = false; /**< Flag indicating if the game is running. */
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.

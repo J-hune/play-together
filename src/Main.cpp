@@ -51,13 +51,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
-    // Initialize Menu
-    Menu menu(renderer, font);
-    menu.render();
-
     // Initialize Game
     Player initialPlayer(50, 50, 2, 20, 30);
     Game game(window, renderer, initialPlayer);
+
+    // Initialize Menu
+    Menu menu(renderer, font, &game);
+    menu.render();
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -75,7 +75,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
             // If the escape key is pressed, stop the game
             else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                menu.setShouldStartGame(false);
+                menu.setDisplayMenu(true);
             }
 
             else {
@@ -89,7 +89,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         SDL_RenderClear(renderer);
 
         // If the game should start
-        if (menu.shouldStartGame()) {
+        if (!menu.isDisplayingMenu()) {
             // Create and start the game
             Player character1(100, 50, 2, 20, 30);
             Player character2(150, 50, 2, 20, 30);

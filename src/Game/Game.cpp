@@ -99,6 +99,9 @@ void Game::handleEvents(int &moveX, int &moveY) {
                     moveX = player.speed;
                     break;
                 case SDLK_ESCAPE:
+                    pause();
+                    break;
+                case SDLK_DELETE:
                     stop();
                     break;
                 default:
@@ -255,10 +258,10 @@ bool Game::isConvex(const Polygon &polygon) {
 void Game::run() {
     int moveX = 0;
     int moveY = 0;
-    isRunning = true;
+    gameState = GameState::RUNNING;
 
     // Game loop
-    while (isRunning) {
+    while (gameState == GameState::RUNNING) {
         // Handle events, apply player movement, check collisions, and render
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
@@ -267,10 +270,18 @@ void Game::run() {
     }
 }
 
-void Game::stop() {
-    isRunning = false;
+void Game::pause() {
+    gameState = GameState::PAUSED;
 }
 
-bool Game::isGameRunning() const {
-    return isRunning;
+void Game::stop() {
+    gameState = GameState::STOPPED;
+
+    // Reset the player position
+    player.x = 50;
+    player.y = 50;
+}
+
+GameState Game::getGameState() const {
+    return gameState;
 }

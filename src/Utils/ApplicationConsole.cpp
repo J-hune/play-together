@@ -19,7 +19,7 @@ void ApplicationConsole::Run() const {
 void ApplicationConsole::ExecuteCommand(const std::string& command) const {
 
     // Commands that can be executed while the game is running
-    if (gamePtr->isGameRunning()) {
+    if (gamePtr->getGameState() == GameState::RUNNING || gamePtr->getGameState() == GameState::PAUSED) {
 
         // Example of a simple command
         if (command == "help") {

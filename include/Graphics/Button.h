@@ -17,6 +17,14 @@ struct ButtonPosition {
     int h;
 };
 
+enum class ButtonAction {
+    NONE,
+    QUIT,
+    START,
+    RESUME,
+    STOP
+};
+
 /**
  * @brief A class representing a clickable button in SDL.
  */
@@ -33,7 +41,7 @@ public:
      * @param textColor The color of the text on the button.
      */
     Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
-           SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor);
+           ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor);
 
     /**
      * @brief Constructor for the Button class.
@@ -47,7 +55,7 @@ public:
      * @param borderRadius
      */
     Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
-           SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
+           ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
 
     /**
      * @brief Render the button on the screen.
@@ -99,6 +107,12 @@ public:
     void setBorderRadius(short radius);
 
     /**
+     * @brief Get the action of the button.
+     * @return The action of the button.
+     */
+    [[nodiscard]] ButtonAction getButtonAction() const;
+
+    /**
      * @brief Reset the button to its initial state.
      */
     void reset();
@@ -109,11 +123,12 @@ private:
     std::string buttonText;
     ButtonPosition position;
     short borderRadius = 0;
-    bool clicked = false;
-    bool hovered = false;
+    ButtonAction buttonAction = ButtonAction::NONE;
     SDL_Color normalColor = { 0, 255, 0, 255 };
     SDL_Color hoverColor = { 255, 0, 0, 255 };
     SDL_Color textColor = { 0, 0, 0, 255 };
+    bool clicked = false;
+    bool hovered = false;
 };
 
 #endif //PLAY_TOGETHER_BUTTON_H

@@ -64,7 +64,7 @@ void Game::handleEvents(int &direction, int &moveY) {
                 case SDLK_UP :
                 case SDLK_z:
                 case SDLK_SPACE:
-                    if (player.isOnPlatform && !player.isJumping){
+                    if (player.timeAfterFall >0 && !player.isJumping){
                         player.wantToJump = true;
                     }
                     //moveY = -player.speed;
@@ -135,7 +135,7 @@ void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int
     }
 
     // The player press "jump button" and he doesn't maintain more than 6
-    if( player.wantToJump && player.timeJump < player.LIMIT_TIME_JUMP){
+    if(player.wantToJump && player.timeJump < player.LIMIT_TIME_JUMP){
 
         // Player jump with the following mathematical function
         player.isJumping = true;
@@ -144,13 +144,15 @@ void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int
     }
     else {
         player.timeJump=0;
-        player.isJumping = false;
         player.wantToJump = false;
         if (player.isOnPlatform){
             moveY = 0;
+            player.isJumping = false;
+            player.timeAfterFall = player.ALLOWED_TIME_TO_FALL;
         }
         else{
             moveY = 2;
+            player.timeAfterFall -= 0.1F;
         }
 
     }

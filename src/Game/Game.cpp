@@ -133,12 +133,19 @@ void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int
         timeSpeed = 0;
         moveX = 0;
     }
+    if(player.timeJump > player.MIN_LIMIT_TIME_JUMP){
+        player.minimumReach = true;
+    }
 
     // The player press "jump button" and he doesn't maintain more than 6
     if(player.wantToJump && player.timeJump < player.LIMIT_TIME_JUMP){
-
+        player.minimumReach = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
+        moveY = (int)-(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
+        player.timeJump+=0.1F;
+    }
+    else if(!player.minimumReach && player.timeJump < player.MIN_LIMIT_TIME_JUMP){
         moveY = (int)-(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
         player.timeJump+=0.1F;
     }

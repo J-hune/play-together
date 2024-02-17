@@ -19,9 +19,12 @@ public:
     const int RIGHT = 1;/**< Constant to the direction of the player here right*/
     const int LEFT = -1;/**< Constant to the direction of the player here left*/
 
-    const float LIMIT_TIME_JUMP = 6;
+    const float LIMIT_TIME_JUMP = 7;/**< Constant for jump time limit*/
+    const float MIN_LIMIT_TIME_JUMP = 4;/**< Constant for the jump time limit minimum*/
 
     const float ALLOWED_TIME_TO_FALL = 2;
+
+    bool minimumReach = true;
 
     int x; /**< The x-coordinate of the player's position. (in pixels) */
     int y; /**< The y-coordinate of the player's position. */

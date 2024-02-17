@@ -31,7 +31,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    Player initialPlayer(50, 50, 2, 20, 30);
+    Player initialPlayer(-50, 50, 2, 20, 30);
 
     Player character1(100, 50, 2, 20, 30);
     Player character2(150, 50, 2, 20, 30);
@@ -48,6 +48,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     game.removeCharacter(character3);
 
+    game.initializeCameraPosition();
 
     // Launch the game loop in a separate thread
     std::jthread gameThread(&Game::run, &game);

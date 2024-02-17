@@ -132,20 +132,49 @@ void Game::applyPlayerMovement(float moveX, float moveY) {
     player.y += moveY;
 }
 
-void Game::applyCameraMovement() {
+void Game::getAveragePlayersPositions(float *x, float *y) {
     float i = 1;  // Number of player in the game (at least one)
-    float x = player.x, y = player.y;  // Initialization of the camera point on the initial player
-
+    *x = player.x, *y = player.y;  // Initialization of the point on the initial player
 
     // Add x and y position of all players
     for (const Player &character : characters) {
-        x += character.x;
-        y += character.y;
+        *x += character.x;
+        *y += character.y;
         i++;
     }
 
     // Average x and y position of all players
-    x /= i; y /= i;
+    *x /= i; *y /= i;
+}
+
+void Game::initializeCameraPosition() {
+    float x, y;
+    getAveragePlayersPositions(&x, &y);
+
+    // Initialize the camera so that players are bottom left
+    camera.x = x; camera.y = y - 2 * (camera.h / 3);
+
+    // The point is on the right of the area
+    if (x > camera.x + (camera.w - (camera.w / 2))) {
+        camera.x += x - (camera.x + (camera.w - (camera.w / 2)));
+    }
+    // The point is on the left of the area
+    else if (x < camera.x + (camera.w / 5)) {
+        camera.x -= (camera.x + (camera.w / 5)) - x;
+    }
+    // The point is on the bottom of the area
+    if (y > camera.y + (camera.h - (camera.h / 5))) {
+        camera.y += y - (camera.y + (camera.h - (camera.h / 5)));
+    }
+    // The point is on the top of the area
+    else if (y < camera.y + (camera.h / 5)) {
+        camera.y -= (camera.y + (camera.h / 5)) - y;
+    }
+}
+
+void Game::applyCameraMovement() {
+    float x, y;
+    getAveragePlayersPositions(&x, &y);
 
     // The point is on the right of the area
     if (x > camera.x + camera.w - (camera.w / 2)) {

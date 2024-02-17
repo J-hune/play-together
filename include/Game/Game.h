@@ -30,6 +30,11 @@ public:
     Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
 
     /**
+    * @brief Initialize the camera position according to players positions.
+    */
+    void initializeCameraPosition();
+
+    /**
      * @brief Runs the game loop.
      */
     void run();
@@ -67,6 +72,13 @@ private:
      * @param moveY The movement along the Y-axis.
      */
     void applyPlayerMovement(float moveX, float moveY);
+
+    /**
+     * @brief Get a point of the average position of all players combined.
+     * @param[out] x The x-coordinate of the average players position
+     * @param[out] y The y-coordinate of the average players position
+     */
+    void getAveragePlayersPositions(float *x, float *y);
 
     /**
      * @brief Applies camera movement based on the positions of all players.

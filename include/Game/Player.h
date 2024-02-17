@@ -21,12 +21,16 @@ public:
 
     const float LIMIT_TIME_JUMP = 6;
 
+    const float ALLOWED_TIME_TO_FALL = 2;
+
     int x; /**< The x-coordinate of the player's position. (in pixels) */
     int y; /**< The y-coordinate of the player's position. */
     int speed; /**< The speed of the player. */
     int speedMax;/**< The maximum speed of the player. */
     int width; /**< The width of the player. (in pixels) */
     int height; /**< The height of the player. */
+
+    float timeAfterFall;/**< The time that has elapsed since the player started falling*/
 
     bool canMove = true; /**< If the player can move */
     bool wantMove = false; /**< If the player try to move */

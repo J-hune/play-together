@@ -78,7 +78,8 @@ bool Menu::isDisplayingMenu() const {
 void Menu::reset() {
     displayMenu = true;
 
-    for (Button button : aggregateButtons(buttons)) {
+    // Iterate over buttons by reference
+    for (Button& button : aggregateButtons(buttons)) {
         button.reset();
     }
 }

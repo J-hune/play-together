@@ -1,5 +1,12 @@
 #include "../../include/Game/Game.h"
 
+// Define constant for the directory containing map files
+constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
+
+// Define constant for the file name containing polygon data
+constexpr char POLYGONS_FILE[] = "polygons.txt";
+
+// Function to check AABB collision between two rectangles
 bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
     // Check for AABB collision
     return (a.x < b.x + b.w &&
@@ -9,7 +16,6 @@ bool checkAABBCollision(const SDL_Rect &a, const SDL_Rect &b) {
 }
 
 /**
- * @file Game.cpp
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
@@ -40,8 +46,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
     obstacles.clear();
 
     // Define the file path for the polygon data
-    std::string filePath = "../assets/maps/" + mapName + "/polygons.txt";
-    std::cout << "File path: " << filePath << std::endl;
+    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/" + POLYGONS_FILE;
 
     std::ifstream file(filePath);
 
@@ -68,6 +73,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
         }
 
         file.close();
+        std::cout << "Loaded " << obstacles.size() << " polygons from the map " << mapName << std::endl;
     } else {
         std::cerr << "Unable to open the file." << std::endl;
     }
@@ -217,26 +223,26 @@ bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
 
     for (Point axis: axes) {
         // Project the rectangle and the polygon onto the axis
-        int playerProjectionMin = INT_MAX;
-        int playerProjectionMax = INT_MIN;
+        int player_projection_min = INT_MAX;
+        int player_projection_max = INT_MIN;
 
         for (const Point &vertex: player.getVertices()) {
             int projection = vertex.x * axis.x + vertex.y * axis.y;
-            playerProjectionMin = std::min(playerProjectionMin, projection);
-            playerProjectionMax = std::max(playerProjectionMax, projection);
+            player_projection_min = std::min(player_projection_min, projection);
+            player_projection_max = std::max(player_projection_max, projection);
         }
 
-        int obstacleProjectionMin = INT_MAX;
-        int obstacleProjectionMax = INT_MIN;
+        int obstacle_projection_min = INT_MAX;
+        int obstacle_projection_max = INT_MIN;
 
         for (const Point &vertex: obstacle.vertices) {
             int projection = vertex.x * axis.x + vertex.y * axis.y;
-            obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
-            obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
+            obstacle_projection_min = std::min(obstacle_projection_min, projection);
+            obstacle_projection_max = std::max(obstacle_projection_max, projection);
         }
 
         // Check for separation on the axis
-        if (playerProjectionMax < obstacleProjectionMin || obstacleProjectionMax < playerProjectionMin) {
+        if (player_projection_max < obstacle_projection_min || obstacle_projection_max < player_projection_min) {
             return false; // No collision detected
         }
     }

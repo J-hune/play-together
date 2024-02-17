@@ -26,6 +26,7 @@ enum class ButtonAction {
 };
 
 /**
+ * @class Button
  * @brief A class representing a clickable button in SDL.
  */
 class Button {
@@ -36,6 +37,7 @@ public:
      * @param font The TTF_Font to render the text on the button.
      * @param position The position of the button.
      * @param buttonText The text to be displayed on the button.
+     * @param buttonAction The action associated with the button.
      * @param normalColor The color of the button when not hovered.
      * @param hoverColor The color of the button when hovered.
      * @param textColor The color of the text on the button.
@@ -44,15 +46,16 @@ public:
            ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor);
 
     /**
-     * @brief Constructor for the Button class.
-     * @param renderer
-     * @param font
-     * @param position
-     * @param buttonText
-     * @param normalColor
-     * @param hoverColor
-     * @param textColor
-     * @param borderRadius
+     * @brief Constructor for the Button class with border radius.
+     * @param renderer The SDL_Renderer to render the button.
+     * @param font The TTF_Font to render the text on the button.
+     * @param position The position of the button.
+     * @param buttonText The text to be displayed on the button.
+     * @param buttonAction The action associated with the button.
+     * @param normalColor The color of the button when not hovered.
+     * @param hoverColor The color of the button when hovered.
+     * @param textColor The color of the text on the button.
+     * @param borderRadius The border radius of the button.
      */
     Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
            ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
@@ -83,6 +86,12 @@ public:
     [[nodiscard]] bool isButtonClicked() const;
 
     /**
+     * @brief Get the action associated with the button.
+     * @return The action of the button.
+     */
+    [[nodiscard]] ButtonAction getButtonAction() const;
+
+    /**
      * @brief Set the color of the button when hovered.
      * @param color The SDL_Color representing the hover color.
      */
@@ -105,12 +114,6 @@ public:
      * @param radius The new border radius of the button.
      */
     void setBorderRadius(short radius);
-
-    /**
-     * @brief Get the action of the button.
-     * @return The action of the button.
-     */
-    [[nodiscard]] ButtonAction getButtonAction() const;
 
     /**
      * @brief Reset the button to its initial state.

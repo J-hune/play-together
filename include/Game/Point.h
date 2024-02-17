@@ -2,11 +2,6 @@
 #define PLAY_TOGETHER_POINT_H
 
 /**
- * @file Point.h
- * @brief Defines the Point structure for 2D coordinates.
- */
-
-/**
  * @struct Point
  * @brief Represents a point in 2D space with x and y coordinates.
  */

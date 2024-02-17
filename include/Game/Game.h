@@ -24,7 +24,8 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
+    Game(SDL_Window *window, SDL_Renderer *renderer,
+         const Player &initialPlayer); /**< Constructor for the Game class. */
 
     /**
      * @brief Runs the game loop.
@@ -41,13 +42,36 @@ public:
      */
     void stop();
 
-    GameState getGameState() const;
+    /**
+     * @brief Loads obstacles from a map file.
+     * @param mapName The name of the map file.
+     */
+    void loadPolygonsFromMap(const std::string &mapName);
 
-/**
- * @brief Loads obstacles from a map file.
- * @param mapName The name of the map file.
- */
-void loadPolygonsFromMap(const std::string &mapName);
+    /**
+    * @brief Adds a character to the game.
+    * @param character The character to add.
+    */
+    void addCharacter(const Player &character);
+
+    /**
+     * @brief Removes a character from the game.
+     * @param character The character to remove.
+     */
+    void removeCharacter(const Player &character);
+
+    /**
+     * @brief Teleports the player to a specific location.
+     * @param x The X-coordinate of the location.
+     * @param y The Y-coordinate of the location.
+     */
+    void teleportPlayer(int x, int y);
+
+    /**
+     * @brief Returns the current game state.
+     * @return The current game state.
+     */
+    [[nodiscard]] GameState getGameState() const;
 
 private:
     SDL_Window *window; /**< SDL window for rendering. */
@@ -97,26 +121,5 @@ private:
      * @return True if the polygon is convex, false otherwise.
      */
     static bool isConvex(const Polygon &polygon);
-
-public:
-    /**
-    * @brief Adds a character to the game.
-    * @param character The character to add.
-    */
-    void addCharacter(const Player &character);
-
-    /**
-     * @brief Removes a character from the game.
-     * @param character The character to remove.
-     */
-    void removeCharacter(const Player &character);
-
-    /**
-     * @brief Teleports the player to a specific location.
-     * @param x The X-coordinate of the location.
-     * @param y The Y-coordinate of the location.
-     */
-    void teleportPlayer(int x, int y);
 };
-
 #endif //PLAY_TOGETHER_GAME_H

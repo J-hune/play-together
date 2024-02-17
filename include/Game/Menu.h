@@ -7,6 +7,10 @@
 #include "../Graphics/Button.h"
 #include "Game.h"
 
+/**
+ * @class Menu
+ * @brief Represents the game menus including the main menu and pause menu
+ */
 class Menu {
 public:
     /**
@@ -30,19 +34,20 @@ public:
 
     /**
      * @brief Check if the menu is displaying.
-     * @return
+     * @return True if the menu is displaying, false otherwise.
      */
-    bool isDisplayingMenu() const;
+    [[nodiscard]] bool isDisplayingMenu() const;
+
+    /**
+     * @brief Set whether the menu should be displayed or not.
+     * @param displayMenu True to display the menu, false to hide it.
+     */
+    void setDisplayMenu(bool displayMenu);
 
     /**
      * @brief Reset the menu.
      */
     void reset();
-
-    /**
-     * @brief Set the menu to display or not.
-     */
-    void setDisplayMenu(bool displayMenu);
 
 private:
     SDL_Renderer* renderer;

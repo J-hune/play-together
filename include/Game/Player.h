@@ -6,15 +6,9 @@
 #include "Point.h"
 
 /**
- * @file Player.h
- * @brief Defines the Player class representing a player in a 2D game.
- */
-
-/**
  * @class Player
  * @brief Represents a player in a 2D game with position, speed, and dimensions.
  */
-
 class Player {
 public:
     int x; /**< The x-coordinate of the player's position. (in pixels) */
@@ -39,6 +33,10 @@ public:
      */
     [[nodiscard]] std::vector<Point> getVertices() const;
 
+    /**
+     * @brief Get the bounding box of the player.
+     * @return SDL_Rect representing the bounding box.
+     */
     [[nodiscard]] SDL_Rect getBoundingBox() const {
         SDL_Rect boundingBox = {x, y, width, height};
         return boundingBox;

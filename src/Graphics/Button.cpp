@@ -1,5 +1,9 @@
 #include "../../include/Graphics/Button.h"
 
+/**
+ * @brief Implements the Button class for rendering and handling events for buttons in the game.
+ */
+
 // Function Color rgba to Uint32
 Uint32 RGBA(Uint32 r, Uint32 g, Uint32 b, Uint32 a) {
     return (a << 24) | (r << 16) | (g << 8) | b;
@@ -21,31 +25,22 @@ void Button::render() {
     roundedBoxColor(renderer, (short)position.x, (short)position.y, (short)(position.x + position.w), (short)(position.y + position.h), borderRadius, RGBA(color.r, color.g, color.b, color.a));
 
     // Render the text on the button
-    SDL_Surface* textSurface = TTF_RenderUTF8_Solid(font, buttonText.c_str(), textColor);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Rect textRect = { position.x + position.w / 2 - textSurface->w / 2, position.y + position.h / 2 - textSurface->h / 2, textSurface->w, textSurface->h };
+    SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, buttonText.c_str(), textColor);
+    SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
+    SDL_Rect text_rect = { position.x + position.w / 2 - text_surface->w / 2, position.y + position.h / 2 - text_surface->h / 2, text_surface->w, text_surface->h };
 
-    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    // Free the surface and texture memory to prevent memory leaks
-    SDL_FreeSurface(textSurface);
-    SDL_DestroyTexture(textTexture);
+    SDL_RenderCopy(renderer, text_texture, nullptr, &text_rect);
+    SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(text_texture);
 }
 
-void Button::handleEvent(SDL_Event const& e) {
-    if (e.type == SDL_MOUSEMOTION) {
-        // Get the current mouse position
+void Button::handleEvent(SDL_Event const& event) {
+    if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN) {
         int mouseX;
         int mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
-        // Update the hovered state of the button
         hovered = isHovered(mouseX, mouseY);
-    } else if (e.type == SDL_MOUSEBUTTONDOWN) {
-        // Get the current mouse position
-        int mouseX;
-        int mouseY;
-        SDL_GetMouseState(&mouseX, &mouseY);
-        // Check if the button is clicked
-        if (isHovered(mouseX, mouseY)) {
+        if (event.type == SDL_MOUSEBUTTONDOWN && hovered && event.button.button == SDL_BUTTON_LEFT) {
             clicked = true;
         }
     }
@@ -80,6 +75,11 @@ bool Button::isButtonClicked() const {
     return clicked;
 }
 
+ButtonAction Button::getButtonAction() const {
+    // Return the action of the button
+    return buttonAction;
+}
+
 void Button::setHoverColor(SDL_Color color) {
     // Set the color used when the button is hovered
     hoverColor = color;
@@ -98,11 +98,6 @@ void Button::setButtonText(std::string text) {
 void Button::setBorderRadius(short radius) {
     // Set the border radius of the button
     borderRadius = radius;
-}
-
-ButtonAction Button::getButtonAction() const {
-    // Return the action of the button
-    return buttonAction;
 }
 
 void Button::reset() {

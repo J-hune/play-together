@@ -1,7 +1,6 @@
 #include "../../include/Game/Player.h"
 
 /**
- * @file Player.cpp
  * @brief Implements the Player class representing a player in a 2D game.
  */
 

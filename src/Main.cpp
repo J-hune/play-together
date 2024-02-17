@@ -10,7 +10,6 @@
 #include "../include/Game/Menu.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
-    SDL_Init(SDL_INIT_VIDEO);
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -61,7 +60,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Initialize Application Console
     ApplicationConsole console(&game);
-    std::jthread consoleThread(&ApplicationConsole::Run, &console);
+    std::jthread consoleThread(&ApplicationConsole::run, &console);
     consoleThread.detach();
 
     // Main loop

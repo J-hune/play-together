@@ -63,8 +63,6 @@ void Menu::render() {
     for (Button &button: buttons[{game->getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
-
-    SDL_Delay(4);
 }
 
 void Menu::handleEvent(const SDL_Event &event) {
@@ -81,9 +79,9 @@ void Menu::handleEvent(const SDL_Event &event) {
             switch (button.getButtonAction()) {
                 using enum ButtonAction;
                 case START:
-                    setMenuAction(MenuAction::MAIN);
-                    displayMenu = false;
                     button.reset();
+                    displayMenu = false;
+                    setMenuAction(MenuAction::MAIN);
                     break;
                 case RESUME:
                     displayMenu = false;

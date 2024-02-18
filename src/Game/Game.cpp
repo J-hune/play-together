@@ -42,7 +42,7 @@ void Game::removeCharacter(const Player &character) {
     }
 }
 
-void Game::loadPolygonsFromMap(const std::string& mapName) {
+void Game::loadPolygonsFromMap(const std::string &mapName) {
     obstacles.clear();
 
     // Define the file path for the polygon data
@@ -73,7 +73,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
         }
 
         file.close();
-        std::cout << "Loaded " << obstacles.size() << " polygons from the map " << mapName << std::endl;
+        std::cout << "Loaded " << obstacles.size() << " polygons from the map " << mapName << "." << std::endl;
     } else {
         std::cerr << "Unable to open the file." << std::endl;
     }
@@ -156,7 +156,7 @@ void Game::handleCollisions(int moveX, int moveY) {
         }
 
         // Check for collisions with other characters
-        for (Player const &character : characters) {
+        for (Player const &character: characters) {
             if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
                 printf("Collision detected with another character\n");
                 player.x -= moveX;
@@ -178,7 +178,7 @@ void Game::render() {
 
     // Draw the characters
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    for (const Player &character : characters) {
+    for (const Player &character: characters) {
         SDL_Rect characterRect = {character.x, character.y, character.width, character.height};
         SDL_RenderFillRect(renderer, &characterRect);
     }
@@ -195,7 +195,6 @@ void Game::render() {
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
-    SDL_Delay(4);
 }
 
 bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
@@ -273,6 +272,8 @@ void Game::run() {
         applyPlayerMovement(moveX, moveY);
         handleCollisions(moveX, moveY);
         render();
+
+        SDL_Delay(4);
     }
 }
 

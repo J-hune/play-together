@@ -44,7 +44,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     }
 
     // Load font from a TrueType (TTF) file
-    TTF_Font* font = TTF_OpenFont("../assets/font/arial.ttf", 24);
+    TTF_Font *font = TTF_OpenFont("../assets/font/arial.ttf", 24);
     if (font == nullptr) {
         std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
         return 1;
@@ -104,9 +104,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
             game.removeCharacter(character3);
 
-            // Launch the game loop in a separate thread
-            std::jthread gameThread(&Game::run, &game);
-            gameThread.join();
+            // Block the main thread until the game is finished
+            game.run();
 
             // Reset the menu after exiting the game
             menu.reset();
@@ -116,6 +115,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         }
 
         SDL_RenderPresent(renderer);
+        SDL_Delay(4);
     }
 
     // Clean up resources

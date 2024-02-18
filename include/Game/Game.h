@@ -12,9 +12,9 @@
 #include <sstream>
 #include <ranges>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
-#define LERP_SMOOTHING_FACTOR 0.05f
+constexpr float SCREEN_WIDTH = 800;
+constexpr float SCREEN_HEIGHT = 600;
+constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
 /**
  * @file Game.h

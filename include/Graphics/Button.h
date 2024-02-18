@@ -61,7 +61,8 @@ public:
      * @param textColor The color of the text on the button.
      * @param borderRadius The border radius of the button.
      */
-    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText, ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
+           ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
 
     /**
      * @brief Render the button on the screen.
@@ -72,7 +73,7 @@ public:
      * @brief Handle mouse events for the button.
      * @param e The SDL_Event to handle.
      */
-    void handleEvent(SDL_Event const& e);
+    void handleEvent(SDL_Event const &e);
 
     /**
      * @brief Check if the button is hovered.
@@ -124,15 +125,15 @@ public:
     void reset();
 
 private:
-    SDL_Renderer* renderer;
-    TTF_Font* font;
+    SDL_Renderer *renderer;
+    TTF_Font *font;
     std::string buttonText;
     ButtonPosition position;
     short borderRadius = 0;
     ButtonAction buttonAction = ButtonAction::NONE;
-    SDL_Color normalColor = { 0, 255, 0, 255 };
-    SDL_Color hoverColor = { 255, 0, 0, 255 };
-    SDL_Color textColor = { 0, 0, 0, 255 };
+    SDL_Color normalColor = {0, 255, 0, 255};
+    SDL_Color hoverColor = {255, 0, 0, 255};
+    SDL_Color textColor = {0, 0, 0, 255};
     bool clicked = false;
     bool hovered = false;
 };

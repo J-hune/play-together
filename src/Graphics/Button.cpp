@@ -4,11 +4,6 @@
  * @brief Implements the Button class for rendering and handling events for buttons in the game.
  */
 
-// Function Color rgba to Uint32
-Uint32 RGBA(Uint32 r, Uint32 g, Uint32 b, Uint32 a) {
-    return (a << 24) | (r << 16) | (g << 8) | b;
-}
-
 Button::Button(SDL_Renderer* renderer, TTF_Font* font, ButtonPosition position, std::string buttonText, ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor)
         : renderer(renderer), font(font), buttonText(std::move(buttonText)), position(position), buttonAction(buttonAction), normalColor(normalColor), hoverColor(hoverColor), textColor(textColor)  {
 }
@@ -22,7 +17,7 @@ void Button::render() {
     // Determine the color of the button based on its state (hovered or not)
     SDL_Color color = hovered ? hoverColor : normalColor;
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-    roundedBoxColor(renderer, (short)position.x, (short)position.y, (short)(position.x + position.w), (short)(position.y + position.h), borderRadius, RGBA(color.r, color.g, color.b, color.a));
+    roundedBoxRGBA(renderer, (short)position.x, (short)position.y, (short)(position.x + position.w), (short)(position.y + position.h), borderRadius, color.r, color.g, color.b, color.a);
 
     // Render the text on the button
     SDL_Surface* text_surface = TTF_RenderUTF8_Solid(font, buttonText.c_str(), textColor);

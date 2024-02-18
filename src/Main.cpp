@@ -50,12 +50,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
+    // Define a boolean to control the game loop
+    bool quit = false;
+
     // Initialize Game
     Player initialPlayer(50, 50, 2, 20, 30);
     Game game(window, renderer, initialPlayer);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game);
+    Menu menu(renderer, font, &game, &quit);
     menu.render();
 
     // Initialize Application Console
@@ -64,7 +67,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     consoleThread.detach();
 
     // Main loop
-    bool quit = false;
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event) != 0) {

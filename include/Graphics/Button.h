@@ -22,7 +22,11 @@ enum class ButtonAction {
     QUIT,
     START,
     RESUME,
-    STOP
+    STOP,
+    MENU_MAIN,
+    MENU_PLAY,
+    MENU_LOAD_SAVE,
+    MENU_START_NEW_GAME,
 };
 
 /**
@@ -57,8 +61,7 @@ public:
      * @param textColor The color of the text on the button.
      * @param borderRadius The border radius of the button.
      */
-    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
-           ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText, ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
 
     /**
      * @brief Render the button on the screen.

@@ -48,7 +48,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
     }
 }
 
-void Game::handleEvents(int &direction, int &moveY) {
+void Game::handleEvents(int &direction, float &moveY) {
     SDL_Event e;
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
@@ -119,7 +119,7 @@ void Game::handleEvents(int &direction, int &moveY) {
     }
 }
 
-void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int &moveY) {
+void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY) {
     if(player.wantMove){
         timeSpeed += 0.1F;
         moveX = player.speedMax * player.speed*timeSpeed;
@@ -142,11 +142,11 @@ void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int
         player.minimumReach = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
-        moveY = (int)-(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
+        moveY = -(float)(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
         player.timeJump+=0.1F;
     }
     else if(!player.minimumReach && player.timeJump < player.MIN_LIMIT_TIME_JUMP){
-        moveY = (int)-(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
+        moveY = -(float)(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
         player.timeJump+=0.1F;
     }
     else {
@@ -171,7 +171,7 @@ void Game::applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int
     player.y += moveY;
 }
 
-void Game::handleCollisions(int direction, int moveY) {
+void Game::handleCollisions(int direction, float moveY) {
     player.canMove = true;
     if (moveY != 0 || direction != 0) {
 
@@ -206,8 +206,8 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_Rect playerRect = {player.x, player.y, player.width, player.height};
-    SDL_RenderFillRect(renderer, &playerRect);
+    SDL_FRect playerRect = {player.x, player.y, player.width, player.height};
+    SDL_RenderFillRectF(renderer, &playerRect);
 
     /*
     // Utils for debugs
@@ -248,7 +248,7 @@ void Game::render() {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+            SDL_RenderDrawLineF(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
         }
     }
 
@@ -282,20 +282,20 @@ bool Game::checkCollision(const std::vector<Point>& playerVertices, const Polygo
 
     for (Point axis: axes) {
         // Project the rectangle and the polygon onto the axis
-        int playerProjectionMin = INT_MAX;
-        int playerProjectionMax = INT_MIN;
+        auto playerProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
+        auto playerProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: playerVertices) {
-            int projection = vertex.x * axis.x + vertex.y * axis.y;
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
             playerProjectionMin = std::min(playerProjectionMin, projection);
             playerProjectionMax = std::max(playerProjectionMax, projection);
         }
 
-        int obstacleProjectionMin = INT_MAX;
-        int obstacleProjectionMax = INT_MIN;
+        auto obstacleProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
+        auto obstacleProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: obstacle.vertices) {
-            int projection = vertex.x * axis.x + vertex.y * axis.y;
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
             obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
             obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
         }
@@ -316,14 +316,14 @@ bool Game::isConvex(const Polygon &polygon) {
     }
 
     // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
-    const double tolerance = 1e-6;
-    return fabs(polygon.totalAngles() - static_cast<double>((n - 2) * 180)) < tolerance;
+    const double tolerance = 1e-3;
+    return std::abs(polygon.totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
 }
 
 void Game::run() {
     int direction = 0;
-    int moveX = 0;
-    int moveY = 0;
+    float moveX = 0;
+    float moveY = 0;
     float timeSpeed = 0;
     // Game loop
     while (isRunning) {

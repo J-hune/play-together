@@ -26,12 +26,12 @@ public:
 
     bool minimumReach = true;/**<If the minimum jump time is reached  */
 
-    int x; /**< The x-coordinate of the player's position. (in pixels) */
-    int y; /**< The y-coordinate of the player's position. */
-    int speed; /**< The speed of the player. */
-    int speedMax;/**< The maximum speed of the player. */
-    int width; /**< The width of the player. (in pixels) */
-    int height; /**< The height of the player. */
+    float x; /**< The x-coordinate of the player's position. (in pixels) */
+    float y; /**< The y-coordinate of the player's position. */
+    float speed; /**< The speed of the player. */
+    float speedMax;/**< The maximum speed of the player. */
+    float width; /**< The width of the player. (in pixels) */
+    float height; /**< The height of the player. */
 
     float timeAfterFall = ALLOWED_TIME_TO_FALL;/**< The time that must elapse since the player started falling*/
 
@@ -52,7 +52,7 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(int startX, int startY, int playerSpeed, int speedMax, int playerWidth, int playerHeight);
+    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
 
     /**
      * @brief Get the vertices of the player's bounding box.

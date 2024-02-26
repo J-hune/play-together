@@ -5,7 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
-Player::Player(int startX, int startY, int playerSpeed,int speedMax, int playerWidth, int playerHeight)
+Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
         : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight){}
 
 std::vector<Point> Player::getVertices() const {

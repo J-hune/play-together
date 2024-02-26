@@ -52,7 +52,7 @@ private:
      * @param moveX Reference to the X-axis movement variable.
      * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(int &moveX, int &moveY);
+    void handleEvents(int &direction, float &moveY);
 
     /**
      * @brief Applies player movement based on the current movement variables.
@@ -61,14 +61,14 @@ private:
      * @param timeSpeed The time that has elapsed since the player started running.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(int &moveX, int direction, float  &timeSpeed, int &moveY);
+    void applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY);
 
     /**
      * @brief Handles collisions between the player and obstacles.
      * @param direction The direction along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(int direction, int moveY);
+    void handleCollisions(int direction, float moveY);
 
     /**
      * @brief Renders the game by drawing the player and obstacles.

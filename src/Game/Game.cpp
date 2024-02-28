@@ -50,6 +50,8 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
 
 void Game::handleEvents(int &direction, float &moveY) {
     SDL_Event e;
+
+    // Main loop handling every event one by one
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
@@ -58,7 +60,7 @@ void Game::handleEvents(int &direction, float &moveY) {
             exit(0);
         }
 
-        // Handle SDL_KEYDOWN and SDL_KEYUP events
+        // A key is pressed
         else if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
                 case SDLK_UP :
@@ -92,6 +94,7 @@ void Game::handleEvents(int &direction, float &moveY) {
             }
         }
 
+        // A key is released
         else if (e.type == SDL_KEYUP) {
             switch (e.key.keysym.sym) {
                 case SDLK_UP:
@@ -113,15 +116,15 @@ void Game::handleEvents(int &direction, float &moveY) {
         }
 
         // Handle SDL_MOUSEBUTTONDOWN events
-        else if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (e.button.button == SDL_BUTTON_LEFT) {
-                printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
-            }
+        else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+            printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
         }
     }
 }
 
 void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY) {
+
+    // The player move on the x-axis
     if(player.wantMove){
         timeSpeed += 0.1F;
         moveX = player.speedMax * player.speed * timeSpeed;
@@ -131,6 +134,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         }
         moveX = direction * moveX;
     }
+    // The player doesn't move on the x-axis
     else{
         timeSpeed = 0;
         moveX = 0;
@@ -152,16 +156,18 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
         player.timeJump += 0.1F;
     }
-
+    // The player doesn't jump
     else {
         player.timeJump = 0;
         player.wantToJump = false;
 
+        // The player is on a platform
         if (player.isOnPlatform){
             moveY = 0;
             player.isJumping = false;
             player.timeAfterFall = player.ALLOWED_TIME_TO_FALL;
         }
+        // The player is falling
         else{
             moveY = 2;
             player.timeAfterFall -= 0.1F;
@@ -169,7 +175,6 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
 
     }
 
-    //printf("\nOn descends de y : %d et on est sur une platforme = %d\n", moveY, player.isOnPlatform);
     handleCollisions(direction, moveY);
     if(player.canMove){
         player.x += moveX;
@@ -180,12 +185,12 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
 void Game::handleCollisions(int direction, float moveY) {
     player.canMove = true;
     if (moveY != 0 || direction != 0) {
-        //printf("Moving player to (%d, %d)\n", player.x, player.y);
         player.isOnPlatform = false;
 
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
 
+            // If collision detected with the roof, the player can't jump anymore
             if (checkCollision(player.getVerticesRoof(), obstacle)) {
                 printf("Collision detected on head\n");
                 player.timeJump = player.LIMIT_TIME_JUMP;
@@ -196,6 +201,7 @@ void Game::handleCollisions(int direction, float moveY) {
                 printf("Collision detected on foot\n");
                 player.isOnPlatform = true;
             }
+
             // If collision detected with the wall, the player can't move
             if (player.canMove && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
                 printf("Collision detected for horizontal movement\n");
@@ -216,7 +222,6 @@ void Game::render() {
     SDL_RenderFillRectF(renderer, &playerRect);
 
     /*
-    // Utils for debugs
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     std::vector<Point> vertexRight = player.getVerticesHorizontal(1);
     for (size_t i = 0; i < vertexRight.size(); ++i) {
@@ -263,7 +268,7 @@ void Game::render() {
     SDL_Delay(4);
 }
 
-bool Game::checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle) {
+bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygon &obstacle) {
     // Check for convexity of the obstacle
     if (!isConvex(obstacle)) {
         printf("The obstacle is not convex\n");

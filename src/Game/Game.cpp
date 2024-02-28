@@ -64,7 +64,7 @@ void Game::handleEvents(int &direction, float &moveY) {
                 case SDLK_UP :
                 case SDLK_z:
                 case SDLK_SPACE:
-                    if (player.timeAfterFall >0 && !player.isJumping){
+                    if (player.timeAfterFall > 0 && !player.isJumping){
                         player.wantToJump = true;
                     }
                     //moveY = -player.speed;
@@ -90,7 +90,9 @@ void Game::handleEvents(int &direction, float &moveY) {
                 default:
                     break;
             }
-        } else if (e.type == SDL_KEYUP) {
+        }
+
+        else if (e.type == SDL_KEYUP) {
             switch (e.key.keysym.sym) {
                 case SDLK_UP:
                 case SDLK_DOWN:
@@ -122,17 +124,18 @@ void Game::handleEvents(int &direction, float &moveY) {
 void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY) {
     if(player.wantMove){
         timeSpeed += 0.1F;
-        moveX = player.speedMax * player.speed*timeSpeed;
-        printf("\n%d\n\n\n\n",moveX > player.speedMax);
+        moveX = player.speedMax * player.speed * timeSpeed;
+        printf("\n%d\n\n\n\n", moveX > player.speedMax);
         if (moveX > player.speedMax){
             moveX = player.speedMax;
         }
-        moveX = direction*moveX;
+        moveX = direction * moveX;
     }
     else{
         timeSpeed = 0;
         moveX = 0;
     }
+
     if(player.timeJump > player.MIN_LIMIT_TIME_JUMP){
         player.minimumReach = true;
     }
@@ -142,16 +145,18 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         player.minimumReach = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
-        moveY = -(float)(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
-        player.timeJump+=0.1F;
+        moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
+        player.timeJump += 0.1F;
     }
     else if(!player.minimumReach && player.timeJump < player.MIN_LIMIT_TIME_JUMP){
-        moveY = -(float)(2 * player.timeJump - 0.3*(player.timeJump*player.timeJump));
-        player.timeJump+=0.1F;
+        moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
+        player.timeJump += 0.1F;
     }
+
     else {
-        player.timeJump=0;
+        player.timeJump = 0;
         player.wantToJump = false;
+
         if (player.isOnPlatform){
             moveY = 0;
             player.isJumping = false;
@@ -163,6 +168,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         }
 
     }
+
     //printf("\nOn descends de y : %d et on est sur une platforme = %d\n", moveY, player.isOnPlatform);
     handleCollisions(direction, moveY);
     if(player.canMove){
@@ -174,9 +180,9 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
 void Game::handleCollisions(int direction, float moveY) {
     player.canMove = true;
     if (moveY != 0 || direction != 0) {
-
         //printf("Moving player to (%d, %d)\n", player.x, player.y);
         player.isOnPlatform = false;
+
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
 
@@ -325,6 +331,7 @@ void Game::run() {
     float moveX = 0;
     float moveY = 0;
     float timeSpeed = 0;
+
     // Game loop
     while (isRunning) {
         // Handle events, apply player movement, check collisions, and render

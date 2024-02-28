@@ -21,9 +21,9 @@ std::vector<Point> Player::getVertices() const {
 std::vector<Point> Player::getVerticesHorizontal(int direction) const {
     // Return the vertices of the player's bounding box, with added margin to capture wall within the area.
     return {
-            {x + (direction * 2),         y +2},
-            {x + width + (direction * 2), y +2},
-            {x + width +(direction * 2), y + height - 2},
+            {x + (direction * 2),         y + 2},
+            {x + width + (direction * 2), y + 2},
+            {x + width + (direction * 2), y + height - 2},
             {x + (direction * 2),         y + height - 2}
     };
 }

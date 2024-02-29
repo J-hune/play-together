@@ -102,12 +102,12 @@ void Game::handleEvents(int &direction, float &moveY) {
                     break;
                 case SDLK_LEFT:
                 case SDLK_q:
-                    direction = player.LEFT;
+                    direction = PLAYER_LEFT;
                     player.wantMove = true;
                     break;
                 case SDLK_RIGHT:
                 case SDLK_d:
-                    direction = player.RIGHT;
+                    direction = PLAYER_RIGHT;
                     player.wantMove = true;
                     break;
                 case SDLK_m:
@@ -153,7 +153,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
     if(player.wantMove){
         timeSpeed += 0.1F;
         moveX = player.speedMax * player.speed * timeSpeed;
-        printf("\n%d\n\n\n\n", moveX > player.speedMax);
+        //printf("\n%d\n\n\n\n", moveX > player.speedMax);
         if (moveX > player.speedMax){
             moveX = player.speedMax;
         }
@@ -165,19 +165,19 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         moveX = 0;
     }
 
-    if(player.timeJump > player.MIN_LIMIT_TIME_JUMP){
+    if(player.timeJump > PRESSURE_JUMP_MIN){
         player.minimumReach = true;
     }
 
     // The player press "jump button" and he doesn't maintain more than 6
-    if(player.wantToJump && player.timeJump < player.LIMIT_TIME_JUMP){
+    if(player.wantToJump && player.timeJump < PRESSURE_JUMP_MAX){
         player.minimumReach = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
         moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
         player.timeJump += 0.1F;
     }
-    else if(!player.minimumReach && player.timeJump < player.MIN_LIMIT_TIME_JUMP){
+    else if(!player.minimumReach && player.timeJump < PRESSURE_JUMP_MIN){
         moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
         player.timeJump += 0.1F;
     }
@@ -190,7 +190,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         if (player.isOnPlatform){
             moveY = 0;
             player.isJumping = false;
-            player.timeAfterFall = player.ALLOWED_TIME_TO_FALL;
+            player.timeAfterFall = COYOTE_TIME;
         }
         // The player is falling
         else{
@@ -204,6 +204,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
     if(player.canMove){
         player.x += moveX;
     }
+    player.y += moveY;
 }
 
 void Game::getAveragePlayersPositions(float *x, float *y) const {
@@ -282,7 +283,7 @@ void Game::handleCollisions(int direction, float moveY) {
             // If collision detected with the roof, the player can't jump anymore
             if (checkCollision(player.getVerticesRoof(), obstacle)) {
                 printf("Collision detected on head\n");
-                player.timeJump = player.LIMIT_TIME_JUMP;
+                player.timeJump = PRESSURE_JUMP_MAX;
             }
 
             // If collision detected with the ground, the player is on platform
@@ -298,6 +299,7 @@ void Game::handleCollisions(int direction, float moveY) {
             }
         }
 
+        /*
         // Check for collisions with other characters
         for (Player const &character : characters) {
             if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
@@ -314,7 +316,7 @@ void Game::handleCollisions(int direction, float moveY) {
             printf("Collision detected with a camera border\n");
             player.x -= moveX;
             player.y -= moveY;
-        }
+        }*/
     }
 }
 

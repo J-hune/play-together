@@ -5,6 +5,15 @@
 #include <SDL_rect.h>
 #include "Point.h"
 
+const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
+const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */
+
+const float PRESSURE_JUMP_MIN = 4; /**< Constant for the jump time limit minimum. */
+const float PRESSURE_JUMP_MAX = 7; /**< Constant for jump time limit. */
+constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
+
+
+
 /**
  * @file Player.h
  * @brief Defines the Player class representing a player in a 2D game.
@@ -17,14 +26,6 @@
 
 class Player {
 public:
-    const int RIGHT = 1;/**< Constant to the direction of the player here right. */
-    const int LEFT = -1;/**< Constant to the direction of the player here left. */
-
-    const float LIMIT_TIME_JUMP = 7;/**< Constant for jump time limit. */
-    const float MIN_LIMIT_TIME_JUMP = 4;/**< Constant for the jump time limit minimum. */
-
-    const float ALLOWED_TIME_TO_FALL = 2;/**< Time allowed for jumping after a fall. */
-
     bool minimumReach = true;/**<If the minimum jump time is reached  */
 
     float x; /**< The x-coordinate of the player's position. (in pixels) */
@@ -34,12 +35,12 @@ public:
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
 
-    float timeAfterFall = ALLOWED_TIME_TO_FALL;/**< The time that must elapse since the player started falling*/
+    float timeAfterFall = COYOTE_TIME;/**< The time that must elapse since the player started falling*/
 
     bool canMove = true; /**< If the player can move */
     bool wantMove = false; /**< If the player try to move */
 
-    float timeJump=0.; /**<The time that has elapsed since the player started jumping */
+    float timeJump = 0.; /**<The time that has elapsed since the player started jumping */
     bool isOnPlatform = false; /**< If the player is on a platform */
     bool isJumping = false;/**< If the player is in a jump */
     bool wantToJump = false;/**< If the player try to jump */

@@ -1,7 +1,12 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include "../../include/Game/Game.h"
+
+bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
+    // Check for AABB collision
+    return (a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y);
+}
 
 /**
  * @file Game.cpp
@@ -10,6 +15,26 @@
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
         : window(window), renderer(renderer), player(initialPlayer) {}
+
+void Game::addCharacter(const Player &character) {
+    characters.push_back(character);
+}
+
+void Game::teleportPlayer(float x, float y) {
+    player.x = x;
+    player.y = y;
+}
+
+void Game::removeCharacter(const Player &character) {
+    // Find the iterator corresponding to the character in the vector
+    std::input_iterator auto it = std::ranges::find(characters.begin(), characters.end(), character);
+
+    // Check if the character was found
+    if (it != characters.end()) {
+        // Erase the character from the vector
+        characters.erase(it);
+    }
+}
 
 void Game::loadPolygonsFromMap(const std::string& mapName) {
     obstacles.clear();
@@ -117,7 +142,7 @@ void Game::handleEvents(int &direction, float &moveY) {
 
         // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%d, %d)\n", e.button.x, e.button.y);
+            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.x, (float)e.button.y + camera.y);
         }
     }
 }
@@ -179,7 +204,71 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
     if(player.canMove){
         player.x += moveX;
     }
-    player.y += moveY;
+}
+
+void Game::getAveragePlayersPositions(float *x, float *y) const {
+    float i = 1;  // Number of player in the game (at least one)
+    *x = player.x; // Initialization of the point on the initial player
+    *y = player.y;
+
+    // Add x and y position of all players
+    for (const Player &character : characters) {
+        *x += character.x;
+        *y += character.y;
+        i++;
+    }
+
+    // Average x and y position of all players
+    *x /= i; *y /= i;
+}
+
+void Game::initializeCameraPosition() {
+    float x;
+    float y;
+    getAveragePlayersPositions(&x, &y);
+
+    // Initialize the camera so that players are bottom left
+    camera.x = x; camera.y = y - 2 * (camera.h / 3);
+
+    // The point is on the right of the area
+    if (x > camera.x + (camera.w - (camera.w / 2))) {
+        camera.x += x - (camera.x + (camera.w - (camera.w / 2)));
+    }
+    // The point is on the left of the area
+    else if (x < camera.x + (camera.w / 5)) {
+        camera.x -= (camera.x + (camera.w / 5)) - x;
+    }
+    // The point is on the bottom of the area
+    if (y > camera.y + (camera.h - (camera.h / 5))) {
+        camera.y += y - (camera.y + (camera.h - (camera.h / 5)));
+    }
+    // The point is on the top of the area
+    else if (y < camera.y + (camera.h / 5)) {
+        camera.y -= (camera.y + (camera.h / 5)) - y;
+    }
+}
+
+void Game::applyCameraMovement() {
+    float x;
+    float y;
+    getAveragePlayersPositions(&x, &y);
+
+    // The point is on the right of the area
+    if (x > camera.x + camera.w - (camera.w / 2)) {
+        camera.x += (x - (camera.x + (camera.w - (camera.w / 2)))) * LERP_SMOOTHING_FACTOR;
+    }
+    // The point is on the left of the area
+    else if (x < camera.x + (camera.w / 5)) {
+        camera.x -= ((camera.x + (camera.w / 5)) - x) * LERP_SMOOTHING_FACTOR;
+    }
+    // The point is on the bottom of the area
+    if (y > camera.y + (camera.h - (camera.h / 5))) {
+        camera.y += (y - (camera.y + (camera.h - (camera.h / 5)))) * LERP_SMOOTHING_FACTOR;
+    }
+    // The point is on the top of the area
+    else if (y < camera.y + (camera.h / 5)) {
+        camera.y -= ((camera.y + (camera.h / 5)) - y) * LERP_SMOOTHING_FACTOR;
+    }
 }
 
 void Game::handleCollisions(int direction, float moveY) {
@@ -208,6 +297,24 @@ void Game::handleCollisions(int direction, float moveY) {
                 player.canMove = false;
             }
         }
+
+        // Check for collisions with other characters
+        for (Player const &character : characters) {
+            if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
+                printf("Collision detected with another character\n");
+                player.x -= moveX;
+                player.y -= moveY;
+            }
+        }
+
+        // Check for collisions with camera borders
+        if (player.x < camera.x || player.x > camera.x + camera.w - player.width ||
+            player.y < camera.y || player.y > camera.y + camera.h - player.height) {
+
+            printf("Collision detected with a camera border\n");
+            player.x -= moveX;
+            player.y -= moveY;
+        }
     }
 }
 
@@ -218,8 +325,15 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_FRect playerRect = {player.x, player.y, player.width, player.height};
+    SDL_FRect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
     SDL_RenderFillRectF(renderer, &playerRect);
+
+    // Draw the characters
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    for (const Player &character : characters) {
+        SDL_FRect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
+        SDL_RenderFillRectF(renderer, &characterRect);
+    }
 
     /*
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
@@ -252,14 +366,13 @@ void Game::render() {
     }
     */
 
-
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (const Polygon &obstacle: obstacles) {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
         }
     }
 
@@ -339,9 +452,10 @@ void Game::run() {
 
     // Game loop
     while (isRunning) {
-        // Handle events, apply player movement, check collisions, and render
+        // Handle events, apply player movement, check collisions, apply camera movement, and render
         handleEvents(direction, moveY);
-        applyPlayerMovement(moveX,direction, timeSpeed, moveY);
+        applyPlayerMovement(moveX, direction, timeSpeed, moveY);
+        applyCameraMovement();
         render();
     }
 

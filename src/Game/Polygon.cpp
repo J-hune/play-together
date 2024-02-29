@@ -1,8 +1,6 @@
 #include "../../include/Game/Polygon.h"
-#include <cmath>
 
 /**
- * @file Polygon.cpp
  * @brief Implements the Polygon class functions for handling polygons in 2D space.
  */
 

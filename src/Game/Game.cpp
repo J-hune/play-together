@@ -1,5 +1,12 @@
 #include "../../include/Game/Game.h"
 
+// Define constant for the directory containing map files
+constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
+
+// Define constant for the file name containing polygon data
+constexpr char POLYGONS_FILE[] = "polygons.txt";
+
+// Function to check AABB collision between two rectangles
 bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
     // Check for AABB collision
     return (a.x < b.x + b.w &&
@@ -36,12 +43,11 @@ void Game::removeCharacter(const Player &character) {
     }
 }
 
-void Game::loadPolygonsFromMap(const std::string& mapName) {
+void Game::loadPolygonsFromMap(const std::string &mapName) {
     obstacles.clear();
 
     // Define the file path for the polygon data
-    std::string filePath = "../assets/maps/" + mapName + "/polygons.txt";
-    std::cout << "File path: " << filePath << std::endl;
+    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/" + POLYGONS_FILE;
 
     std::ifstream file(filePath);
 
@@ -68,6 +74,7 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
         }
 
         file.close();
+        std::cout << "Loaded " << obstacles.size() << " polygons from the map " << mapName << "." << std::endl;
     } else {
         std::cerr << "Unable to open the file." << std::endl;
     }
@@ -98,9 +105,11 @@ void Game::handleEvents(float &moveX, float &moveY) {
                 case SDLK_RIGHT:
                     moveX = player.speed;
                     break;
-                case SDLK_m:
-                    printf("Loading map 'assurance'\n");
-                    loadPolygonsFromMap("assurance");
+                case SDLK_ESCAPE:
+                    pause();
+                    break;
+                case SDLK_DELETE:
+                    stop();
                     break;
                 default:
                     break;
@@ -213,7 +222,7 @@ void Game::handleCollisions(float moveX, float moveY) {
         }
 
         // Check for collisions with other characters
-        for (Player const &character : characters) {
+        for (Player const &character: characters) {
             if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
                 printf("Collision detected with another character\n");
                 player.x -= moveX;
@@ -261,7 +270,6 @@ void Game::render() {
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
-    SDL_Delay(4);
 }
 
 bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
@@ -289,26 +297,26 @@ bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
 
     for (Point axis: axes) {
         // Project the rectangle and the polygon onto the axis
-        auto playerProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
-        auto playerProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
+        auto player_projection_min = static_cast<float>(std::numeric_limits<int>::max());
+        auto player_projection_max = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: player.getVertices()) {
             float projection = vertex.x * axis.x + vertex.y * axis.y;
-            playerProjectionMin = std::min(playerProjectionMin, projection);
-            playerProjectionMax = std::max(playerProjectionMax, projection);
+            player_projection_min = std::min(player_projection_min, projection);
+            player_projection_max = std::max(player_projection_max, projection);
         }
 
-        auto obstacleProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
-        auto obstacleProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
+        auto obstacle_projection_min = static_cast<float>(std::numeric_limits<int>::max());
+        auto obstacle_projection_max = static_cast<float>(std::numeric_limits<int>::min());
 
         for (const Point &vertex: obstacle.vertices) {
             float projection = vertex.x * axis.x + vertex.y * axis.y;
-            obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
-            obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
+            obstacle_projection_min = std::min(obstacle_projection_min, projection);
+            obstacle_projection_max = std::max(obstacle_projection_max, projection);
         }
 
         // Check for separation on the axis
-        if (playerProjectionMax < obstacleProjectionMin || obstacleProjectionMax < playerProjectionMin) {
+        if (player_projection_max < obstacle_projection_min || obstacle_projection_max < player_projection_min) {
             return false; // No collision detected
         }
     }
@@ -330,24 +338,33 @@ bool Game::isConvex(const Polygon &polygon) {
 void Game::run() {
     float moveX = 0;
     float moveY = 0;
+    gameState = GameState::RUNNING;
 
     // Game loop
-    while (isRunning) {
+    while (gameState == GameState::RUNNING) {
         // Handle events, apply player movement, check collisions, apply camera movement, and render
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
         handleCollisions(moveX, moveY);
         applyCameraMovement();
         render();
-    }
 
-    // Close the window and clean up resources
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+        SDL_Delay(4);
+    }
+}
+
+void Game::pause() {
+    gameState = GameState::PAUSED;
 }
 
 void Game::stop() {
-    isRunning = false;
+    gameState = GameState::STOPPED;
+
+    // Reset the player position
+    player.x = 50;
+    player.y = 50;
 }
 
+GameState Game::getGameState() const {
+    return gameState;
+}

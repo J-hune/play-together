@@ -16,6 +16,12 @@ constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
 constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
+enum class GameState {
+    RUNNING,
+    PAUSED,
+    STOPPED
+};
+
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
@@ -27,7 +33,8 @@ constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
  */
 class Game {
 public:
-    Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
+    Game(SDL_Window *window, SDL_Renderer *renderer,
+         const Player &initialPlayer); /**< Constructor for the Game class. */
 
     /**
     * @brief Initialize the camera position according to players positions.
@@ -40,15 +47,45 @@ public:
     void run();
 
     /**
-     * @brief Stops the game loop and cleans up resources.
+     * @brief Pauses the game loop.
+     */
+    void pause();
+
+    /**
+     * @brief Stops the game loop and exits the game.
      */
     void stop();
 
-/**
- * @brief Loads obstacles from a map file.
- * @param mapName The name of the map file.
- */
-void loadPolygonsFromMap(const std::string &mapName);
+    /**
+     * @brief Loads obstacles from a map file.
+     * @param mapName The name of the map file.
+     */
+    void loadPolygonsFromMap(const std::string &mapName);
+
+    /**
+    * @brief Adds a character to the game.
+    * @param character The character to add.
+    */
+    void addCharacter(const Player &character);
+
+    /**
+     * @brief Removes a character from the game.
+     * @param character The character to remove.
+     */
+    void removeCharacter(const Player &character);
+
+    /**
+     * @brief Teleports the player to a specific location.
+     * @param x The X-coordinate of the location.
+     * @param y The Y-coordinate of the location.
+     */
+    void teleportPlayer(int x, int y);
+
+    /**
+     * @brief Returns the current game state.
+     * @return The current game state.
+     */
+    [[nodiscard]] GameState getGameState() const;
 
 private:
     SDL_Window *window; /**< SDL window for rendering. */
@@ -57,7 +94,7 @@ private:
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     SDL_FRect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; /**< Rectangle for camera object */
-    bool isRunning = true; /**< Flag indicating if the game is running. */
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.

@@ -2,12 +2,8 @@
 #define PLAY_TOGETHER_POLYGON_H
 
 #include <vector>
+#include <cmath>
 #include "Point.h"
-
-/**
- * @file Polygon.h
- * @brief Defines the Polygon class for handling polygons in 2D space.
- */
 
 /**
  * @class Polygon

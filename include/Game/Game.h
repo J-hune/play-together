@@ -79,7 +79,7 @@ public:
      * @param x The X-coordinate of the location.
      * @param y The Y-coordinate of the location.
      */
-    void teleportPlayer(int x, int y);
+    void teleportPlayer(float x, float y);
 
     /**
      * @brief Returns the current game state.
@@ -148,26 +148,6 @@ private:
      * @return True if the polygon is convex, false otherwise.
      */
     static bool isConvex(const Polygon &polygon);
-
-public:
-    /**
-    * @brief Adds a character to the game.
-    * @param character The character to add.
-    */
-    void addCharacter(const Player &character);
-
-    /**
-     * @brief Removes a character from the game.
-     * @param character The character to remove.
-     */
-    void removeCharacter(const Player &character);
-
-    /**
-     * @brief Teleports the player to a specific location.
-     * @param x The X-coordinate of the location.
-     * @param y The Y-coordinate of the location.
-     */
-    void teleportPlayer(float x, float y);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

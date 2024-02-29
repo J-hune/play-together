@@ -1,7 +1,6 @@
 #include <thread>
 #include <mutex>
 #include <SDL_ttf.h>
-#include <thread>
 #include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
@@ -21,16 +20,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
-    /*
-    window = SDL_CreateWindow(
-            "Play Together",
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH, SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN
-    );*/
-
-    SDL_Window window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
-                              SDL_WINDOW_SHOWN);
+    SDL_Window *window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN);
 
     if (window == nullptr) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());

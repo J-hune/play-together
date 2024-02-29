@@ -94,7 +94,6 @@ void Game::handleEvents(int &direction, float &moveY) {
                     if (player.timeAfterFall > 0 && !player.isJumping){
                         player.wantToJump = true;
                     }
-                    //moveY = -player.speed;
                     break;
                 case SDLK_DOWN:
                 case SDLK_s:
@@ -103,12 +102,12 @@ void Game::handleEvents(int &direction, float &moveY) {
                 case SDLK_LEFT:
                 case SDLK_q:
                     direction = PLAYER_LEFT;
-                    player.wantMove = true;
+                    player.wantToMove = true;
                     break;
                 case SDLK_RIGHT:
                 case SDLK_d:
                     direction = PLAYER_RIGHT;
-                    player.wantMove = true;
+                    player.wantToMove = true;
                     break;
                 case SDLK_m:
                     printf("Loading map 'vow'\n");
@@ -132,7 +131,7 @@ void Game::handleEvents(int &direction, float &moveY) {
                 case SDLK_RIGHT:
                 case SDLK_d:
                 case SDLK_q:
-                    player.wantMove = false;
+                    player.wantToMove = false;
                     direction = 0;
                     break;
                 default:
@@ -150,7 +149,7 @@ void Game::handleEvents(int &direction, float &moveY) {
 void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY) {
 
     // The player move on the x-axis
-    if(player.wantMove){
+    if(player.wantToMove){
         timeSpeed += 0.1F;
         moveX = player.speedMax * player.speed * timeSpeed;
         //printf("\n%d\n\n\n\n", moveX > player.speedMax);
@@ -165,25 +164,25 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         moveX = 0;
     }
 
-    if(player.timeJump > PRESSURE_JUMP_MIN){
-        player.minimumReach = true;
+    if(player.timeSpentJumping > PRESSURE_JUMP_MIN){
+        player.minimumTimeJumpReached = true;
     }
 
     // The player press "jump button" and he doesn't maintain more than 6
-    if(player.wantToJump && player.timeJump < PRESSURE_JUMP_MAX){
-        player.minimumReach = false;
+    if(player.wantToJump && player.timeSpentJumping < PRESSURE_JUMP_MAX){
+        player.minimumTimeJumpReached = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
-        moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
-        player.timeJump += 0.1F;
+        moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
+        player.timeSpentJumping += 0.1F;
     }
-    else if(!player.minimumReach && player.timeJump < PRESSURE_JUMP_MIN){
-        moveY = -(float)(2 * player.timeJump - 0.3 * (player.timeJump * player.timeJump));
-        player.timeJump += 0.1F;
+    else if(!player.minimumTimeJumpReached && player.timeSpentJumping < PRESSURE_JUMP_MIN){
+        moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
+        player.timeSpentJumping += 0.1F;
     }
     // The player doesn't jump
     else {
-        player.timeJump = 0;
+        player.timeSpentJumping = 0;
         player.wantToJump = false;
 
         // The player is on a platform
@@ -209,7 +208,9 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
 
 void Game::getAveragePlayersPositions(float *x, float *y) const {
     float i = 1;  // Number of player in the game (at least one)
-    *x = player.x; // Initialization of the point on the initial player
+
+    // Initialization of the point on the initial player
+    *x = player.x;
     *y = player.y;
 
     // Add x and y position of all players
@@ -283,10 +284,10 @@ void Game::handleCollisions(int direction, float moveY) {
             // If collision detected with the roof, the player can't jump anymore
             if (checkCollision(player.getVerticesRoof(), obstacle)) {
                 printf("Collision detected on head\n");
-                player.timeJump = PRESSURE_JUMP_MAX;
+                player.timeSpentJumping = PRESSURE_JUMP_MAX;
             }
 
-            // If collision detected with the ground, the player is on platform
+            // If collision detected with the ground, the player is on a platform
             if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
                 printf("Collision detected on foot\n");
                 player.isOnPlatform = true;

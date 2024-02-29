@@ -12,8 +12,6 @@ const float PRESSURE_JUMP_MIN = 4; /**< Constant for the jump time limit minimum
 const float PRESSURE_JUMP_MAX = 7; /**< Constant for jump time limit. */
 constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
 
-
-
 /**
  * @file Player.h
  * @brief Defines the Player class representing a player in a 2D game.
@@ -26,24 +24,24 @@ constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
 
 class Player {
 public:
-    bool minimumReach = true;/**<If the minimum jump time is reached  */
-
     float x; /**< The x-coordinate of the player's position. (in pixels) */
     float y; /**< The y-coordinate of the player's position. */
     float speed; /**< The speed of the player. */
-    float speedMax;/**< The maximum speed of the player. */
+    float speedMax; /**< The maximum speed of the player. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
 
-    float timeAfterFall = COYOTE_TIME;/**< The time that must elapse since the player started falling*/
+    float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
     bool canMove = true; /**< If the player can move */
-    bool wantMove = false; /**< If the player try to move */
+    bool wantToMove = false; /**< If the player try to move */
 
-    float timeJump = 0.; /**<The time that has elapsed since the player started jumping */
+    bool minimumTimeJumpReached = true; /**< If the minimum jump time is reached (pressure jump) */
+
+    float timeSpentJumping = 0.; /**< The time that has elapsed since the player started jumping */
     bool isOnPlatform = false; /**< If the player is on a platform */
-    bool isJumping = false;/**< If the player is in a jump */
-    bool wantToJump = false;/**< If the player try to jump */
+    bool isJumping = false; /**< If the player is jumping */
+    bool wantToJump = false; /**< If the player try to jump */
 
     /**
      * @brief Constructor for the Player class.

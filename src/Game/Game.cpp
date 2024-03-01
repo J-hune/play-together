@@ -20,19 +20,11 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer, Network &network)
-        : window(window), renderer(renderer), player(initialPlayer), network(network) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
+        : window(window), renderer(renderer), player(initialPlayer) {}
 
 GameState Game::getGameState() const {
     return gameState;
-}
-
-TCPServer &Game::getTCPServer() {
-    return network.tcp_server;
-}
-
-TCPClient &Game::getTCPClient() {
-    return network.tcp_client;
 }
 
 void Game::addCharacter(const Player &character) {

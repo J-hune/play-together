@@ -37,15 +37,31 @@ public:
          const Player &initialPlayer); /**< Constructor for the Game class. */
 
     /**
- * @brief Returns the current game state.
- * @return The current game state.
- */
+     * @brief Returns the current game state.
+     * @return The current game state.
+     */
     [[nodiscard]] GameState getGameState() const;
 
     /**
-    * @brief Initialize the camera position according to players positions.
-    */
+     * @brief Initialize the camera position according to players positions.
+     */
     void initializeCameraPosition();
+
+    /**
+     * @brief Set a new state to render_camera_point
+     * @param state the state of render_camera_point
+     */
+    void setRenderCameraPointState(bool state){
+        render_camera_point = state;
+    }
+
+    /**
+     * @brief Set a new state to render_camera_area
+     * @param state the state of render_camera_area
+     */
+    void setRenderCameraAreaState(bool state){
+        render_camera_point = state;
+    }
 
     /**
      * @brief Runs the game loop.
@@ -69,9 +85,9 @@ public:
     void loadPolygonsFromMap(const std::string &mapName);
 
     /**
-    * @brief Adds a character to the game.
-    * @param character The character to add.
-    */
+     * @brief Adds a character to the game.
+     * @param character The character to add.
+     */
     void addCharacter(const Player &character);
 
     /**
@@ -92,8 +108,16 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
+
     std::vector<Player> characters; /**< Collection of characters in the game. */
     SDL_FRect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; /**< Rectangle for camera object */
+    SDL_FRect camera_area = {SCREEN_WIDTH/5.f, /**< Rectangle for camera "not moving area" */
+                             SCREEN_HEIGHT/5.f,
+                             SCREEN_WIDTH - (SCREEN_WIDTH/2.f) - SCREEN_WIDTH/5.f,
+                             SCREEN_HEIGHT - (SCREEN_HEIGHT/5.f) - SCREEN_HEIGHT/5.f};
+    bool render_camera_point = false;
+    bool render_camera_area = false;
+
     GameState gameState = GameState::STOPPED; /**< The current game state. */
 
     /**

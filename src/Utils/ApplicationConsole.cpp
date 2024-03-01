@@ -31,9 +31,10 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "help - Display help\n";
             std::cout << "exit - Exit the console\n";
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
+            std::cout << "show [camera_point | camera_area] - Show debug information\n";
         }
 
-            // Teleport player to a specific location
+        // Teleport player to a specific location
         else if (command.find("tp") != std::string::npos) {
             int x;
             int y;
@@ -44,7 +45,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             }
         }
 
-            // Change map (load polygons from a map file)
+        // Change map (load polygons from a map file)
         else if (command.find("map") != std::string::npos) {
             std::istringstream iss(command);
             std::string command_name;
@@ -54,6 +55,48 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 gamePtr->loadPolygonsFromMap(map_name);
             } else {
                 std::cout << "Invalid syntax. Usage: map [mapName]\n";
+            }
+        }
+
+        // Show debug information
+        else if (command.find("show") != std::string::npos) {
+            std::istringstream iss(command);
+            std::string command_name;
+            std::string option;
+            iss >> command_name >> option;
+            if (command_name == "show") {
+                if (option == "camera_point") {
+                    gamePtr->setRenderCameraPointState(true);
+                    std::cout << "Showing camera point information.\n";
+                } else if (option == "camera_area") {
+                     gamePtr->setRenderCameraAreaState(true);
+                    std::cout << "Showing camera area information.\n";
+                } else {
+                    std::cout << "Invalid option. Usage: show [camera_point | camera_area]\n";
+                }
+            } else {
+                std::cout << "Invalid syntax. Usage: show [camera_point | camera_area]\n";
+            }
+        }
+
+        // Hide debug information
+        else if (command.find("hide") != std::string::npos) {
+            std::istringstream iss(command);
+            std::string command_name;
+            std::string option;
+            iss >> command_name >> option;
+            if (command_name == "hide") {
+                if (option == "camera_point") {
+                    gamePtr->setRenderCameraPointState(false);
+                    std::cout << "Hiding camera point information.\n";
+                } else if (option == "camera_area") {
+                    gamePtr->setRenderCameraAreaState(false);
+                    std::cout << "Hiding camera area information.\n";
+                } else {
+                    std::cout << "Invalid option. Usage: hide [camera_point | camera_area]\n";
+                }
+            } else {
+                std::cout << "Invalid syntax. Usage: hide [camera_point | camera_area]\n";
             }
         }
 

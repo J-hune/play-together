@@ -272,6 +272,24 @@ void Game::render() {
         }
     }
 
+    // Draw the camera point
+    if (render_camera_point) {
+        float x;
+        float y;
+        getAveragePlayersPositions(&x, &y);
+        SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+        SDL_FRect cameraPointRect = {x - camera.x, y - camera.y, 20, 20};
+        SDL_RenderFillRectF(renderer, &cameraPointRect);
+        SDL_RenderDrawRectF(renderer, &cameraPointRect);
+    }
+
+    // Draw the camera area
+    if (render_camera_area) {
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_FRect cameraRect = {camera_area.x, camera_area.y, camera_area.w + player.width, camera_area.h + player.height - 10};
+        SDL_RenderDrawRectF(renderer, &cameraRect);
+    }
+
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
 }

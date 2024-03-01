@@ -43,18 +43,6 @@ public:
     [[nodiscard]] GameState getGameState() const;
 
     /**
-     * @brief Returns the TCP server object.
-     * @return The TCP server object.
-     */
-    TCPServer &getTCPServer();
-
-    /**
-     * @brief Returns the TCP client object.
-     * @return The TCP client object.
-     */
-    TCPClient &getTCPClient();
-
-    /**
     * @brief Initialize the camera position according to players positions.
     */
     void initializeCameraPosition();

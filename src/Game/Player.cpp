@@ -16,3 +16,8 @@ std::vector<Point> Player::getVertices() const {
             {x, y + height}
     };
 }
+
+SDL_FRect Player::getBoundingBox() const {
+    // Return the bounding box of the player.
+    return {x, y, width, height};
+}

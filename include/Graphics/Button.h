@@ -5,7 +5,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <utility>
-#include <SDL2_gfxPrimitives.h>
+#include "../../dependencies/SDL2_gfx/SDL2_gfxPrimitives.h"
 
 /**
  * @brief A struct representing the position of a button.

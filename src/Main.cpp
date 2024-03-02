@@ -1,7 +1,15 @@
 #include <thread>
 #include <mutex>
+
+
+#include <fstream>
+#include <iostream>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+
 #include "../include/Game/Game.h"
 #include "../include/Utils/GameConsole.h"
+#include "../include/Utils/Saves.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -28,6 +36,28 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "could not create window: %s\n", SDL_GetError());
         return 1;
     }
+    /*it worksssssss
+    std::string obj = "holla";
+    std::ofstream ofs("test");
+
+    {
+        boost::archive::text_oarchive oa(ofs);
+        oa & obj;
+    }
+
+    //std::string newt;
+    Game newg();
+
+    {
+        // create and open an archive for input
+        std::ifstream ifs("test");
+        boost::archive::text_iarchive ia(ifs);
+        // read class state from archive
+        ia >> newg;
+        // archive and stream closed when destructors are called
+    }*/
+
+
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -50,6 +80,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     game.initializeCameraPosition();
 
+    std::ofstream ofs("test");
+
+    {
+        boost::archive::text_oarchive oa(ofs);
+        oa & game;
+    }
+
+    Game ngame(window, renderer, initialPlayer);
+
+    {
+        std::ifstream ifs("test");
+        boost::archive::text_iarchive ia(ifs);
+        ia >> ngame;
+    }
+
+
     // Launch the game loop in a separate thread
     std::jthread gameThread(&Game::run, &game);
 
@@ -61,6 +107,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Join the console thread
     consoleThread.join();
+    //Saves<Game> saves;
+    //saves.save(game,"Game");
+    //Saves<std::string>::save("hello","test");
+
+
 
     return 0;
 }

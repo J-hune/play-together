@@ -350,4 +350,29 @@ void Game::run() {
 void Game::stop() {
     isRunning = false;
 }
+/*
+void Game::serialize_save(std::string filename) {
+    std::ofstream ofs(filename);
+
+    {
+        boost::archive::text_oarchive oa(ofs);
+        oa & ;
+    }
+
+}
+
+    Game Game::load_deserialize(std::string filename) {
+        Game oldGame();
+
+        {
+            // create and open an archive for input
+            std::ifstream ifs(filename);
+            boost::archive::text_iarchive ia(ifs);
+            // read class state from archive
+            ia >> oldGame;
+            // archive and stream closed when destructors are called
+        }
+
+    }*/
+
 

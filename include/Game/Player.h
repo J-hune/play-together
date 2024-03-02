@@ -33,6 +33,8 @@ public:
      */
     Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight);
 
+    Player();
+
     /**
      * @brief Get the vertices of the player's bounding box.
      * @return A vector of Point representing the vertices.
@@ -47,6 +49,15 @@ public:
     // Equality operator for comparing two players
     bool operator==(const Player &other) const {
         return (x == other.x && y == other.y && width == other.width && height == other.height);
+    }
+
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & x;
+        ar & y;
+        ar & speed;
+        ar & width;
+        ar & height;
     }
 };
 

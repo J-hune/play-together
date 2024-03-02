@@ -9,6 +9,16 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/)
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
+#Find boost library
+#find_package( Boost 1.82 COMPONENTS lboost_serialization  REQUIRED )
+find_package(Boost COMPONENTS serialization REQUIRED)
+#FIND_PACKAGE(Boost)
+IF (Boost_FOUND)
+    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+    ADD_DEFINITIONS( "-DHAS_BOOST" )
+ENDIF()
+#target_include_directories( play-together PRIVATE ${Boost_INCLUDE_DIR})
+
 # Automatic retrieval of source files
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -27,5 +37,8 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets)
 # Create the executable
 add_executable(play-together WIN32 ${SOURCES} ${HEADERS})
 
+
 # Link libraries
 target_link_libraries(play-together ${SDL2_LIBRARIES})
+target_link_libraries(play-together ${Boost_LIBRARIES})
+target_link_libraries(play-together Boost::serialization)

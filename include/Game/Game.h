@@ -11,6 +11,9 @@
 #include <fstream>
 #include <sstream>
 #include <ranges>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
 
 constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
@@ -131,6 +134,32 @@ public:
      * @param y The Y-coordinate of the location.
      */
     void teleportPlayer(float x, float y);
+    /**
+     * @brief method to serialize the object
+     * @tparam Archive
+     * @param ar
+     * @param version
+     */
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & obstacles;
+        ar & player;
+        ar & characters;
+        ar & camera.x;
+        ar & camera.y;
+    }
+    /**
+     * @brief serialization of the specific object and saves it in the file
+     * @param filename the filename that the object will be saved in
+     */
+     void serialize_save(std::string filename);
+
+
+     /**
+      * @brief load and deserialize
+      * @param filename the file that we will read the object from
+      */
+      Game load_deserialize(std::string filename);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

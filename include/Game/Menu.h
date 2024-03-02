@@ -4,14 +4,23 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <map>
+#include <thread>
+
 #include "../Graphics/Button.h"
 #include "Game.h"
+#include "../../dependencies/json.hpp"
+#include "../Network/TCPServer.h"
+#include "../Network/TCPClient.h"
+
+constexpr unsigned int MAX_JSON_SIZE = 1024;
 
 enum class MenuAction {
     MAIN,
     PLAY,
     LOAD_SAVE,
     START_NEW_GAME,
+    HOST_GAME,
+    JOIN_GAME,
 };
 
 struct GameStateKey {
@@ -36,6 +45,8 @@ public:
      * @param quit A pointer to a boolean to control the game loop.
      */
     Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit);
+
+    ~Menu();
 
     /**
      * @brief Render the menu on the screen.
@@ -84,13 +95,52 @@ public:
     void reset();
 
 private:
-    SDL_Renderer *renderer;
-    TTF_Font *font;
-    bool displayMenu = true;
-    Game *game;
-    bool *quit;
-    MenuAction currentMenuAction = MenuAction::MAIN;
-    std::map<GameStateKey, std::vector<Button>> buttons;
+    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    TTF_Font *font; /**< TTF font for rendering text. */
+    bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
+    Game *game; /**< Pointer to the game object. */
+    bool *quit; /**< Pointer to a boolean controlling the game loop. */
+    TCPClient tcpClient; /**< TCP client instance for network communication. */
+    TCPServer tcpServer; /**< TCP server instance for network communication. */
+    MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
+    std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
+    std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
+    std::unique_ptr<std::jthread> serverTCPThreadPtr; /**< Pointer to the TCP server thread. */
+
+    /**
+     * @brief Wait for a connection to be established.
+     */
+    void startServer();
+
+    /**
+     * @brief Start the client to connect to the server.
+     */
+    void startClient();
+
+    /**
+     * @brief Callback function to handle server disconnect event.
+     */
+    void onServerDisconnect();
+
+    /**
+     * @brief Get the buttons corresponding to the current menu state.
+     * @return Reference to the vector of buttons.
+     */
+    std::vector<Button>& getCurrentMenuButtons();
+
+    // Button action handlers
+    void handleButtonAction(Button &button);
+    void handleStartButton(Button &button);
+    void handleResumeButton(Button &button);
+    void handleStopButton(Button &button);
+    void handleHostGameButton(Button &button);
+    void handleJoinGameButton(Button &button);
+    void handleNavigateToMainMenuButton(Button &button);
+    void handleNavigateToPlayMenuButton(Button &button);
+    void handleSendMessageButton(Button &button);
+    void handleNavigateToLoadSaveMenuButton(Button &button);
+    void handleNavigateToStartNewGameMenuButton(Button &button);
+    void handleQuitButton(Button &button);
 };
 
 #endif //PLAY_TOGETHER_MENU_H

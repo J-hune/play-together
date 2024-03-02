@@ -33,26 +33,13 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window *window, SDL_Renderer *renderer,
-         const Player &initialPlayer); /**< Constructor for the Game class. */
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer); /**< Constructor for the Game class. */
 
     /**
- * @brief Returns the current game state.
- * @return The current game state.
- */
+    * @brief Returns the current game state.
+    * @return The current game state.
+    */
     [[nodiscard]] GameState getGameState() const;
-
-    /**
-     * @brief Returns the TCP server object.
-     * @return The TCP server object.
-     */
-    TCPServer &getTCPServer();
-
-    /**
-     * @brief Returns the TCP client object.
-     * @return The TCP client object.
-     */
-    TCPClient &getTCPClient();
 
     /**
     * @brief Initialize the camera position according to players positions.

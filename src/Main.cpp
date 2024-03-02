@@ -1,5 +1,4 @@
 #include <thread>
-#include <mutex>
 #include <SDL_ttf.h>
 #include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"

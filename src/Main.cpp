@@ -9,7 +9,7 @@
 
 #include "../include/Game/Game.h"
 #include "../include/Utils/GameConsole.h"
-#include "../include/Utils/Saves.h"
+#include "../src/Utils/Saves.cpp"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -21,14 +21,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
-    /*
-    window = SDL_CreateWindow(
-            "Play Together",
-            SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH, SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN
-    );*/
-
     window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
                               SDL_WINDOW_SHOWN);
 
@@ -36,26 +28,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "could not create window: %s\n", SDL_GetError());
         return 1;
     }
-    /*it worksssssss
-    std::string obj = "holla";
-    std::ofstream ofs("test");
-
-    {
-        boost::archive::text_oarchive oa(ofs);
-        oa & obj;
-    }
-
-    //std::string newt;
-    Game newg();
-
-    {
-        // create and open an archive for input
-        std::ifstream ifs("test");
-        boost::archive::text_iarchive ia(ifs);
-        // read class state from archive
-        ia >> newg;
-        // archive and stream closed when destructors are called
-    }*/
 
 
 
@@ -80,20 +52,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     game.initializeCameraPosition();
 
-    std::ofstream ofs("test");
+    //we save the file for the first time in the filename Game
+    Saves<Game>::save(game,"Game");
 
-    {
-        boost::archive::text_oarchive oa(ofs);
-        oa & game;
-    }
-
-    Game ngame(window, renderer, initialPlayer);
-
-    {
-        std::ifstream ifs("test");
-        boost::archive::text_iarchive ia(ifs);
-        ia >> ngame;
-    }
 
 
     // Launch the game loop in a separate thread
@@ -107,11 +68,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Join the console thread
     consoleThread.join();
-    //Saves<Game> saves;
-    //saves.save(game,"Game");
-    //Saves<std::string>::save("hello","test");
-
-
 
     return 0;
 }

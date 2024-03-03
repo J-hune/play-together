@@ -8,18 +8,28 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "../Game/Game.h"
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 
 using namespace std;
-template <typename T>
 
 
+template <class T>
 class Saves {
 public :
-    void save(T obj,const std::string& filename);//later make it static
-    void load(T* obj,const std::string& filename);
+    /**
+     *@brief it save the given object in a file named
+     * like the given parameter filename
+     * @param obj
+     * @param filename
+     */
+    void static save(T obj,const std::string& filename);
+
+    /**
+     * @brief form the given file we extract/load the object
+     * @param filename
+     */
+    T static load(const std::string& filename);
 };
 
 

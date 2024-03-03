@@ -6,7 +6,7 @@
 #include "../../include/Utils/Saves.h"
 
 
-template<typename T>
+template <class T>
 void Saves<T>::save(T obj, const std::string& filename) {
 
     std::ofstream ofs(filename);
@@ -17,14 +17,14 @@ void Saves<T>::save(T obj, const std::string& filename) {
     }
 }
 
-template<typename T>
-void Saves<T>::load(T* obj, const std::string &filename) {
-
+template<class T>
+T Saves<T>::load(const std::string &filename) {
+        T obj;
         std::ifstream ifs(filename);
 
         boost::archive::text_iarchive ia(ifs);
         ia >> obj;
-
+        return obj;
 }
 
 

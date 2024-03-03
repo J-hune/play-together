@@ -193,7 +193,7 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
         }
         // The player is falling
         else{
-            moveY = 2;
+            moveY = (player.timeSpentJumping <= 2) ? 2 - player.timeSpentJumping : 2;
             player.timeAfterFall -= 0.1F;
         }
 

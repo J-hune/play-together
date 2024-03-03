@@ -21,7 +21,6 @@ template<class T>
 T Saves<T>::load(const std::string &filename) {
         T obj;
         std::ifstream ifs(filename);
-
         boost::archive::text_iarchive ia(ifs);
         ia >> obj;
         return obj;

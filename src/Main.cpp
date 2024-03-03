@@ -1,12 +1,6 @@
 #include <thread>
 #include <mutex>
 
-
-#include <fstream>
-#include <iostream>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-
 #include "../include/Game/Game.h"
 #include "../include/Utils/GameConsole.h"
 #include "../src/Utils/Saves.cpp"
@@ -28,7 +22,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "could not create window: %s\n", SDL_GetError());
         return 1;
     }
-
 
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -54,11 +47,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     //we save the file for the first time in the filename Game
     Saves<Game>::save(game,"Game");
-
-
+    Game ngame = Saves<Game>::load("Game");
+    //eample with int 
+    //serializes a random int
+    int random = 27364;
+    Saves<int>::save(random,"randomint");
+    //deserializes a random int
+    int newran = Saves<int>::load("randomint");
+    cout << newran << endl;
 
     // Launch the game loop in a separate thread
-    std::jthread gameThread(&Game::run, &game);
+    std::jthread gameThread(&Game::run, &ngame);
 
     // Launch the game console in a separate thread
     std::jthread consoleThread(&GameConsole::Run, &console);

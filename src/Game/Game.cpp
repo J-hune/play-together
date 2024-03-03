@@ -16,6 +16,13 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
         : window(window), renderer(renderer), player(initialPlayer) {}
 
+Game ::Game(){
+        this->window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
+                                        SDL_WINDOW_SHOWN);
+        this->renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        this->player = Player (-50, 50, 2, 20, 30);
+}
+
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
@@ -350,27 +357,25 @@ void Game::run() {
 void Game::stop() {
     isRunning = false;
 }
-/*
-void Game::serialize_save(std::string filename) {
-    std::ofstream ofs(filename);
 
+/*
+void Game::serialize_save(const std::string& filename) {
+    std::ofstream ofs(filename);
     {
         boost::archive::text_oarchive oa(ofs);
-        oa & ;
+        oa & this;
     }
 
 }
 
-    Game Game::load_deserialize(std::string filename) {
-        Game oldGame();
+void Game::load_deserialize(const std::string filename) {
 
         {
             // create and open an archive for input
             std::ifstream ifs(filename);
             boost::archive::text_iarchive ia(ifs);
             // read class state from archive
-            ia >> oldGame;
-            // archive and stream closed when destructors are called
+            ia >> this;
         }
 
     }*/

@@ -19,6 +19,8 @@ constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
 constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
+
+
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
@@ -31,7 +33,7 @@ constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 class Game {
 public:
     Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
-
+    Game();
     /**
     * @brief Initialize the camera position according to players positions.
     */
@@ -152,14 +154,14 @@ public:
      * @brief serialization of the specific object and saves it in the file
      * @param filename the filename that the object will be saved in
      */
-     void serialize_save(std::string filename);
+     void serialize_save(const std::string& filename);
 
 
      /**
       * @brief load and deserialize
       * @param filename the file that we will read the object from
       */
-      Game load_deserialize(std::string filename);
+      void load_deserialize(std::string filename);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

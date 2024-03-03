@@ -70,11 +70,6 @@ public:
     [[nodiscard]] std::string receive() const;
 
     /**
-     * @brief Disconnects from the server.
-     */
-    void disconnect();
-
-    /**
      * @brief Stops the client.
      */
     void stop();
@@ -82,6 +77,7 @@ public:
 private:
     int socketFileDescriptor = -1; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */
+    bool shouldSendDisconnect = true; /**< Flag to indicate if the client should send a disconnect message. */
     std::function<void()> disconnectCallback; /**< Callback function to notify menu on server disconnect. */
 };
 

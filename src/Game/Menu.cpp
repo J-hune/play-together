@@ -82,19 +82,32 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : ren
 }
 
 Menu::~Menu() {
-    // Stop the server thread
+    // Stop the TCP server thread if it is running
     if (serverTCPThreadPtr && serverTCPThreadPtr->joinable()) {
-        tcpServer.shutdown();
+        tcpServer.stop();
         serverTCPThreadPtr->request_stop();
         serverTCPThreadPtr->join();
     }
 
-    // Stop the client thread
+    // Stop the TCP client thread if it is running
     if (clientTCPThreadPtr && clientTCPThreadPtr->joinable()) {
-        tcpClient.disconnect();
         tcpClient.stop();
         clientTCPThreadPtr->request_stop();
         clientTCPThreadPtr->join();
+    }
+
+    // Stop the UDP server thread if it is running
+    if (serverUDPThreadPtr && serverUDPThreadPtr->joinable()) {
+        udpServer.stop();
+        serverUDPThreadPtr->request_stop();
+        serverUDPThreadPtr->join();
+    }
+
+    // Stop the UDP client thread if it is running
+    if (clientUDPThreadPtr && clientUDPThreadPtr->joinable()) {
+        udpClient.stop();
+        clientUDPThreadPtr->request_stop();
+        clientUDPThreadPtr->join();
     }
 }
 
@@ -144,6 +157,15 @@ void Menu::startServer() {
     } else {
         std::cerr << "Failed to initialize TCPServer" << std::endl;
     }
+
+    if (udpServer.initialize(8080)) {
+        std::cout << "UDPServer: Server initialized and listening on port 8080" << std::endl;
+
+        // Start the server in a separate thread
+        serverUDPThreadPtr = std::make_unique<std::jthread>(&UDPServer::start, &udpServer);
+    } else {
+        std::cerr << "Failed to initialize UDPServer" << std::endl;
+    }
 }
 
 void Menu::startClient() {
@@ -155,6 +177,13 @@ void Menu::startClient() {
         clientTCPThreadPtr = std::make_unique<std::jthread>(&TCPClient::start, &tcpClient);
     } else {
         std::cerr << "Failed to connect TCPClient" << std::endl;
+    }
+
+    if (udpClient.initialize("127.0.0.1", 8080)) {
+        // Start the client in a separate thread
+        clientUDPThreadPtr = std::make_unique<std::jthread>(&UDPClient::start, &udpClient);
+    } else {
+        std::cerr << "Failed to connect UDPClient" << std::endl;
     }
 }
 
@@ -259,29 +288,66 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
     button.reset();
 
     if (tcpServer.getSocketFileDescriptor() != -1) {
-        tcpServer.shutdown();
+        tcpServer.stop();
         if (serverTCPThreadPtr && serverTCPThreadPtr->joinable()) {
             serverTCPThreadPtr->request_stop();
             serverTCPThreadPtr->join();
         }
+        // Destroy the server thread
+        serverTCPThreadPtr.reset();
     }
 
     if (tcpClient.getSocketFileDescriptor() != -1) {
-        tcpClient.disconnect();
+        tcpClient.stop();
         if (clientTCPThreadPtr && clientTCPThreadPtr->joinable()) {
             clientTCPThreadPtr->request_stop();
             clientTCPThreadPtr->join();
         }
+        // Destroy the client thread
+        clientTCPThreadPtr.reset();
+    }
+
+    if (udpServer.getSocketFileDescriptor() != -1) {
+        udpServer.stop();
+        if (serverUDPThreadPtr && serverUDPThreadPtr->joinable()) {
+            serverUDPThreadPtr->request_stop();
+            serverUDPThreadPtr->join();
+        }
+        // Destroy the server thread
+        serverUDPThreadPtr.reset();
+    }
+
+    if (udpClient.getSocketFileDescriptor() != -1) {
+        udpClient.stop();
+        if (clientUDPThreadPtr && clientUDPThreadPtr->joinable()) {
+            clientUDPThreadPtr->request_stop();
+            clientUDPThreadPtr->join();
+        }
+        // Destroy the client thread
+        clientUDPThreadPtr.reset();
     }
 }
 
 void Menu::handleSendMessageButton(Button &button) {
     if (tcpClient.getSocketFileDescriptor() != -1) {
-        tcpClient.send("Hello, World!");
+        tcpClient.send("Hello, World from TCP!");
+    }
+
+    if (udpClient.getSocketFileDescriptor() != -1) {
+        udpClient.send("Hello, World from UDP!");
     }
 
     if (tcpServer.getSocketFileDescriptor() != -1) {
         bool success = tcpServer.broadcast("Hello, World!");
+        if (success) {
+            std::cout << "Message sent to all clients" << std::endl;
+        } else {
+            std::cerr << "Failed to send message to all clients" << std::endl;
+        }
+    }
+
+    if (udpServer.getSocketFileDescriptor() != -1) {
+        bool success = udpServer.broadcast("Hello, World!");
         if (success) {
             std::cout << "Message sent to all clients" << std::endl;
         } else {
@@ -301,6 +367,6 @@ void Menu::handleNavigateToStartNewGameMenuButton(Button &button) {
     button.reset();
 }
 
-void Menu::handleQuitButton(Button &button) {
+void Menu::handleQuitButton([[maybe_unused]] Button &button) {
     setQuit(true);
 }

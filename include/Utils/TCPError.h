@@ -8,43 +8,43 @@ public:
 };
 
 // Error for issues during socket creation
-class SocketCreationError : public TCPError {
+class TCPSocketCreationError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during socket binding to an address and port
-class SocketBindError : public TCPError {
+class TCPSocketBindError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during socket listening
-class SocketListenError : public TCPError {
+class TCPSocketListenError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during accepting new connections
-class SocketAcceptError : public TCPError {
+class TCPSocketAcceptError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during connection to a remote server
-class ConnectionError : public TCPError {
+class TCPConnectionError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during sending data on the socket
-class SocketSendError : public TCPError {
+class TCPSocketSendError : public TCPError {
 public:
     using TCPError::TCPError;
 };
 
 // Error for issues during receiving data on the socket
-class SocketReceiveError : public TCPError {
+class TCPSocketReceiveError : public TCPError {
 public:
     using TCPError::TCPError;
 };

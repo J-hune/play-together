@@ -3,7 +3,6 @@
 TCPClient::TCPClient() = default;
 
 TCPClient::~TCPClient() {
-    disconnect(); // Disconnect from the server
     stop(); // Stop the client
 }
 
@@ -16,14 +15,15 @@ void TCPClient::setDisconnectCallback(std::function<void()> callback) {
 }
 
 bool TCPClient::connect(const std::string &serverAddress, short port) {
-    // Create TCP socket
-    socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketFileDescriptor == -1) {
+    // Create temporary file descriptor for the socket
+    // (We don't want to modify the socketFileDescriptor if the connection fails)
+    int socketFileDescriptorTest = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketFileDescriptorTest == -1) {
         perror("TCPClient: Error during socket creation");
         return false;
     }
 
-    // Server address structure
+    // Server address structures
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
@@ -33,17 +33,22 @@ bool TCPClient::connect(const std::string &serverAddress, short port) {
     }
 
     // Connect to the server
-    if (::connect(socketFileDescriptor, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
+    if (::connect(socketFileDescriptorTest, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
         perror("TCPClient: Connection failed");
         return false;
     }
 
+    // If the connection is successful, update the socketFileDescriptor
+    socketFileDescriptor = socketFileDescriptorTest;
     return true;
 }
 
 void TCPClient::start() {
+    stopRequested = false;
+    shouldSendDisconnect = true; // Reset the flag to send a disconnect message
     handleMessages(); // Start handling incoming messages (blocking)
-    std::cout << "TCPClient: Stopping client" << std::endl;
+    stop(); // Stop the client
+    std::cout << "TCPClient: Client shutdown" << std::endl;
 }
 
 
@@ -56,16 +61,13 @@ void TCPClient::handleMessages() {
 
             if (receivedMessage == "DISCONNECT") {
                 std::cout << "TCPClient: Server asked to disconnect" << std::endl;
-                if (socketFileDescriptor != -1) {
-                    close(socketFileDescriptor);
-                    socketFileDescriptor = -1;
-                }
+                shouldSendDisconnect = false; // Do not send a disconnect message
                 disconnectCallback(); // Invoke the disconnect callback
             }
 
         } else {
             // Handle disconnection or receive error cases
-            std::cerr << "Error receiving message or server disconnected." << std::endl;
+            if (!stopRequested) std::cerr << "TCPClient: Error receiving message or server disconnected." << std::endl;
             break;
         }
     }
@@ -138,15 +140,14 @@ std::string TCPClient::receive() const {
     return receivedData;
 }
 
-void TCPClient::disconnect() {
+void TCPClient::stop() {
+    stopRequested = true; // Set the stop flag to terminate the message handling loop
+
     // Send a message to the server to initiate disconnection
     if (socketFileDescriptor != -1) {
-        send("DISCONNECT");
+        if (shouldSendDisconnect) send("DISCONNECT");
+        ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
     }
-}
-
-void TCPClient::stop() {
-    stopRequested = true; // Set the stop flag to terminate the message handling loop
 }

@@ -23,7 +23,7 @@
 TCPServer::TCPServer() = default;
 
 TCPServer::~TCPServer() {
-    destroy();
+    stop();
 }
 
 // Get the socket file descriptor
@@ -36,7 +36,7 @@ bool TCPServer::initialize(short port) {
     // Create socket
     socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFileDescriptor == -1) {
-        throw SocketCreationError("TCPServer: Error during socket creation");
+        throw TCPSocketCreationError("TCPServer: Error during socket creation");
     }
 
     // Bind socket to address
@@ -45,12 +45,12 @@ bool TCPServer::initialize(short port) {
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(port);
     if (bind(socketFileDescriptor, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
-        throw SocketBindError("TCPServer: Error during bind");
+        throw TCPSocketBindError("TCPServer: Error during bind");
     }
 
     // Listen for incoming connections
     if (listen(socketFileDescriptor, 5) == -1) {
-        throw SocketListenError("TCPServer: Error during listen");
+        throw TCPSocketListenError("TCPServer: Error during listen");
     }
 
     return true;
@@ -60,13 +60,14 @@ bool TCPServer::initialize(short port) {
 void TCPServer::start() {
     stopRequested = false;
     acceptConnections();
+    clearResources();
 }
 
 // Accept incoming client connections
 void TCPServer::acceptConnections() {
     std::cout << "TCPServer: Handling incoming connections..." << std::endl;
 
-    while (!stopRequested) {
+    while (!stopRequested.load()) {
         int clientSocket = waitForConnection();
         if (clientSocket != -1) {
             // Create a new thread to handle messages from the client
@@ -116,15 +117,14 @@ void TCPServer::handleMessage(int clientSocket) {
 
                 if (message == "DISCONNECT") {
                     std::cout << "TCPServer: Client " << clientSocket << " asked to disconnect" << std::endl;
-                    close(clientSocket);
-                    std::erase(clientsFileDescriptors, clientSocket);
+                    clientConnected = false;
                 }
 
                 if (!message.empty()) {
                     std::cout << "TCPServer: Received message: " << message << " (message length: " << message.length() << " bytes) from client " << clientSocket << std::endl;
                 }
             }
-        } catch (const SocketReceiveError& e) {
+        } catch (const TCPSocketReceiveError& e) {
             std::cerr << e.what() << std::endl;
             // Exit the loop on error
             clientConnected = false;
@@ -183,7 +183,7 @@ std::string TCPServer::receive(int clientSocket) const {
             return "";
         } else {
             // Error or connection closed by client
-            throw SocketReceiveError("TCPServer: Error receiving message size, client disconnected");
+            throw TCPSocketReceiveError("TCPServer: Error receiving message size, client disconnected");
         }
     }
 
@@ -202,7 +202,7 @@ std::string TCPServer::receive(int clientSocket) const {
                 return "";
             } else {
                 // Error or connection closed by client
-                throw SocketReceiveError("TCPServer: Error receiving message data, client disconnected");
+                throw TCPSocketReceiveError("TCPServer: Error receiving message data, client disconnected");
             }
         }
         totalBytesReceived += bytesRead;
@@ -211,15 +211,14 @@ std::string TCPServer::receive(int clientSocket) const {
     return receivedData;
 }
 
-// Shutdown the server
-void TCPServer::shutdown() {
-    // Close all client sockets
-    stopRequested = true;
+// Stop the server
+void TCPServer::stop() {
+    // Send a disconnect message to all connected clients
     broadcast("DISCONNECT");
-    for (int clientSocket: clientsFileDescriptors) {
-        close(clientSocket);
-    }
-    clientsFileDescriptors.clear();
+
+    // Stop message handling
+    stopRequested = true;
+    std::cout << "TCPServer: Stop requested" << std::endl;
 
     // Close the server socket
     if (socketFileDescriptor != -1) {
@@ -227,21 +226,27 @@ void TCPServer::shutdown() {
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
     }
-
-    std::cout << "TCPServer: Server shutdown, all client connections closed" << std::endl;
 }
 
-// Destroy the server
-void TCPServer::destroy() {
-    // Close all client sockets
+void TCPServer::clearResources() {
     for (int clientSocket: clientsFileDescriptors) {
+        ::shutdown(clientSocket, SHUT_RDWR);
         close(clientSocket);
     }
-    clientsFileDescriptors.clear();
 
-    // Close the server socket
-    if (socketFileDescriptor != -1) {
-        close(socketFileDescriptor);
-        socketFileDescriptor = -1;
+    std::cout << "TCPServer: Closing all client connections..." << std::endl;
+    for (std::jthread& clientThread: clientThreads) {
+        if (clientThread.joinable()) {
+            std::cout << "TCPServer: THREAD JOINABLE" << std::endl;
+            clientThread.request_stop();
+            clientThread.join();
+        }
     }
+    std::cout << "TCPServer: " << clientThreads.size() << " client threads stopped" << std::endl;
+
+
+    clientsFileDescriptors.clear();
+    clientThreads.clear();
+
+    std::cout << "TCPServer: Server shutdown" << std::endl;
 }

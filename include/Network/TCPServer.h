@@ -75,19 +75,14 @@ public:
     /**
      * @brief Shuts down the server, closing all client connections.
      */
-    void shutdown();
-
-    /**
-     * @brief Closes the server socket.
-     */
-    void destroy();
+    void stop();
 
 private:
     int socketFileDescriptor = -1; /**< The server socket file descriptor. */
     unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
     std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
     std::vector<int> clientsFileDescriptors; /**< File descriptors for connected clients. */
-    bool stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
+    std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
 
     /**
      * @brief Waits for a new client connection.
@@ -105,6 +100,11 @@ private:
      * @param clientSocket The client socket file descriptor.
      */
     void handleMessage(int clientSocket);
+
+    /**
+     * @brief Close all client connections and clear resources.
+     */
+    void clearResources();
 };
 
 #endif //PLAY_TOGETHER_TCPSERVER_H

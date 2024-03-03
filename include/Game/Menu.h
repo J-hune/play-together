@@ -11,6 +11,8 @@
 #include "../../dependencies/json.hpp"
 #include "../Network/TCPServer.h"
 #include "../Network/TCPClient.h"
+#include "../Network/UDPServer.h"
+#include "../Network/UDPClient.h"
 
 constexpr unsigned int MAX_JSON_SIZE = 1024;
 
@@ -100,12 +102,16 @@ private:
     bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
     Game *game; /**< Pointer to the game object. */
     bool *quit; /**< Pointer to a boolean controlling the game loop. */
-    TCPClient tcpClient; /**< TCP client instance for network communication. */
-    TCPServer tcpServer; /**< TCP server instance for network communication. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
+    TCPServer tcpServer; /**< TCP server instance for network communication. */
+    TCPClient tcpClient; /**< TCP client instance for network communication. */
+    UDPServer udpServer; /**< UDP server instance for network communication. */
+    UDPClient udpClient; /**< UDP client instance for network communication. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-    std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
     std::unique_ptr<std::jthread> serverTCPThreadPtr; /**< Pointer to the TCP server thread. */
+    std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
+    std::unique_ptr<std::jthread> serverUDPThreadPtr; /**< Pointer to the UDP server thread. */
+    std::unique_ptr<std::jthread> clientUDPThreadPtr; /**< Pointer to the UDP client thread. */
 
     /**
      * @brief Wait for a connection to be established.
@@ -140,7 +146,7 @@ private:
     void handleSendMessageButton(Button &button);
     void handleNavigateToLoadSaveMenuButton(Button &button);
     void handleNavigateToStartNewGameMenuButton(Button &button);
-    void handleQuitButton(Button &button);
+    void handleQuitButton([[maybe_unused]] Button &button);
 };
 
 #endif //PLAY_TOGETHER_MENU_H

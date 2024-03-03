@@ -11,6 +11,8 @@
 #include <map>
 #include <mutex>
 
+#include "../Utils/UDPError.h"
+
 /**
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
  */
@@ -36,9 +38,8 @@ public:
      * @brief Initializes the UDP client with the given server address and port.
      * @param serverHostname The IP address or hostname of the server.
      * @param serverPort The port number of the server.
-     * @return True if the connection is successful, false otherwise.
      */
-    bool initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort);
+    void initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort);
 
     /**
      * @brief Starts the client to handle incoming messages.

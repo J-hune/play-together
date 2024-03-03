@@ -149,6 +149,9 @@ private:
     void handleNavigateToLoadSaveMenuButton(Button &button);
     void handleNavigateToStartNewGameMenuButton(Button &button);
     void handleQuitButton([[maybe_unused]] Button &button);
+
+    template<typename SocketType>
+    void cleanupThreads(std::unique_ptr<std::jthread> &threadPtr, SocketType &socket) const;
 };
 
 #endif //PLAY_TOGETHER_MENU_H

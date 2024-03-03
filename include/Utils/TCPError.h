@@ -1,3 +1,6 @@
+#ifndef PLAY_TOGETHER_TCPERROR_H
+#define PLAY_TOGETHER_TCPERROR_H
+
 #include <stdexcept>
 #include <string>
 
@@ -48,3 +51,5 @@ class TCPSocketReceiveError : public TCPError {
 public:
     using TCPError::TCPError;
 };
+
+#endif //PLAY_TOGETHER_TCPERROR_H

@@ -10,7 +10,7 @@ int UDPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
-bool UDPServer::initialize(short port) {
+void UDPServer::initialize(short port) {
     // Create socket
     socketFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
     if (socketFileDescriptor == -1) {
@@ -25,8 +25,6 @@ bool UDPServer::initialize(short port) {
     if (bind(socketFileDescriptor, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
         throw UDPSocketBindError("UDPServer: Error during bind");
     }
-
-    return true;
 }
 
 void UDPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex) {

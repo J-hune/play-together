@@ -32,7 +32,7 @@ int TCPServer::getSocketFileDescriptor() const {
 }
 
 // Initialize the server with a specified port
-bool TCPServer::initialize(short port) {
+void TCPServer::initialize(short port) {
     // Create socket
     socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFileDescriptor == -1) {
@@ -52,8 +52,6 @@ bool TCPServer::initialize(short port) {
     if (listen(socketFileDescriptor, 5) == -1) {
         throw TCPSocketListenError("TCPServer: Error during listen");
     }
-
-    return true;
 }
 
 // Start the server
@@ -247,9 +245,6 @@ void TCPServer::stop() {
 
     // Stop message handling
     stopRequested = true;
-    std::cout << "TCPServer: Stop requested" << std::endl;
-
-    // Close the server socket
     if (socketFileDescriptor != -1) {
         ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);

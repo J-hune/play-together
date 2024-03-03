@@ -41,9 +41,8 @@ public:
     /**
      * @brief Initializes the UDP server with the given port.
      * @param port The port number to listen on.
-     * @return True if initialization is successful, false otherwise.
      */
-    bool initialize(short port);
+    void initialize(short port);
 
     /**
      * @brief Starts the UDP server to handle incoming messages.

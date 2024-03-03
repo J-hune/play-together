@@ -14,13 +14,12 @@ void TCPClient::setDisconnectCallback(std::function<void()> callback) {
     disconnectCallback = std::move(callback);
 }
 
-bool TCPClient::connect(const std::string &serverAddress, short port, unsigned short& clientPort) {
+void TCPClient::connect(const std::string &serverAddress, short port, unsigned short& clientPort) {
     // Create temporary file descriptor for the socket
     // (We don't want to modify the socketFileDescriptor if the connection fails)
     int socketFileDescriptorTest = socket(AF_INET, SOCK_STREAM, 0);
     if (socketFileDescriptorTest == -1) {
-        perror("TCPClient: Error during socket creation");
-        return false;
+        throw TCPSocketCreationError("TCPClient: Error during socket creation");
     }
 
     // Server address structures
@@ -28,22 +27,18 @@ bool TCPClient::connect(const std::string &serverAddress, short port, unsigned s
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     if (inet_pton(AF_INET, serverAddress.c_str(), &serverAddr.sin_addr) <= 0) {
-        perror("TCPClient: Invalid address/ Address not supported");
-        return false;
+        throw TCPSocketCreationError("TCPClient: Invalid address/ Address not supported");
     }
 
     // Connect to the server
     if (::connect(socketFileDescriptorTest, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
-        perror("TCPClient: Connection failed");
-        return false;
+        throw TCPConnectionError("TCPClient: Unable to connect to server");
     }
 
     // Get the local port that was chosen for the connection
     struct sockaddr_in localAddr = {};
     if (socklen_t addrLen = sizeof(localAddr); getsockname(socketFileDescriptorTest, (struct sockaddr *) &localAddr, &addrLen) == -1) {
-        perror("TCPClient: Unable to get local port");
-        close(socketFileDescriptorTest);
-        return false;
+        throw TCPConnectionError("TCPClient: Unable to get local port");
     }
 
     // Store the chosen port
@@ -51,7 +46,6 @@ bool TCPClient::connect(const std::string &serverAddress, short port, unsigned s
 
     // If the connection is successful, update the socketFileDescriptor
     socketFileDescriptor = socketFileDescriptorTest;
-    return true;
 }
 
 void TCPClient::start() {

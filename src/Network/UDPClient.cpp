@@ -10,12 +10,11 @@ int UDPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
-bool UDPClient::initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort) {
+void UDPClient::initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort) {
     // Create UDP socket
     socketFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
     if (socketFileDescriptor == -1) {
-        perror("UDPClient: Error during socket creation");
-        return false;
+        throw UDPSocketCreationError("UDPClient: Error during socket creation");
     }
 
     // Client address structure
@@ -26,8 +25,7 @@ bool UDPClient::initialize(const std::string &serverHostname, short serverPort, 
 
     // Bind the socket to the client port
     if (bind(socketFileDescriptor, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0) {
-        perror("UDPClient: Error during binding");
-        return false;
+        throw UDPSocketBindError("UDPClient: Error during bind");
     }
 
     // Server address structure
@@ -35,13 +33,11 @@ bool UDPClient::initialize(const std::string &serverHostname, short serverPort, 
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(serverPort);
     if (inet_pton(AF_INET, serverHostname.c_str(), &serverAddr.sin_addr) <= 0) {
-        perror("UDPClient: Invalid address/ Address not supported");
-        return false;
+        throw UDPSocketCreationError("UDPClient: Invalid address/ Address not supported");
     }
 
     // No need to connect in UDP, just remember the server address for sending
     this->serverAddress = serverAddr;
-    return true;
 }
 
 void UDPClient::start() {

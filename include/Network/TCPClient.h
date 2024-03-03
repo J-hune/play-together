@@ -11,6 +11,8 @@
 #include <thread>
 #include <functional>
 
+#include "../Utils/TCPError.h"
+
 /**
  * @brief The TCPClient class provides functionality to create and manage a TCP client.
  */
@@ -42,9 +44,8 @@ public:
      * @brief Connects to the specified server.
      * @param serverAddress The IP address or hostname of the server.
      * @param port The port number of the server.
-     * @return True if the connection is successful, false otherwise.
      */
-    bool connect(const std::string &serverAddress, short port, unsigned short& clientPort);
+    void connect(const std::string &serverAddress, short port, unsigned short& clientPort);
 
     /**
      * @brief Starts the client to handle incoming messages.

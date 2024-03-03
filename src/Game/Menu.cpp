@@ -153,7 +153,9 @@ void Menu::startServer() {
         setMenuAction(MenuAction::HOST_GAME);
 
         // Start the server in a separate thread
-        serverTCPThreadPtr = std::make_unique<std::jthread>(&TCPServer::start, &tcpServer);
+        serverTCPThreadPtr = std::make_unique<std::jthread>([this](TCPServer *serverPtr) {
+            serverPtr->start(clientAddresses, clientAddressesMutex);
+        }, &tcpServer);
     } else {
         std::cerr << "Failed to initialize TCPServer" << std::endl;
     }
@@ -162,14 +164,18 @@ void Menu::startServer() {
         std::cout << "UDPServer: Server initialized and listening on port 8080" << std::endl;
 
         // Start the server in a separate thread
-        serverUDPThreadPtr = std::make_unique<std::jthread>(&UDPServer::start, &udpServer);
+        serverUDPThreadPtr = std::make_unique<std::jthread>([this](UDPServer *serverPtr) {
+            serverPtr->start(clientAddresses, clientAddressesMutex);
+        }, &udpServer);
     } else {
         std::cerr << "Failed to initialize UDPServer" << std::endl;
     }
 }
 
 void Menu::startClient() {
-    if (tcpClient.connect("127.0.0.1", 8080)) {
+    unsigned short clientPort;
+
+    if (tcpClient.connect("127.0.0.1", 8080, clientPort)) {
         std::cout << "TCPClient: Connected to server" << std::endl;
         setMenuAction(MenuAction::JOIN_GAME);
 
@@ -179,7 +185,7 @@ void Menu::startClient() {
         std::cerr << "Failed to connect TCPClient" << std::endl;
     }
 
-    if (udpClient.initialize("127.0.0.1", 8080)) {
+    if (udpClient.initialize("127.0.0.1", 8080, clientPort)) {
         // Start the client in a separate thread
         clientUDPThreadPtr = std::make_unique<std::jthread>(&UDPClient::start, &udpClient);
     } else {

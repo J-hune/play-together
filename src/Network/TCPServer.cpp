@@ -57,10 +57,14 @@ bool TCPServer::initialize(short port) {
 }
 
 // Start the server
-void TCPServer::start() {
+void TCPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex) {
+    clientAddressesPtr = &clientAddresses;
+    clientAddressesMutexPtr = &clientAddressesMutex;
+
     stopRequested = false;
     acceptConnections();
     clearResources();
+    std::cout << "TCPServer: Server shutdown" << std::endl;
 }
 
 // Accept incoming client connections
@@ -84,10 +88,13 @@ int TCPServer::waitForConnection() {
     struct sockaddr_in clientAddr = {};
     socklen_t clientLen = sizeof(clientAddr);
 
-    if (clientsFileDescriptors.size() >= maxClients) {
-        std::cerr << "TCPServer: Maximum number of clients reached, new connection refused" << std::endl;
+    // Check if the maximum number of clients has been reached
+    clientAddressesMutexPtr->lock();
+    if (clientAddressesPtr->size() >= maxClients) {
+        std::cout << "TCPServer: Maximum number of clients reached" << std::endl;
         return -1;
     }
+    clientAddressesMutexPtr->unlock();
 
     std::cout << "TCPServer: Waiting for new client connection" << std::endl;
     int clientSocket = accept(socketFileDescriptor, (struct sockaddr *) &clientAddr, &clientLen);
@@ -97,7 +104,10 @@ int TCPServer::waitForConnection() {
     std::string clientIp = inet_ntoa(clientAddr.sin_addr);
     std::cout << "TCPServer: New client connected from " << clientIp << ":" << ntohs(clientAddr.sin_port) << std::endl;
 
-    clientsFileDescriptors.push_back(clientSocket);
+    // Add the client to the list of connected clients
+    clientAddressesMutexPtr->lock();
+    clientAddressesPtr->insert({clientSocket, clientAddr});
+    clientAddressesMutexPtr->unlock();
     std::cout << "TCPServer: New client connected with ID: " << clientSocket << std::endl;
 
     return clientSocket;
@@ -108,8 +118,10 @@ void TCPServer::handleMessage(int clientSocket) {
     bool clientConnected = true;
     while (clientConnected) {
         try {
-            // Check if the client is still connected
-            clientConnected = std::ranges::find(clientsFileDescriptors, clientSocket) != clientsFileDescriptors.end();
+            // Check if the client is still connected (if the clientFileDescriptor is still in the list of connected clients)
+            clientAddressesMutexPtr->lock();
+            clientConnected = clientAddressesPtr->contains(clientSocket);
+            clientAddressesMutexPtr->unlock();
 
             if (clientConnected) {
                 std::cout << "TCPServer: Waiting for message from client " << clientSocket << std::endl;
@@ -133,7 +145,11 @@ void TCPServer::handleMessage(int clientSocket) {
 
     std::cout << "TCPServer: Client " << clientSocket << " disconnected" << std::endl;
     close(clientSocket);
-    std::erase(clientsFileDescriptors, clientSocket);
+
+    // Remove the client from the list of connected clients
+    clientAddressesMutexPtr->lock();
+    clientAddressesPtr->erase(clientSocket);
+    clientAddressesMutexPtr->unlock();
 }
 
 // Send a message to a client
@@ -164,10 +180,15 @@ bool TCPServer::send(int clientSocket, const std::string &message) const {
 
 // Broadcast a message to all connected clients
 bool TCPServer::broadcast(const std::string &message) const {
-    std::cout << "TCPServer: Broadcasting message: " << message << " (" << message.length() << " bytes) to " << clientsFileDescriptors.size() << " clients" << std::endl;
-    return std::ranges::all_of(clientsFileDescriptors, [&](int clientSocket) {
-        return send(clientSocket, message);
+    clientAddressesMutexPtr->lock();
+    std::cout << "TCPServer: Broadcasting message: " << message << " (" << message.length() << " bytes) to " << clientAddressesPtr->size() << " clients" << std::endl;
+
+    auto send_successful = std::ranges::all_of(*clientAddressesPtr, [&](const auto& client) {
+        return send(client.first, message);
     });
+
+    clientAddressesMutexPtr->unlock();
+    return send_successful;
 }
 
 // Receive a message from a client
@@ -214,7 +235,15 @@ std::string TCPServer::receive(int clientSocket) const {
 // Stop the server
 void TCPServer::stop() {
     // Send a disconnect message to all connected clients
-    broadcast("DISCONNECT");
+    if (clientAddressesMutexPtr && clientAddressesMutexPtr->try_lock()) {
+        if (!clientAddressesPtr->empty()) {
+            clientAddressesMutexPtr->unlock();
+            std::cout << "TCPServer: Sending disconnect message to all clients" << std::endl;
+            broadcast("DISCONNECT");
+        } else {
+            clientAddressesMutexPtr->unlock();
+        }
+    }
 
     // Stop message handling
     stopRequested = true;
@@ -229,23 +258,24 @@ void TCPServer::stop() {
 }
 
 void TCPServer::clearResources() {
-    for (int clientSocket: clientsFileDescriptors) {
+    // Close all client connections (clientAddressPtr)
+    clientAddressesMutexPtr->lock();
+    for (const auto& [clientSocket, _]: *clientAddressesPtr) {
         ::shutdown(clientSocket, SHUT_RDWR);
         close(clientSocket);
     }
+    clientAddressesPtr->clear();
+    clientAddressesMutexPtr->unlock();
 
     std::cout << "TCPServer: Closing all client connections..." << std::endl;
     for (std::jthread& clientThread: clientThreads) {
         if (clientThread.joinable()) {
-            std::cout << "TCPServer: THREAD JOINABLE" << std::endl;
             clientThread.request_stop();
             clientThread.join();
         }
     }
     std::cout << "TCPServer: " << clientThreads.size() << " client threads stopped" << std::endl;
 
-
-    clientsFileDescriptors.clear();
     clientThreads.clear();
 
     std::cout << "TCPServer: Server shutdown" << std::endl;

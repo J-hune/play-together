@@ -29,7 +29,10 @@ bool UDPServer::initialize(short port) {
     return true;
 }
 
-void UDPServer::start() {
+void UDPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex) {
+    clientAddressesPtr = &clientAddresses;
+    clientAddressesMutexPtr = &clientAddressesMutex;
+
     stopRequested = false;
     handleMessage();
     std::cout << "UDPServer: Server shutdown" << std::endl;
@@ -48,6 +51,17 @@ bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &messag
 
 bool UDPServer::broadcast(const std::string &message) const {
     std::cout << "UDPServer: Broadcasting message: " << message << " (" << message.length() << " bytes)" << std::endl;
+
+    clientAddressesMutexPtr->lock();
+    for (const auto& [id, address] : *clientAddressesPtr) {
+        if (!send(address, message)) {
+            clientAddressesMutexPtr->unlock();
+
+            return false;
+        }
+    }
+    clientAddressesMutexPtr->unlock();
+
     return true; // Placeholder
 }
 
@@ -95,7 +109,22 @@ void UDPServer::handleMessage() {
 
         // Handle the received message
         if (!message.empty()) {
-            std::cout << "UDPServer: Received message: " << message << " from " << inet_ntoa(clientAddress.sin_addr) << ":" << ntohs(clientAddress.sin_port) << std::endl;
+            // Identify the client with the address (find)
+            clientAddressesMutexPtr->lock();
+            int clientID = -1;
+            for (const auto& [id, address] : *clientAddressesPtr) {
+                if (address.sin_addr.s_addr == clientAddress.sin_addr.s_addr && address.sin_port == clientAddress.sin_port) {
+                    clientID = id;
+                    break;
+                }
+            }
+            clientAddressesMutexPtr->unlock();
+
+            if (clientID != -1) {
+                std::cout << "UDPServer: Received message: " << message << " from " << clientID << std::endl;
+            } else {
+                std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
+            }
         }
     }
 

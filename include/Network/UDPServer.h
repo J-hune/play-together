@@ -47,8 +47,10 @@ public:
 
     /**
      * @brief Starts the UDP server to handle incoming messages.
+     * @param clientAddresses The map of client IDs and their addresses.
+     * @param clientAddressesMutex The mutex to protect the client addresses map.
      */
-    void start();
+    void start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex);
 
     /**
      * @brief Sends a message to the specified client.
@@ -80,6 +82,8 @@ public:
 private:
     int socketFileDescriptor = -1; /**< The server socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the server should stop. */
+    std::map<int, sockaddr_in> *clientAddressesPtr; /**< Pointer to the map of client IDs and their addresses. */
+    std::mutex *clientAddressesMutexPtr; /**< Pointer to the mutex to protect the client addresses map. */
 
     /**
      * @brief Waits for incoming messages.

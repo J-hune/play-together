@@ -47,8 +47,10 @@ public:
 
     /**
      * @brief Starts the TCP server to accept incoming connections.
+     * @param clientAddresses The map of client IDs and their addresses.
+     * @param clientAddressesMutex The mutex to protect the client addresses map.
      */
-    void start();
+    void start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex);
 
     /**
      * @brief Sends a message to the specified client.
@@ -81,8 +83,9 @@ private:
     int socketFileDescriptor = -1; /**< The server socket file descriptor. */
     unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
     std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
-    std::vector<int> clientsFileDescriptors; /**< File descriptors for connected clients. */
     std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
+    std::map<int, sockaddr_in> *clientAddressesPtr; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
+    std::mutex *clientAddressesMutexPtr; /**< Pointer to the mutex to protect the client addresses map. */
 
     /**
      * @brief Waits for a new client connection.

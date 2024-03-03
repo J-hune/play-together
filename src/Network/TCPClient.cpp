@@ -14,7 +14,7 @@ void TCPClient::setDisconnectCallback(std::function<void()> callback) {
     disconnectCallback = std::move(callback);
 }
 
-bool TCPClient::connect(const std::string &serverAddress, short port) {
+bool TCPClient::connect(const std::string &serverAddress, short port, unsigned short& clientPort) {
     // Create temporary file descriptor for the socket
     // (We don't want to modify the socketFileDescriptor if the connection fails)
     int socketFileDescriptorTest = socket(AF_INET, SOCK_STREAM, 0);
@@ -24,7 +24,7 @@ bool TCPClient::connect(const std::string &serverAddress, short port) {
     }
 
     // Server address structures
-    struct sockaddr_in serverAddr;
+    struct sockaddr_in serverAddr = {};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     if (inet_pton(AF_INET, serverAddress.c_str(), &serverAddr.sin_addr) <= 0) {
@@ -37,6 +37,17 @@ bool TCPClient::connect(const std::string &serverAddress, short port) {
         perror("TCPClient: Connection failed");
         return false;
     }
+
+    // Get the local port that was chosen for the connection
+    struct sockaddr_in localAddr = {};
+    if (socklen_t addrLen = sizeof(localAddr); getsockname(socketFileDescriptorTest, (struct sockaddr *) &localAddr, &addrLen) == -1) {
+        perror("TCPClient: Unable to get local port");
+        close(socketFileDescriptorTest);
+        return false;
+    }
+
+    // Store the chosen port
+    clientPort = ntohs(localAddr.sin_port);
 
     // If the connection is successful, update the socketFileDescriptor
     socketFileDescriptor = socketFileDescriptorTest;

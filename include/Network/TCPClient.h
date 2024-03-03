@@ -44,7 +44,7 @@ public:
      * @param port The port number of the server.
      * @return True if the connection is successful, false otherwise.
      */
-    bool connect(const std::string &serverAddress, short port);
+    bool connect(const std::string &serverAddress, short port, unsigned short& clientPort);
 
     /**
      * @brief Starts the client to handle incoming messages.

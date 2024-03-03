@@ -8,6 +8,8 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <cstring>
+#include <map>
+#include <mutex>
 
 /**
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
@@ -36,7 +38,7 @@ public:
      * @param serverPort The port number of the server.
      * @return True if the connection is successful, false otherwise.
      */
-    bool initialize(const std::string &serverHostname, short serverPort);
+    bool initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort);
 
     /**
      * @brief Starts the client to handle incoming messages.

@@ -10,11 +10,23 @@ int UDPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
-bool UDPClient::initialize(const std::string &serverHostname, short serverPort) {
+bool UDPClient::initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort) {
     // Create UDP socket
     socketFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
     if (socketFileDescriptor == -1) {
         perror("UDPClient: Error during socket creation");
+        return false;
+    }
+
+    // Client address structure
+    struct sockaddr_in clientAddr = {};
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_addr.s_addr = htonl(INADDR_ANY); // Bind to any available local address
+    clientAddr.sin_port = htons(clientPort); // Set the client port
+
+    // Bind the socket to the client port
+    if (bind(socketFileDescriptor, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0) {
+        perror("UDPClient: Error during binding");
         return false;
     }
 
@@ -34,7 +46,7 @@ bool UDPClient::initialize(const std::string &serverHostname, short serverPort) 
 
 void UDPClient::start() {
     handleMessages(); // Start handling incoming messages (blocking)
-    std::cout << "UDPClient: Stopping client" << std::endl;
+    std::cout << "UDPClient: Client shutdown" << std::endl;
 }
 
 void UDPClient::handleMessages() {

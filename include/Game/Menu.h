@@ -112,6 +112,8 @@ private:
     std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
     std::unique_ptr<std::jthread> serverUDPThreadPtr; /**< Pointer to the UDP server thread. */
     std::unique_ptr<std::jthread> clientUDPThreadPtr; /**< Pointer to the UDP client thread. */
+    std::map<int, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
+    std::mutex clientAddressesMutex; /**< Mutex to protect the client addresses map. */
 
     /**
      * @brief Wait for a connection to be established.

@@ -35,9 +35,9 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
 
             // Teleport player to a specific location
         else if (command.find("tp") != std::string::npos) {
-            int x;
-            int y;
-            if (sscanf(command.c_str(), "tp %d %d", &x, &y) == 2) {
+            float x;
+            float y;
+            if (sscanf(command.c_str(), "tp %f %f", &x, &y) == 2) {
                 gamePtr->teleportPlayer(x, y);
             } else {
                 std::cout << "Invalid syntax. Usage: tp [x] [y]\n";

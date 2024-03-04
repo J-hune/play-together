@@ -47,6 +47,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     //we save the file for the first time in the filename Game
     Saves<Game>::save(game,"Game");
+    SDL_DestroyWindow(window);
     Game ngame = Saves<Game>::load("Game");
     //eample with int 
     //serializes a random int

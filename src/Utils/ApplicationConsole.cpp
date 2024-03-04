@@ -32,6 +32,10 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "exit - Exit the console\n";
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
             std::cout << "show [camera_point | camera_area] - Show debug information\n";
+            std::cout << "hide [camera_point | camera_area] - Hide debug information\n";
+            std::cout << "enable [camera_shake] - Enable game mechanic\n";
+            std::cout << "disable [camera_shake] - Disable game mechanic\n";
+
         }
 
         // Teleport player to a specific location
@@ -97,6 +101,46 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 }
             } else {
                 std::cout << "Invalid syntax. Usage: hide [camera_point | camera_area]\n";
+            }
+        }
+
+        // Enable game mechanics
+        else if (command.find("enable") != std::string::npos) {
+            std::istringstream iss(command);
+            std::string command_name;
+            std::string option;
+            iss >> command_name >> option;
+            if (command_name == "enable") {
+                if (option == "camera_shake") {
+                    gamePtr->setCameraIsShaking(true);
+                    std::cout << "Enabled camera shaking.\n";
+                }
+                else {
+                    std::cout << "Invalid option. Usage: enable [camera_shake]\n";
+                }
+            }
+            else {
+                std::cout << "Invalid syntax. Usage: enable [camera_shake]\n";
+            }
+        }
+
+        // Disable game mechanics
+        else if (command.find("disable") != std::string::npos) {
+            std::istringstream iss(command);
+            std::string command_name;
+            std::string option;
+            iss >> command_name >> option;
+            if (command_name == "disable") {
+                if (option == "camera_shake") {
+                    gamePtr->setCameraIsShaking(false);
+                    std::cout << "Disabled camera shaking.\n";
+                }
+                else {
+                    std::cout << "Invalid option. Usage: disable [camera_shake]\n";
+                }
+            }
+            else {
+                std::cout << "Invalid syntax. Usage: disable [camera_shake]]\n";
             }
         }
 

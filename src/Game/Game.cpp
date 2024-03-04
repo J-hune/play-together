@@ -23,6 +23,11 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, const Player &initialPlayer)
         : window(window), renderer(renderer), camera(camera), player(initialPlayer) {}
 
+
+void Game::setCameraIsShaking(bool val) {
+    camera.setIsShaking(val);
+}
+
 GameState Game::getGameState() const {
     return gameState;
 }

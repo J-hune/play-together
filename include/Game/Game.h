@@ -33,6 +33,7 @@ public:
     Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera,
          const Player &initialPlayer); /**< Constructor for the Game class. */
 
+
     /**
      * @brief Returns the current game state.
      * @return The current game state.
@@ -45,6 +46,12 @@ public:
      * @param[out] y The y-coordinate of the average players position
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
+
+    /**
+     * @brief Sets the shaking state of the camera.
+     * @param val The new value for the shaking state of the camera.
+     */
+    void setCameraIsShaking(bool val);
 
     /**
      * @brief Set a new state to render_camera_point

@@ -11,8 +11,10 @@ constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
 class Camera {
 public:
+    /**< Constructors for the Camera class. */
     Camera();
-    Camera(float x, float y, float w, float h); /**< Constructor for the Game class. */
+    Camera(float x, float y, float w, float h);
+
 
     /** ACCESSORS **/
 
@@ -46,6 +48,20 @@ public:
      */
     [[nodiscard]] SDL_FRect getArea() const;
 
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Set the isShaking attribute.
+     */
+    void setIsShaking(bool val);
+
+    /**
+     * @brief Toggle the isShaking attribute.
+     */
+    void toggleIsShaking();
+
+
     /** METHODS **/
 
     /**
@@ -73,7 +89,7 @@ private:
                       w - (w/2.f) - w/5.f,
                       h - (h/5.f) - h/5.f};
 
-    bool isShaking = true; /**< Flag indicating if the camera is currently shaking */
+    bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
 
     /**

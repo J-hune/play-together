@@ -25,6 +25,18 @@ SDL_FRect Camera::getArea() const {
     return area;
 }
 
+
+/** MODIFIERS **/
+
+void Camera::setIsShaking(bool val) {
+    isShaking = val;
+}
+
+void Camera::toggleIsShaking() {
+    isShaking = !isShaking;
+}
+
+
 /** METHODS **/
 
 void Camera::initializeCameraPosition(Point camera_point) {
@@ -90,5 +102,3 @@ void Camera::makeCameraShake() {
     randBool(gen) ? x += targetX : x -= targetX;
     randBool(gen) ? y += targetY : y -= targetY;
 }
-
-

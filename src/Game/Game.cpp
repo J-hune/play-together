@@ -109,6 +109,10 @@ void Game::handleEvents(int &direction, float &moveY) {
                     direction = PLAYER_RIGHT;
                     player.wantToMove = true;
                     break;
+                case SDLK_g:
+                    switchGravity = !switchGravity;
+                    player.isOnPlatform = false;
+                    break;
                 case SDLK_m:
                     printf("Loading map 'vow'\n");
                     loadPolygonsFromMap("vow");
@@ -196,7 +200,11 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
             moveY = (player.timeSpentJumping <= 2) ? 2 - player.timeSpentJumping : 2;
             player.timeAfterFall -= 0.1F;
         }
+    }
 
+    // If the gravity is switched change the direction of the y-axis move
+    if (switchGravity) {
+        moveY *= -1;
     }
 
     handleCollisions(direction, moveY);
@@ -281,16 +289,33 @@ void Game::handleCollisions(int direction, float moveY) {
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
 
-            // If collision detected with the roof, the player can't jump anymore
-            if (checkCollision(player.getVerticesRoof(), obstacle)) {
-                printf("Collision detected on head\n");
-                player.timeSpentJumping = PRESSURE_JUMP_MAX;
-            }
+            // Normal gravity
+            if (!switchGravity) {
+                // If collision detected with the roof, the player can't jump anymore
+                if (checkCollision(player.getVerticesRoof(), obstacle)) {
+                    printf("Collision detected on head\n");
+                    player.timeSpentJumping = PRESSURE_JUMP_MAX;
+                }
 
-            // If collision detected with the ground, the player is on a platform
-            if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
-                printf("Collision detected on foot\n");
-                player.isOnPlatform = true;
+                // If collision detected with the ground, the player is on a platform
+                if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
+                    printf("Collision detected on foot\n");
+                    player.isOnPlatform = true;
+                }
+            }
+            // Reversed gravity
+            else {
+                // If collision detected with the roof, the player is on a platform
+                if (checkCollision(player.getVerticesRoof(), obstacle)) {
+                    printf("Collision detected on foot\n");
+                    player.isOnPlatform = true;
+                }
+
+                // If collision detected with the ground, the player can't jump anymore
+                if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
+                    printf("Collision detected on head\n");
+                    player.timeSpentJumping = PRESSURE_JUMP_MAX;
+                }
             }
 
             // If collision detected with the wall, the player can't move

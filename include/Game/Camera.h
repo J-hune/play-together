@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_CAMERA_H
 
 #include <SDL.h>
+#include <random>
 #include "Point.h"
 
 constexpr float SCREEN_WIDTH = 800;
@@ -64,12 +65,22 @@ private:
     float x = 0; /**< The x-coordinate of the camera's position */
     float y = 0; /**< The y-coordinate of the camera's position */
     float w = SCREEN_WIDTH; /**< The width of the camera */
-    float h = SCREEN_HEIGHT; /**< The heigth of the camera */
+    float h = SCREEN_HEIGHT; /**< The height of the camera */
 
-    SDL_FRect area = {w/5.f, /**< Rectangle for camera "not moving area" */
-                             h/5.f,
-                             w - (w/2.f) - w/5.f,
-                             h - (h/5.f) - h/5.f};
+    /**< Rectangle for camera "not moving area" */
+    SDL_FRect area = {w/5.f,
+                      h/5.f,
+                      w - (w/2.f) - w/5.f,
+                      h - (h/5.f) - h/5.f};
+
+    bool isShaking = true; /**< Flag indicating if the camera is currently shaking */
+    float shakeAmplitude = 2; /**< The amplitude of the camera shake */
+
+    /**
+     * @brief Applies a shake movement to the camera .
+     */
+    void makeCameraShake();
+
 };
 
 

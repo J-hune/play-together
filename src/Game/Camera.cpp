@@ -67,6 +67,28 @@ void Camera::applyCameraMovement(Point camera_point) {
     else if (camera_point.y < y + (h / 5)) {
         y -= ((y + (h / 5)) - camera_point.y) * LERP_SMOOTHING_FACTOR;
     }
+
+    if (isShaking) {
+        makeCameraShake();
+    }
+}
+
+void Camera::makeCameraShake() {
+    // Creating a random number generator
+    std::random_device rd;
+    std::minstd_rand gen(rd()); // Using the Linear Congruential Generator
+
+    // Defining uniform distributions for generating random boolean and float values
+    std::uniform_int_distribution randBool(0, 1);
+    std::uniform_real_distribution<float> randFloat(0.0, 1.0);
+
+    // Calculating target offsets for camera shake
+    float targetX = randFloat(gen) * shakeAmplitude;
+    float targetY = randFloat(gen) * shakeAmplitude;
+
+    // Applying camera shake by randomly adding or subtracting target offsets
+    randBool(gen) ? x += targetX : x -= targetX;
+    randBool(gen) ? y += targetY : y -= targetY;
 }
 
 

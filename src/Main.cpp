@@ -43,8 +43,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     bool quit = false;
 
     // Initialize Game
+    Camera camera = Camera();
     Player initialPlayer(-50, 50, 2, 20, 30);
-    Game game(window, renderer, initialPlayer);
+    Game game(window, renderer, camera, initialPlayer);
 
     // Initialize Menu
     Menu menu(renderer, font, &game, &quit);
@@ -92,7 +93,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             game.loadPolygonsFromMap("experimentation");
 
             game.removeCharacter(character3);
-            game.initializeCameraPosition();
+            camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished
             game.run();

@@ -20,8 +20,8 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
-        : window(window), renderer(renderer), player(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, const Player &initialPlayer)
+        : window(window), renderer(renderer), camera(camera), player(initialPlayer) {}
 
 GameState Game::getGameState() const {
     return gameState;
@@ -135,7 +135,7 @@ void Game::handleEvents(float &moveX, float &moveY) {
 
         // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.x, (float)e.button.y + camera.y);
+            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
     }
 }
@@ -145,69 +145,22 @@ void Game::applyPlayerMovement(float moveX, float moveY) {
     player.y += moveY;
 }
 
-void Game::getAveragePlayersPositions(float *x, float *y) const {
+Point Game::getAveragePlayersPositions() const {
     float i = 1;  // Number of player in the game (at least one)
-    *x = player.x; // Initialization of the point on the initial player
-    *y = player.y;
+    float x = player.x; // Initialization of the point on the initial player
+    float y = player.y;
 
     // Add x and y position of all players
     for (const Player &character : characters) {
-        *x += character.x;
-        *y += character.y;
+        x += character.x;
+        y += character.y;
         i++;
     }
 
     // Average x and y position of all players
-    *x /= i; *y /= i;
-}
+    x /= i; y /= i;
 
-void Game::initializeCameraPosition() {
-    float x;
-    float y;
-    getAveragePlayersPositions(&x, &y);
-
-    // Initialize the camera so that players are bottom left
-    camera.x = x; camera.y = y - 2 * (camera.h / 3);
-
-    // The point is on the right of the area
-    if (x > camera.x + (camera.w - (camera.w / 2))) {
-        camera.x += x - (camera.x + (camera.w - (camera.w / 2)));
-    }
-    // The point is on the left of the area
-    else if (x < camera.x + (camera.w / 5)) {
-        camera.x -= (camera.x + (camera.w / 5)) - x;
-    }
-    // The point is on the bottom of the area
-    if (y > camera.y + (camera.h - (camera.h / 5))) {
-        camera.y += y - (camera.y + (camera.h - (camera.h / 5)));
-    }
-    // The point is on the top of the area
-    else if (y < camera.y + (camera.h / 5)) {
-        camera.y -= (camera.y + (camera.h / 5)) - y;
-    }
-}
-
-void Game::applyCameraMovement() {
-    float x;
-    float y;
-    getAveragePlayersPositions(&x, &y);
-
-    // The point is on the right of the area
-    if (x > camera.x + camera.w - (camera.w / 2)) {
-        camera.x += (x - (camera.x + (camera.w - (camera.w / 2)))) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the left of the area
-    else if (x < camera.x + (camera.w / 5)) {
-        camera.x -= ((camera.x + (camera.w / 5)) - x) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the bottom of the area
-    if (y > camera.y + (camera.h - (camera.h / 5))) {
-        camera.y += (y - (camera.y + (camera.h - (camera.h / 5)))) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the top of the area
-    else if (y < camera.y + (camera.h / 5)) {
-        camera.y -= ((camera.y + (camera.h / 5)) - y) * LERP_SMOOTHING_FACTOR;
-    }
+    return {x, y};
 }
 
 void Game::handleCollisions(float moveX, float moveY) {
@@ -235,8 +188,8 @@ void Game::handleCollisions(float moveX, float moveY) {
         }
 
         // Check for collisions with camera borders
-        if (player.x < camera.x || player.x > camera.x + camera.w - player.width ||
-            player.y < camera.y || player.y > camera.y + camera.h - player.height) {
+        if (player.x < camera.getX() || player.x > camera.getX() + camera.getW() - player.width ||
+            player.y < camera.getY() || player.y > camera.getY() + camera.getH() - player.height) {
 
             printf("Collision detected with a camera border\n");
             player.x -= moveX;
@@ -252,13 +205,13 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_FRect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
+    SDL_FRect playerRect = {player.x - camera.getX(), player.y - camera.getY(), player.width, player.height};
     SDL_RenderFillRectF(renderer, &playerRect);
 
     // Draw the characters
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     for (const Player &character : characters) {
-        SDL_FRect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
+        SDL_FRect characterRect = {character.x - camera.getX(), character.y - camera.getY(), character.width, character.height};
         SDL_RenderFillRectF(renderer, &characterRect);
     }
 
@@ -268,17 +221,15 @@ void Game::render() {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
         }
     }
 
     // Draw the camera point
     if (render_camera_point) {
-        float x;
-        float y;
-        getAveragePlayersPositions(&x, &y);
+        Point camera_point = getAveragePlayersPositions();
         SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-        SDL_FRect cameraPointRect = {x - camera.x, y - camera.y, 20, 20};
+        SDL_FRect cameraPointRect = {camera_point.x - camera.getX(), camera_point.y - camera.getY(), 20, 20};
         SDL_RenderFillRectF(renderer, &cameraPointRect);
         SDL_RenderDrawRectF(renderer, &cameraPointRect);
     }
@@ -286,7 +237,7 @@ void Game::render() {
     // Draw the camera area
     if (render_camera_area) {
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_FRect cameraRect = {camera_area.x, camera_area.y, camera_area.w + player.width, camera_area.h + player.height - 10};
+        SDL_FRect cameraRect = {camera.getArea().x, camera.getArea().y, camera.getArea().w + player.width, camera.getArea().h + player.height - 10};
         SDL_RenderDrawRectF(renderer, &cameraRect);
     }
 
@@ -368,7 +319,7 @@ void Game::run() {
         handleEvents(moveX, moveY);
         applyPlayerMovement(moveX, moveY);
         handleCollisions(moveX, moveY);
-        applyCameraMovement();
+        camera.applyCameraMovement(getAveragePlayersPositions());
         render();
 
         SDL_Delay(4);

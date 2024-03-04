@@ -5,16 +5,13 @@
 #include <SDL.h>
 #include "Polygon.h"
 #include "Player.h"
+#include "Camera.h"
 #include <climits>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <ranges>
-
-constexpr float SCREEN_WIDTH = 800;
-constexpr float SCREEN_HEIGHT = 600;
-constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
 enum class GameState {
     RUNNING,
@@ -33,7 +30,7 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window *window, SDL_Renderer *renderer,
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera,
          const Player &initialPlayer); /**< Constructor for the Game class. */
 
     /**
@@ -43,9 +40,11 @@ public:
     [[nodiscard]] GameState getGameState() const;
 
     /**
-     * @brief Initialize the camera position according to players positions.
+     * @brief Get a point of the average position of all players combined.
+     * @param[out] x The x-coordinate of the average players position
+     * @param[out] y The y-coordinate of the average players position
      */
-    void initializeCameraPosition();
+    [[nodiscard]] Point getAveragePlayersPositions() const;
 
     /**
      * @brief Set a new state to render_camera_point
@@ -106,15 +105,10 @@ public:
 private:
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    Camera camera; /**< The camera object */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     Player player; /**< The player object. */
-
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    SDL_FRect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; /**< Rectangle for camera object */
-    SDL_FRect camera_area = {SCREEN_WIDTH/5.f, /**< Rectangle for camera "not moving area" */
-                             SCREEN_HEIGHT/5.f,
-                             SCREEN_WIDTH - (SCREEN_WIDTH/2.f) - SCREEN_WIDTH/5.f,
-                             SCREEN_HEIGHT - (SCREEN_HEIGHT/5.f) - SCREEN_HEIGHT/5.f};
     bool render_camera_point = false;
     bool render_camera_area = false;
 
@@ -133,18 +127,6 @@ private:
      * @param moveY The movement along the Y-axis.
      */
     void applyPlayerMovement(float moveX, float moveY);
-
-    /**
-     * @brief Get a point of the average position of all players combined.
-     * @param[out] x The x-coordinate of the average players position
-     * @param[out] y The y-coordinate of the average players position
-     */
-    void getAveragePlayersPositions(float *x, float *y) const;
-
-    /**
-     * @brief Applies camera movement based on the positions of all players.
-     */
-    void applyCameraMovement();
 
     /**
      * @brief Handles collisions between the player and obstacles.

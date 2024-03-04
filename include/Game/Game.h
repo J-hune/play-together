@@ -6,11 +6,9 @@
 #include "Polygon.h"
 #include "Player.h"
 #include "Camera.h"
+#include "Level.h"
 #include <climits>
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <ranges>
 
 enum class GameState {
@@ -30,7 +28,7 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera,
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
          const Player &initialPlayer); /**< Constructor for the Game class. */
 
 
@@ -46,6 +44,12 @@ public:
      * @param[out] y The y-coordinate of the average players position
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
+
+    /**
+     * @brief Set the level attribute.
+     * @param map_name The name of the new map.
+     */
+    void setLevel(std::string const &map_name);
 
     /**
      * @brief Sets the shaking state of the camera.
@@ -85,12 +89,6 @@ public:
     void stop();
 
     /**
-     * @brief Loads obstacles from a map file.
-     * @param mapName The name of the map file.
-     */
-    void loadPolygonsFromMap(const std::string &mapName);
-
-    /**
      * @brief Adds a character to the game.
      * @param character The character to add.
      */
@@ -113,7 +111,7 @@ private:
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     Camera camera; /**< The camera object */
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    Level level; /**< The level object */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     bool render_camera_point = false;

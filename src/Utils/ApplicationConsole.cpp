@@ -56,7 +56,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::string map_name;
             iss >> command_name >> map_name;
             if (command_name == "map") {
-                gamePtr->loadPolygonsFromMap(map_name);
+                gamePtr->setLevel(map_name);
             } else {
                 std::cout << "Invalid syntax. Usage: map [mapName]\n";
             }

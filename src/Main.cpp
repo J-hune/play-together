@@ -44,8 +44,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Initialize Game
     Camera camera = Camera();
+    Level level("experimentation");
     Player initialPlayer(-50, 50, 2, 20, 30);
-    Game game(window, renderer, camera, initialPlayer);
+    Game game(window, renderer, camera, level, initialPlayer);
 
     // Initialize Menu
     Menu menu(renderer, font, &game, &quit);
@@ -89,8 +90,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             game.addCharacter(character1);
             game.addCharacter(character2);
             game.addCharacter(character3);
-
-            game.loadPolygonsFromMap("experimentation");
 
             game.removeCharacter(character3);
             camera.initializeCameraPosition(game.getAveragePlayersPositions());

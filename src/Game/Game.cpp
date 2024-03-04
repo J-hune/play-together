@@ -1,10 +1,6 @@
+#include <utility>
+
 #include "../../include/Game/Game.h"
-
-// Define constant for the directory containing map files
-constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
-
-// Define constant for the file name containing polygon data
-constexpr char POLYGONS_FILE[] = "polygons.txt";
 
 // Function to check AABB collision between two rectangles
 bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
@@ -20,12 +16,16 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, const Player &initialPlayer)
-        : window(window), renderer(renderer), camera(camera), player(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), player(initialPlayer) {}
 
 
 void Game::setCameraIsShaking(bool val) {
     camera.setIsShaking(val);
+}
+
+void Game::setLevel(std::string const &map_name) {
+    level = Level(map_name);
 }
 
 GameState Game::getGameState() const {
@@ -49,43 +49,6 @@ void Game::removeCharacter(const Player &character) {
     if (it != characters.end()) {
         // Erase the character from the vector
         characters.erase(it);
-    }
-}
-
-void Game::loadPolygonsFromMap(const std::string &mapName) {
-    obstacles.clear();
-
-    // Define the file path for the polygon data
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/" + POLYGONS_FILE;
-
-    std::ifstream file(filePath);
-
-    if (file.is_open()) {
-        std::string line;
-
-        // Read each line from the file
-        while (std::getline(file, line)) {
-            Polygon currentPolygon;
-            std::istringstream iss(line);
-            char dummy;
-
-            // Extract points from each line
-            while (iss >> dummy >> std::ws && dummy == '(') {
-                int x;
-                int y;
-                iss >> x >> dummy >> y >> dummy;
-                currentPolygon.vertices.emplace_back(x, y);
-                iss >> dummy;
-            }
-
-            // Add the completed polygon to the obstacles vector
-            obstacles.push_back(currentPolygon);
-        }
-
-        file.close();
-        std::cout << "Loaded " << obstacles.size() << " polygons from the map " << mapName << "." << std::endl;
-    } else {
-        std::cerr << "Unable to open the file." << std::endl;
     }
 }
 
@@ -173,7 +136,7 @@ void Game::handleCollisions(float moveX, float moveY) {
         printf("Moving player to (%f, %f)\n", player.x, player.y);
 
         // Check for collisions with each obstacle
-        for (const Polygon &obstacle: obstacles) {
+        for (const Polygon &obstacle: level.getObstacles()) {
 
             // If collision detected, revert player position
             if (checkCollision(player, obstacle)) {
@@ -222,7 +185,7 @@ void Game::render() {
 
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (const Polygon &obstacle: obstacles) {
+    for (const Polygon &obstacle: level.getObstacles()) {
         for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
             const auto &vertex1 = obstacle.vertices[i];
             const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];

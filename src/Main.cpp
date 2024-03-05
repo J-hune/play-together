@@ -1,5 +1,6 @@
 #include <thread>
 #include <mutex>
+#include "../src/Utils/Saves.cpp"
 #include <SDL_ttf.h>
 #include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"
@@ -31,6 +32,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "Could not create renderer: %s\n", SDL_GetError());
         return 1;
     }
+
+    //we save the file for the first time in the filename Game
+    Saves<Game>::save(game,"Game");
+    SDL_DestroyWindow(window);
+    Game ngame = Saves<Game>::load("Game");
+    //eample with int 
+    //serializes a random int
+    int random = 27364;
+    Saves<int>::save(random,"randomint");
+    //deserializes a random int
+    int newran = Saves<int>::load("randomint");
+    cout << newran << endl;
 
     // Load font from a TrueType (TTF) file
     TTF_Font *font = TTF_OpenFont("../assets/font/arial.ttf", 24);

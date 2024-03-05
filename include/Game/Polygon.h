@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include "Point.h"
+#include <boost/serialization/vector.hpp>
 
 /**
  * @file Polygon.h
@@ -65,6 +66,10 @@ private:
      * @return The sum of interior angles in degrees.
      */
     [[nodiscard]] double totalAngles() const;
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & vertices;
+    }
 };
 
 #endif //PLAY_TOGETHER_POLYGON_H

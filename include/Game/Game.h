@@ -6,6 +6,7 @@
 #include <climits>
 #include <string>
 #include <ranges>
+
 #include "Polygon.h"
 #include "Player.h"
 #include "Camera.h"
@@ -16,6 +17,8 @@ enum class GameState {
     PAUSED,
     STOPPED
 };
+
+
 
 /**
  * @file Game.h
@@ -28,11 +31,12 @@ enum class GameState {
  */
 class Game {
 public:
-    /** CONSTRUCTOR **/
+  
+    /** CONSTRUCTORS **/
 
     Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
          const Player &initialPlayer);
-
+    Game();
 
     /** ACCESSORS **/
 
@@ -41,7 +45,6 @@ public:
      * @return The current game state.
      */
     [[nodiscard]] GameState getGameState() const;
-
     /**
      * @brief Get a point of the average position of all players combined.
      * @param[out] x The x-coordinate of the average players position
@@ -112,6 +115,21 @@ public:
      * @param y The Y-coordinate of the location.
      */
     void teleportPlayer(float x, float y);
+    /**
+     * @brief method to serialize the object
+     * @tparam Archive
+     * @param ar
+     * @param version
+     */
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & obstacles;
+        ar & player;
+        ar & characters;
+        ar & camera.x;
+        ar & camera.y;
+    }
+  
 
 
 private:
@@ -164,6 +182,20 @@ private:
      * @brief Renders the game by drawing the player and obstacles.
      */
     void render();
+    /**
+     * @brief Checks for collision between the player and a polygon obstacle.
+     * @param player The player object.
+     * @param obstacle The polygon obstacle.
+     * @return True if a collision is detected, false otherwise.
+     */
+    static bool checkCollision(const Player &player, const Polygon &obstacle);
+
+    /**
+     * @brief Checks if a polygon is convex.
+     * @param polygon The polygon to check.
+     * @return True if the polygon is convex, false otherwise.
+     */
+    static bool isConvex(const Polygon &polygon);
 
 };
 

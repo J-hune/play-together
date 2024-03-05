@@ -14,7 +14,6 @@
  * @class Player
  * @brief Represents a player in a 2D game with position, speed, and dimensions.
  */
-
 class Player {
 public:
     float x; /**< The x-coordinate of the player's position. (in pixels) */
@@ -41,10 +40,11 @@ public:
      */
     [[nodiscard]] std::vector<Point> getVertices() const;
 
-    [[nodiscard]] SDL_FRect getBoundingBox() const {
-        SDL_FRect boundingBox = {x, y, width, height};
-        return boundingBox;
-    }
+    /**
+     * @brief Get the bounding box of the player.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getBoundingBox() const;
 
     // Equality operator for comparing two players
     bool operator==(const Player &other) const {

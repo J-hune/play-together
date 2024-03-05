@@ -1,7 +1,6 @@
 #include "../../include/Game/Player.h"
 
 /**
- * @file Player.cpp
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
@@ -18,4 +17,9 @@ std::vector<Point> Player::getVertices() const {
             {x + width, y + height},
             {x, y + height}
     };
+}
+
+SDL_FRect Player::getBoundingBox() const {
+    // Return the bounding box of the player.
+    return {x, y, width, height};
 }

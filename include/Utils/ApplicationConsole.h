@@ -8,34 +8,36 @@
 #include "../../include/Game/Game.h"
 
 /**
- * @brief The GameConsole class represents a console for interacting with a Game.
+ * @Class Application
+    * @brief The ApplicationConsole class represent an interface for the developer to interact with the game.
  */
-class GameConsole {
+class ApplicationConsole {
 public:
+    /** CONSTRUCTOR **/
+
     /**
-     * @brief Constructs a GameConsole object.
+     * @brief Constructs a ApplicationConsole object.
      * @param game A pointer to the Game object that the console interacts with.
      */
-    explicit GameConsole(Game* game);
+    explicit ApplicationConsole(Game* game);
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Runs the console, allowing the user to input commands.
      */
-    void Run() const;
+    void run() const;
 
     /**
      * @brief Executes a command entered by the user.
      * @param command The command to be executed.
      */
-    void ExecuteCommand(const std::string& command) const;
-
-    /**
-     * @brief Requests the console to exit.
-     */
-    void RequestExit();
+    void executeCommand(const std::string& command) const;
 
 private:
-    bool exitRequested = false;  /**< Flag indicating whether an exit has been requested. */
+    /** ATTRIBUTES **/
+
     std::mutex consoleMutex;  /**< Mutex for thread safety in the console. */
     Game* gamePtr;  /**< Pointer to the associated Game object. */
 };

@@ -1,4 +1,6 @@
-#include "../../include/Network/UDPServer.h"
+#ifdef _WIN32
+
+#include "../../../include/Network/WIN32/UDPServer.h"
 
 UDPServer::UDPServer() = default;
 
@@ -6,14 +8,14 @@ UDPServer::~UDPServer() {
     stop();
 }
 
-int UDPServer::getSocketFileDescriptor() const {
+SOCKET UDPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
 void UDPServer::initialize(short port) {
     // Create socket
     socketFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socketFileDescriptor == -1) {
+    if (socketFileDescriptor == INVALID_SOCKET) {
         throw UDPSocketCreationError("UDPServer: Error during socket creation");
     }
 
@@ -27,7 +29,7 @@ void UDPServer::initialize(short port) {
     }
 }
 
-void UDPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex) {
+void UDPServer::start(std::map<SOCKET, sockaddr_in> &clientAddresses, std::mutex &clientAddressesMutex) {
     clientAddressesPtr = &clientAddresses;
     clientAddressesMutexPtr = &clientAddressesMutex;
 
@@ -39,8 +41,8 @@ void UDPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &c
 bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &message) const {
     std::cout << "UDPServer: Sending message: " << message << " (" << message.length() << " bytes)" << std::endl;
 
-    if (sendto(socketFileDescriptor, message.c_str(), message.length(), 0, (const sockaddr*)&clientAddress, sizeof(clientAddress)) == -1) {
-        perror("UDPServer: Error sending message");
+    if (sendto(socketFileDescriptor, message.c_str(), static_cast<int>(message.length()), 0, (const sockaddr*)&clientAddress, sizeof(clientAddress)) == -1) {
+        std::cerr << "UDPServer: Error sending message: " << WSAGetLastError() << std::endl;
         return false;
     }
 
@@ -77,9 +79,9 @@ std::string UDPServer::receive(sockaddr_in& clientAddress, int timeoutMillisecon
     timeout.tv_usec = (timeoutMilliseconds % 1000) * 1000;
 
     // Wait until data is available or timeout expires
-    int ready = select(socketFileDescriptor + 1, &readSet, nullptr, nullptr, &timeout);
+    int ready = select(0, &readSet, nullptr, nullptr, &timeout);
     if (ready == -1) {
-        perror("UDPServer: Error in select()");
+        std::cerr << "UDPServer: Error in select: " << WSAGetLastError() << std::endl;
         return "";
     } else if (ready == 0) {
         // No data available within the specified timeout, return an empty string
@@ -88,12 +90,12 @@ std::string UDPServer::receive(sockaddr_in& clientAddress, int timeoutMillisecon
         // Data is available for reading, receive the data
         ssize_t bytesRead = recvfrom(socketFileDescriptor, buffer, sizeof(buffer), 0, (sockaddr*)&clientAddress, &clientLen);
         if (bytesRead == -1) {
-            if(!stopRequested) perror("UDPServer: Error receiving message");
+            if(!stopRequested) std::cerr << "UDPServer: Error receiving message: " << WSAGetLastError() << std::endl;
             return "";
         }
 
         buffer[bytesRead] = '\0'; // Null-terminate the received data
-        return std::string(buffer);
+        return buffer;
     }
 }
 
@@ -102,14 +104,14 @@ void UDPServer::handleMessage() {
 
     while (!stopRequested) {
         // Receive message with timeout
-        struct sockaddr_in clientAddress;
+        struct sockaddr_in clientAddress = {};
         std::string message = receive(clientAddress, 200); // 1 second timeout
 
         // Handle the received message
         if (!message.empty()) {
             // Identify the client with the address (find)
             clientAddressesMutexPtr->lock();
-            int clientID = -1;
+            SOCKET clientID = INVALID_SOCKET;
             for (const auto& [id, address] : *clientAddressesPtr) {
                 if (address.sin_addr.s_addr == clientAddress.sin_addr.s_addr && address.sin_port == clientAddress.sin_port) {
                     clientID = id;
@@ -118,7 +120,7 @@ void UDPServer::handleMessage() {
             }
             clientAddressesMutexPtr->unlock();
 
-            if (clientID != -1) {
+            if (clientID != INVALID_SOCKET) {
                 std::cout << "UDPServer: Received message: " << message << " from " << clientID << std::endl;
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
@@ -132,8 +134,10 @@ void UDPServer::handleMessage() {
 // Stop the server
 void UDPServer::stop() {
     stopRequested = true;
-    if (socketFileDescriptor != -1) {
-        close(socketFileDescriptor);
-        socketFileDescriptor = -1;
+    if (socketFileDescriptor != INVALID_SOCKET) {
+        closesocket(socketFileDescriptor); // Close socket on Windows
+        socketFileDescriptor = INVALID_SOCKET;
     }
 }
+
+#endif // _WIN32

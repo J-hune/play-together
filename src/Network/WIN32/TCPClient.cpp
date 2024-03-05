@@ -1,4 +1,6 @@
-#include "../../include/Network/TCPClient.h"
+#ifdef _WIN32
+
+#include "../../../include/Network/WIN32/TCPClient.h"
 
 TCPClient::TCPClient() = default;
 
@@ -6,7 +8,7 @@ TCPClient::~TCPClient() {
     stop(); // Stop the client
 }
 
-int TCPClient::getSocketFileDescriptor() const {
+SOCKET TCPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
@@ -17,8 +19,9 @@ void TCPClient::setDisconnectCallback(std::function<void()> callback) {
 void TCPClient::connect(const std::string &serverAddress, short port, unsigned short& clientPort) {
     // Create temporary file descriptor for the socket
     // (We don't want to modify the socketFileDescriptor if the connection fails)
-    int socketFileDescriptorTest = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketFileDescriptorTest == -1) {
+
+    SOCKET socketFileDescriptorTest = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketFileDescriptorTest == INVALID_SOCKET) {
         throw TCPSocketCreationError("TCPClient: Error during socket creation");
     }
 
@@ -34,6 +37,7 @@ void TCPClient::connect(const std::string &serverAddress, short port, unsigned s
     if (::connect(socketFileDescriptorTest, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1) {
         throw TCPConnectionError("TCPClient: Unable to connect to server");
     }
+
 
     // Get the local port that was chosen for the connection
     struct sockaddr_in localAddr = {};
@@ -55,7 +59,6 @@ void TCPClient::start() {
     stop(); // Stop the client
     std::cout << "TCPClient: Client shutdown" << std::endl;
 }
-
 
 void TCPClient::handleMessages() {
     std::cout << "TCPClient: Handling incoming messages..." << std::endl;
@@ -85,18 +88,18 @@ bool TCPClient::send(const std::string &message) const {
 
     // First, send the size of the message
     auto messageSize = static_cast<int>(message.length()); // Message size including null terminator
-    if (::send(socketFileDescriptor, &messageSize, sizeof(int), 0) == -1) {
-        perror("TCPClient: Error sending message size");
+    if (::send(socketFileDescriptor, reinterpret_cast<const char*>(&messageSize), sizeof(int), 0) == -1) {
+        std::cerr << "TCPClient: Error sending message size: " << WSAGetLastError() << std::endl;
         return false;
     }
 
     // Then, send the message itself
     const char *messagePtr = message.c_str();
-    ssize_t totalBytesSent = 0;
+    int totalBytesSent = 0;
     while (totalBytesSent < messageSize) {
-        ssize_t bytesSent = ::send(socketFileDescriptor, messagePtr + totalBytesSent, messageSize - totalBytesSent, 0);
+        int bytesSent = ::send(socketFileDescriptor, messagePtr + totalBytesSent, messageSize - totalBytesSent, 0);
         if (bytesSent == -1) {
-            perror("TCPClient: Error sending message");
+            std::cerr << "TCPClient: Error sending message: " << WSAGetLastError() << std::endl;
             return false;
         }
         totalBytesSent += bytesSent;
@@ -107,7 +110,7 @@ bool TCPClient::send(const std::string &message) const {
 
 std::string TCPClient::receive() const {
     char sizeBuffer[sizeof(int)];
-    ssize_t bytesRead;
+    int bytesRead;
 
     // Receive the size of the message
     bytesRead = recv(socketFileDescriptor, sizeBuffer, sizeof(sizeBuffer), 0);
@@ -116,7 +119,7 @@ std::string TCPClient::receive() const {
             return ""; // No data available, return empty string
         } else {
             // Error or connection closed by server
-            perror("TCPClient: Error receiving message size");
+            if (!stopRequested) std::cerr << "TCPClient: Error receiving message size: " << WSAGetLastError() << std::endl;
             return "";
         }
     }
@@ -127,15 +130,15 @@ std::string TCPClient::receive() const {
     std::string receivedData;
     receivedData.resize(messageSize);
 
-    size_t totalBytesReceived = 0;
-    while (totalBytesReceived < static_cast<size_t>(messageSize)) {
+    int totalBytesReceived = 0;
+    while (totalBytesReceived < messageSize) {
         bytesRead = recv(socketFileDescriptor, &receivedData[totalBytesReceived], messageSize - totalBytesReceived, 0);
         if (bytesRead <= 0) {
             if (bytesRead == 0) {
                 return ""; // No data available, return empty string
             } else {
                 // Error or connection closed by server
-                perror("TCPClient: Error receiving message data");
+                std::cerr << "TCPClient: Error receiving message data: " << WSAGetLastError() << std::endl;
                 return "";
             }
         }
@@ -149,10 +152,12 @@ void TCPClient::stop() {
     stopRequested = true; // Set the stop flag to terminate the message handling loop
 
     // Send a message to the server to initiate disconnection
-    if (socketFileDescriptor != -1) {
+    if (socketFileDescriptor != INVALID_SOCKET ) {
         if (shouldSendDisconnect) send("DISCONNECT");
-        ::shutdown(socketFileDescriptor, SHUT_RDWR);
-        close(socketFileDescriptor);
-        socketFileDescriptor = -1;
+        ::shutdown(socketFileDescriptor, SD_BOTH);
+        closesocket(socketFileDescriptor);
+        socketFileDescriptor = INVALID_SOCKET;
     }
 }
+
+#endif // _WIN32

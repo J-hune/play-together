@@ -46,3 +46,8 @@ add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
 
 # Link libraries
 target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES})
+
+# Check if it's Windows and add Ws2_32.lib
+if (WIN32)
+    target_link_libraries(play-together Ws2_32.lib)
+endif()

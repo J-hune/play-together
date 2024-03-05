@@ -1,3 +1,5 @@
+#ifndef _WIN32
+
 #ifndef PLAY_TOGETHER_UDPCLIENT_H
 #define PLAY_TOGETHER_UDPCLIENT_H
 
@@ -11,7 +13,7 @@
 #include <map>
 #include <mutex>
 
-#include "../Utils/UDPError.h"
+#include "../../Utils/UDPError.h"
 
 /**
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
@@ -72,7 +74,8 @@ public:
 private:
     int socketFileDescriptor = -1; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */
-    struct sockaddr_in serverAddress; /**< The server address structure. */
+    struct sockaddr_in serverAddress{}; /**< The server address structure. */
 };
 
 #endif //PLAY_TOGETHER_UDPCLIENT_H
+#endif // !_WIN32

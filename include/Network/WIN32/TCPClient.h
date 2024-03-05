@@ -1,17 +1,17 @@
+#ifdef _WIN32
+
 #ifndef PLAY_TOGETHER_TCPCLIENT_H
 #define PLAY_TOGETHER_TCPCLIENT_H
 
 #include <string>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <iostream>
 #include <cstring>
 #include <thread>
 #include <functional>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
-#include "../Utils/TCPError.h"
+#include "../../Utils/TCPError.h"
 
 /**
  * @brief The TCPClient class provides functionality to create and manage a TCP client.
@@ -32,7 +32,7 @@ public:
      * @brief Gets the socket file descriptor.
      * @return The socket file descriptor.
      */
-    [[nodiscard]] int getSocketFileDescriptor() const;
+    [[nodiscard]] SOCKET getSocketFileDescriptor() const;
 
     /**
      * @brief Set a callback function to notify menu on server disconnect.
@@ -76,10 +76,11 @@ public:
     void stop();
 
 private:
-    int socketFileDescriptor = -1; /**< The client socket file descriptor. */
+    SOCKET socketFileDescriptor = INVALID_SOCKET; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */
     bool shouldSendDisconnect = true; /**< Flag to indicate if the client should send a disconnect message. */
     std::function<void()> disconnectCallback; /**< Callback function to notify menu on server disconnect. */
 };
 
 #endif //PLAY_TOGETHER_TCPCLIENT_H
+#endif // _WIN32

@@ -8,11 +8,19 @@
 
 #include "../Graphics/Button.h"
 #include "Game.h"
-#include "../../dependencies/json.hpp"
-#include "../Network/TCPServer.h"
-#include "../Network/TCPClient.h"
-#include "../Network/UDPServer.h"
-#include "../Network/UDPClient.h"
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include "../Network/WIN32/TCPServer.h"
+#include "../Network/WIN32/TCPClient.h"
+#include "../Network/WIN32/UDPServer.h"
+#include "../Network/WIN32/UDPClient.h"
+#else
+#include "../Network/Unix/TCPServer.h"
+#include "../Network/Unix/TCPClient.h"
+#include "../Network/Unix/UDPServer.h"
+#include "../Network/Unix/UDPClient.h"
+#endif
 
 constexpr unsigned int MAX_JSON_SIZE = 1024;
 
@@ -112,8 +120,13 @@ private:
     std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
     std::unique_ptr<std::jthread> serverUDPThreadPtr; /**< Pointer to the UDP server thread. */
     std::unique_ptr<std::jthread> clientUDPThreadPtr; /**< Pointer to the UDP client thread. */
+    std::mutex clientAddressesMutex = {}; /**< Mutex to protect the client addresses map. */
+
+#ifdef _WIN32
+    std::map<SOCKET, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
+#else
     std::map<int, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
-    std::mutex clientAddressesMutex; /**< Mutex to protect the client addresses map. */
+#endif
 
     /**
      * @brief Wait for a connection to be established.

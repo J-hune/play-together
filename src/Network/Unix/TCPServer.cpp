@@ -1,4 +1,6 @@
-#include "../../include/Network/TCPServer.h"
+#ifndef _WIN32
+
+#include "../../../include/Network/Unix/TCPServer.h"
 
 /*
     The TCP server listens on a specified port and accepts incoming connections from clients. For each
@@ -272,6 +274,6 @@ void TCPServer::clearResources() {
     std::cout << "TCPServer: " << clientThreads.size() << " client threads stopped" << std::endl;
 
     clientThreads.clear();
-
-    std::cout << "TCPServer: Server shutdown" << std::endl;
 }
+
+#endif // !_WIN32

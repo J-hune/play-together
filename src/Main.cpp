@@ -6,6 +6,14 @@
 #include "../include/Game/Menu.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+#ifdef _WIN32
+    WSADATA wsaData;
+    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (result != 0) {
+        std::cerr << "WSAStartup failed: " << result << std::endl;
+        return 1;
+    }
+#endif
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -114,5 +122,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     TTF_Quit();
     SDL_Quit();
 
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return 0;
 }

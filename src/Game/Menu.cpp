@@ -262,11 +262,17 @@ void Menu::handleStopButton(Button &button) {
 }
 
 void Menu::handleHostGameButton(Button &button) {
+    cleanupThreads(clientTCPThreadPtr, tcpClient);
+    cleanupThreads(clientUDPThreadPtr, udpClient);
+
     startServer();
     button.reset();
 }
 
 void Menu::handleJoinGameButton(Button &button) {
+    cleanupThreads(serverTCPThreadPtr, tcpServer);
+    cleanupThreads(serverUDPThreadPtr, udpServer);
+
     startClient();
     button.reset();
 }
@@ -287,6 +293,33 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
 }
 
 void Menu::handleSendMessageButton(Button &button) {
+#ifdef _WIN32
+    if (tcpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
+        tcpClient.send("Hello, World from TCP!");
+    }
+
+    if (udpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
+        udpClient.send("Hello, World from UDP!");
+    }
+
+    if (tcpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
+        bool success = tcpServer.broadcast("Hello, World!");
+        if (success) {
+            std::cout << "Message sent to all clients" << std::endl;
+        } else {
+            std::cerr << "Failed to send message to all clients" << std::endl;
+        }
+    }
+
+    if (udpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
+        bool success = udpServer.broadcast("Hello, World!");
+        if (success) {
+            std::cout << "Message sent to all clients" << std::endl;
+        } else {
+            std::cerr << "Failed to send message to all clients" << std::endl;
+        }
+    }
+#else
     if (tcpClient.getSocketFileDescriptor() != -1) {
         tcpClient.send("Hello, World from TCP!");
     }
@@ -312,6 +345,8 @@ void Menu::handleSendMessageButton(Button &button) {
             std::cerr << "Failed to send message to all clients" << std::endl;
         }
     }
+#endif
+
     button.reset();
 }
 
@@ -331,7 +366,12 @@ void Menu::handleQuitButton([[maybe_unused]] Button &button) {
 
 template<typename SocketType>
 void Menu::cleanupThreads(std::unique_ptr<std::jthread> &threadPtr, SocketType &socket) const {
+
+#ifdef _WIN32
+    if (socket.getSocketFileDescriptor() != INVALID_SOCKET) socket.stop();
+#else
     if (socket.getSocketFileDescriptor() != -1) socket.stop();
+#endif
 
     if (threadPtr && threadPtr->joinable()) {
         threadPtr->request_stop();

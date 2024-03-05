@@ -1,3 +1,5 @@
+#ifndef _WIN32
+
 #ifndef PLAY_TOGETHER_UDPSERVER_H
 #define PLAY_TOGETHER_UDPSERVER_H
 
@@ -15,7 +17,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "../Utils/UDPError.h"
+#include "../../Utils/UDPError.h"
 
 /**
  * @brief The UDPServer class provides functionality to create and manage a UDP server.
@@ -81,8 +83,8 @@ public:
 private:
     int socketFileDescriptor = -1; /**< The server socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the server should stop. */
-    std::map<int, sockaddr_in> *clientAddressesPtr; /**< Pointer to the map of client IDs and their addresses. */
-    std::mutex *clientAddressesMutexPtr; /**< Pointer to the mutex to protect the client addresses map. */
+    std::map<int, sockaddr_in> *clientAddressesPtr{}; /**< Pointer to the map of client IDs and their addresses. */
+    std::mutex *clientAddressesMutexPtr{}; /**< Pointer to the mutex to protect the client addresses map. */
 
     /**
      * @brief Waits for incoming messages.
@@ -91,3 +93,4 @@ private:
 };
 
 #endif //PLAY_TOGETHER_UDPSERVER_H
+#endif // !_WIN32

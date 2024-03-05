@@ -1,4 +1,6 @@
-#include "../../include/Network/UDPClient.h"
+#ifdef _WIN32
+
+#include "../../../include/Network/WIN32/UDPClient.h"
 
 UDPClient::UDPClient() = default;
 
@@ -6,14 +8,14 @@ UDPClient::~UDPClient() {
     stop(); // Stop the client
 }
 
-int UDPClient::getSocketFileDescriptor() const {
+SOCKET UDPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
 void UDPClient::initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort) {
     // Create UDP socket
     socketFileDescriptor = socket(AF_INET, SOCK_DGRAM, 0);
-    if (socketFileDescriptor == -1) {
+    if (socketFileDescriptor == INVALID_SOCKET) {
         throw UDPSocketCreationError("UDPClient: Error during socket creation");
     }
 
@@ -24,7 +26,8 @@ void UDPClient::initialize(const std::string &serverHostname, short serverPort, 
     clientAddr.sin_port = htons(clientPort); // Set the client port
 
     // Bind the socket to the client port
-    if (bind(socketFileDescriptor, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) < 0) {
+    if (bind(socketFileDescriptor, (struct sockaddr *)&clientAddr, sizeof(clientAddr)) == -1) {
+        std::cerr << "UDPClient: Error during bind: " << WSAGetLastError() << std::endl;
         throw UDPSocketBindError("UDPClient: Error during bind");
     }
 
@@ -61,8 +64,8 @@ bool UDPClient::send(const std::string &message) const {
     std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes)" << std::endl;
 
     std::cout << "UDPClient: Sending message to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
-    if (sendto(socketFileDescriptor, message.c_str(), message.length(), 0, (const sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-        perror("UDPClient: Error sending message");
+    if (sendto(socketFileDescriptor, message.c_str(), static_cast<int>(message.length()), 0, (const sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
+        std::cerr << "UDPClient: Error sending message: " << WSAGetLastError() << std::endl;
         return false;
     }
 
@@ -83,33 +86,34 @@ std::string UDPClient::receive(int timeoutMilliseconds) const {
     timeout.tv_usec = (timeoutMilliseconds % 1000) * 1000;
 
     // Wait until data is available or timeout expires
-    int ready = select(socketFileDescriptor + 1, &readSet, nullptr, nullptr, &timeout);
+    int ready = select(0, &readSet, nullptr, nullptr, &timeout);
     if (ready == -1) {
-        perror("UDPClient: Error in select()");
+        std::cerr << "UDPClient: Error in select: " << WSAGetLastError() << std::endl;
         return "";
     } else if (ready == 0) {
         // No data available within the specified timeout, return an empty string
         return "";
     } else {
         // Data is available for reading, receive the data
-        ssize_t bytesRead = recvfrom(socketFileDescriptor, buffer, sizeof(buffer), 0, nullptr, &serverLen);
+        int bytesRead = recvfrom(socketFileDescriptor, buffer, sizeof(buffer), 0, (sockaddr*)&serverAddress, &serverLen);
         if (bytesRead == -1) {
-            if (!stopRequested) perror("UDPClient: Error receiving message");
+            if (!stopRequested) std::cerr << "UDPClient: Error receiving message: " << WSAGetLastError() << std::endl;
             return "";
         }
 
         buffer[bytesRead] = '\0'; // Null-terminate the received data
-        return std::string(buffer);
+        return buffer;
     }
 }
 
 void UDPClient::stop() {
     // No need to disconnect in UDP
-    if (socketFileDescriptor != -1) {
-        close(socketFileDescriptor);
-        socketFileDescriptor = -1;
+    if (socketFileDescriptor != INVALID_SOCKET) {
+        closesocket(socketFileDescriptor); // Close socket on Windows
+        socketFileDescriptor = INVALID_SOCKET;
     }
 
     stopRequested = true; // Set the stop flag to terminate the message handling loop
 }
 
+#endif // _WIN32

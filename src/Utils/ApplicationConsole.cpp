@@ -36,10 +36,10 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "help - Display help\n";
             std::cout << "exit - Exit the console\n";
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
-            std::cout << "show [camera_point | camera_area] - Show debug information\n";
-            std::cout << "hide [camera_point | camera_area] - Hide debug information\n";
-            std::cout << "enable [camera_shake] - Enable game mechanic\n";
-            std::cout << "disable [camera_shake] - Disable game mechanic\n";
+            std::cout << "show [all | camera_point | camera_area] - Show debug information\n";
+            std::cout << "hide [all | camera_point | camera_area] - Hide debug information\n";
+            std::cout << "enable [all | camera_shake] - Enable game mechanic\n";
+            std::cout << "disable [all | camera_shake] - Disable game mechanic\n";
 
         }
 
@@ -74,17 +74,22 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::string option;
             iss >> command_name >> option;
             if (command_name == "show") {
-                if (option == "camera_point") {
+                if (option == "all") {
+                    gamePtr->setRenderCameraPoint(true);
+                    gamePtr->setRenderCameraArea(true);
+                    std::cout << "Showing all information.\n";
+                }
+                else if (option == "camera_point") {
                     gamePtr->setRenderCameraPoint(true);
                     std::cout << "Showing camera point information.\n";
                 } else if (option == "camera_area") {
-                     gamePtr->setRenderCameraArea(true);
+                    gamePtr->setRenderCameraArea(true);
                     std::cout << "Showing camera area information.\n";
                 } else {
-                    std::cout << "Invalid option. Usage: show [camera_point | camera_area]\n";
+                    std::cout << "Invalid option. Usage: show [all | camera_point | camera_area]\n";
                 }
             } else {
-                std::cout << "Invalid syntax. Usage: show [camera_point | camera_area]\n";
+                std::cout << "Invalid syntax. Usage: show [all | camera_point | camera_area]\n";
             }
         }
 
@@ -95,17 +100,22 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::string option;
             iss >> command_name >> option;
             if (command_name == "hide") {
-                if (option == "camera_point") {
+                if (option == "all") {
+                    gamePtr->setRenderCameraPoint(false);
+                    gamePtr->setRenderCameraArea(false);
+                    std::cout << "Hiding all information.\n";
+                }
+                else if (option == "camera_point") {
                     gamePtr->setRenderCameraPoint(false);
                     std::cout << "Hiding camera point information.\n";
                 } else if (option == "camera_area") {
                     gamePtr->setRenderCameraArea(false);
                     std::cout << "Hiding camera area information.\n";
                 } else {
-                    std::cout << "Invalid option. Usage: hide [camera_point | camera_area]\n";
+                    std::cout << "Invalid option. Usage: hide [all | camera_point | camera_area]\n";
                 }
             } else {
-                std::cout << "Invalid syntax. Usage: hide [camera_point | camera_area]\n";
+                std::cout << "Invalid syntax. Usage: hide [all | camera_point | camera_area]\n";
             }
         }
 
@@ -116,16 +126,20 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::string option;
             iss >> command_name >> option;
             if (command_name == "enable") {
-                if (option == "camera_shake") {
+                if (option == "all") {
                     gamePtr->setCameraIsShaking(true);
-                    std::cout << "Enabled camera shaking.\n";
+                    std::cout << "Enabling all mechanics.\n";
+                }
+                else if (option == "camera_shake") {
+                    gamePtr->setCameraIsShaking(true);
+                    std::cout << "Enabling camera shaking.\n";
                 }
                 else {
-                    std::cout << "Invalid option. Usage: enable [camera_shake]\n";
+                    std::cout << "Invalid option. Usage: enable [all | camera_shake]\n";
                 }
             }
             else {
-                std::cout << "Invalid syntax. Usage: enable [camera_shake]\n";
+                std::cout << "Invalid syntax. Usage: enable [all | camera_shake]\n";
             }
         }
 
@@ -136,16 +150,20 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::string option;
             iss >> command_name >> option;
             if (command_name == "disable") {
-                if (option == "camera_shake") {
+                if (option == "all") {
                     gamePtr->setCameraIsShaking(false);
-                    std::cout << "Disabled camera shaking.\n";
+                    std::cout << "Disabling all mechanics.\n";
+                }
+                else if (option == "camera_shake") {
+                    gamePtr->setCameraIsShaking(false);
+                    std::cout << "Disabling camera shaking.\n";
                 }
                 else {
-                    std::cout << "Invalid option. Usage: disable [camera_shake]\n";
+                    std::cout << "Invalid option. Usage: disable [all | camera_shake]\n";
                 }
             }
             else {
-                std::cout << "Invalid syntax. Usage: disable [camera_shake]]\n";
+                std::cout << "Invalid syntax. Usage: disable [all | camera_shake]]\n";
             }
         }
 

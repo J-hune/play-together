@@ -1,7 +1,15 @@
 #include "../../include/Game/Camera.h"
 
+/**
+ * @file Camera.cpp
+ * @brief Implements the Camera class responsible for handling camera logic.
+ */
+
+/** CONSTRUCTORS **/
+
 Camera::Camera() = default;
-Camera::Camera(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {} /**< Constructor for the Camera class. */
+Camera::Camera(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+
 
 /** ACCESSORS **/
 
@@ -28,8 +36,8 @@ SDL_FRect Camera::getArea() const {
 
 /** MODIFIERS **/
 
-void Camera::setIsShaking(bool val) {
-    isShaking = val;
+void Camera::setIsShaking(bool state) {
+    isShaking = state;
 }
 
 void Camera::toggleIsShaking() {

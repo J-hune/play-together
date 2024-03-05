@@ -1,6 +1,61 @@
-#include <utility>
-
 #include "../../include/Game/Game.h"
+
+/**
+ * @file Game.cpp
+ * @brief Implements the Game class responsible for handling the main game logic.
+ */
+
+/** CONSTRUCTOR **/
+
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), player(initialPlayer) {}
+
+
+/** ACCESSORS **/
+
+GameState Game::getGameState() const {
+    return gameState;
+}
+
+Point Game::getAveragePlayersPositions() const {
+    float i = 1;  // Number of player in the game (at least one)
+    float x = player.x; // Initialization of the point on the initial player
+    float y = player.y;
+
+    // Add x and y position of all players
+    for (const Player &character : characters) {
+        x += character.x;
+        y += character.y;
+        i++;
+    }
+
+    // Average x and y position of all players
+    x /= i; y /= i;
+
+    return {x, y};
+}
+
+
+/** MODIFIERS **/
+
+void Game::setLevel(std::string const &map_name) {
+    level = Level(map_name);
+}
+
+void Game::setRenderCameraPoint(bool state){
+    render_camera_point = state;
+}
+
+void Game::setRenderCameraArea(bool state){
+    render_camera_area = state;
+}
+
+void Game::setCameraIsShaking(bool state) {
+    camera.setIsShaking(state);
+}
+
+
+/** FUNCTIONS **/
 
 // Function to check AABB collision between two rectangles
 bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
@@ -11,34 +66,11 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
             a.y + a.h > b.y);
 }
 
-/**
- * @file Game.cpp
- * @brief Implements the Game class responsible for handling the main game logic.
- */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), camera(camera), level(std::move(level)), player(initialPlayer) {}
-
-
-void Game::setCameraIsShaking(bool val) {
-    camera.setIsShaking(val);
-}
-
-void Game::setLevel(std::string const &map_name) {
-    level = Level(map_name);
-}
-
-GameState Game::getGameState() const {
-    return gameState;
-}
+/** METHODS **/
 
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);
-}
-
-void Game::teleportPlayer(float x, float y) {
-    player.x = x;
-    player.y = y;
 }
 
 void Game::removeCharacter(const Player &character) {
@@ -50,6 +82,11 @@ void Game::removeCharacter(const Player &character) {
         // Erase the character from the vector
         characters.erase(it);
     }
+}
+
+void Game::teleportPlayer(float x, float y) {
+    player.x = x;
+    player.y = y;
 }
 
 void Game::handleEvents(float &moveX, float &moveY) {
@@ -113,22 +150,59 @@ void Game::applyPlayerMovement(float moveX, float moveY) {
     player.y += moveY;
 }
 
-Point Game::getAveragePlayersPositions() const {
-    float i = 1;  // Number of player in the game (at least one)
-    float x = player.x; // Initialization of the point on the initial player
-    float y = player.y;
 
-    // Add x and y position of all players
-    for (const Player &character : characters) {
-        x += character.x;
-        y += character.y;
-        i++;
+
+bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
+    // Check for convexity of the obstacle
+    if (!obstacle.isConvex()) {
+        printf("The obstacle is not convex\n");
+        return false;
     }
 
-    // Average x and y position of all players
-    x /= i; y /= i;
+    // Potential separation axes (normals to the sides of the rectangle)
+    std::vector<Point> axes = {
+            {1, 0},
+            {0, 1}
+    };
 
-    return {x, y};
+    // Add axes perpendicular to the sides of the polygon
+    for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+        std::vector<Point> vertices = obstacle.getVertices();
+        const Point &vertex1 = vertices[i];
+        const Point &vertex2 = vertices[(i + 1) % vertices.size()];
+
+        Point edge = {vertex2.x - vertex1.x, vertex2.y - vertex1.y};
+        Point axis = {-edge.y, edge.x};
+        axes.push_back(axis);
+    }
+
+    for (Point axis: axes) {
+        // Project the rectangle and the polygon onto the axis
+        auto player_projection_min = static_cast<float>(std::numeric_limits<int>::max());
+        auto player_projection_max = static_cast<float>(std::numeric_limits<int>::min());
+
+        for (const Point &vertex: player.getVertices()) {
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
+            player_projection_min = std::min(player_projection_min, projection);
+            player_projection_max = std::max(player_projection_max, projection);
+        }
+
+        auto obstacle_projection_min = static_cast<float>(std::numeric_limits<int>::max());
+        auto obstacle_projection_max = static_cast<float>(std::numeric_limits<int>::min());
+
+        for (const Point &vertex: obstacle.getVertices()) {
+            float projection = vertex.x * axis.x + vertex.y * axis.y;
+            obstacle_projection_min = std::min(obstacle_projection_min, projection);
+            obstacle_projection_max = std::max(obstacle_projection_max, projection);
+        }
+
+        // Check for separation on the axis
+        if (player_projection_max < obstacle_projection_min || obstacle_projection_max < player_projection_min) {
+            return false; // No collision detected
+        }
+    }
+
+    return true; // Collision detected
 }
 
 void Game::handleCollisions(float moveX, float moveY) {
@@ -186,9 +260,10 @@ void Game::render() {
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (const Polygon &obstacle: level.getObstacles()) {
-        for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
-            const auto &vertex1 = obstacle.vertices[i];
-            const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
+        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+            std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
             SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
         }
     }
@@ -211,69 +286,6 @@ void Game::render() {
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
-}
-
-bool Game::checkCollision(const Player &player, const Polygon &obstacle) {
-    // Check for convexity of the obstacle
-    if (!isConvex(obstacle)) {
-        printf("The obstacle is not convex\n");
-        return false;
-    }
-
-    // Potential separation axes (normals to the sides of the rectangle)
-    std::vector<Point> axes = {
-            {1, 0},
-            {0, 1}
-    };
-
-    // Add axes perpendicular to the sides of the polygon
-    for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
-        const Point &vertex1 = obstacle.vertices[i];
-        const Point &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-
-        Point edge = {vertex2.x - vertex1.x, vertex2.y - vertex1.y};
-        Point axis = {-edge.y, edge.x};
-        axes.push_back(axis);
-    }
-
-    for (Point axis: axes) {
-        // Project the rectangle and the polygon onto the axis
-        auto player_projection_min = static_cast<float>(std::numeric_limits<int>::max());
-        auto player_projection_max = static_cast<float>(std::numeric_limits<int>::min());
-
-        for (const Point &vertex: player.getVertices()) {
-            float projection = vertex.x * axis.x + vertex.y * axis.y;
-            player_projection_min = std::min(player_projection_min, projection);
-            player_projection_max = std::max(player_projection_max, projection);
-        }
-
-        auto obstacle_projection_min = static_cast<float>(std::numeric_limits<int>::max());
-        auto obstacle_projection_max = static_cast<float>(std::numeric_limits<int>::min());
-
-        for (const Point &vertex: obstacle.vertices) {
-            float projection = vertex.x * axis.x + vertex.y * axis.y;
-            obstacle_projection_min = std::min(obstacle_projection_min, projection);
-            obstacle_projection_max = std::max(obstacle_projection_max, projection);
-        }
-
-        // Check for separation on the axis
-        if (player_projection_max < obstacle_projection_min || obstacle_projection_max < player_projection_min) {
-            return false; // No collision detected
-        }
-    }
-
-    return true; // Collision detected
-}
-
-bool Game::isConvex(const Polygon &polygon) {
-    size_t n = polygon.vertices.size();
-    if (n < 3) {
-        return false;
-    }
-
-    // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
-    const double tolerance = 1e-3;
-    return std::abs(polygon.totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
 }
 
 void Game::run() {

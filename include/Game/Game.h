@@ -1,15 +1,15 @@
 #ifndef PLAY_TOGETHER_GAME_H
 #define PLAY_TOGETHER_GAME_H
 
-#include <vector>
 #include <SDL.h>
+#include <vector>
+#include <climits>
+#include <string>
+#include <ranges>
 #include "Polygon.h"
 #include "Player.h"
 #include "Camera.h"
 #include "Level.h"
-#include <climits>
-#include <string>
-#include <ranges>
 
 enum class GameState {
     RUNNING,
@@ -28,9 +28,13 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
-         const Player &initialPlayer); /**< Constructor for the Game class. */
+    /** CONSTRUCTOR **/
 
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
+         const Player &initialPlayer);
+
+
+    /** ACCESSORS **/
 
     /**
      * @brief Returns the current game state.
@@ -45,6 +49,9 @@ public:
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
+
+    /** MODIFIERS **/
+
     /**
      * @brief Set the level attribute.
      * @param map_name The name of the new map.
@@ -55,23 +62,22 @@ public:
      * @brief Sets the shaking state of the camera.
      * @param val The new value for the shaking state of the camera.
      */
-    void setCameraIsShaking(bool val);
+    void setCameraIsShaking(bool state);
 
     /**
      * @brief Set a new state to render_camera_point
      * @param state the state of render_camera_point
      */
-    void setRenderCameraPointState(bool state){
-        render_camera_point = state;
-    }
+    void setRenderCameraPoint(bool state);
 
     /**
      * @brief Set a new state to render_camera_area
      * @param state the state of render_camera_area
      */
-    void setRenderCameraAreaState(bool state){
-        render_camera_point = state;
-    }
+    void setRenderCameraArea(bool state);
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Runs the game loop.
@@ -107,7 +113,10 @@ public:
      */
     void teleportPlayer(float x, float y);
 
+
 private:
+    /** ATTRIBUTES **/
+
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     Camera camera; /**< The camera object */
@@ -118,6 +127,9 @@ private:
     bool render_camera_area = false;
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
@@ -134,6 +146,14 @@ private:
     void applyPlayerMovement(float moveX, float moveY);
 
     /**
+     * @brief Checks for collision between the player and a polygon obstacle.
+     * @param player The player object.
+     * @param obstacle The polygon obstacle.
+     * @return True if a collision is detected, false otherwise.
+     */
+    static bool checkCollision(const Player &player, const Polygon &obstacle);
+
+    /**
      * @brief Handles collisions between the player and obstacles.
      * @param moveX The movement along the X-axis.
      * @param moveY The movement along the Y-axis.
@@ -145,20 +165,6 @@ private:
      */
     void render();
 
-    /**
-     * @brief Checks for collision between the player and a polygon obstacle.
-     * @param player The player object.
-     * @param obstacle The polygon obstacle.
-     * @return True if a collision is detected, false otherwise.
-     */
-    static bool checkCollision(const Player &player, const Polygon &obstacle);
-
-    /**
-     * @brief Checks if a polygon is convex.
-     * @param polygon The polygon to check.
-     * @return True if the polygon is convex, false otherwise.
-     */
-    static bool isConvex(const Polygon &polygon);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

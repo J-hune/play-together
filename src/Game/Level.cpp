@@ -34,7 +34,7 @@ void Level::loadPolygonsFromMap(const std::string &mapName) {
 
         // Read each line from the file
         while (std::getline(file, line)) {
-            Polygon currentPolygon;
+            std::vector<Point> vertices;
             std::istringstream iss(line);
             char dummy;
 
@@ -43,12 +43,11 @@ void Level::loadPolygonsFromMap(const std::string &mapName) {
                 int x;
                 int y;
                 iss >> x >> dummy >> y >> dummy;
-                currentPolygon.vertices.emplace_back(x, y);
+                vertices.emplace_back(x, y);
                 iss >> dummy;
             }
-
             // Add the completed polygon to the obstacles vector
-            obstacles.push_back(currentPolygon);
+            obstacles.emplace_back(vertices);
         }
 
         file.close();

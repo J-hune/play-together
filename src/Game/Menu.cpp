@@ -4,6 +4,35 @@
  * @brief Implementation of the Menu class responsible for rendering and handling events for the game menus.
  */
 
+
+/** ACCESSORS **/
+
+bool Menu::isDisplayingMenu() const {
+    return displayMenu;
+}
+
+MenuAction Menu::getCurrentMenuAction() const {
+    return currentMenuAction;
+}
+
+
+/** MODIFIERS **/
+
+void Menu::setDisplayMenu(bool display_menu) {
+    displayMenu = display_menu;
+}
+
+void Menu::setMenuAction(MenuAction menu_action) {
+    currentMenuAction = menu_action;
+}
+
+void Menu::setQuit(bool quit_value) {
+    *quit = quit_value;
+}
+
+
+/** FUNCTIONS **/
+
 // Helper function to flatten a map of buttons into a vector of buttons
 std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Button>> &buttonsMap) {
     std::vector<Button> flattenedButtons;
@@ -12,6 +41,9 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
     }
     return flattenedButtons;
 }
+
+
+/** METHODS **/
 
 Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : renderer(renderer), font(font), game(game), quit(quit) {
     // Create menu buttons
@@ -114,26 +146,6 @@ void Menu::handleEvent(const SDL_Event &event) {
             }
         }
     }
-}
-
-bool Menu::isDisplayingMenu() const {
-    return displayMenu;
-}
-
-MenuAction Menu::getCurrentMenuAction() const {
-    return currentMenuAction;
-}
-
-void Menu::setDisplayMenu(bool display_menu) {
-    displayMenu = display_menu;
-}
-
-void Menu::setMenuAction(MenuAction menu_action) {
-    currentMenuAction = menu_action;
-}
-
-void Menu::setQuit(bool quit_value) {
-    *quit = quit_value;
 }
 
 void Menu::reset() {

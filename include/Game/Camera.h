@@ -9,9 +9,21 @@ constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
 constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
+
+/**
+ * @file Camera.h
+ * @brief Defines the Camera class responsible for handling the camera logic.
+ */
+
+/**
+ * @class Level
+ * @brief Represents the camera logic including movement and shaking.
+ */
+
 class Camera {
 public:
-    /**< Constructors for the Camera class. */
+    /** CONSTRUCTORS **/
+
     Camera();
     Camera(float x, float y, float w, float h);
 
@@ -53,16 +65,18 @@ public:
 
     /**
      * @brief Set the isShaking attribute.
+     * @see toggleIsShaking for a similar operation.
      */
-    void setIsShaking(bool val);
+    void setIsShaking(bool state);
 
     /**
      * @brief Toggle the isShaking attribute.
+     * @see setIsShaking for a similar operation.
      */
     void toggleIsShaking();
 
 
-    /** METHODS **/
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Initialize the camera position according to players positions.
@@ -78,6 +92,8 @@ public:
 
 
 private:
+    /** ATTRIBUTES **/
+
     float x = 0; /**< The x-coordinate of the camera's position */
     float y = 0; /**< The y-coordinate of the camera's position */
     float w = SCREEN_WIDTH; /**< The width of the camera */
@@ -91,6 +107,9 @@ private:
 
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Applies a shake movement to the camera .

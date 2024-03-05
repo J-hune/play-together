@@ -1,8 +1,23 @@
 #include "../../include/Game/Polygon.h"
 
 /**
+ * @file Polygon.cpp
  * @brief Implements the Polygon class functions for handling polygons in 2D space.
  */
+
+/** CONSTRUCTOR **/
+
+Polygon::Polygon(const std::vector<Point> &vertices) : vertices(vertices) {}
+
+
+/** ACCESSORS **/
+
+std::vector<Point> Polygon::getVertices() const {
+    return vertices;
+}
+
+
+/** METHODS **/
 
 double Polygon::distance(const Point& a, const Point& b) {
     return std::hypot(b.x - a.x, b.y - a.y);
@@ -44,4 +59,15 @@ double Polygon::totalAngles() const {
     }
 
     return sumAngles;
+}
+
+bool Polygon::isConvex() const{
+    size_t n = vertices.size();
+    if (n < 3) {
+        return false;
+    }
+
+    // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
+    const double tolerance = 1e-3;
+    return std::abs(totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
 }

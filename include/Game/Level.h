@@ -24,7 +24,9 @@ constexpr char POLYGONS_FILE[] = "polygons.txt";
  */
 class Level {
 public:
-    Level(const std::string &map_name); /**< Constructor for the Level class. */
+    /** CONSTRUCTOR **/
+
+    Level(const std::string &map_name);
 
 
     /** ACCESSORS **/
@@ -37,7 +39,12 @@ public:
 
 
 private:
+    /** ATTRIBUTES **/
+
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Loads obstacles from a map file.
@@ -45,8 +52,6 @@ private:
      */
     void loadPolygonsFromMap(const std::string &mapName);
 
-
 };
-
 
 #endif //PLAY_TOGETHER_LEVEL_H

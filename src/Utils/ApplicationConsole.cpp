@@ -1,7 +1,12 @@
 #include "../../include/Utils/ApplicationConsole.h"
 
+/** CONSTRUCTOR **/
+
 // Constructor for ApplicationConsole, takes a pointer to the associated Game object.
 ApplicationConsole::ApplicationConsole(Game* game) : gamePtr(game) {}
+
+
+/** METHODS **/
 
 // Runs the console in a loop, waiting for user input and executing commands.
 void ApplicationConsole::run() const {
@@ -70,10 +75,10 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             iss >> command_name >> option;
             if (command_name == "show") {
                 if (option == "camera_point") {
-                    gamePtr->setRenderCameraPointState(true);
+                    gamePtr->setRenderCameraPoint(true);
                     std::cout << "Showing camera point information.\n";
                 } else if (option == "camera_area") {
-                     gamePtr->setRenderCameraAreaState(true);
+                     gamePtr->setRenderCameraArea(true);
                     std::cout << "Showing camera area information.\n";
                 } else {
                     std::cout << "Invalid option. Usage: show [camera_point | camera_area]\n";
@@ -91,10 +96,10 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             iss >> command_name >> option;
             if (command_name == "hide") {
                 if (option == "camera_point") {
-                    gamePtr->setRenderCameraPointState(false);
+                    gamePtr->setRenderCameraPoint(false);
                     std::cout << "Hiding camera point information.\n";
                 } else if (option == "camera_area") {
-                    gamePtr->setRenderCameraAreaState(false);
+                    gamePtr->setRenderCameraArea(false);
                     std::cout << "Hiding camera area information.\n";
                 } else {
                     std::cout << "Invalid option. Usage: hide [camera_point | camera_area]\n";

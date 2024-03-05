@@ -28,6 +28,44 @@ struct GameStateKey {
  */
 class Menu {
 public:
+    /** ACCESSORS **/
+
+    /**
+     * @brief Check if the menu is displaying.
+     * @return True if the menu is displaying, false otherwise.
+     */
+    [[nodiscard]] bool isDisplayingMenu() const;
+
+    /**
+     * @brief Get the current menu action.
+     * @return The current menu action.
+     */
+    [[nodiscard]] MenuAction getCurrentMenuAction() const;
+
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Set whether the menu should be displayed or not.
+     * @param displayMenu True to display the menu, false to hide it.
+     */
+    void setDisplayMenu(bool displayMenu);
+
+    /**
+     * @brief Set the current menu action.
+     * @param menuAction The menu action to set.
+     */
+    void setMenuAction(MenuAction menuAction);
+
+    /**
+     * @brief Set whether the game loop should quit or not.
+     * @param quit_value True to quit the game loop, false otherwise.
+     */
+    void setQuit(bool quit_value);
+
+
+    /** PUBLIC METHODS **/
+
     /**
      * @brief Constructor for the Menu class.
      * @param renderer The SDL_Renderer to render the menu.
@@ -49,41 +87,13 @@ public:
     void handleEvent(const SDL_Event &event);
 
     /**
-     * @brief Check if the menu is displaying.
-     * @return True if the menu is displaying, false otherwise.
-     */
-    [[nodiscard]] bool isDisplayingMenu() const;
-
-    /**
-     * @brief Get the current menu action.
-     * @return The current menu action.
-     */
-    [[nodiscard]] MenuAction getCurrentMenuAction() const;
-
-    /**
-     * @brief Set whether the menu should be displayed or not.
-     * @param displayMenu True to display the menu, false to hide it.
-     */
-    void setDisplayMenu(bool displayMenu);
-
-    /**
-     * @brief Set the current menu action.
-     * @param menuAction The menu action to set.
-     */
-    void setMenuAction(MenuAction menuAction);
-
-    /**
-     * @brief Set whether the game loop should quit or not.
-     * @param quit_value True to quit the game loop, false otherwise.
-     */
-    void setQuit(bool quit_value);
-
-    /**
      * @brief Reset the menu.
      */
     void reset();
 
 private:
+    /** ATTRIBUTES **/
+
     SDL_Renderer *renderer;
     TTF_Font *font;
     bool displayMenu = true;

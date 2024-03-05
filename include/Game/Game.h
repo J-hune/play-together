@@ -123,11 +123,9 @@ public:
      */
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version){
-        ar & obstacles;
         ar & player;
         ar & characters;
-        ar & camera.x;
-        ar & camera.y;
+        ar & camera;
     }
   
 
@@ -182,13 +180,6 @@ private:
      * @brief Renders the game by drawing the player and obstacles.
      */
     void render();
-    /**
-     * @brief Checks for collision between the player and a polygon obstacle.
-     * @param player The player object.
-     * @param obstacle The polygon obstacle.
-     * @return True if a collision is detected, false otherwise.
-     */
-    static bool checkCollision(const Player &player, const Polygon &obstacle);
 
     /**
      * @brief Checks if a polygon is convex.

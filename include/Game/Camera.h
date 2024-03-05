@@ -89,6 +89,19 @@ public:
      * @param camera_point A point representing the camera point position.
      */
     void applyCameraMovement(Point camera_point);
+    /**
+ * @brief method to serialize the object
+ * @tparam Archive
+ * @param ar
+ * @param version
+ */
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & w;
+        ar & h;
+        ar & x;
+        ar & y;
+    }
 
 
 private:

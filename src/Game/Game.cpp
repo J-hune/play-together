@@ -16,13 +16,12 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
         : window(window), renderer(renderer), player(initialPlayer) {}
 
-void Game::addCharacter(const Player &character) {
-    characters.push_back(character);
+void Game::teleportPlayer(float newX, float newY) {
+    player.teleportPlayer(newX, newY);
 }
 
-void Game::teleportPlayer(float x, float y) {
-    player.x = x;
-    player.y = y;
+void Game::addCharacter(const Player &character) {
+    characters.push_back(character);
 }
 
 void Game::removeCharacter(const Player &character) {
@@ -80,33 +79,33 @@ void Game::handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction,
         case SDLK_z:
         case SDLK_SPACE:
             // If the coyote time is passed and the player is not already in a jump
-            if (player.timeAfterFall > 0 && !player.isJumping) {
-                player.wantToJump = true;
+            if (player.getTimeAfterFall() > 0 && !player.getIsJumping()) {
+                player.setWantToJump(true);
             }
             break;
         case SDLK_DOWN:
         case SDLK_s:
-            moveY = player.speed;
+            moveY = player.getSpeed();
             break;
         case SDLK_LEFT:
         case SDLK_q:
             // If the player don't already move to the right
-            if (!player.wantToMoveRight) {
+            if (!player.getWantToMoveRight()) {
                 direction = PLAYER_LEFT;
-                player.wantToMoveLeft = true;
+                player.setWantToMoveLeft(true);
             }
             break;
         case SDLK_RIGHT:
         case SDLK_d:
             // If the player don't already move to the left
-            if (!player.wantToMoveLeft) {
+            if (!player.getWantToMoveLeft()) {
                 direction = PLAYER_RIGHT;
-                player.wantToMoveRight = true;
+                player.setWantToMoveRight(true);
             }
             break;
         case SDLK_g:
             switchGravity = !switchGravity;
-            player.isOnPlatform = false;
+            player.setIsOnPlatform(false);
             break;
         case SDLK_m:
             printf("Loading map 'diversity'\n");
@@ -123,17 +122,17 @@ void Game::handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent) {
         case SDLK_DOWN:
         case SDLK_z:
         case SDLK_SPACE:
-            player.wantToJump = false;
+            player.setWantToJump(false);
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            player.wantToMoveRight = false;
-            player.finishTheMovement = false;
+            player.setWantToMoveRight(false);
+            player.setFinishTheMovement(false);
             break;
         case SDLK_q:
         case SDLK_LEFT:
-            player.wantToMoveLeft = false;
-            player.finishTheMovement = false;
+            player.setWantToMoveLeft(false);
+            player.setFinishTheMovement(false);
             break;
         default:
             break;
@@ -167,97 +166,17 @@ void Game::handleEvents(int &direction, float &moveY) {
     }
 }
 
-void Game::applyPlayerMovement(float &moveX, int direction, float &moveY) {
-
-    // The player move on the x-axis
-    if(player.finishTheMovement && (player.wantToMoveLeft || player.wantToMoveRight)){
-        player.timeSpeed += 0.1F;
-        moveX = player.speedMax * player.speed * player.timeSpeed;
-        if (moveX > player.speedMax){
-            moveX = player.speedMax;
-            player.timeSpeed= player.maxSpeedReachWithThisTime;
-        }
-        moveX *= direction;
-        player.currentDirection = direction;
-    }
-    // The player doesn't move on the x-axis
-    else{
-        if (player.timeSpeed > 0) {
-            player.timeSpeed -= 0.05F;
-            moveX = player.speedMax * player.speed * player.timeSpeed;
-            moveX *= player.currentDirection;
-            player.finishTheMovement = false;
-        }
-        else{
-            player.timeSpeed = 0;
-            moveX = 0;
-            player.finishTheMovement = true;
-        }
-    }
-
-
-    // The player press "jump button" and he doesn't maintain more than 6
-    if(player.wantToJump && player.timeSpentJumping < PRESSURE_JUMP_MAX){
-        // Player jump with the following mathematical function
-        player.isJumping = true;
-        moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
-        player.timeSpentJumping += 0.1F;
-    }
-    else if(player.timeSpentJumping>0 && player.timeSpentJumping < PRESSURE_JUMP_MIN){
-        moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
-        player.timeSpentJumping += 0.1F;
-    }
-    // The player doesn't jump
-    else {
-        player.timeSpentJumping = 0;
-        player.wantToJump = false;
-
-        // The player is on a platform
-        if (player.isOnPlatform){
-            moveY = 0;
-            player.isJumping = false;
-            player.timeAfterFall = COYOTE_TIME;
-        }
-        // The player is falling
-        else{
-            moveY = (player.timeAfterFall > 0) ? 2 - player.timeAfterFall : 2;
-            player.timeAfterFall -= 0.1F;
-        }
-    }
-
-    // If the gravity is switched change the direction of the y-axis move
-    if (switchGravity) {
-        moveY *= -1;
-    }
-
-    handleCollisions(player.currentDirection, moveY, moveX);
-    if(!player.canMove){
-        moveX = 0;
-    }
-    if(player.x < camera.x){
-        player.x = camera.x;
-        printf("camera.x : %f\n",camera.x);
-    }
-    else if(player.x + player.width > camera.x + camera.w) {
-        player.x = camera.x+ camera.w - player.width;
-    }
-    else{
-        player.x += moveX;
-    }
-    player.y += moveY;
-}
-
 void Game::getAveragePlayersPositions(float *x, float *y) const {
     float i = 1;  // Number of player in the game (at least one)
 
     // Initialization of the point on the initial player
-    *x = player.x;
-    *y = player.y;
+    *x = player.getX();
+    *y = player.getY();
 
     // Add x and y position of all players
     for (const Player &character : characters) {
-        *x += character.x;
-        *y += character.y;
+        *x += character.getX();
+        *y += character.getY();
         i++;
     }
 
@@ -314,10 +233,33 @@ void Game::applyCameraMovement() {
     }
 }
 
+void Game::applyPlayerMovement(float &moveX, float &moveY) {
+    // If the gravity is switched change the direction of the y-axis move
+    if (switchGravity) {
+        moveY *= -1;
+    }
+
+    // If the player can't move on x-axis, don't apply the movement
+    if(!player.getCanMove()){
+        moveX = 0;
+    }
+    if(player.getX() < camera.x){
+        player.setX(camera.x);
+        printf("camera.x : %f\n",camera.x);
+    }
+    else if(player.getX() + player.getW() > camera.x + camera.w) {
+        player.setX(camera.x+ camera.w - player.getW());
+    }
+    else{
+        player.setX(player.getX() + moveX);
+    }
+    player.setY(player.getY() + moveY);
+}
+
 void Game::handleCollisions(int direction, float moveY, float &moveX) {
-    player.canMove = true;
+    player.setCanMove(true);
     if (moveY != 0 || direction != 0) {
-        player.isOnPlatform = false;
+        player.setIsOnPlatform(false);
 
         // Check for collisions with each obstacle
         for (const Polygon &obstacle: obstacles) {
@@ -327,13 +269,13 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
                 // If collision detected with the roof, the player can't jump anymore
                 if (checkCollision(player.getVerticesRoof(), obstacle)) {
                     printf("Collision detected on head\n");
-                    player.timeSpentJumping = PRESSURE_JUMP_MAX;
+                    player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
                 }
 
                 // If collision detected with the ground, the player is on a platform
-                if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
+                if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
                     printf("Collision detected on foot\n");
-                    player.isOnPlatform = true;
+                    player.setIsOnPlatform(true);
                 }
             }
             // Reversed gravity
@@ -341,21 +283,21 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
                 // If collision detected with the roof, the player is on a platform
                 if (checkCollision(player.getVerticesRoof(), obstacle)) {
                     printf("Collision detected on foot\n");
-                    player.isOnPlatform = true;
+                    player.setIsOnPlatform(true);
                 }
 
                 // If collision detected with the ground, the player can't jump anymore
-                if (!player.isOnPlatform && checkCollision(player.getVerticesGround(), obstacle)) {
+                if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
                     printf("Collision detected on head\n");
-                    player.timeSpentJumping = PRESSURE_JUMP_MAX;
+                    player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
                 }
             }
 
             // If collision detected with the wall, the player can't move
-            if (player.canMove && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
+            if (player.getCanMove() && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
                 printf("Collision detected for horizontal movement\n");
-                player.canMove = false;
-                player.timeSpeed = 0;
+                player.setCanMove(false);
+                player.setTimeSpeed(0);
             }
         }
 
@@ -385,7 +327,7 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
 
 
         // Check for collisions with right camera borders
-        if (player.x > camera.x + camera.w - player.width) {
+        if (player.getX() > camera.x + camera.w - player.getW()) {
 
             // Divide the velocity of the player
             moveX /= 5;
@@ -394,14 +336,14 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
 
             // Check if others players touch the left camera borders
             for (Player &character : characters){
-                if(character.x < camera.x){
-                    character.x += moveX;
+                if(character.getX() < camera.x){
+                    character.setX(moveX);
                 }
             }
 
         }
         // Check for collisions with left camera borders
-        else if (player.x < camera.x) {
+        else if (player.getX() < camera.x) {
 
             // Divide the velocity of the player
             moveX /= 5;
@@ -410,8 +352,8 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
 
             // Check if others players touch the right camera borders
             for (Player &character: characters) {
-                if (character.x > camera.x + camera.w - character.width) {
-                    character.x += moveX;
+                if (character.getX() > camera.x + camera.w - character.getW()) {
+                    character.setX(moveX);
                 }
             }
         }
@@ -425,7 +367,7 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_FRect playerRect = {player.x - camera.x, player.y - camera.y, player.width, player.height};
+    SDL_FRect playerRect = {player.getX() - camera.x, player.getY() - camera.y, player.getW(), player.getH()};
     SDL_RenderFillRectF(renderer, &playerRect);
 
     /*// Draw the characters
@@ -559,9 +501,11 @@ void Game::run() {
 
     // Game loop
     while (isRunning) {
-        // Handle events, apply player movement, check collisions, apply camera movement, and render
+        // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
         handleEvents(direction, moveY);
-        applyPlayerMovement(moveX, direction, moveY);
+        player.calculatePlayerMovement(moveX, direction, moveY);
+        handleCollisions(player.getCurrentDirection(), moveY, moveX);
+        applyPlayerMovement(moveX, moveY);
         applyCameraMovement();
         render();
     }

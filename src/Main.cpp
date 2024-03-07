@@ -31,7 +31,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    Player initialPlayer(50, 50, 0.2, 2, 20, 30);
+    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
 
     Player character1(100, 50, 1, 2, 20, 30);
     Player character2(150, 50, 1, 2, 20, 30);

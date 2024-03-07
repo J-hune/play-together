@@ -31,6 +31,13 @@ public:
     Game(SDL_Window* window, SDL_Renderer* renderer, const Player& initialPlayer); /**< Constructor for the Game class. */
 
     /**
+     * @brief Teleports the player to a specific location.
+     * @param newX The X-coordinate of the location.
+     * @param newY The Y-coordinate of the location.
+     */
+    void teleportPlayer(float newX, float newY);
+
+    /**
     * @brief Initialize the camera position according to players positions.
     */
     void initializeCameraPosition();
@@ -85,11 +92,9 @@ private:
     /**
      * @brief Applies player movement based on the current movement variables.
      * @param moveX The movement along the X-axis.
-     * @param direction The direction along the X-axis.
-     * @param timeSpeed The time that has elapsed since the player started running.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(float &moveX, int direction, float &moveY);
+    void applyPlayerMovement(float &moveX, float &moveY);
 
     /**
      * @brief Get a point of the average position of all players combined.
@@ -142,13 +147,6 @@ public:
      * @param character The character to remove.
      */
     void removeCharacter(const Player &character);
-
-    /**
-     * @brief Teleports the player to a specific location.
-     * @param x The X-coordinate of the location.
-     * @param y The Y-coordinate of the location.
-     */
-    void teleportPlayer(float x, float y);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

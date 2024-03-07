@@ -62,10 +62,24 @@ private:
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
-     * @param moveX Reference to the X-axis movement variable.
+     * @param direction Reference to the direction of the player.
      * @param moveY Reference to the Y-axis movement variable.
      */
     void handleEvents(int &direction, float &moveY);
+
+    /**
+     * @brief Handles SDL Key up events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was release.
+     */
+    void handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent);
+
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     * @param direction Reference to the direction of the player.
+     * @param moveY Reference to the Y-axis movement variable.
+     */
+    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction, float &moveY);
 
     /**
      * @brief Applies player movement based on the current movement variables.

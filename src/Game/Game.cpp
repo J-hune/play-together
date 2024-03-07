@@ -73,6 +73,69 @@ void Game::loadPolygonsFromMap(const std::string& mapName) {
     }
 }
 
+
+void Game::handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction, float &moveY) {
+    switch (keyEvent.keysym.sym) {
+        case SDLK_UP:
+        case SDLK_z:
+        case SDLK_SPACE:
+            // If the coyote time is passed and the player is not already in a jump
+            if (player.timeAfterFall > 0 && !player.isJumping) {
+                player.wantToJump = true;
+            }
+            break;
+        case SDLK_DOWN:
+        case SDLK_s:
+            moveY = player.speed;
+            break;
+        case SDLK_LEFT:
+        case SDLK_q:
+            // If the player don't already move to the right
+            if (!player.wantToMoveRight) {
+                direction = PLAYER_LEFT;
+                player.wantToMoveLeft = true;
+            }
+            break;
+        case SDLK_RIGHT:
+        case SDLK_d:
+            // If the player don't already move to the left
+            if (!player.wantToMoveLeft) {
+                direction = PLAYER_RIGHT;
+                player.wantToMoveRight = true;
+            }
+            break;
+        case SDLK_m:
+            printf("Loading map 'diversity'\n");
+            loadPolygonsFromMap("diversity");
+            break;
+        default:
+            break;
+    }
+}
+
+void Game::handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent) {
+    switch (keyEvent.keysym.sym) {
+        case SDLK_UP:
+        case SDLK_DOWN:
+        case SDLK_z:
+        case SDLK_SPACE:
+            player.wantToJump = false;
+            break;
+        case SDLK_RIGHT:
+        case SDLK_d:
+            player.wantToMoveRight = false;
+            player.finishTheMovement = false;
+            break;
+        case SDLK_q:
+        case SDLK_LEFT:
+            player.wantToMoveLeft = false;
+            player.finishTheMovement = false;
+            break;
+        default:
+            break;
+    }
+}
+
 void Game::handleEvents(int &direction, float &moveY) {
     SDL_Event e;
 
@@ -85,61 +148,15 @@ void Game::handleEvents(int &direction, float &moveY) {
             exit(0);
         }
 
-        // A key is pressed
-        else if (e.type == SDL_KEYDOWN) {
-            switch (e.key.keysym.sym) {
-                case SDLK_UP :
-                case SDLK_z:
-                case SDLK_SPACE:
-                    if (player.timeAfterFall > 0 && !player.isJumping){
-                        player.wantToJump = true;
-                    }
-                    break;
-                case SDLK_DOWN:
-                case SDLK_s:
-                    moveY = player.speed;
-                    break;
-                case SDLK_LEFT:
-                case SDLK_q:
-                    direction = PLAYER_LEFT;
-                    player.wantToMove = true;
-                    break;
-                case SDLK_RIGHT:
-                case SDLK_d:
-                    direction = PLAYER_RIGHT;
-                    player.wantToMove = true;
-                    break;
-                case SDLK_m:
-                    printf("Loading map 'vow'\n");
-                    loadPolygonsFromMap("vow");
-                    break;
-                default:
-                    break;
-            }
+        // Handle key events
+        if (e.type == SDL_KEYUP) {
+            handleKeyUpEvent(e.key);
+        }
+        if (e.type == SDL_KEYDOWN) {
+            handleKeyDownEvent(e.key, direction, moveY);
         }
 
-        // A key is released
-        else if (e.type == SDL_KEYUP) {
-            switch (e.key.keysym.sym) {
-                case SDLK_UP:
-                case SDLK_DOWN:
-                case SDLK_z:
-                case SDLK_SPACE:
-                    player.wantToJump = false;
-                    break;
-                case SDLK_LEFT:
-                case SDLK_RIGHT:
-                case SDLK_d:
-                case SDLK_q:
-                    player.wantToMove = false;
-                    direction = 0;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Handle SDL_MOUSEBUTTONDOWN events
+            // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
             printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.x, (float)e.button.y + camera.y);
         }

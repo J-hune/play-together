@@ -404,11 +404,19 @@ void Game::render() {
     SDL_RenderFillRectF(renderer, &playerRect);
 
     // Draw the characters
+    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+    SDL_FRect characterRect = {characters[0].x - camera.x, characters[0].y - camera.y, characters[0].width, characters[0].height};
+    SDL_RenderFillRectF(renderer, &characterRect);
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    for (const Player &character : characters) {
-        SDL_FRect characterRect = {character.x - camera.x, character.y - camera.y, character.width, character.height};
-        SDL_RenderFillRectF(renderer, &characterRect);
-    }
+    SDL_FRect characterRect1 = {characters[1].x - camera.x, characters[1].y - camera.y, characters[1].width, characters[1].height};
+    SDL_RenderFillRectF(renderer, &characterRect1);
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_FRect characterRect2 = {characters[2].x - camera.x, characters[2].y - camera.y, characters[2].width, characters[2].height};
+    SDL_RenderFillRectF(renderer, &characterRect2);
+
+
 
     /*
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);

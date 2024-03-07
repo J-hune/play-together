@@ -50,14 +50,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     game.initializeCameraPosition();
 
-    // Launch the game loop in a separate thread
-    std::jthread gameThread(&Game::run, &game);
+    game.run();
 
     // Launch the game console in a separate thread
     std::jthread consoleThread(&GameConsole::Run, &console);
-
-    // Wait for the game loop to finish
-    gameThread.join();
 
     // Join the console thread
     consoleThread.join();

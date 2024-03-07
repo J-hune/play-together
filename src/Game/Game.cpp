@@ -7,18 +7,17 @@
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-/** CONSTRUCTOR **/
+/** CONSTRUCTORS **/
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
         : window(window), renderer(renderer), camera(camera), level(std::move(level)), player(initialPlayer) {}
 
-Game::Game(Level level, Player player) : level(std::move(level)), player(player) {
-        this->window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                        SDL_WINDOW_SHOWN);
-        this->renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-        this->player = Player(-50, 50, 2, 20, 30);
-        this->level = std::move(Level("experimentation")); //needs to change with load
-}
+Game::Game() :
+            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                    (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
+            renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
+            level("experimentation"),
+            player(-50, 50, 2, 20, 30) {}
 
 
 /** ACCESSORS **/

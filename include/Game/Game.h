@@ -28,12 +28,12 @@ enum class GameState {
  */
 class Game {
 public:
-    /** CONSTRUCTOR **/
+    /** CONSTRUCTORS **/
 
     Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
          const Player &initialPlayer);
 
-    Game(Level level, Player player);
+    Game();
 
 
     /** ACCESSORS **/
@@ -116,7 +116,7 @@ public:
     void teleportPlayer(float x, float y);
 
     /**
-     * @brief method to serialize the object
+     * @brief Serialize the game object
      * @tparam Archive
      * @param ar
      * @param version

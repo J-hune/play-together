@@ -25,6 +25,7 @@ public:
     /** CONSTRUCTORS **/
 
     Camera();
+
     Camera(float x, float y, float w, float h);
 
 
@@ -89,14 +90,15 @@ public:
      * @param camera_point A point representing the camera point position.
      */
     void applyCameraMovement(Point camera_point);
+
     /**
- * @brief method to serialize the object
- * @tparam Archive
- * @param ar
- * @param version
- */
+     * @brief Serialize the camera object
+     * @tparam Archive
+     * @param ar
+     * @param version
+     */
     template<class Archive>
-    void serialize(Archive & ar, const unsigned int version){
+    void serialize(Archive &ar, const unsigned int version) {
         ar & w;
         ar & h;
         ar & x;
@@ -113,10 +115,10 @@ private:
     float h = SCREEN_HEIGHT; /**< The height of the camera */
 
     /**< Rectangle for camera "not moving area" */
-    SDL_FRect area = {w/5.f,
-                      h/5.f,
-                      w - (w/2.f) - w/5.f,
-                      h - (h/5.f) - h/5.f};
+    SDL_FRect area = {w / 5.f,
+                      h / 5.f,
+                      w - (w / 2.f) - w / 5.f,
+                      h - (h / 5.f) - h / 5.f};
 
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */

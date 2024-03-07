@@ -181,13 +181,6 @@ private:
      */
     void render();
 
-    /**
-     * @brief Checks if a polygon is convex.
-     * @param polygon The polygon to check.
-     * @return True if the polygon is convex, false otherwise.
-     */
-    static bool isConvex(const Polygon &polygon);
-
 };
 
 #endif //PLAY_TOGETHER_GAME_H

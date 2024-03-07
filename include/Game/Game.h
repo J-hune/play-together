@@ -113,6 +113,19 @@ public:
      */
     void teleportPlayer(float x, float y);
 
+    /**
+     * @brief method to serialize the object
+     * @tparam Archive
+     * @param ar
+     * @param version
+     */
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & player;
+        ar & characters;
+        ar & camera;
+    }
+
 
 private:
     /** ATTRIBUTES **/

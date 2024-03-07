@@ -52,6 +52,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Menu menu(renderer, font, &game, &quit);
     menu.render();
 
+
+
     // Initialize Application Console
     ApplicationConsole console(&game);
     std::jthread consoleThread(&ApplicationConsole::run, &console);

@@ -33,10 +33,14 @@ public:
 
     float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
+    bool finishTheMovement; /**< If the player has finish the movement and can change direction*/
+    int currentDirection; /**< The current direction of the player*/
+    float timeSpeed; /**< The time that has elapsed since the player started running */
+    float maxSpeedReachWithThisTime = 5.2F;/**< the speed max is reach at this time */
     bool canMove = true; /**< If the player can move */
-    bool wantToMove = false; /**< If the player try to move */
+    bool wantToMoveRight = false; /**< If the player try to move right */
+    bool wantToMoveLeft = false; /**< If the player try to move left */
 
-    bool minimumTimeJumpReached = true; /**< If the minimum jump time is reached (pressure jump) */
 
     float timeSpentJumping = 0.; /**< The time that has elapsed since the player started jumping */
     bool isOnPlatform = false; /**< If the player is on a platform */
@@ -66,6 +70,18 @@ public:
      * @return A vector of Point representing vertices, with added margin to capture wall within the area.
      */
     [[nodiscard]] std::vector<Point> getVerticesHorizontal(int direction) const;
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
+     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
+     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesRight() const;
 
     /**
      * @brief Gets the vertices of the player's bounding box, adjusted to capture the ground.

@@ -88,7 +88,7 @@ private:
      * @param timeSpeed The time that has elapsed since the player started running.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY);
+    void applyPlayerMovement(float &moveX, int direction, float &moveY);
 
     /**
      * @brief Get a point of the average position of all players combined.
@@ -107,7 +107,7 @@ private:
      * @param direction The direction along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(int direction, float moveY);
+    void handleCollisions(int direction, float moveY, float &moveX);
 
     /**
      * @brief Renders the game by drawing the player and obstacles.

@@ -163,37 +163,43 @@ void Game::handleEvents(int &direction, float &moveY) {
     }
 }
 
-void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, float &moveY) {
+void Game::applyPlayerMovement(float &moveX, int direction, float &moveY) {
 
     // The player move on the x-axis
-    if(player.wantToMove){
-        timeSpeed += 0.1F;
-        moveX = player.speedMax * player.speed * timeSpeed;
-        //printf("\n%d\n\n\n\n", moveX > player.speedMax);
+    if(player.finishTheMovement && (player.wantToMoveLeft || player.wantToMoveRight)){
+        player.timeSpeed += 0.1F;
+        moveX = player.speedMax * player.speed * player.timeSpeed;
         if (moveX > player.speedMax){
             moveX = player.speedMax;
+            player.timeSpeed= player.maxSpeedReachWithThisTime;
         }
-        moveX = direction * moveX;
+        moveX *= direction;
+        player.currentDirection = direction;
     }
     // The player doesn't move on the x-axis
     else{
-        timeSpeed = 0;
-        moveX = 0;
+        if (player.timeSpeed > 0) {
+            player.timeSpeed -= 0.05F;
+            moveX = player.speedMax * player.speed * player.timeSpeed;
+            moveX *= player.currentDirection;
+            player.finishTheMovement = false;
+        }
+        else{
+            player.timeSpeed = 0;
+            moveX = 0;
+            player.finishTheMovement = true;
+        }
     }
 
-    if(player.timeSpentJumping > PRESSURE_JUMP_MIN){
-        player.minimumTimeJumpReached = true;
-    }
 
     // The player press "jump button" and he doesn't maintain more than 6
     if(player.wantToJump && player.timeSpentJumping < PRESSURE_JUMP_MAX){
-        player.minimumTimeJumpReached = false;
         // Player jump with the following mathematical function
         player.isJumping = true;
         moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
         player.timeSpentJumping += 0.1F;
     }
-    else if(!player.minimumTimeJumpReached && player.timeSpentJumping < PRESSURE_JUMP_MIN){
+    else if(player.timeSpentJumping>0 && player.timeSpentJumping < PRESSURE_JUMP_MIN){
         moveY = -(float)(2 * player.timeSpentJumping - 0.3 * (player.timeSpentJumping * player.timeSpentJumping));
         player.timeSpentJumping += 0.1F;
     }
@@ -216,8 +222,18 @@ void Game::applyPlayerMovement(float &moveX, int direction, float  &timeSpeed, f
 
     }
 
-    handleCollisions(direction, moveY);
-    if(player.canMove){
+    handleCollisions(player.currentDirection, moveY, moveX);
+    if(!player.canMove){
+        moveX = 0;
+    }
+    if(player.x < camera.x){
+        player.x = camera.x;
+        printf("camera.x : %f\n",camera.x);
+    }
+    else if(player.x + player.width > camera.x + camera.w) {
+        player.x = camera.x+ camera.w - player.width;
+    }
+    else{
         player.x += moveX;
     }
     player.y += moveY;
@@ -290,7 +306,7 @@ void Game::applyCameraMovement() {
     }
 }
 
-void Game::handleCollisions(int direction, float moveY) {
+void Game::handleCollisions(int direction, float moveY, float &moveX) {
     player.canMove = true;
     if (moveY != 0 || direction != 0) {
         player.isOnPlatform = false;
@@ -314,6 +330,7 @@ void Game::handleCollisions(int direction, float moveY) {
             if (player.canMove && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
                 printf("Collision detected for horizontal movement\n");
                 player.canMove = false;
+                player.timeSpeed = 0;
             }
         }
 
@@ -326,15 +343,53 @@ void Game::handleCollisions(int direction, float moveY) {
                 player.y -= moveY;
             }
         }
+        */
 
-        // Check for collisions with camera borders
-        if (player.x < camera.x || player.x > camera.x + camera.w - player.width ||
-            player.y < camera.y || player.y > camera.y + camera.h - player.height) {
 
-            printf("Collision detected with a camera border\n");
-            player.x -= moveX;
-            player.y -= moveY;
-        }*/
+        /*// Check for collisions with down camera borders
+         * if (player.y < camera.y){
+         *
+         * }
+         */
+
+        /*// Check for collisions with up camera borders
+         * if (player.y > camera.y + camera.h - player.height){
+         *
+         * }
+         */
+
+
+        // Check for collisions with right camera borders
+        if (player.x > camera.x + camera.w - player.width) {
+
+            // Divide the velocity of the player
+            moveX /= 5;
+
+            camera.x += moveX;
+
+            // Check if others players touch the left camera borders
+            for (Player &character : characters){
+                if(character.x < camera.x){
+                    character.x += moveX;
+                }
+            }
+
+        }
+        // Check for collisions with left camera borders
+        else if (player.x < camera.x) {
+
+            // Divide the velocity of the player
+            moveX /= 5;
+
+            camera.x += moveX;
+
+            // Check if others players touch the right camera borders
+            for (Player &character: characters) {
+                if (character.x > camera.x + camera.w - character.width) {
+                    character.x += moveX;
+                }
+            }
+        }
     }
 }
 
@@ -468,13 +523,12 @@ void Game::run() {
     int direction = 0;
     float moveX = 0;
     float moveY = 0;
-    float timeSpeed = 0;
 
     // Game loop
     while (isRunning) {
         // Handle events, apply player movement, check collisions, apply camera movement, and render
         handleEvents(direction, moveY);
-        applyPlayerMovement(moveX, direction, timeSpeed, moveY);
+        applyPlayerMovement(moveX, direction, moveY);
         applyCameraMovement();
         render();
     }

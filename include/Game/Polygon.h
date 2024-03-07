@@ -2,11 +2,12 @@
 #define PLAY_TOGETHER_POLYGON_H
 
 #include <vector>
+#include <cmath>
 #include "Point.h"
 
 /**
  * @file Polygon.h
- * @brief Defines the Polygon class for handling polygons in 2D space.
+ * @brief Defines the Polygon class responsible for handling polygons in 2D space.
  */
 
 /**
@@ -15,7 +16,32 @@
  */
 class Polygon {
 public:
+    /** CONSTRUCTOR **/
+
+    Polygon(const std::vector<Point> &vertices);
+
+
+    /** ACCESSORS **/
+
+    [[nodiscard]] std::vector<Point> getVertices() const;
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+     * @brief Checks if a polygon is convex.
+     * @param polygon The polygon to check.
+     * @return True if the polygon is convex, false otherwise.
+     */
+    [[nodiscard]] bool isConvex() const;
+
+private:
+    /** ATTRIBUTES **/
+
     std::vector<Point> vertices; /**< The vertices of the polygon. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Calculate the distance between two points.

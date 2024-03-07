@@ -132,6 +132,11 @@ std::vector<Point> Player::getVerticesRoof() const {
     };
 }
 
+SDL_FRect Player::getBoundingBox() const {
+    // Return the bounding box of the player.
+    return {x, y, width, height};
+}
+
 
 /** MODIFIERS **/
 

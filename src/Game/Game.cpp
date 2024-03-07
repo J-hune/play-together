@@ -1,5 +1,70 @@
 #include "../../include/Game/Game.h"
 
+/**
+ * @file Game.cpp
+ * @brief Implements the Game class responsible for handling the main game logic.
+ */
+
+/** CONSTRUCTORS **/
+
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), player(initialPlayer) {}
+
+Game::Game() :
+            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                    (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
+            renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
+            level("experimentation"),
+            player(-50, 50, 1, 2, 20, 30) {}
+
+
+/** ACCESSORS **/
+
+GameState Game::getGameState() const {
+    return gameState;
+}
+
+Point Game::getAveragePlayersPositions() const {
+    float i = 1;  // Number of player in the game (at least one)
+    float x = player.getX(); // Initialization of the point on the initial player
+    float y = player.getY();
+
+    // Add x and y position of all players
+    for (const Player &character : characters) {
+        x += character.getX();
+        y += character.getY();
+        i++;
+    }
+
+    // Average x and y position of all players
+    x /= i; y /= i;
+
+    return {x, y};
+}
+
+
+/** MODIFIERS **/
+
+void Game::setLevel(std::string const &map_name) {
+    level = Level(map_name);
+}
+
+void Game::setRenderCameraPoint(bool state){
+    render_camera_point = state;
+}
+
+void Game::setRenderCameraArea(bool state){
+    render_camera_area = state;
+}
+
+void Game::setCameraIsShaking(bool state) {
+    camera.setIsShaking(state);
+}
+
+
+/** FUNCTIONS **/
+
+// Function to check AABB collision between two rectangles
 bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
     // Check for AABB collision
     return (a.x < b.x + b.w &&
@@ -8,13 +73,8 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
             a.y + a.h > b.y);
 }
 
-/**
- * @file Game.cpp
- * @brief Implements the Game class responsible for handling the main game logic.
- */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer)
-        : window(window), renderer(renderer), player(initialPlayer) {}
+/** METHODS **/
 
 void Game::teleportPlayer(float newX, float newY) {
     player.teleportPlayer(newX, newY);
@@ -32,43 +92,6 @@ void Game::removeCharacter(const Player &character) {
     if (it != characters.end()) {
         // Erase the character from the vector
         characters.erase(it);
-    }
-}
-
-void Game::loadPolygonsFromMap(const std::string& mapName) {
-    obstacles.clear();
-
-    // Define the file path for the polygon data
-    std::string filePath = "../assets/maps/" + mapName + "/polygons.txt";
-    std::cout << "File path: " << filePath << std::endl;
-
-    std::ifstream file(filePath);
-
-    if (file.is_open()) {
-        std::string line;
-
-        // Read each line from the file
-        while (std::getline(file, line)) {
-            Polygon currentPolygon;
-            std::istringstream iss(line);
-            char dummy;
-
-            // Extract points from each line
-            while (iss >> dummy >> std::ws && dummy == '(') {
-                int x;
-                int y;
-                iss >> x >> dummy >> y >> dummy;
-                currentPolygon.vertices.emplace_back(x, y);
-                iss >> dummy;
-            }
-
-            // Add the completed polygon to the obstacles vector
-            obstacles.push_back(currentPolygon);
-        }
-
-        file.close();
-    } else {
-        std::cerr << "Unable to open the file." << std::endl;
     }
 }
 
@@ -109,7 +132,7 @@ void Game::handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction,
             break;
         case SDLK_m:
             printf("Loading map 'diversity'\n");
-            loadPolygonsFromMap("diversity");
+            setLevel("diversity");
             break;
         default:
             break;
@@ -161,77 +184,11 @@ void Game::handleEvents(int &direction, float &moveY) {
 
             // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
-            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.x, (float)e.button.y + camera.y);
+            printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
     }
 }
 
-void Game::getAveragePlayersPositions(float *x, float *y) const {
-    float i = 1;  // Number of player in the game (at least one)
-
-    // Initialization of the point on the initial player
-    *x = player.getX();
-    *y = player.getY();
-
-    // Add x and y position of all players
-    for (const Player &character : characters) {
-        *x += character.getX();
-        *y += character.getY();
-        i++;
-    }
-
-    // Average x and y position of all players
-    *x /= i; *y /= i;
-}
-
-void Game::initializeCameraPosition() {
-    float x;
-    float y;
-    getAveragePlayersPositions(&x, &y);
-
-    // Initialize the camera so that players are bottom left
-    camera.x = x; camera.y = y - 2 * (camera.h / 3);
-
-    // The point is on the right of the area
-    if (x > camera.x + (camera.w - (camera.w / 2))) {
-        camera.x += x - (camera.x + (camera.w - (camera.w / 2)));
-    }
-    // The point is on the left of the area
-    else if (x < camera.x + (camera.w / 5)) {
-        camera.x -= (camera.x + (camera.w / 5)) - x;
-    }
-    // The point is on the bottom of the area
-    if (y > camera.y + (camera.h - (camera.h / 5))) {
-        camera.y += y - (camera.y + (camera.h - (camera.h / 5)));
-    }
-    // The point is on the top of the area
-    else if (y < camera.y + (camera.h / 5)) {
-        camera.y -= (camera.y + (camera.h / 5)) - y;
-    }
-}
-
-void Game::applyCameraMovement() {
-    float x;
-    float y;
-    getAveragePlayersPositions(&x, &y);
-
-    // The point is on the right of the area
-    if (x > camera.x + camera.w - (camera.w / 2)) {
-        camera.x += (x - (camera.x + (camera.w - (camera.w / 2)))) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the left of the area
-    else if (x < camera.x + (camera.w / 5)) {
-        camera.x -= ((camera.x + (camera.w / 5)) - x) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the bottom of the area
-    if (y > camera.y + (camera.h - (camera.h / 5))) {
-        camera.y += (y - (camera.y + (camera.h - (camera.h / 5)))) * LERP_SMOOTHING_FACTOR;
-    }
-    // The point is on the top of the area
-    else if (y < camera.y + (camera.h / 5)) {
-        camera.y -= ((camera.y + (camera.h / 5)) - y) * LERP_SMOOTHING_FACTOR;
-    }
-}
 
 void Game::applyPlayerMovement(float &moveX, float &moveY) {
     // If the gravity is switched change the direction of the y-axis move
@@ -243,12 +200,12 @@ void Game::applyPlayerMovement(float &moveX, float &moveY) {
     if(!player.getCanMove()){
         moveX = 0;
     }
-    if(player.getX() < camera.x){
-        player.setX(camera.x);
-        printf("camera.x : %f\n",camera.x);
+    if(player.getX() < camera.getX()){
+        player.setX(camera.getX());
+        printf("camera.x : %f\n", camera.getX());
     }
-    else if(player.getX() + player.getW() > camera.x + camera.w) {
-        player.setX(camera.x+ camera.w - player.getW());
+    else if(player.getX() + player.getW() > camera.getX() + camera.getW()) {
+        player.setX(camera.getX() + camera.getW() - player.getW());
     }
     else{
         player.setX(player.getX() + moveX);
@@ -262,7 +219,7 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
         player.setIsOnPlatform(false);
 
         // Check for collisions with each obstacle
-        for (const Polygon &obstacle: obstacles) {
+        for (const Polygon &obstacle: level.getObstacles()) {
 
             // Normal gravity
             if (!switchGravity) {
@@ -327,32 +284,32 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
 
 
         // Check for collisions with right camera borders
-        if (player.getX() > camera.x + camera.w - player.getW()) {
+        if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
 
             // Divide the velocity of the player
             moveX /= 5;
 
-            camera.x += moveX;
+            camera.setX(moveX);
 
             // Check if others players touch the left camera borders
             for (Player &character : characters){
-                if(character.getX() < camera.x){
+                if(character.getX() < camera.getX()){
                     character.setX(moveX);
                 }
             }
 
         }
         // Check for collisions with left camera borders
-        else if (player.getX() < camera.x) {
+        else if (player.getX() < camera.getX()) {
 
             // Divide the velocity of the player
             moveX /= 5;
 
-            camera.x += moveX;
+            camera.setX(moveX);
 
             // Check if others players touch the right camera borders
             for (Player &character: characters) {
-                if (character.getX() > camera.x + camera.w - character.getW()) {
+                if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
                     character.setX(moveX);
                 }
             }
@@ -367,25 +324,17 @@ void Game::render() {
 
     // Draw the player
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_FRect playerRect = {player.getX() - camera.x, player.getY() - camera.y, player.getW(), player.getH()};
+    SDL_FRect playerRect = {player.getX() - camera.getX(), player.getY() - camera.getY(), player.getW(), player.getH()};
     SDL_RenderFillRectF(renderer, &playerRect);
 
-    /*// Draw the characters
-    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    SDL_FRect characterRect = {characters[0].x - camera.x, characters[0].y - camera.y, characters[0].width, characters[0].height};
-    SDL_RenderFillRectF(renderer, &characterRect);
-
+    // Draw the characters
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_FRect characterRect1 = {characters[1].x - camera.x, characters[1].y - camera.y, characters[1].width, characters[1].height};
-    SDL_RenderFillRectF(renderer, &characterRect1);
+    for (const Player &character : characters) {
+        SDL_FRect characterRect = {character.getX() - camera.getX(), character.getY() - camera.getY(), character.getW(), character.getH()};
+        SDL_RenderFillRectF(renderer, &characterRect);
+    }
 
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_FRect characterRect2 = {characters[2].x - camera.x, characters[2].y - camera.y, characters[2].width, characters[2].height};
-    SDL_RenderFillRectF(renderer, &characterRect2);
-    */
-
-
-    /*
+    /* // Draw the player colliders
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     std::vector<Point> vertexRight = player.getVerticesHorizontal(1);
     for (size_t i = 0; i < vertexRight.size(); ++i) {
@@ -418,12 +367,29 @@ void Game::render() {
 
     // Draw the obstacles
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (const Polygon &obstacle: obstacles) {
-        for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
-            const auto &vertex1 = obstacle.vertices[i];
-            const auto &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    for (const Polygon &obstacle: level.getObstacles()) {
+        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+            std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
         }
+    }
+
+    // Draw the camera point
+    if (render_camera_point) {
+        Point camera_point = getAveragePlayersPositions();
+        SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+        SDL_FRect cameraPointRect = {camera_point.x - camera.getX(), camera_point.y - camera.getY(), 20, 20};
+        SDL_RenderFillRectF(renderer, &cameraPointRect);
+        SDL_RenderDrawRectF(renderer, &cameraPointRect);
+    }
+
+    // Draw the camera area
+    if (render_camera_area) {
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+        SDL_FRect cameraRect = {camera.getArea().x, camera.getArea().y, camera.getArea().w + player.getW(), camera.getArea().h + player.getH() - 10};
+        SDL_RenderDrawRectF(renderer, &cameraRect);
     }
 
     // Present the renderer and introduce a slight delay
@@ -433,7 +399,7 @@ void Game::render() {
 
 bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygon &obstacle) {
     // Check for convexity of the obstacle
-    if (!isConvex(obstacle)) {
+    if (!obstacle.isConvex()) {
         printf("The obstacle is not convex\n");
         return false;
     }
@@ -445,9 +411,10 @@ bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygo
     };
 
     // Add axes perpendicular to the sides of the polygon
-    for (size_t i = 0; i < obstacle.vertices.size(); ++i) {
-        const Point &vertex1 = obstacle.vertices[i];
-        const Point &vertex2 = obstacle.vertices[(i + 1) % obstacle.vertices.size()];
+    for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+        std::vector<Point> vertices = obstacle.getVertices();
+        const Point &vertex1 = vertices[i];
+        const Point &vertex2 = vertices[(i + 1) % vertices.size()];
 
         Point edge = {vertex2.x - vertex1.x, vertex2.y - vertex1.y};
         Point axis = {-edge.y, edge.x};
@@ -468,7 +435,7 @@ bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygo
         auto obstacleProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
         auto obstacleProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
 
-        for (const Point &vertex: obstacle.vertices) {
+        for (const Point &vertex: obstacle.getVertices()) {
             float projection = vertex.x * axis.x + vertex.y * axis.y;
             obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
             obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
@@ -483,39 +450,34 @@ bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygo
     return true; // Collision detected
 }
 
-bool Game::isConvex(const Polygon &polygon) {
-    size_t n = polygon.vertices.size();
-    if (n < 3) {
-        return false;
-    }
-
-    // Check if the sum of interior angles equals (n - 2) * 180 degrees (convex polygon property) with a tolerance
-    const double tolerance = 1e-3;
-    return std::abs(polygon.totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
-}
-
 void Game::run() {
     int direction = 0;
     float moveX = 0;
     float moveY = 0;
+    gameState = GameState::RUNNING;
 
     // Game loop
-    while (isRunning) {
+    while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
         handleEvents(direction, moveY);
         player.calculatePlayerMovement(moveX, direction, moveY);
         handleCollisions(player.getCurrentDirection(), moveY, moveX);
         applyPlayerMovement(moveX, moveY);
-        applyCameraMovement();
+        camera.applyCameraMovement(getAveragePlayersPositions());
         render();
-    }
 
-    // Close the window and clean up resources
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+        SDL_Delay(4);
+    }
+}
+
+void Game::pause() {
+    gameState = GameState::PAUSED;
 }
 
 void Game::stop() {
-    isRunning = false;
+    gameState = GameState::STOPPED;
+
+    // Reset the player position
+    player.setX(50);
+    player.setY(50);
 }

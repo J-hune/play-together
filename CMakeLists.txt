@@ -30,16 +30,6 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${SDL2_GFX_INCLUDE_DIRS})
 
-#Find boost library
-#find_package( Boost 1.82 COMPONENTS lboost_serialization  REQUIRED )
-find_package(Boost COMPONENTS serialization REQUIRED)
-#FIND_PACKAGE(Boost)
-IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-    ADD_DEFINITIONS( "-DHAS_BOOST" )
-ENDIF()
-#target_include_directories( play-together PRIVATE ${Boost_INCLUDE_DIR})
-
 # Automatic retrieval of source files
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -58,9 +48,5 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets)
 # Create the executable
 add_executable(play-together WIN32 ${SOURCES} ${HEADERS})
 
-
 # Link libraries
 target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_GFX_LIBRARY})
-target_link_libraries(play-together ${Boost_LIBRARIES})
-target_link_libraries(play-together Boost::serialization)
-

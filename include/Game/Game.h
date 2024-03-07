@@ -6,7 +6,6 @@
 #include <climits>
 #include <string>
 #include <ranges>
-
 #include "Polygon.h"
 #include "Player.h"
 #include "Camera.h"
@@ -17,8 +16,6 @@ enum class GameState {
     PAUSED,
     STOPPED
 };
-
-
 
 /**
  * @file Game.h
@@ -31,12 +28,11 @@ enum class GameState {
  */
 class Game {
 public:
-  
-    /** CONSTRUCTORS **/
+    /** CONSTRUCTOR **/
 
     Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
          const Player &initialPlayer);
-    Game();
+
 
     /** ACCESSORS **/
 
@@ -45,6 +41,7 @@ public:
      * @return The current game state.
      */
     [[nodiscard]] GameState getGameState() const;
+
     /**
      * @brief Get a point of the average position of all players combined.
      * @param[out] x The x-coordinate of the average players position
@@ -115,6 +112,7 @@ public:
      * @param y The Y-coordinate of the location.
      */
     void teleportPlayer(float x, float y);
+
     /**
      * @brief method to serialize the object
      * @tparam Archive
@@ -127,7 +125,6 @@ public:
         ar & characters;
         ar & camera;
     }
-  
 
 
 private:

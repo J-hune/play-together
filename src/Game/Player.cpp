@@ -7,8 +7,6 @@
 Player::Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight)
         : x(startX), y(startY), speed(playerSpeed), width(playerWidth), height(playerHeight) {}
 
-Player::Player(): x(0), y(0), speed(0), width(0), height(0) {}
-
 std::vector<Point> Player::getVertices() const {
     // Return the vertices of the player's bounding box.
     return {

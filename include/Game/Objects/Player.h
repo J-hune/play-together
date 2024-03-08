@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <SDL_rect.h>
-#include "Point.h"
+#include "../Point.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
 const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */

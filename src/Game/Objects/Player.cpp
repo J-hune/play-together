@@ -1,4 +1,4 @@
-#include "../../include/Game/Player.h"
+#include "../../../include/Game/Objects/Player.h"
 
 /**
  * @file Player.cpp

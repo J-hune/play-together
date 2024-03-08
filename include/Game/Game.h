@@ -8,9 +8,9 @@
 #include <ranges>
 #include <cmath>
 #include "Polygon.h"
-#include "Player.h"
 #include "Camera.h"
 #include "Level.h"
+#include "Objects/Player.h"
 
 enum class GameState {
     RUNNING,

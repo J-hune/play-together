@@ -65,7 +65,20 @@ public:
     /** MODIFIERS **/
 
     /**
+    * @brief Set the x attribute.
+    * @param val The new value of the x attribute.
+    */
+    void setX(float val);
+
+    /**
+    * @brief Set the x attribute.
+    * @param val The new value of the x attribute.
+    */
+    void setY(float val);
+
+    /**
      * @brief Set the isShaking attribute.
+     * @param state The new state of the isShaking attribute.
      * @see toggleIsShaking for a similar operation.
      */
     void setIsShaking(bool state);

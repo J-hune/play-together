@@ -6,6 +6,7 @@
 #include <climits>
 #include <string>
 #include <ranges>
+#include <cmath>
 #include "Polygon.h"
 #include "Player.h"
 #include "Camera.h"
@@ -26,6 +27,7 @@ enum class GameState {
  * @class Game
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
  */
+
 class Game {
 public:
     /** CONSTRUCTORS **/
@@ -53,6 +55,13 @@ public:
 
 
     /** MODIFIERS **/
+
+    /**
+     * @brief Teleports the player to a specific location.
+     * @param newX The X-coordinate of the location.
+     * @param newY The Y-coordinate of the location.
+     */
+    void teleportPlayer(float newX, float newY);
 
     /**
      * @brief Set the level attribute.
@@ -109,13 +118,6 @@ public:
     void removeCharacter(const Player &character);
 
     /**
-     * @brief Teleports the player to a specific location.
-     * @param x The X-coordinate of the location.
-     * @param y The Y-coordinate of the location.
-     */
-    void teleportPlayer(float x, float y);
-
-    /**
      * @brief Serialize the game object
      * @tparam Archive
      * @param ar
@@ -138,6 +140,9 @@ private:
     Level level; /**< The level object */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
+    bool isRunning = true; /**< Flag indicating if the game is running. */
+    bool switchGravity = false;
+
     bool render_camera_point = false;
     bool render_camera_area = false;
 
@@ -148,32 +153,46 @@ private:
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
-     * @param moveX Reference to the X-axis movement variable.
+     * @param direction Reference to the direction of the player.
      * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(float &moveX, float &moveY);
+    void handleEvents(int &direction, float &moveY);
+
+    /**
+     * @brief Handles SDL Key up events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was release.
+     */
+    void handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent);
+
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     * @param direction Reference to the direction of the player.
+     * @param moveY Reference to the Y-axis movement variable.
+     */
+    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction, float &moveY);
 
     /**
      * @brief Applies player movement based on the current movement variables.
      * @param moveX The movement along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(float moveX, float moveY);
+    void applyPlayerMovement(float &moveX, float &moveY);
 
     /**
      * @brief Checks for collision between the player and a polygon obstacle.
-     * @param player The player object.
+     * @param playerVertices The vector of Point representing the vertices of the player object.
      * @param obstacle The polygon obstacle.
      * @return True if a collision is detected, false otherwise.
      */
-    static bool checkCollision(const Player &player, const Polygon &obstacle);
+    static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
 
     /**
      * @brief Handles collisions between the player and obstacles.
-     * @param moveX The movement along the X-axis.
+     * @param direction The direction along the X-axis.
      * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(float moveX, float moveY);
+    void handleCollisions(int direction, float moveY, float &moveX);
 
     /**
      * @brief Renders the game by drawing the player and obstacles.

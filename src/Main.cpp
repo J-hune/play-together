@@ -26,6 +26,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
         return 1;
     }
+
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         fprintf(stderr, "Could not create renderer: %s\n", SDL_GetError());
@@ -44,15 +45,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Initialize Game
     Camera camera = Camera();
-    Level level("experimentation");
-    Player initialPlayer(-50, 50, 2, 20, 30);
+    Level level("diversity");
+    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
     Game game(window, renderer, camera, level, initialPlayer);
 
     // Initialize Menu
     Menu menu(renderer, font, &game, &quit);
     menu.render();
-
-
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -85,12 +84,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 2, 20, 30);
-            Player character2(150, 50, 2, 20, 30);
-            Player character3(200, 50, 2, 20, 30);
+            Player character1(100, 50, 1, 2, 20, 30);
+            Player character2(150, 50, 1, 2, 20, 30);
+            Player character3(200, 50, 1, 2, 20, 30);
 
-            game.addCharacter(character1);
-            game.addCharacter(character2);
+            //game.addCharacter(character1);
+            //game.addCharacter(character2);
             game.addCharacter(character3);
 
             game.removeCharacter(character3);

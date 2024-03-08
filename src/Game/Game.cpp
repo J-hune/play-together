@@ -209,7 +209,6 @@ void Game::applyPlayerMovement(float &moveX, float &moveY) {
     }
     if(player.getX() < camera.getX()){
         player.setX(camera.getX());
-        printf("camera.x : %f\n", camera.getX());
     }
     else if(player.getX() + player.getW() > camera.getX() + camera.getW()) {
         player.setX(camera.getX() + camera.getW() - player.getW());
@@ -232,13 +231,11 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
             if (!switchGravity) {
                 // If collision detected with the roof, the player can't jump anymore
                 if (checkCollision(player.getVerticesRoof(), obstacle)) {
-                    printf("Collision detected on head\n");
                     player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
                 }
 
                 // If collision detected with the ground, the player is on a platform
                 if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
-                    printf("Collision detected on foot\n");
                     player.setIsOnPlatform(true);
                 }
             }
@@ -246,20 +243,17 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
             else {
                 // If collision detected with the roof, the player is on a platform
                 if (checkCollision(player.getVerticesRoof(), obstacle)) {
-                    printf("Collision detected on foot\n");
                     player.setIsOnPlatform(true);
                 }
 
                 // If collision detected with the ground, the player can't jump anymore
                 if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
-                    printf("Collision detected on head\n");
                     player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
                 }
             }
 
             // If collision detected with the wall, the player can't move
             if (player.getCanMove() && checkCollision(player.getVerticesHorizontal(direction), obstacle)) {
-                printf("Collision detected for horizontal movement\n");
                 player.setCanMove(false);
                 player.setTimeSpeed(0);
             }

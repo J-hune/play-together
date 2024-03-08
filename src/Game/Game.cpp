@@ -129,6 +129,7 @@ void Game::handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction,
         case SDLK_g:
             switchGravity = !switchGravity;
             player.setIsOnPlatform(false);
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
             break;
         case SDLK_m:
             printf("Loading map 'diversity'\n");

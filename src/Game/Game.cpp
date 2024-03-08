@@ -134,6 +134,12 @@ void Game::handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction,
             printf("Loading map 'diversity'\n");
             setLevel("diversity");
             break;
+        case SDLK_ESCAPE:
+            pause();
+            break;
+        case SDLK_DELETE:
+            stop();
+            break;
         default:
             break;
     }
@@ -289,7 +295,7 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
             // Divide the velocity of the player
             moveX /= 5;
 
-            camera.setX(moveX);
+            camera.setX(camera.getX() + moveX);
 
             // Check if others players touch the left camera borders
             for (Player &character : characters){
@@ -305,7 +311,7 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
             // Divide the velocity of the player
             moveX /= 5;
 
-            camera.setX(moveX);
+            camera.setX(camera.getX() + moveX);
 
             // Check if others players touch the right camera borders
             for (Player &character: characters) {
@@ -465,8 +471,6 @@ void Game::run() {
         applyPlayerMovement(moveX, moveY);
         camera.applyCameraMovement(getAveragePlayersPositions());
         render();
-
-        SDL_Delay(4);
     }
 }
 

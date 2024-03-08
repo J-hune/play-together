@@ -53,8 +53,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Menu menu(renderer, font, &game, &quit);
     menu.render();
 
-
-
     // Initialize Application Console
     ApplicationConsole console(&game);
     std::jthread consoleThread(&ApplicationConsole::run, &console);
@@ -90,8 +88,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             Player character2(150, 50, 1, 2, 20, 30);
             Player character3(200, 50, 1, 2, 20, 30);
 
-            game.addCharacter(character1);
-            game.addCharacter(character2);
+            //game.addCharacter(character1);
+            //game.addCharacter(character2);
             game.addCharacter(character3);
 
             game.removeCharacter(character3);

@@ -36,6 +36,14 @@ SDL_FRect Camera::getArea() const {
 
 /** MODIFIERS **/
 
+void Camera::setX(float val) {
+    x = val;
+}
+
+void Camera::setY(float val) {
+    y = val;
+}
+
 void Camera::setIsShaking(bool state) {
     isShaking = state;
 }

@@ -9,7 +9,7 @@
 
 Level::Level(const std::string &map_name) {
     loadPolygonsFromMap(map_name);
-    MovingPlatform1D platform(150, 0, 80, 20, 0.5F, 100, 400, false, false);
+    MovingPlatform1D platform(150, 0, 80, 20, 0.3F, 100, 400, false, false);
     movingPlatforms1D.push_back(platform);
 }
 

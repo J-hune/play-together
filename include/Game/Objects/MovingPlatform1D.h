@@ -28,27 +28,39 @@ public:
 
     /**
      * @brief Return the x attribute.
-     * @return The value of the x attribute
+     * @return The value of the x attribute.
      */
     [[nodiscard]] float getX() const;
 
     /**
      * @brief Return the y attribute.
-     * @return The value of the y attribute
+     * @return The value of the y attribute.
      */
     [[nodiscard]] float getY() const;
 
     /**
      * @brief Return the weight attribute.
-     * @return The value of the weight attribute
+     * @return The value of the weight attribute.
      */
     [[nodiscard]] float getW() const;
 
     /**
      * @brief Return the height attribute.
-     * @return The value of the height attribute
+     * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const;
+
+    /**
+     * @brief Return the move attribute.
+     * @return The value of the move attribute.
+     */
+    [[nodiscard]] float getMove() const;
+
+    /**
+     * @brief Return the axis attribute.
+     * @return The value of the axis attribute.
+     */
+    [[nodiscard]] bool getAxis() const;
 
     /**
      * @brief Get the bounding box of the platform.
@@ -73,6 +85,7 @@ private:
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
     float speed; /**< The speed of the platform. */
+    float move = 1; /**< The number of pixel the platform has moved */
 
     float min; /**< The minimum x-coordinate of the platform's position. */
     float max; /**< The maximum x-coordinate of the platform's position. */

@@ -288,6 +288,8 @@ void Game::handleCollisions() {
             // If collision detected with the ground, the player is on the platform
             if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player.setIsOnPlatform(true);
+                // Add platform velocity to the player by checking on which axis it moves
+                platform.getAxis() ? player.setY(player.getY() + platform.getMove()) : player.setX(player.getX() + platform.getMove());
             }
             // If collision detected with the wall, the player can't move
             if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {

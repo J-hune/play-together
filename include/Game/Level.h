@@ -1,12 +1,13 @@
 #ifndef PLAY_TOGETHER_LEVEL_H
 #define PLAY_TOGETHER_LEVEL_H
 
-#include <SDL.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include "Polygon.h"
+#include "Camera.h"
+#include "Objects/MovingPlatform1D.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
@@ -37,11 +38,33 @@ public:
      */
     [[nodiscard]] std::vector<Polygon> getObstacles() const;
 
+    /**
+     * @brief Return the movingPlatform attribute.
+     * @return A vector of MovingPlatform.
+     */
+    [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+     * @brief Apply the movement of every platforms in the level.
+     */
+    void applyPlatformsMovement();
+
+    /**
+     * @brief Renders the game by drawing the player and obstacles.
+     * @param[out] renderer The renderer associated to the current game
+     * @param camera The camera associated to the current game
+     */
+    void renderPlatforms(SDL_Renderer *renderer, Camera camera) const;
+
 
 private:
     /** ATTRIBUTES **/
 
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of polygons representing obstacles. */
 
 
     /** PRIVATE METHODS **/

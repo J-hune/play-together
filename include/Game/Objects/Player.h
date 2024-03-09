@@ -159,6 +159,25 @@ public:
     [[nodiscard]] std::vector<Point> getVerticesRoof() const;
 
     /**
+     * @brief Gets the horizontal collider bounding box of the player's, according to its current direction.
+     * @param direction The direction in which the player intends to move.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getHorizontalCollider(int direction) const;
+
+    /**
+     * @brief Get the bounding box of the player's ground collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getGroundColliderBoundingBox() const;
+
+    /**
+     * @brief Get the bounding box of the player's roof collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getRoofColliderBoundingBox() const;
+
+    /**
      * @brief Get the bounding box of the player.
      * @return SDL_Rect representing the bounding box.
      */
@@ -293,6 +312,18 @@ private:
 
 
     /** PRIVATE METHODS **/
+
+    /**
+     * @brief Get the bounding box of the player's left collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getLeftColliderBoundingBox() const;
+
+    /**
+     * @brief Get the bounding box of the player's right collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getRightColliderBoundingBox() const;
 
 };
 

@@ -9,17 +9,39 @@
 
 Level::Level(const std::string &map_name) {
     loadPolygonsFromMap(map_name);
+    MovingPlatform1D platform(150, 0, 80, 20, 0.5F, 100, 400, false, false);
+    movingPlatforms1D.push_back(platform);
 }
 
 
 /** ACCESSORS **/
 
-std::vector<Polygon> Level::getObstacles() const{
+std::vector<Polygon> Level::getObstacles() const {
     return obstacles;
+}
+
+std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
+    return movingPlatforms1D;
 }
 
 
 /** METHODS **/
+
+void Level::applyPlatformsMovement() {
+    // Apply movement for 1D platforms
+    for (MovingPlatform1D &platform: movingPlatforms1D) {
+        platform.applyMovingPlatformMovement();
+    }
+}
+
+void Level::renderPlatforms(SDL_Renderer *renderer, Camera camera) const {
+    // Draw the moving platforms
+    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+    for (const MovingPlatform1D &platform: movingPlatforms1D) {
+        SDL_FRect platformRect = {platform.getX() - camera.getX(), platform.getY() - camera.getY(), platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platformRect);
+    }
+}
 
 void Level::loadPolygonsFromMap(const std::string &mapName) {
     obstacles.clear();

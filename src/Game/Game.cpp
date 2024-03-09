@@ -283,6 +283,23 @@ void Game::handleCollisions(int direction, float moveY, float &moveX) {
          * }
          */
 
+        // Check for collisions with each platforms
+        for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
+            // If collision detected with the roof, the player can't jump anymore
+            if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+            }
+            // If collision detected with the ground, the player is on the platform
+            if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player.setIsOnPlatform(true);
+            }
+            // If collision detected with the wall, the player can't move
+            if (checkAABBCollision(player.getHorizontalCollider(direction), platform.getBoundingBox())) {
+                player.setCanMove(false);
+                player.setTimeSpeed(0);
+            }
+        }
+
 
         // Check for collisions with right camera borders
         if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
@@ -377,6 +394,8 @@ void Game::render() {
         }
     }
 
+    level.renderPlatforms(renderer, camera); // Draw the platforms
+
     // Draw the camera point
     if (render_camera_point) {
         Point camera_point = getAveragePlayersPositions();
@@ -461,6 +480,7 @@ void Game::run() {
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
         handleEvents(direction, moveY);
+        level.applyPlatformsMovement();
         player.calculatePlayerMovement(moveX, direction, moveY);
         handleCollisions(player.getCurrentDirection(), moveY, moveX);
         applyPlayerMovement(moveX, moveY);

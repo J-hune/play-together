@@ -80,18 +80,7 @@ std::vector<Point> Player::getVertices() const {
 }
 
 std::vector<Point> Player::getVerticesHorizontal(int direction) const {
-    // Return the vertices of the player's bounding box, with added margin to capture wall within the area.
-
-    std::vector<Point> verticesDirection;
-
-    if(direction==PLAYER_LEFT){
-        verticesDirection = getVerticesLeft();
-    }
-    else{
-        verticesDirection = getVerticesRight();
-    }
-
-    return verticesDirection;
+    return direction == PLAYER_LEFT ? getVerticesLeft() : getVerticesRight();
 }
 
 std::vector<Point> Player::getVerticesLeft() const {

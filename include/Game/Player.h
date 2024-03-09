@@ -135,18 +135,6 @@ public:
     [[nodiscard]] std::vector<Point> getVerticesHorizontal(int direction) const;
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
-     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
-     */
-    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
-
-    /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
-     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
-     */
-    [[nodiscard]] std::vector<Point> getVerticesRight() const;
-
-    /**
      * @brief Gets the vertices of the player's bounding box, adjusted to capture the ground.
      * @return A vector of Point representing vertices, with added margin to capture ground within the area.
      */
@@ -293,6 +281,18 @@ private:
 
 
     /** PRIVATE METHODS **/
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
+     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
+     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesRight() const;
 
 };
 

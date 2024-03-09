@@ -182,9 +182,56 @@ private:
     static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
 
     /**
-     * @brief Handles collisions between the player and obstacles.
+     * @brief Handles collisions between the player and platform.
+     */
+    void handleCollisionsWithObstacles();
+
+    /**
+     * @brief Handles collisions between the player and platforms.
+     */
+    void handleCollisionsWithPlatforms();
+
+    /**
+     * @brief Handles collisions between the player and other players.
+     */
+    void handleCollisionsWithOtherPlayers();
+
+    /**
+     * @brief Handles collisions between the player and camera borders.
+     */
+    void handleCollisionsWithCameraBorders();
+
+    /**
+     * @brief Handles collisions between the player and every object.
+     * @see handleCollisionsReversedMavity() for handling collisions with reversed mavity.
      */
     void handleCollisions();
+
+    /**
+     * @brief Handles collisions between the player and platform when mavity is reversed.
+     */
+    void handleCollisionsWithObstaclesReverseMavity();
+
+    /**
+     * @brief Handles collisions between the player and platforms when the mavity is reversed.
+     */
+    void handleCollisionsWithPlatformsReversedMavity();
+
+    /**
+     * @brief Handles collisions between the player and other players when mavity is reversed.
+     */
+    void handleCollisionsWithCameraBordersReversedMavity();
+
+    /**
+     * @brief Handles collisions between the player and camera borders when mavity is reversed.
+     */
+    void handleCollisionsWithOtherPlayersReversedMavity();
+
+    /**
+     * @brief Main method that handle every collision when the mavity is reversed.
+     * @see handleCollisions() for handling collisions with normal mavity.
+     */
+    void handleCollisionsReversedMavity();
 
     /**
      * @brief Renders the game by drawing the player and obstacles.

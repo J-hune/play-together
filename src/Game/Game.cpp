@@ -215,122 +215,231 @@ void Game::applyPlayerMovement() {
     player.setY(player.getY() + player.getMoveY());
 }
 
-void Game::handleCollisions() {
-    player.setCanMove(true);
-    if (player.getMoveY() != 0 || player.getCurrentDirection() != 0) {
-        player.setIsOnPlatform(false);
 
-        // Check for collisions with each obstacle
-        for (const Polygon &obstacle: level.getObstacles()) {
+/** HANDLE COLLISIONS **/
 
-            // Normal gravity
-            if (!switchGravity) {
-                // If collision detected with the roof, the player can't jump anymore
-                if (checkCollision(player.getVerticesRoof(), obstacle)) {
-                    player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
-                }
-
-                // If collision detected with the ground, the player is on a platform
-                if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
-                    player.setIsOnPlatform(true);
-                }
-            }
-            // Reversed gravity
-            else {
-                // If collision detected with the roof, the player is on a platform
-                if (checkCollision(player.getVerticesRoof(), obstacle)) {
-                    player.setIsOnPlatform(true);
-                }
-
-                // If collision detected with the ground, the player can't jump anymore
-                if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
-                    player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
-                }
-            }
-
-            // If collision detected with the wall, the player can't move
-            if (player.getCanMove() && checkCollision(player.getVerticesHorizontal(), obstacle)) {
-                player.setCanMove(false);
-                player.setTimeSpeed(0);
-            }
+void Game::handleCollisionsWithObstacles() {
+    // Check collisions with each obstacle
+    for (const Polygon &obstacle: level.getObstacles()) {
+        // If collision detected with the roof, the player can't jump anymore
+        if (checkCollision(player.getVerticesRoof(), obstacle)) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
         }
-
-        /*
-        // Check for collisions with other characters
-        for (Player const &character : characters) {
-            if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
-                printf("Collision detected with another character\n");
-                player.x -= moveX;
-                player.y -= moveY;
-            }
+        // If collision detected with the ground, the player is on a platform
+        if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
+            player.setIsOnPlatform(true);
         }
-        */
-
-
-        /*// Check for collisions with down camera borders
-         * if (player.y < camera.y){
-         *
-         * }
-         */
-
-        /*// Check for collisions with up camera borders
-         * if (player.y > camera.y + camera.h - player.height){
-         *
-         * }
-         */
-
-        // Check for collisions with each platforms
-        for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-            // If collision detected with the roof, the player can't jump anymore
-            if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
-            // If collision detected with the ground, the player is on the platform
-            if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player.setIsOnPlatform(true);
-                // Add platform velocity to the player by checking on which axis it moves
-                platform.getAxis() ? player.setY(player.getY() + platform.getMove()) : player.setX(player.getX() + platform.getMove());
-            }
-            // If collision detected with the wall, the player can't move
-            if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player.setCanMove(false);
-                player.setTimeSpeed(0);
-            }
+        // If collision detected with the wall, the player can't move
+        if (player.getCanMove() && checkCollision(player.getVerticesHorizontal(), obstacle)) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
         }
+    }
+}
 
-
-        // Check for collisions with right camera borders
-        if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
-
-            // Divide the velocity of the player
-            player.setMoveX(player.getMoveX()/5);
-
-            camera.setX(camera.getX() + player.getMoveX());
-
-            // Check if others players touch the left camera borders
-            for (Player &character : characters){
-                if(character.getX() < camera.getX()){
-                    character.setX(player.getMoveX());
-                }
-            }
-
+void Game::handleCollisionsWithPlatforms() {
+    // Check for collisions with each 1D moving platforms
+    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
+        // If collision detected with the roof, the player can't jump anymore
+        if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
         }
-        // Check for collisions with left camera borders
-        else if (player.getX() < camera.getX()) {
+        // If collision detected with the ground, the player is on the platform
+        if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setIsOnPlatform(true);
+            // Add platform velocity to the player by checking on which axis it moves
+            platform.getAxis() ? player.setY(player.getY() + platform.getMove()) : player.setX(player.getX() + platform.getMove());
+        }
+        // If collision detected with the wall, the player can't move
+        if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
+        }
+    }
+}
 
-            // Divide the velocity of the player
-            player.setMoveX(player.getMoveX()/5);
+void Game::handleCollisionsWithOtherPlayers() {
+    /*
+    // Check for collisions with other characters
+    for (Player const &character : characters) {
+    if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
+    printf("Collision detected with another character\n");
+    player.x -= moveX;
+    player.y -= moveY;
+    }
+    }
+    */
+}
 
-            camera.setX(camera.getX() + player.getMoveX());
+void Game::handleCollisionsWithCameraBorders() {
+    // Check for collisions with right camera borders
+    if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
 
-            // Check if others players touch the right camera borders
-            for (Player &character: characters) {
-                if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
-                    character.setX(player.getMoveX());
-                }
+        // Divide the velocity of the player
+        player.setMoveX(player.getMoveX()/5);
+
+        camera.setX(camera.getX() + player.getMoveX());
+
+        // Check if others players touch the left camera borders
+        for (Player &character : characters){
+            if(character.getX() < camera.getX()){
+                character.setX(player.getMoveX());
             }
         }
     }
+    // Check for collisions with left camera borders
+    else if (player.getX() < camera.getX()) {
+
+        // Divide the velocity of the player
+        player.setMoveX(player.getMoveX()/5);
+
+        camera.setX(camera.getX() + player.getMoveX());
+
+        // Check if others players touch the right camera borders
+        for (Player &character: characters) {
+            if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
+                character.setX(player.getMoveX());
+            }
+        }
+    }
+    /*// Check for collisions with down camera borders
+    * if (player.y < camera.y){
+    *
+    * }
+    */
+    /*// Check for collisions with up camera borders
+    * if (player.y > camera.y + camera.h - player.height){
+    *
+    * }
+    */
+}
+
+
+void Game::handleCollisions() {
+    player.setCanMove(true);
+
+    // Check obstacles collisions only if the player has moved
+    if (player.getMoveY() != 0 || player.getCurrentDirection() != 0) {
+        player.setIsOnPlatform(false);
+        handleCollisionsWithObstacles();
+    }
+
+    handleCollisionsWithOtherPlayers(); // Check collisions with other players
+    handleCollisionsWithPlatforms(); // Check collisions with platforms
+    handleCollisionsWithCameraBorders(); // Check collisions with camera borders
+}
+
+
+/** HANDLE COLLISIONS REVERSED MAVITY **/
+
+void Game::handleCollisionsWithObstaclesReverseMavity() {
+    // Check collisions with each obstacle
+    for (const Polygon &obstacle: level.getObstacles()) {
+        // If collision detected with the roof, the player is on a platform
+        if (checkCollision(player.getVerticesRoof(), obstacle)) {
+            player.setIsOnPlatform(true);
+        }
+        // If collision detected with the ground, the player can't jump anymore
+        if (!player.getIsOnPlatform() && checkCollision(player.getVerticesGround(), obstacle)) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+        }
+        // If collision detected with the wall, the player can't move
+        if (player.getCanMove() && checkCollision(player.getVerticesHorizontal(), obstacle)) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
+        }
+    }
+}
+
+void Game::handleCollisionsWithPlatformsReversedMavity() {
+    // Check for collisions with each 1D moving platforms
+    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
+        // If collision detected with the roof, the player is on the platform
+        if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setIsOnPlatform(true);
+            // Add platform velocity to the player by checking on which axis it moves
+            platform.getAxis() ? player.setY(player.getY() + platform.getMove()) : player.setX(player.getX() + platform.getMove());
+        }
+        // If collision detected with the ground, the player can't jump anymore
+        if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+        }
+        // If collision detected with the wall, the player can't move
+        if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
+        }
+    }
+}
+
+void Game::handleCollisionsWithOtherPlayersReversedMavity() {
+    /*
+    // Check for collisions with other characters
+    for (Player const &character : characters) {
+    if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
+    printf("Collision detected with another character\n");
+    player.x -= moveX;
+    player.y -= moveY;
+    }
+    }
+    */
+}
+
+void Game::handleCollisionsWithCameraBordersReversedMavity() {
+    // Check for collisions with right camera borders
+    if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
+
+        // Divide the velocity of the player
+        player.setMoveX(player.getMoveX()/5);
+
+        camera.setX(camera.getX() + player.getMoveX());
+
+        // Check if others players touch the left camera borders
+        for (Player &character : characters){
+            if(character.getX() < camera.getX()){
+                character.setX(player.getMoveX());
+            }
+        }
+    }
+        // Check for collisions with left camera borders
+    else if (player.getX() < camera.getX()) {
+
+        // Divide the velocity of the player
+        player.setMoveX(player.getMoveX()/5);
+
+        camera.setX(camera.getX() + player.getMoveX());
+
+        // Check if others players touch the right camera borders
+        for (Player &character: characters) {
+            if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
+                character.setX(player.getMoveX());
+            }
+        }
+    }
+    /*// Check for collisions with down camera borders
+    * if (player.y < camera.y){
+    *
+    * }
+    */
+    /*// Check for collisions with up camera borders
+    * if (player.y > camera.y + camera.h - player.height){
+    *
+    * }
+    */
+}
+
+void Game::handleCollisionsReversedMavity() {
+    player.setCanMove(true);
+
+    // Check obstacles collisions only if the player has moved
+    if (player.getMoveY() != 0 || player.getCurrentDirection() != 0) {
+        player.setIsOnPlatform(false);
+        handleCollisionsWithObstaclesReverseMavity();
+    }
+
+    handleCollisionsWithOtherPlayersReversedMavity(); // Check collisions with other players
+    handleCollisionsWithPlatformsReversedMavity(); // Check collisions with platforms
+    handleCollisionsWithCameraBordersReversedMavity(); // Check collisions with camera borders
 }
 
 void Game::render() {
@@ -477,7 +586,7 @@ void Game::run() {
         handleEvents();
         level.applyPlatformsMovement();
         player.calculatePlayerMovement();
-        handleCollisions();
+        switchGravity ? handleCollisionsReversedMavity() : handleCollisions();
         applyPlayerMovement();
         camera.applyCameraMovement(getAveragePlayersPositions());
         render();

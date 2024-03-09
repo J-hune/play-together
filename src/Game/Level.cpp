@@ -21,6 +21,18 @@ std::vector<Polygon> Level::getObstacles() const{
 
 /** METHODS **/
 
+void Level::renderObstacles(SDL_Renderer *renderer, Camera camera) const {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for (const Polygon &obstacle: obstacles) {
+        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+            std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
+        }
+    }
+}
+
 void Level::loadPolygonsFromMap(const std::string &mapName) {
     obstacles.clear();
 

@@ -118,3 +118,16 @@ void Camera::makeCameraShake() {
     randBool(gen) ? x += targetX : x -= targetX;
     randBool(gen) ? y += targetY : y -= targetY;
 }
+
+void Camera::renderCameraPoint(SDL_Renderer *renderer, Point camera_point) const {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+    SDL_FRect cameraPointRect = {camera_point.x - x, camera_point.y - y, 20, 20};
+    SDL_RenderFillRectF(renderer, &cameraPointRect);
+    SDL_RenderDrawRectF(renderer, &cameraPointRect);
+}
+
+void Camera::renderCameraArea(SDL_Renderer *renderer) const {
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_FRect cameraRect = {area.x, area.y, area.w + 20, area.h + 30};
+    SDL_RenderDrawRectF(renderer, &cameraRect);
+}

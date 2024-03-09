@@ -366,31 +366,16 @@ void Game::render() {
     }
     */
 
-    // Draw the obstacles
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (const Polygon &obstacle: level.getObstacles()) {
-        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
-            std::vector<Point> vertices = obstacle.getVertices();
-            const auto &vertex1 = vertices[i];
-            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
-        }
-    }
+    level.renderObstacles(renderer, camera); // Draw the obstacles
 
     // Draw the camera point
     if (render_camera_point) {
-        Point camera_point = getAveragePlayersPositions();
-        SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-        SDL_FRect cameraPointRect = {camera_point.x - camera.getX(), camera_point.y - camera.getY(), 20, 20};
-        SDL_RenderFillRectF(renderer, &cameraPointRect);
-        SDL_RenderDrawRectF(renderer, &cameraPointRect);
+        camera.renderCameraPoint(renderer, getAveragePlayersPositions());
     }
 
     // Draw the camera area
     if (render_camera_area) {
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_FRect cameraRect = {camera.getArea().x, camera.getArea().y, camera.getArea().w + player.getW(), camera.getArea().h + player.getH() - 10};
-        SDL_RenderDrawRectF(renderer, &cameraRect);
+        camera.renderCameraArea(renderer);
     }
 
     // Present the renderer and introduce a slight delay

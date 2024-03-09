@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include "Polygon.h"
+#include "Camera.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
@@ -22,6 +23,7 @@ constexpr char POLYGONS_FILE[] = "polygons.txt";
  * @class Level
  * @brief Represents the level object including obstacles.
  */
+
 class Level {
 public:
     /** CONSTRUCTOR **/
@@ -36,6 +38,16 @@ public:
      * @return A vector of Polygon.
      */
     [[nodiscard]] std::vector<Polygon> getObstacles() const;
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+     * @brief Renders the collisions by drawing obstacles.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderObstacles(SDL_Renderer *renderer, Camera camera) const;
 
 
 private:

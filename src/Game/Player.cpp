@@ -34,12 +34,24 @@ float Player::getSpeed() const {
     return speed;
 }
 
+float Player::getMoveX() const {
+    return moveX;
+}
+
+float Player::getMoveY() const {
+    return moveY;
+}
+
 float Player::getTimeAfterFall() const {
     return timeAfterFall;
 }
 
 int Player::getCurrentDirection() const {
     return currentDirection;
+}
+
+int Player::getDesiredDirection() const {
+    return desiredDirection;
 }
 
 bool Player::getCanMove() const {
@@ -79,12 +91,12 @@ std::vector<Point> Player::getVertices() const {
     };
 }
 
-std::vector<Point> Player::getVerticesHorizontal(int direction) const {
+std::vector<Point> Player::getVerticesHorizontal() const {
     // Return the vertices of the player's bounding box, with added margin to capture wall within the area.
 
     std::vector<Point> verticesDirection;
 
-    if(direction==PLAYER_LEFT){
+    if(currentDirection==PLAYER_LEFT){
         verticesDirection = getVerticesLeft();
     }
     else{
@@ -156,12 +168,25 @@ void Player::setH(float val){
     height = val;
 }
 
+void Player::setMoveX(float val){
+    moveX = val;
+}
+
+void Player::setMoveY(float val){
+    moveY = val;
+}
+
+
 void Player::setFinishTheMovement(bool state){
     finishTheMovement = state;
 }
 
 void Player::setTimeSpeed(float val){
     timeSpeed = val;
+}
+
+void Player::setDesiredDirection(int val) {
+    desiredDirection = val;
 }
 
 void Player::setCanMove(bool state) {
@@ -196,7 +221,7 @@ void Player::teleportPlayer(float newX, float newY) {
     y = newY;
 }
 
-void Player::calculatePlayerMovement(float &moveX, int direction, float &moveY) {
+void Player::calculatePlayerMovement() {
 
     // The player move on the x-axis
     if (finishTheMovement && (wantToMoveLeft || wantToMoveRight)) {
@@ -206,8 +231,8 @@ void Player::calculatePlayerMovement(float &moveX, int direction, float &moveY) 
             moveX = speedMax;
             timeSpeed = maxSpeedReachWithThisTime;
         }
-        moveX *= (float)direction;
-        currentDirection = direction;
+        moveX *= (float)desiredDirection;
+        currentDirection = desiredDirection;
     }
         // The player doesn't move on the x-axis
     else {

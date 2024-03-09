@@ -153,10 +153,8 @@ private:
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
-     * @param direction Reference to the direction of the player.
-     * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(int &direction, float &moveY);
+    void handleEvents();
 
     /**
      * @brief Handles SDL Key up events, updating the movement variables accordingly.
@@ -167,17 +165,13 @@ private:
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
      * @param keyEvent Reference to the key who was press.
-     * @param direction Reference to the direction of the player.
-     * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent, int &direction, float &moveY);
+    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent);
 
     /**
      * @brief Applies player movement based on the current movement variables.
-     * @param moveX The movement along the X-axis.
-     * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(float &moveX, float &moveY);
+    void applyPlayerMovement();
 
     /**
      * @brief Checks for collision between the player and a polygon obstacle.
@@ -189,10 +183,8 @@ private:
 
     /**
      * @brief Handles collisions between the player and obstacles.
-     * @param direction The direction along the X-axis.
-     * @param moveY The movement along the Y-axis.
      */
-    void handleCollisions(int direction, float moveY, float &moveX);
+    void handleCollisions();
 
     /**
      * @brief Renders the game by drawing the player and obstacles.

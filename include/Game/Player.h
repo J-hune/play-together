@@ -2,7 +2,7 @@
 #define PLAY_TOGETHER_PLAYER_H
 
 #include <vector>
-#include <SDL_rect.h>
+#include <SDL.h>
 #include "Point.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
@@ -250,6 +250,13 @@ public:
      * @param[out] moveY The movement on the y-axis.
      */
     void calculatePlayerMovement(float &moveX, int direction, float &moveY);
+
+    /**
+     * @brief Renders the player's colliders.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderColliders(SDL_Renderer *renderer, Point camera) const;
 
 
 

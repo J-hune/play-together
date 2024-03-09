@@ -61,6 +61,10 @@ void Game::setCameraIsShaking(bool state) {
     camera.setIsShaking(state);
 }
 
+void Game::setRenderPlayerColliders(bool state) {
+    render_player_colliders = state;
+}
+
 
 /** FUNCTIONS **/
 
@@ -335,36 +339,11 @@ void Game::render() {
         SDL_RenderFillRectF(renderer, &characterRect);
     }
 
-    /* // Draw the player colliders
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = player.getVerticesHorizontal(1);
-    for (size_t i = 0; i < vertexRight.size(); ++i) {
-        const auto &vertex1 = vertexRight[i];
-        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
+
+    // Draw the player's colliders
+    if (render_player_colliders) {
+        player.renderColliders(renderer, {camera.getX(), camera.getY()});
     }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = player.getVerticesHorizontal(-1);
-    for (size_t i = 0; i < vertexLeft.size(); ++i) {
-        const auto &vertex1 = vertexLeft[i];
-        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = player.getVerticesRoof();
-    for (size_t i = 0; i < vertex.size(); ++i) {
-        const auto &vertex1 = vertex[i];
-        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = player.getVerticesGround();
-    for (size_t i = 0; i < vertexGround.size(); ++i) {
-        const auto &vertex1 = vertexGround[i];
-        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    */
 
     level.renderObstacles(renderer, camera); // Draw the obstacles
 

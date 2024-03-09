@@ -87,6 +87,12 @@ public:
      */
     void setRenderCameraArea(bool state);
 
+    /**
+     * @brief Set a new state to render_player_colliders
+     * @param state the state of render_player_colliders
+     */
+    void setRenderPlayerColliders(bool state);
+
 
     /** PUBLIC METHODS **/
 
@@ -145,6 +151,7 @@ private:
 
     bool render_camera_point = false;
     bool render_camera_area = false;
+    bool render_player_colliders = false;
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
 

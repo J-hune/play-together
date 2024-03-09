@@ -208,6 +208,10 @@ void Player::setTimeSpeed(float val){
     timeSpeed = val;
 }
 
+void Player::setDesiredDirection(int val) {
+    desiredDirection = val;
+}
+
 void Player::setCanMove(bool state) {
     canMove = state;
 }

@@ -269,7 +269,7 @@ void Player::calculatePlayerMovement() {
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     //Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = getVerticesHorizontal(1);
+    std::vector<Point> vertexRight = getVerticesRight();
     for (size_t i = 0; i < vertexRight.size(); ++i) {
         const auto &vertex1 = vertexRight[i];
         const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
@@ -277,7 +277,7 @@ void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     }
     //Draw the left collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = getVerticesHorizontal(-1);
+    std::vector<Point> vertexLeft = getVerticesLeft();
     for (size_t i = 0; i < vertexLeft.size(); ++i) {
         const auto &vertex1 = vertexLeft[i];
         const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];

@@ -71,6 +71,18 @@ public:
     [[nodiscard]] float getSpeed() const;
 
     /**
+     * @brief Return the moveX attribute.
+     * @return The value of the moveX attribute
+     */
+    [[nodiscard]] float getMoveX() const;
+
+    /**
+     * @brief Return the moveY attribute.
+     * @return The value of the moveY attribute
+     */
+    [[nodiscard]] float getMoveY() const;
+
+    /**
      * @brief Return the timeAfterFall attribute.
      * @return The value of the timeAfterFall attribute
      */
@@ -81,6 +93,12 @@ public:
      * @return The value of the currentDirection attribute (-1 for left, 1 for right)
      */
     [[nodiscard]] int getCurrentDirection() const;
+
+    /**
+     * @brief Return the desiredDirection attribute.
+     * @return The value of the desiredDirection attribute (-1 for left, 1 for right)
+     */
+    [[nodiscard]] int getDesiredDirection() const;
 
     /**
      * @brief Return the canMove attribute.
@@ -129,10 +147,9 @@ public:
 
     /**
      * @brief Gets the vertices of the player's bounding box, adjusted to capture the wall.
-     * @param direction The direction in which the player intends to move.
      * @return A vector of Point representing vertices, with added margin to capture wall within the area.
      */
-    [[nodiscard]] std::vector<Point> getVerticesHorizontal(int direction) const;
+    [[nodiscard]] std::vector<Point> getVerticesHorizontal() const;
 
     /**
      * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
@@ -216,6 +233,18 @@ public:
     void setH(float val);
 
     /**
+     * @brief Set the moveX attribute.
+     * @param val The new value of the moveX attribute.
+     */
+    void setMoveX(float val);
+
+    /**
+     * @brief Set the moveY attribute.
+     * @param val The new value of the moveY attribute.
+     */
+    void setMoveY(float val);
+
+    /**
      * @brief Set the finishTheMovement attribute.
      * @param state The new value of the finishTheMovement attribute.
      */
@@ -226,6 +255,12 @@ public:
      * @param state The new value of the timeSpeed attribute.
      */
     void setTimeSpeed(float val);
+
+    /**
+     * @brief Set the desiredDirection attribute.
+     * @param val The new value of the desiredDirection attribute.
+     */
+    void setDesiredDirection(int val);
 
     /**
      * @brief Set the canMove attribute.
@@ -276,11 +311,8 @@ public:
 
     /**
      * @brief Calculate the new position of the player.
-     * @param[out] moveX The movement on the x-axis.
-     * @param[in] direction The direction of movement on x-axis (-1 for left, 1 for right).
-     * @param[out] moveY The movement on the y-axis.
      */
-    void calculatePlayerMovement(float &moveX, int direction, float &moveY);
+    void calculatePlayerMovement();
 
 
 
@@ -291,14 +323,17 @@ private:
     float y; /**< The y-coordinate of the player's position. */
     float speed; /**< The speed of the player. */
     float speedMax; /**< The maximum speed of the player. */
+    float moveX = 0;/**< The actual speed of the player into the x axis. */
+    float moveY = 0;/**< The actual speed of the player into the y axis. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
 
     float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
-    bool finishTheMovement; /**< If the player has finish the movement and can change direction */
-    int currentDirection; /**< The current direction of the player (-1 for left, 1 for right) */
-    float timeSpeed; /**< The time that has elapsed since the player started running */
+    bool finishTheMovement = true; /**< If the player has finish the movement and can change direction */
+    int desiredDirection = 0;/**< The direction the player wants to go (-1 for left, 1 for right) */
+    int currentDirection = 0; /**< The current direction of the player (-1 for left, 1 for right) */
+    float timeSpeed = 0; /**< The time that has elapsed since the player started running */
     float maxSpeedReachWithThisTime = 5.2F; /**< the speed max is reach at this time */
     bool canMove = true; /**< If the player can move */
     bool wantToMoveRight = false; /**< If the player try to move right */

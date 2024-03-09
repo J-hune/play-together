@@ -144,27 +144,27 @@ std::vector<Point> Player::getVerticesRoof() const {
     };
 }
 
-SDL_FRect Player::getHorizontalCollider() const {
+SDL_FRect Player::getHorizontalColliderBoundingBox() const {
     return currentDirection == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
 }
 
 SDL_FRect Player::getLeftColliderBoundingBox() const {
     // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x - 2, y + 2, 2, x + height - 2};
+    return {x - 2, y, 2, height};
 }
 
 SDL_FRect Player::getRightColliderBoundingBox() const {
     // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x + width, y + 2, 2, y + height - 2};
+    return {x + width, y, 2, height};
 }
 
 SDL_FRect Player::getGroundColliderBoundingBox() const {
     // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x + 2, y + height, width -2, 2};
+    return {x, y + height, width, 2};
 }
 
 SDL_FRect Player::getRoofColliderBoundingBox() const {
-    return {x + 2, y + 2 , width - 2, 2};
+    return {x, y - 2 , width, 2};
 }
 
 SDL_FRect Player::getBoundingBox() const {

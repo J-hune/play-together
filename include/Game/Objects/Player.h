@@ -180,7 +180,7 @@ public:
      * @param direction The direction in which the player intends to move.
      * @return SDL_Rect representing the bounding box.
      */
-    [[nodiscard]] SDL_FRect getHorizontalCollider() const;
+    [[nodiscard]] SDL_FRect getHorizontalColliderBoundingBox() const;
 
     /**
      * @brief Get the bounding box of the player's ground collider.

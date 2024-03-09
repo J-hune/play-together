@@ -290,7 +290,7 @@ void Game::handleCollisions() {
                 player.setIsOnPlatform(true);
             }
             // If collision detected with the wall, the player can't move
-            if (checkAABBCollision(player.getHorizontalCollider(), platform.getBoundingBox())) {
+            if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
                 player.setCanMove(false);
                 player.setTimeSpeed(0);
             }

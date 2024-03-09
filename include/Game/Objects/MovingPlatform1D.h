@@ -85,7 +85,7 @@ private:
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
     float speed; /**< The speed of the platform. */
-    float move = 1; /**< The number of pixel the platform has moved */
+    float move = 0; /**< The number of pixel the platform has moved */
 
     float min; /**< The minimum x-coordinate of the platform's position. */
     float max; /**< The maximum x-coordinate of the platform's position. */

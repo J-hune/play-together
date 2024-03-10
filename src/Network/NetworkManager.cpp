@@ -52,14 +52,20 @@ void NetworkManager::startClients() {
 }
 
 void NetworkManager::stopServers() {
+#ifndef _WIN32
     if (tcpServer.getSocketFileDescriptor() != -1) tcpServer.stop();
+    if (udpServer.getSocketFileDescriptor() != -1) udpServer.stop();
+#else
+    if (tcpServer.getSocketFileDescriptor() != INVALID_SOCKET) tcpServer.stop();
+    if (udpServer.getSocketFileDescriptor() != INVALID_SOCKET) udpServer.stop();
+#endif
+
     if (serverTCPThreadPtr && serverTCPThreadPtr->joinable()) {
         serverTCPThreadPtr->request_stop();
         serverTCPThreadPtr->join();
     }
     serverTCPThreadPtr.reset();
 
-    if (udpServer.getSocketFileDescriptor() != -1) udpServer.stop();
     if (serverUDPThreadPtr && serverUDPThreadPtr->joinable()) {
         serverUDPThreadPtr->request_stop();
         serverUDPThreadPtr->join();
@@ -68,14 +74,20 @@ void NetworkManager::stopServers() {
 }
 
 void NetworkManager::stopClients() {
+#ifndef _WIN32
     if (tcpClient.getSocketFileDescriptor() != -1) tcpClient.stop();
+    if (udpClient.getSocketFileDescriptor() != -1) udpClient.stop();
+#else
+    if (tcpClient.getSocketFileDescriptor() != INVALID_SOCKET) tcpClient.stop();
+    if (udpClient.getSocketFileDescriptor() != INVALID_SOCKET) udpClient.stop();
+#endif
+
     if (clientTCPThreadPtr && clientTCPThreadPtr->joinable()) {
         clientTCPThreadPtr->request_stop();
         clientTCPThreadPtr->join();
     }
     clientTCPThreadPtr.reset();
 
-    if (udpClient.getSocketFileDescriptor() != -1) udpClient.stop();
     if (clientUDPThreadPtr && clientUDPThreadPtr->joinable()) {
         clientUDPThreadPtr->request_stop();
         clientUDPThreadPtr->join();

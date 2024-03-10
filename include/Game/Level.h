@@ -26,6 +26,7 @@ constexpr char POLYGONS_FILE[] = "polygons.txt";
  * @class Level
  * @brief Represents the level object including obstacles.
  */
+
 class Level {
 public:
     /** CONSTRUCTOR **/
@@ -73,6 +74,16 @@ public:
      * @param camera The camera associated to the current game
      */
     void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+     * @brief Renders the collisions by drawing obstacles.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderObstacles(SDL_Renderer *renderer, Camera camera) const;
 
 
 private:

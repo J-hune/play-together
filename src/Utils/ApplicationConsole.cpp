@@ -36,8 +36,8 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "help - Display help\n";
             std::cout << "exit - Exit the console\n";
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
-            std::cout << "show [all | camera_point | camera_area] - Show debug information\n";
-            std::cout << "hide [all | camera_point | camera_area] - Hide debug information\n";
+            std::cout << "show [all | camera_point | camera_area | player_colliders] - Show debug information\n";
+            std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
             std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
             std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
 
@@ -77,6 +77,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 if (option == "all") {
                     gamePtr->setRenderCameraPoint(true);
                     gamePtr->setRenderCameraArea(true);
+                    gamePtr->setRenderPlayerColliders(true);
                     std::cout << "Showing all information.\n";
                 }
                 else if (option == "camera_point") {
@@ -85,11 +86,14 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 } else if (option == "camera_area") {
                     gamePtr->setRenderCameraArea(true);
                     std::cout << "Showing camera area information.\n";
+                } else if (option == "player_colliders") {
+                    gamePtr->setRenderPlayerColliders(true);
+                    std::cout << "Showing player's colliders area information.\n";
                 } else {
-                    std::cout << "Invalid option. Usage: show [all | camera_point | camera_area]\n";
+                    std::cout << "Invalid option. Usage: show [all | camera_point | camera_area | player_colliders]\n";
                 }
             } else {
-                std::cout << "Invalid syntax. Usage: show [all | camera_point | camera_area]\n";
+                std::cout << "Invalid syntax. Usage: show [all | camera_point | camera_area | player_colliders]\n";
             }
         }
 
@@ -103,6 +107,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 if (option == "all") {
                     gamePtr->setRenderCameraPoint(false);
                     gamePtr->setRenderCameraArea(false);
+                    gamePtr->setRenderPlayerColliders(false);
                     std::cout << "Hiding all information.\n";
                 }
                 else if (option == "camera_point") {
@@ -111,11 +116,14 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
                 } else if (option == "camera_area") {
                     gamePtr->setRenderCameraArea(false);
                     std::cout << "Hiding camera area information.\n";
+                } else if (option == "player_colliders") {
+                    gamePtr->setRenderPlayerColliders(false);
+                    std::cout << "Hiding player's colliders information.\n";
                 } else {
-                    std::cout << "Invalid option. Usage: hide [all | camera_point | camera_area]\n";
+                    std::cout << "Invalid option. Usage: hide [all | camera_point | camera_area | player_colliders]\n";
                 }
             } else {
-                std::cout << "Invalid syntax. Usage: hide [all | camera_point | camera_area]\n";
+                std::cout << "Invalid syntax. Usage: hide [all | camera_point | camera_area | player_colliders]\n";
             }
         }
 

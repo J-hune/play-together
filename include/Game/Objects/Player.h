@@ -2,7 +2,7 @@
 #define PLAY_TOGETHER_PLAYER_H
 
 #include <vector>
-#include <SDL_rect.h>
+#include <SDL.h>
 #include "../Point.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
@@ -150,18 +150,6 @@ public:
      * @return A vector of Point representing vertices, with added margin to capture wall within the area.
      */
     [[nodiscard]] std::vector<Point> getVerticesHorizontal() const;
-
-    /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
-     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
-     */
-    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
-
-    /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
-     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
-     */
-    [[nodiscard]] std::vector<Point> getVerticesRight() const;
 
     /**
      * @brief Gets the vertices of the player's bounding box, adjusted to capture the ground.
@@ -314,6 +302,13 @@ public:
      */
     void calculatePlayerMovement();
 
+    /**
+     * @brief Renders the player's colliders.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderColliders(SDL_Renderer *renderer, Point camera) const;
+
 
 
 private:
@@ -347,6 +342,18 @@ private:
 
 
     /** PRIVATE METHODS **/
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
+     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
+
+    /**
+     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
+     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
+     */
+    [[nodiscard]] std::vector<Point> getVerticesRight() const;
 
     /**
      * @brief Get the bounding box of the player's left collider.

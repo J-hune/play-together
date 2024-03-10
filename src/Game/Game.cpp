@@ -61,6 +61,10 @@ void Game::setCameraIsShaking(bool state) {
     camera.setIsShaking(state);
 }
 
+void Game::setRenderPlayerColliders(bool state) {
+    render_player_colliders = state;
+}
+
 void Game::setEnablePlatformsMovement(bool state) {
     enable_platforms_movement = state;
 }
@@ -468,7 +472,7 @@ void Game::handleCollisionsWithCameraBordersReversedMavity() {
     if (player.getX() > camera.getX() + camera.getW() - player.getW()) {
 
         // Divide the velocity of the player
-        player.setMoveX(player.getMoveX()/5);
+        player.setMoveX(player.getMoveX() / 5);
 
         camera.setX(camera.getX() + player.getMoveX());
 
@@ -479,11 +483,11 @@ void Game::handleCollisionsWithCameraBordersReversedMavity() {
             }
         }
     }
-        // Check for collisions with left camera borders
+    // Check for collisions with left camera borders
     else if (player.getX() < camera.getX()) {
 
         // Divide the velocity of the player
-        player.setMoveX(player.getMoveX()/5);
+        player.setMoveX(player.getMoveX() / 5);
 
         camera.setX(camera.getX() + player.getMoveX());
 
@@ -537,64 +541,23 @@ void Game::render() {
         SDL_RenderFillRectF(renderer, &characterRect);
     }
 
-    /* // Draw the player colliders
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = player.getVerticesHorizontal(1);
-    for (size_t i = 0; i < vertexRight.size(); ++i) {
-        const auto &vertex1 = vertexRight[i];
-        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = player.getVerticesHorizontal(-1);
-    for (size_t i = 0; i < vertexLeft.size(); ++i) {
-        const auto &vertex1 = vertexLeft[i];
-        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = player.getVerticesRoof();
-    for (size_t i = 0; i < vertex.size(); ++i) {
-        const auto &vertex1 = vertex[i];
-        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = player.getVerticesGround();
-    for (size_t i = 0; i < vertexGround.size(); ++i) {
-        const auto &vertex1 = vertexGround[i];
-        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
-        SDL_RenderDrawLine(renderer, vertex1.x, vertex1.y, vertex2.x, vertex2.y);
-    }
-    */
 
-    // Draw the obstacles
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (const Polygon &obstacle: level.getObstacles()) {
-        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
-            std::vector<Point> vertices = obstacle.getVertices();
-            const auto &vertex1 = vertices[i];
-            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
-        }
+    // Draw the player's colliders
+    if (render_player_colliders) {
+        player.renderColliders(renderer, {camera.getX(), camera.getY()});
     }
 
+    level.renderObstacles(renderer, camera); // Draw the obstacles
     level.renderPlatforms(renderer, {camera.getX(), camera.getY()}); // Draw the platforms
 
     // Draw the camera point
     if (render_camera_point) {
-        Point camera_point = getAveragePlayersPositions();
-        SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-        SDL_FRect cameraPointRect = {camera_point.x - camera.getX(), camera_point.y - camera.getY(), 20, 20};
-        SDL_RenderFillRectF(renderer, &cameraPointRect);
-        SDL_RenderDrawRectF(renderer, &cameraPointRect);
+        camera.renderCameraPoint(renderer, getAveragePlayersPositions());
     }
 
     // Draw the camera area
     if (render_camera_area) {
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_FRect cameraRect = {camera.getArea().x, camera.getArea().y, camera.getArea().w + player.getW(), camera.getArea().h + player.getH() - 10};
-        SDL_RenderDrawRectF(renderer, &cameraRect);
+        camera.renderCameraArea(renderer);
     }
 
     // Present the renderer and introduce a slight delay

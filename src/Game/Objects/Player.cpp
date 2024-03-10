@@ -92,18 +92,7 @@ std::vector<Point> Player::getVertices() const {
 }
 
 std::vector<Point> Player::getVerticesHorizontal() const {
-    // Return the vertices of the player's bounding box, with added margin to capture wall within the area.
-
-    std::vector<Point> verticesDirection;
-
-    if (currentDirection == PLAYER_LEFT) {
-        verticesDirection = getVerticesLeft();
-    }
-    else {
-        verticesDirection = getVerticesRight();
-    }
-
-    return verticesDirection;
+    return currentDirection == PLAYER_LEFT ? getVerticesLeft() : getVerticesRight();
 }
 
 std::vector<Point> Player::getVerticesLeft() const {
@@ -297,5 +286,40 @@ void Player::calculatePlayerMovement() {
             moveY = (timeAfterFall > 0) ? 2 - timeAfterFall : 2;
             timeAfterFall -= 0.1F;
         }
+    }
+}
+
+void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
+    //Draw the right collider
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    std::vector<Point> vertexRight = getVerticesRight();
+    for (size_t i = 0; i < vertexRight.size(); ++i) {
+        const auto &vertex1 = vertexRight[i];
+        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the left collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+    std::vector<Point> vertexLeft = getVerticesLeft();
+    for (size_t i = 0; i < vertexLeft.size(); ++i) {
+        const auto &vertex1 = vertexLeft[i];
+        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the roof collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertex = getVerticesRoof();
+    for (size_t i = 0; i < vertex.size(); ++i) {
+        const auto &vertex1 = vertex[i];
+        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the ground collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertexGround = getVerticesGround();
+    for (size_t i = 0; i < vertexGround.size(); ++i) {
+        const auto &vertex1 = vertexGround[i];
+        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
 }

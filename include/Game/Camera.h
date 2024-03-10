@@ -105,6 +105,19 @@ public:
     void applyCameraMovement(Point camera_point);
 
     /**
+     * @brief Renders the collisions by drawing obstacles.
+     * @param renderer Represents the renderer of the game.
+     * @param camera_point Represents the camera point.
+     */
+    void renderCameraPoint(SDL_Renderer *renderer, Point camera_point) const;
+
+    /**
+     * @brief Renders the collisions by drawing obstacles.
+     * @param renderer Represents the renderer of the game.
+     */
+    void renderCameraArea(SDL_Renderer *renderer) const;
+
+    /**
      * @brief Serialize the camera object
      * @tparam Archive
      * @param ar

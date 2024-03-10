@@ -9,8 +9,6 @@
 
 Level::Level(const std::string &map_name) {
     loadPolygonsFromMap(map_name);
-    MovingPlatform2D platform(150, 0, 80, 20, 0.15F, {100,0}, {400, -300}, false);
-    movingPlatforms2D.push_back(platform);
 }
 
 

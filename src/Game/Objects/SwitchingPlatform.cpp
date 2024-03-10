@@ -9,7 +9,7 @@
 
 SwitchingPlatform::SwitchingPlatform(float x, float y, float w, float h, Uint32 bpm, std::vector<Point> points)
         : x(x), y(y), w(w), h(h), bpm(bpm), points(std::move(points)) {
-    startTime = SDL_GetTicks();
+    startTime = SDL_GetTicks(); // Get the current time
 }
 
 

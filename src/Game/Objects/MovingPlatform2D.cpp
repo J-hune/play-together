@@ -69,6 +69,9 @@ void MovingPlatform2D::setIsMoving(bool state) {
     isMoving = state;
 }
 
+
+/** METHODS **/
+
 void MovingPlatform2D::applyMovement() {
     // Apply movement
     moveX = 1;
@@ -108,13 +111,13 @@ void MovingPlatform2D::applyMovement() {
         x = left.x;
         y = left.y;
         directionX = 1; // Change direction to left
-        directionY =  left.y - right.y > 0 ? -1 : 1;
+        directionY = left.y - right.y > 0 ? -1 : 1;
     }
     // If the platform has reached its maximum point
 
     else if (x + w > right.x) {
         x = right.x - w;
         directionX = -1; // Change direction to right
-        directionY =  left.y - right.y > 0 ? 1 : -1;
+        directionY = left.y - right.y > 0 ? 1 : -1;
     }
 }

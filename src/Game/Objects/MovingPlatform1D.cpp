@@ -49,6 +49,7 @@ bool MovingPlatform1D::getAxis() const {
     return axis;
 }
 
+
 /** SPECIFIC ACCESSORS **/
 
 SDL_FRect MovingPlatform1D::getBoundingBox() const {

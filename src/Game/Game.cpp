@@ -256,6 +256,26 @@ void Game::handleCollisionsWithPlatforms() {
             player.setTimeSpeed(0);
         }
     }
+
+    // Check for collisions with each 2D moving platforms
+    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
+        // If collision detected with the roof, the player can't jump anymore
+        if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+        }
+        // If collision detected with the ground, the player is on the platform
+        if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setIsOnPlatform(true);
+            // Add platform velocity to the player
+            player.setX(player.getX() + platform.getMoveX());
+            player.setY(player.getY() + platform.getMoveY());
+        }
+        // If collision detected with the wall, the player can't move
+        if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
+        }
+    }
 }
 
 void Game::handleCollisionsWithOtherPlayers() {
@@ -359,6 +379,26 @@ void Game::handleCollisionsWithPlatformsReversedMavity() {
             player.setIsOnPlatform(true);
             // Add platform velocity to the player by checking on which axis it moves
             platform.getAxis() ? player.setY(player.getY() + platform.getMove()) : player.setX(player.getX() + platform.getMove());
+        }
+        // If collision detected with the ground, the player can't jump anymore
+        if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+        }
+        // If collision detected with the wall, the player can't move
+        if (checkAABBCollision(player.getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setCanMove(false);
+            player.setTimeSpeed(0);
+        }
+    }
+
+    // Check for collisions with each 2D moving platforms
+    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
+        // If collision detected with the roof, the player is on the platform
+        if (checkAABBCollision(player.getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+            player.setIsOnPlatform(true);
+            // Add platform velocity to the player
+            player.setX(player.getX() + platform.getMoveX());
+            player.setY(player.getY() + platform.getMoveY());
         }
         // If collision detected with the ground, the player can't jump anymore
         if (checkAABBCollision(player.getGroundColliderBoundingBox(), platform.getBoundingBox())) {
@@ -501,7 +541,7 @@ void Game::render() {
         }
     }
 
-    level.renderPlatforms(renderer, camera); // Draw the platforms
+    level.renderPlatforms(renderer, {camera.getX(), camera.getY()}); // Draw the platforms
 
     // Draw the camera point
     if (render_camera_point) {

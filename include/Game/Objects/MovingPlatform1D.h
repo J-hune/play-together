@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <ranges>
 
-constexpr float PLATFORM_LERP_SMOOTHING_FACTOR = 0.02F;
+constexpr float PLATFORM_LERP_SMOOTHING_FACTOR = 0.05F;
 
 /**
  * @file MovingPlatform1D.h
@@ -75,7 +75,7 @@ public:
      * @brief Selects whether to calculate x- or y-axis movement.
      * @see applyXaxisMovement() and applyYaxisMovement() for applying movement.
      */
-    void applyMovingPlatformMovement();
+    void applyMovement();
 
 private:
     /** ATTRIBUTES **/
@@ -87,13 +87,13 @@ private:
     float speed; /**< The speed of the platform. */
     float move = 0; /**< The number of pixel the platform has moved */
 
-    float min; /**< The minimum x-coordinate of the platform's position. */
-    float max; /**< The maximum x-coordinate of the platform's position. */
+    const float min; /**< The minimum x-coordinate of the platform's position. */
+    const float max; /**< The maximum x-coordinate of the platform's position. */
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
 
-    float smoothingLimit = 5; /**< The smoothing limit of the platform movement */
+    float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
 
 
     /** PRIVATE METHODS **/

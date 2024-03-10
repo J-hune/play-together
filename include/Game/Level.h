@@ -8,6 +8,8 @@
 #include "Polygon.h"
 #include "Camera.h"
 #include "Objects/MovingPlatform1D.h"
+#include "Objects/MovingPlatform2D.h"
+
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
@@ -40,9 +42,15 @@ public:
 
     /**
      * @brief Return the movingPlatform attribute.
-     * @return A vector of MovingPlatform.
+     * @return A vector of MovingPlatform1D.
      */
     [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
+
+    /**
+     * @brief Return the movingPlatform2D attribute.
+     * @return A vector of MovingPlatform2D.
+     */
+    [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
 
 
     /** PUBLIC METHODS **/
@@ -57,14 +65,15 @@ public:
      * @param[out] renderer The renderer associated to the current game
      * @param camera The camera associated to the current game
      */
-    void renderPlatforms(SDL_Renderer *renderer, Camera camera) const;
+    void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
 
 
 private:
     /** ATTRIBUTES **/
 
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of polygons representing obstacles. */
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
 
 
     /** PRIVATE METHODS **/

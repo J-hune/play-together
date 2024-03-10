@@ -106,6 +106,6 @@ void MovingPlatform1D::applyYaxisMovement() {
     }
 }
 
-void MovingPlatform1D::applyMovingPlatformMovement() {
+void MovingPlatform1D::applyMovement() {
     axis ? applyYaxisMovement() : applyXaxisMovement();
 }

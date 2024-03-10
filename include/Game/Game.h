@@ -12,6 +12,8 @@
 #include "Camera.h"
 #include "Level.h"
 
+const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
+
 enum class GameState {
     RUNNING,
     PAUSED,

@@ -261,17 +261,62 @@ void Game::handleCollisions() {
             }
         }
 
-        /*
         // Check for collisions with other characters
-        for (Player const &character : characters) {
+        for (Player &character : characters) {
             if (&character != &player && checkAABBCollision(player.getBoundingBox(), character.getBoundingBox())) {
                 printf("Collision detected with another character\n");
-                player.x -= moveX;
-                player.y -= moveY;
+
+                //The player move to the right
+                if(player.getMoveX()>0){
+                    //  The player's right is to the right of the detected player's left
+                    if(player.getX()+player.getW()<=character.getX()+2){
+                        // Slow down the player's speed
+                        player.setMoveX(player.getMoveX()/5);
+                        character.setMoveX(player.getMoveX());
+                    }
+                }
+                //The player move to the left
+                else if(player.getMoveX()<0){
+                    if(player.getX()+2>character.getX()+character.getW()){
+                        player.setMoveX(player.getMoveX()/5);
+                        character.setMoveX(player.getMoveX());
+                    }
+                }
+
+                // If above the detected player
+                if(!player.getIsOnPlatform()
+                //The player's bottom is below the detected player's head
+                && player.getY()+player.getH()>character.getY()
+                // The player's head is above the detected player's head
+                && player.getY()<character.getY()
+                // The player's body is well within the x range of the detected player's body
+                && player.getX()+player.getW()>character.getX()+2 // The player's right is to the right of the detected player's left
+                && player.getX()+2<character.getX()+character.getW()){ // The player's left is to the left of the detected player's right
+                    player.setIsOnPlatform(true);
+                }
+
+                // If below the detected player
+                //The player's head is above the detected player's bottom
+                if(player.getY()<character.getY()+character.getH() &&
+                // The player's head is below the detected player's head
+                player.getY() > character.getY()
+                // The player's body is well within the x range of the detected player's body
+                && player.getX()+player.getW()>character.getX()+2 // The player's right is to the right of the detected player's left
+                && player.getX()+2<character.getX()+character.getW()){ // The player's left is to the left of the detected player's right
+                    player.setTimeSpentJumping(PRESSURE_JUMP_MAX);
+                }
+
             }
         }
-        */
 
+        // Check for collisions with down camera borders
+         if (player.getY() > camera.getY() + camera.getH() - player.getH() + DISTANCE_OUT_MAP_BEFORE_DEATH){
+            printf("WASTED\n");
+
+            //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
+            player.setX(50);
+            player.setY(50);
+         }
 
         /*// Check for collisions with down camera borders
          * if (player.y < camera.y){
@@ -279,11 +324,14 @@ void Game::handleCollisions() {
          * }
          */
 
-        /*// Check for collisions with up camera borders
-         * if (player.y > camera.y + camera.h - player.height){
-         *
-         * }
-         */
+        // Check for collisions with up camera borders
+        if (player.getY() < camera.getY() - DISTANCE_OUT_MAP_BEFORE_DEATH){
+            printf("WASTED\n");
+
+            //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
+            player.setX(camera.getX());
+            player.setY(camera.getY());
+        }
 
 
         // Check for collisions with right camera borders
@@ -297,7 +345,7 @@ void Game::handleCollisions() {
             // Check if others players touch the left camera borders
             for (Player &character : characters){
                 if(character.getX() < camera.getX()){
-                    character.setX(player.getMoveX());
+                    character.setMoveX(player.getMoveX());
                 }
             }
 

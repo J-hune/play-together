@@ -87,6 +87,12 @@ public:
      */
     void setRenderCameraArea(bool state);
 
+    /**
+     * @brief Set a new state to enable_platforms_movement
+     * @param state the state of enable_platforms_movement
+     */
+    void setEnablePlatformsMovement(bool state);
+
 
     /** PUBLIC METHODS **/
 
@@ -145,6 +151,7 @@ private:
 
     bool render_camera_point = false;
     bool render_camera_area = false;
+    bool enable_platforms_movement = true;
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
 

@@ -39,6 +39,13 @@ SDL_FRect SwitchingPlatform::getBoundingBox() const {
 }
 
 
+/** MODIFIERS **/
+
+void SwitchingPlatform::setIsMoving(bool state) {
+    isMoving = state;
+}
+
+
 /** METHODS **/
 
 void SwitchingPlatform::applyMovement() {

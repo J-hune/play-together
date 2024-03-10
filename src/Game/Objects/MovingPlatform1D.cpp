@@ -56,6 +56,13 @@ SDL_FRect MovingPlatform1D::getBoundingBox() const {
 }
 
 
+/** MODIFIERS **/
+
+void MovingPlatform1D::setIsMoving(bool state) {
+    isMoving = state;
+}
+
+
 /** METHODS **/
 
 void MovingPlatform1D::applyXaxisMovement() {

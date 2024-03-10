@@ -23,7 +23,7 @@ public:
     MovingPlatform2D(float x, float y, float w, float h, float speed, Point left, Point right, bool start);
 
 
-    /** ACCESSORS **/
+    /** BASIC ACCESSORS **/
 
     /**
      * @brief Return the x attribute.
@@ -61,11 +61,23 @@ public:
      */
     [[nodiscard]] float getMoveY() const;
 
+
+    /** SPECIFIC ACCESSORS **/
+
     /**
      * @brief Get the bounding box of the platform.
      * @return SDL_Rect representing the platform box.
      */
     [[nodiscard]] SDL_FRect getBoundingBox() const;
+
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Set the isMoving attribute.
+     * @param state The new state of the isMoving attribute.
+     */
+    void setIsMoving(bool state);
 
 
     /** PUBLIC METHODS **/
@@ -92,6 +104,7 @@ private:
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
     float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom */
     float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom */
+    bool isMoving = true;
 
     float smoothingLimit = 3; /**< The smoothing limit of the platform movement */
 };

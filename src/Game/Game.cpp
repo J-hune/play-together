@@ -61,6 +61,10 @@ void Game::setCameraIsShaking(bool state) {
     camera.setIsShaking(state);
 }
 
+void Game::setEnablePlatformsMovement(bool state) {
+    enable_platforms_movement = state;
+}
+
 
 /** FUNCTIONS **/
 
@@ -658,7 +662,7 @@ void Game::run() {
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
         handleEvents();
-        level.applyPlatformsMovement();
+        if (enable_platforms_movement) level.applyPlatformsMovement();
         player.calculatePlayerMovement();
         switchGravity ? handleCollisionsReversedMavity() : handleCollisions();
         applyPlayerMovement();

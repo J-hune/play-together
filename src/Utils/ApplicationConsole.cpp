@@ -38,8 +38,8 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
             std::cout << "show [all | camera_point | camera_area] - Show debug information\n";
             std::cout << "hide [all | camera_point | camera_area] - Hide debug information\n";
-            std::cout << "enable [all | camera_shake] - Enable game mechanic\n";
-            std::cout << "disable [all | camera_shake] - Disable game mechanic\n";
+            std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
+            std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
 
         }
 
@@ -128,18 +128,23 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             if (command_name == "enable") {
                 if (option == "all") {
                     gamePtr->setCameraIsShaking(true);
+                    gamePtr->setEnablePlatformsMovement(true);
                     std::cout << "Enabling all mechanics.\n";
                 }
                 else if (option == "camera_shake") {
                     gamePtr->setCameraIsShaking(true);
                     std::cout << "Enabling camera shaking.\n";
                 }
+                else if (option == "platforms") {
+                    gamePtr->setEnablePlatformsMovement(true);
+                    std::cout << "Enabling platforms movement.\n";
+                }
                 else {
-                    std::cout << "Invalid option. Usage: enable [all | camera_shake]\n";
+                    std::cout << "Invalid option. Usage: enable [all | camera_shake | platforms]\n";
                 }
             }
             else {
-                std::cout << "Invalid syntax. Usage: enable [all | camera_shake]\n";
+                std::cout << "Invalid syntax. Usage: enable [all | camera_shake | platforms]\n";
             }
         }
 
@@ -152,18 +157,23 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             if (command_name == "disable") {
                 if (option == "all") {
                     gamePtr->setCameraIsShaking(false);
+                    gamePtr->setEnablePlatformsMovement(false);
                     std::cout << "Disabling all mechanics.\n";
                 }
                 else if (option == "camera_shake") {
                     gamePtr->setCameraIsShaking(false);
                     std::cout << "Disabling camera shaking.\n";
                 }
+                else if (option == "platforms") {
+                    gamePtr->setEnablePlatformsMovement(false);
+                    std::cout << "Disabling platforms' movement.\n";
+                }
                 else {
-                    std::cout << "Invalid option. Usage: disable [all | camera_shake]\n";
+                    std::cout << "Invalid option. Usage: disable [all | camera_shake | platforms]\n";
                 }
             }
             else {
-                std::cout << "Invalid syntax. Usage: disable [all | camera_shake]]\n";
+                std::cout << "Invalid syntax. Usage: disable [all | camera_shake | platforms]\n";
             }
         }
 

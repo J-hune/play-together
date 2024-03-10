@@ -60,6 +60,15 @@ public:
     [[nodiscard]] SDL_FRect getBoundingBox() const;
 
 
+    /** MODIFIERS **/
+
+    /**
+     * @brief Set the isMoving attribute.
+     * @param state The new state of the isMoving attribute.
+     */
+    void setIsMoving(bool state);
+
+
     /** PUBLIC METHODS **/
 
     /**
@@ -76,6 +85,7 @@ private:
     Uint32 startTime; /**< The time set at the beginning of every beat */
     int actualPoint = 0; /**< The current point the platform's position. */
     std::vector<Point> points; /** Collection of Point representing every possible position of the platform. */
+    bool isMoving = true;
 
 };
 

@@ -26,7 +26,6 @@ MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, float spe
         directionX = -1;
         directionY =  left.y - right.y > 0 ? 1 : -1;
     }
-    printf("RATIO = %f\n", ratio);
 }
 
 
@@ -56,10 +55,18 @@ float MovingPlatform2D::getMoveY() const {
     return moveY;
 }
 
+
 /** SPECIFIC ACCESSORS **/
 
 SDL_FRect MovingPlatform2D::getBoundingBox() const {
     return {x, y, w, h};
+}
+
+
+/** MODIFIERS **/
+
+void MovingPlatform2D::setIsMoving(bool state) {
+    isMoving = state;
 }
 
 void MovingPlatform2D::applyMovement() {
@@ -106,7 +113,6 @@ void MovingPlatform2D::applyMovement() {
     // If the platform has reached its maximum point
 
     else if (x + w > right.x) {
-        printf("%f + %f > %f\n", y, h, right.y);
         x = right.x - w;
         directionX = -1; // Change direction to right
         directionY =  left.y - right.y > 0 ? 1 : -1;

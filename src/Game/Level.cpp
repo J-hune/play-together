@@ -26,6 +26,10 @@ std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
     return movingPlatforms2D;
 }
 
+std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
+    return switchingPlatforms;
+}
+
 
 /** METHODS **/
 
@@ -37,6 +41,11 @@ void Level::applyPlatformsMovement() {
 
     // Apply movement for 2D platforms
     for (MovingPlatform2D &platform: movingPlatforms2D) {
+        platform.applyMovement();
+    }
+
+    // Apply movement for switching platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) {
         platform.applyMovement();
     }
 }
@@ -52,6 +61,13 @@ void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
     // Draw the 2D moving platforms
     SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
     for (const MovingPlatform2D &platform: movingPlatforms2D) {
+        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platformRect);
+    }
+
+    // Draw the switching platforms
+    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+    for (const SwitchingPlatform &platform: switchingPlatforms) {
         SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
         SDL_RenderFillRectF(renderer, &platformRect);
     }

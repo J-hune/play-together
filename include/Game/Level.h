@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Objects/MovingPlatform1D.h"
 #include "Objects/MovingPlatform2D.h"
+#include "Objects/SwitchingPlatform.h"
 
 
 // Define constants for directories and file names
@@ -52,6 +53,12 @@ public:
      */
     [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
 
+    /**
+     * @brief Return the switchingPlatforms attribute.
+     * @return A vector of SwitchingPlatform.
+     */
+    [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
+
 
     /** PUBLIC METHODS **/
 
@@ -74,6 +81,7 @@ private:
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
 
 
     /** PRIVATE METHODS **/

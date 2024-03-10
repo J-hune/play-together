@@ -104,8 +104,11 @@ std::string UDPClient::receive(int timeoutMilliseconds) const {
 void UDPClient::stop() {
     // No need to disconnect in UDP
     if (socketFileDescriptor != -1) {
+        ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
+
+        std::cout << "UDPClient: Socket closed" << std::endl;
     }
 
     stopRequested = true; // Set the stop flag to terminate the message handling loop

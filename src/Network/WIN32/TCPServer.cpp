@@ -258,6 +258,8 @@ void TCPServer::stop() {
         ::shutdown(socketFileDescriptor, SD_BOTH);
         closesocket(socketFileDescriptor);
         socketFileDescriptor = INVALID_SOCKET;
+
+        std::cout << "TCPServer: Server socket closed" << std::endl;
     }
 }
 

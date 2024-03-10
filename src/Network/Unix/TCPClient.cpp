@@ -63,8 +63,8 @@ void TCPClient::handleMessages() {
             if (receivedMessage == "DISCONNECT") {
                 std::cout << "TCPClient: Server asked to disconnect" << std::endl;
                 shouldSendDisconnect = false; // Do not send a disconnect message
+                stop(); // Stop the client
                 disconnectCallback(); // Invoke the disconnect callback
-                stopRequested = true;
             }
 
         } else {
@@ -151,6 +151,8 @@ void TCPClient::stop() {
         ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
+
+        std::cout << "TCPClient: Socket closed" << std::endl;
     }
 }
 

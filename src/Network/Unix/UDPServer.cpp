@@ -131,8 +131,11 @@ void UDPServer::handleMessage() {
 void UDPServer::stop() {
     stopRequested = true;
     if (socketFileDescriptor != -1) {
+        ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
+
+        std::cout << "UDPServer: Server socket closed" << std::endl;
     }
 }
 

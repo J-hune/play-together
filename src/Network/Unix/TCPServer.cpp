@@ -247,6 +247,8 @@ void TCPServer::stop() {
         ::shutdown(socketFileDescriptor, SHUT_RDWR);
         close(socketFileDescriptor);
         socketFileDescriptor = -1;
+
+        std::cout << "TCPServer: Server socket closed" << std::endl;
     }
 }
 

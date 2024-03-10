@@ -4,10 +4,6 @@
 
 TCPClient::TCPClient() = default;
 
-TCPClient::~TCPClient() {
-    stop(); // Stop the client
-}
-
 int TCPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
@@ -54,7 +50,6 @@ void TCPClient::start() {
     stopRequested = false;
     shouldSendDisconnect = true; // Reset the flag to send a disconnect message
     handleMessages(); // Start handling incoming messages (blocking)
-    stop(); // Stop the client
     std::cout << "TCPClient: Client shutdown" << std::endl;
 }
 
@@ -69,6 +64,7 @@ void TCPClient::handleMessages() {
                 std::cout << "TCPClient: Server asked to disconnect" << std::endl;
                 shouldSendDisconnect = false; // Do not send a disconnect message
                 disconnectCallback(); // Invoke the disconnect callback
+                stopRequested = true;
             }
 
         } else {

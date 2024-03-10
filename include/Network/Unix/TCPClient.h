@@ -13,7 +13,7 @@
 #include <thread>
 #include <functional>
 
-#include "../../Utils/TCPError.h"
+#include "../TCPError.h"
 
 /**
  * @brief The TCPClient class provides functionality to create and manage a TCP client.
@@ -24,11 +24,6 @@ public:
      * @brief Constructs a TCPClient object.
      */
     TCPClient();
-
-    /**
-     * @brief Destroys the TCPClient object.
-     */
-    ~TCPClient();
 
     /**
      * @brief Gets the socket file descriptor.

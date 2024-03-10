@@ -1,13 +1,13 @@
 #ifndef PLAY_TOGETHER_UDPERROR_H
 #define PLAY_TOGETHER_UDPERROR_H
 
-#include <stdexcept>
 #include <string>
+#include "NetworkError.h"
 
-// Base class for UDP errors, inheriting from std::runtime_error
-class UDPError : public std::runtime_error {
+// Base class for UDP errors, inheriting from NetworkError
+class UDPError : public NetworkError {
 public:
-    using std::runtime_error::runtime_error;
+    using NetworkError::NetworkError;
 };
 
 // Error for issues during socket creation

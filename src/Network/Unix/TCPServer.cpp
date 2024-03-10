@@ -24,10 +24,6 @@
 
 TCPServer::TCPServer() = default;
 
-TCPServer::~TCPServer() {
-    stop();
-}
-
 // Get the socket file descriptor
 int TCPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;

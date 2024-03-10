@@ -1,13 +1,13 @@
 #ifndef PLAY_TOGETHER_TCPERROR_H
 #define PLAY_TOGETHER_TCPERROR_H
 
-#include <stdexcept>
 #include <string>
+#include "NetworkError.h"
 
-// Base class for TCP errors, inheriting from std::runtime_error
-class TCPError : public std::runtime_error {
+// Base class for TCP errors, inheriting from NetworkError
+class TCPError : public NetworkError {
 public:
-    using std::runtime_error::runtime_error;
+    using NetworkError::NetworkError;
 };
 
 // Error for issues during socket creation

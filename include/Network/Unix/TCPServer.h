@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include "../../Utils/TCPError.h"
+#include "../TCPError.h"
 
 /**
  * @brief The TCPServer class provides functionality to create and manage a TCP server.
@@ -28,11 +28,6 @@ public:
      * @brief Constructs a TCPServer object.
      */
     TCPServer();
-
-    /**
-     * @brief Destroys the TCPServer object and shuts down the server.
-     */
-    ~TCPServer();
 
     /**
      * @brief Returns the server socket file descriptor.
@@ -86,8 +81,8 @@ private:
     unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
     std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
     std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
-    std::map<int, sockaddr_in> *clientAddressesPtr{}; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
-    std::mutex *clientAddressesMutexPtr{}; /**< Pointer to the mutex to protect the client addresses map. */
+    std::map<int, sockaddr_in> *clientAddressesPtr = nullptr; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
+    std::mutex *clientAddressesMutexPtr = nullptr; /**< Pointer to the mutex to protect the client addresses map. */
 
     /**
      * @brief Waits for a new client connection.

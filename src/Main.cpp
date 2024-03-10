@@ -1,9 +1,9 @@
 #include <thread>
 #include <SDL_ttf.h>
-#include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
+#include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 #ifdef _WIN32
@@ -49,13 +49,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
+    Mediator mediator;
+
     // Initialize Game
     Player initialPlayer(-50, 50, 2, 20, 30);
     Game game(window, renderer, initialPlayer);
+    mediator.setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit);
+    Menu menu(renderer, font, &game, &quit, &mediator);
+    mediator.setMenuPtr(&menu);
     menu.render();
+
+    // Initialize NetworkManager
+    NetworkManager networkManager(&mediator);
+    mediator.setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);

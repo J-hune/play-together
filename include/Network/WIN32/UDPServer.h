@@ -15,7 +15,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "../../Utils/UDPError.h"
+#include "../UDPError.h"
 
 /**
  * @brief The UDPServer class provides functionality to create and manage a UDP server.
@@ -26,11 +26,6 @@ public:
      * @brief Constructs a UDPServer object.
      */
     UDPServer();
-
-    /**
-     * @brief Destroys the UDPServer object and shuts down the server.
-     */
-    ~UDPServer();
 
     /**
      * @brief Returns the server socket file descriptor.
@@ -81,8 +76,8 @@ public:
 private:
     SOCKET socketFileDescriptor = INVALID_SOCKET; /**< The server socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the server should stop. */
-    std::map<SOCKET, sockaddr_in> *clientAddressesPtr{}; /**< Pointer to the map of client IDs and their addresses. */
-    std::mutex *clientAddressesMutexPtr; /**< Pointer to the mutex to protect the client addresses map. */
+    std::map<SOCKET, sockaddr_in> *clientAddressesPtr = nullptr; /**< Pointer to the map of client IDs and their addresses. */
+    std::mutex *clientAddressesMutexPtr = nullptr; /**< Pointer to the mutex to protect the client addresses map. */
 
     /**
      * @brief Waits for incoming messages.

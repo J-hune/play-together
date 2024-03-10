@@ -15,7 +15,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "../../Utils/TCPError.h"
+#include "../TCPError.h"
 
 /**
  * @brief The TCPServer class provides functionality to create and manage a TCP server.
@@ -26,11 +26,6 @@ public:
      * @brief Constructs a TCPServer object.
      */
     TCPServer();
-
-    /**
-     * @brief Destroys the TCPServer object and shuts down the server.
-     */
-    ~TCPServer();
 
     /**
      * @brief Returns the server socket file descriptor.

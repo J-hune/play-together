@@ -1,4 +1,6 @@
 #include "../../include/Game/Menu.h"
+#include "../../include/Network/TCPError.h"
+#include "../../include/Network/UDPError.h"
 
 /**
  * @brief Implementation of the Menu class responsible for rendering and handling events for the game menus.
@@ -13,9 +15,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
     return flattenedButtons;
 }
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : renderer(renderer), font(font), game(game), quit(quit) {
-    tcpClient.setDisconnectCallback([this] { onServerDisconnect(); });
-
+Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator) : renderer(renderer), font(font), gamePtr(game), quit(quit), mediatorPtr(mediator) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -81,17 +81,9 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : ren
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(stop_button);
 }
 
-Menu::~Menu() {
-    // Stop the server and client threads if they are running before destroying the Menu
-    cleanupThreads(serverTCPThreadPtr, tcpServer);
-    cleanupThreads(clientTCPThreadPtr, tcpClient);
-    cleanupThreads(serverUDPThreadPtr, udpServer);
-    cleanupThreads(clientUDPThreadPtr, udpClient);
-}
-
 void Menu::render() {
     // Render buttons
-    for (Button &button: buttons[{game->getGameState(), getCurrentMenuAction()}]) {
+    for (Button &button: buttons[{gamePtr->getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
 }
@@ -125,64 +117,7 @@ void Menu::reset() {
     }
 }
 
-void Menu::startServer() {
-    try {
-        tcpServer.initialize(8080);
-        std::cout << "TCPServer: Server initialized and listening on port 8080" << std::endl;
-
-        // Start the server in a separate thread
-        serverTCPThreadPtr = std::make_unique<std::jthread>([this](TCPServer *serverPtr) {
-            serverPtr->start(clientAddresses, clientAddressesMutex);
-        }, &tcpServer);
-
-        udpServer.initialize(8080);
-        std::cout << "UDPServer: Server initialized and listening on port 8080" << std::endl;
-
-        // Start the server in a separate thread
-        serverUDPThreadPtr = std::make_unique<std::jthread>([this](UDPServer *serverPtr) {
-            serverPtr->start(clientAddresses, clientAddressesMutex);
-        }, &udpServer);
-
-        setMenuAction(MenuAction::HOST_GAME);
-    } catch (const TCPError& e) {
-        std::cerr << "(TCPError) " << e.what() << std::endl;
-        cleanupThreads(clientTCPThreadPtr, tcpClient);
-        cleanupThreads(clientUDPThreadPtr, udpClient); // Clean up UDP thread as well
-    } catch (const UDPError& e) {
-        std::cerr << "(UDPError) " << e.what() << std::endl;
-        cleanupThreads(clientTCPThreadPtr, tcpClient); // Clean up TCP thread as well
-        cleanupThreads(clientUDPThreadPtr, udpClient);
-    }
-}
-
-void Menu::startClient() {
-    unsigned short clientPort;
-    try {
-        // Start the client, connect it to the server and start it in a separate thread
-        tcpClient.connect("127.0.0.1", 8080, clientPort);
-        std::cout << "TCPClient: Connected to server" << std::endl;
-        clientTCPThreadPtr = std::make_unique<std::jthread>(&TCPClient::start, &tcpClient);
-
-        // Initialize the UDP client and start it in a separate thread
-        udpClient.initialize("127.0.0.1", 8080, clientPort);
-        std::cout << "UDPClient: Client initialized and running on port " << clientPort << std::endl;
-        clientUDPThreadPtr = std::make_unique<std::jthread>(&UDPClient::start, &udpClient);
-
-        setMenuAction(MenuAction::JOIN_GAME);
-    } catch (const TCPError& e) {
-        std::cerr << "(TCPError) " << e.what() << std::endl;
-        cleanupThreads(clientTCPThreadPtr, tcpClient);
-        cleanupThreads(clientUDPThreadPtr, udpClient); // Clean up UDP thread as well
-    } catch (const UDPError& e) {
-        std::cerr << "(UDPError) " << e.what() << std::endl;
-        cleanupThreads(clientTCPThreadPtr, tcpClient); // Clean up TCP thread as well
-        cleanupThreads(clientUDPThreadPtr, udpClient);
-    }
-}
-
 void Menu::onServerDisconnect() {
-    tcpClient.stop();
-
     // Switch to MAIN menu on server disconnect
     setMenuAction(MenuAction::MAIN);
     setDisplayMenu(true); // Make sure menu is displayed
@@ -201,7 +136,7 @@ void Menu::handleEvent(const SDL_Event &event) {
 }
 
 std::vector<Button> &Menu::getCurrentMenuButtons() {
-    return buttons[{game->getGameState(), getCurrentMenuAction()}];
+    return buttons[{gamePtr->getGameState(), getCurrentMenuAction()}];
 }
 
 void Menu::handleButtonAction(Button &button) {
@@ -258,22 +193,36 @@ void Menu::handleResumeButton(Button &button) {
 
 void Menu::handleStopButton(Button &button) {
     button.reset();
-    game->stop();
+    gamePtr->stop();
 }
 
 void Menu::handleHostGameButton(Button &button) {
-    cleanupThreads(clientTCPThreadPtr, tcpClient);
-    cleanupThreads(clientUDPThreadPtr, udpClient);
+    mediatorPtr->stopClients();
 
-    startServer();
+    try {
+        mediatorPtr->startServers();
+        setMenuAction(MenuAction::HOST_GAME);
+    } catch (const TCPError& e) {
+        std::cerr << "(TCPError) " << e.what() << std::endl;
+    } catch (const UDPError& e) {
+        std::cerr << "(UDPError) " << e.what() << std::endl;
+    }
+
     button.reset();
 }
 
 void Menu::handleJoinGameButton(Button &button) {
-    cleanupThreads(serverTCPThreadPtr, tcpServer);
-    cleanupThreads(serverUDPThreadPtr, udpServer);
+    mediatorPtr->stopServers();
 
-    startClient();
+    try {
+        mediatorPtr->startClients();
+        setMenuAction(MenuAction::JOIN_GAME);
+    } catch (const TCPError& e) {
+        std::cerr << "(TCPError) " << e.what() << std::endl;
+    } catch (const UDPError& e) {
+        std::cerr << "(UDPError) " << e.what() << std::endl;
+    }
+
     button.reset();
 }
 
@@ -286,67 +235,12 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
     setMenuAction(MenuAction::PLAY);
     button.reset();
 
-    cleanupThreads(serverTCPThreadPtr, tcpServer);
-    cleanupThreads(clientTCPThreadPtr, tcpClient);
-    cleanupThreads(serverUDPThreadPtr, udpServer);
-    cleanupThreads(clientUDPThreadPtr, udpClient);
+    mediatorPtr->stopServers();
+    mediatorPtr->stopClients();
 }
 
 void Menu::handleSendMessageButton(Button &button) {
-#ifdef _WIN32
-    if (tcpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
-        tcpClient.send("Hello, World from TCP!");
-    }
-
-    if (udpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
-        udpClient.send("Hello, World from UDP!");
-    }
-
-    if (tcpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
-        bool success = tcpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-
-    if (udpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
-        bool success = udpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-#else
-    if (tcpClient.getSocketFileDescriptor() != -1) {
-        tcpClient.send("Hello, World from TCP!");
-    }
-
-    if (udpClient.getSocketFileDescriptor() != -1) {
-        udpClient.send("Hello, World from UDP!");
-    }
-
-    if (tcpServer.getSocketFileDescriptor() != -1) {
-        bool success = tcpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-
-    if (udpServer.getSocketFileDescriptor() != -1) {
-        bool success = udpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-#endif
-
+    mediatorPtr->temporarySendMethod("Hello, World!");
     button.reset();
 }
 
@@ -362,21 +256,4 @@ void Menu::handleNavigateToStartNewGameMenuButton(Button &button) {
 
 void Menu::handleQuitButton([[maybe_unused]] Button &button) {
     setQuit(true);
-}
-
-template<typename SocketType>
-void Menu::cleanupThreads(std::unique_ptr<std::jthread> &threadPtr, SocketType &socket) const {
-
-#ifdef _WIN32
-    if (socket.getSocketFileDescriptor() != INVALID_SOCKET) socket.stop();
-#else
-    if (socket.getSocketFileDescriptor() != -1) socket.stop();
-#endif
-
-    if (threadPtr && threadPtr->joinable()) {
-        threadPtr->request_stop();
-        threadPtr->join();
-    }
-    // Destroy the thread
-    threadPtr.reset();
 }

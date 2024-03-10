@@ -4,10 +4,6 @@
 
 UDPClient::UDPClient() = default;
 
-UDPClient::~UDPClient() {
-    stop(); // Stop the client
-}
-
 int UDPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }

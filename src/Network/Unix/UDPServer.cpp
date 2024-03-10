@@ -4,10 +4,6 @@
 
 UDPServer::UDPServer() = default;
 
-UDPServer::~UDPServer() {
-    stop();
-}
-
 int UDPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }

@@ -11,7 +11,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "../../Utils/UDPError.h"
+#include "../UDPError.h"
 
 /**
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
@@ -22,11 +22,6 @@ public:
      * @brief Constructs a UDPClient object.
      */
     UDPClient();
-
-    /**
-     * @brief Destroys the UDPClient object.
-     */
-    ~UDPClient();
 
     /**
      * @brief Gets the socket file descriptor.

@@ -1,13 +1,16 @@
 #ifndef PLAY_TOGETHER_LEVEL_H
 #define PLAY_TOGETHER_LEVEL_H
 
-#include <SDL.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include "Polygon.h"
 #include "Camera.h"
+#include "Objects/MovingPlatform1D.h"
+#include "Objects/MovingPlatform2D.h"
+#include "Objects/SwitchingPlatform.h"
+
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
@@ -39,6 +42,39 @@ public:
      */
     [[nodiscard]] std::vector<Polygon> getObstacles() const;
 
+    /**
+     * @brief Return the movingPlatform attribute.
+     * @return A vector of MovingPlatform1D.
+     */
+    [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
+
+    /**
+     * @brief Return the movingPlatform2D attribute.
+     * @return A vector of MovingPlatform2D.
+     */
+    [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
+
+    /**
+     * @brief Return the switchingPlatforms attribute.
+     * @return A vector of SwitchingPlatform.
+     */
+    [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+     * @brief Apply the movement of every platforms in the level.
+     */
+    void applyPlatformsMovement();
+
+    /**
+     * @brief Renders the game by drawing the player and obstacles.
+     * @param[out] renderer The renderer associated to the current game
+     * @param camera The camera associated to the current game
+     */
+    void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
+
 
     /** PUBLIC METHODS **/
 
@@ -54,6 +90,9 @@ private:
     /** ATTRIBUTES **/
 
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
 
 
     /** PRIVATE METHODS **/

@@ -14,8 +14,20 @@ Level::Level(const std::string &map_name) {
 
 /** ACCESSORS **/
 
-std::vector<Polygon> Level::getObstacles() const{
+std::vector<Polygon> Level::getObstacles() const {
     return obstacles;
+}
+
+std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
+    return movingPlatforms1D;
+}
+
+std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
+    return movingPlatforms2D;
+}
+
+std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
+    return switchingPlatforms;
 }
 
 
@@ -30,6 +42,46 @@ void Level::renderObstacles(SDL_Renderer *renderer, Camera camera) const {
             const auto &vertex2 = vertices[(i + 1) % vertices.size()];
             SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
         }
+    }
+}
+
+void Level::applyPlatformsMovement() {
+    // Apply movement for 1D platforms
+    for (MovingPlatform1D &platform: movingPlatforms1D) {
+        platform.applyMovement();
+    }
+
+    // Apply movement for 2D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) {
+        platform.applyMovement();
+    }
+
+    // Apply movement for switching platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) {
+        platform.applyMovement();
+    }
+}
+
+void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+    // Draw the 1D moving platforms
+    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+    for (const MovingPlatform1D &platform: movingPlatforms1D) {
+        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platformRect);
+    }
+
+    // Draw the 2D moving platforms
+    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+    for (const MovingPlatform2D &platform: movingPlatforms2D) {
+        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platformRect);
+    }
+
+    // Draw the switching platforms
+    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+    for (const SwitchingPlatform &platform: switchingPlatforms) {
+        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platformRect);
     }
 }
 

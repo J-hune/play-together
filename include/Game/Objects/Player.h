@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <SDL.h>
-#include "Point.h"
+#include "../Point.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
 const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */
@@ -162,6 +162,25 @@ public:
      * @return A vector of Point representing vertices, with added margin to capture roof within the area.
      */
     [[nodiscard]] std::vector<Point> getVerticesRoof() const;
+
+    /**
+     * @brief Gets the horizontal collider bounding box of the player's, according to its current direction.
+     * @param direction The direction in which the player intends to move.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getHorizontalColliderBoundingBox() const;
+
+    /**
+     * @brief Get the bounding box of the player's ground collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getGroundColliderBoundingBox() const;
+
+    /**
+     * @brief Get the bounding box of the player's roof collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getRoofColliderBoundingBox() const;
 
     /**
      * @brief Get the bounding box of the player.
@@ -335,6 +354,18 @@ private:
      * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
      */
     [[nodiscard]] std::vector<Point> getVerticesRight() const;
+
+    /**
+     * @brief Get the bounding box of the player's left collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getLeftColliderBoundingBox() const;
+
+    /**
+     * @brief Get the bounding box of the player's right collider.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getRightColliderBoundingBox() const;
 
 };
 

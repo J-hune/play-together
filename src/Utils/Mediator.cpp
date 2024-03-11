@@ -3,6 +3,11 @@
 #include "../../include/Game/Menu.h"
 #include "../../include/Network/NetworkManager.h"
 
+// Define the static member variables
+Game* Mediator::gamePtr = nullptr;
+Menu* Mediator::menuPtr = nullptr;
+NetworkManager* Mediator::networkManagerPtr = nullptr;
+
 /** CONSTRUCTORS **/
 
 Mediator::Mediator() = default;
@@ -11,42 +16,42 @@ Mediator::Mediator() = default;
 /** MODIFIERS **/
 
 void Mediator::setGamePtr(Game *game) {
-    this->gamePtr = game;
+    Mediator::gamePtr = game;
 }
 
 void Mediator::setMenuPtr(Menu *menu) {
-    this->menuPtr = menu;
+    Mediator::menuPtr = menu;
 }
 
 void Mediator::setNetworkManagerPtr(NetworkManager *networkManager) {
-    this->networkManagerPtr = networkManager;
+    Mediator::networkManagerPtr = networkManager;
 }
 
 
 /** METHODS **/
 
 void Mediator::startServers() {
-    this->networkManagerPtr->startServers();
+    Mediator::networkManagerPtr->startServers();
 }
 
 void Mediator::startClients() {
-    this->networkManagerPtr->startClients();
+    Mediator::networkManagerPtr->startClients();
 }
 
 void Mediator::stopServers() {
-    this->networkManagerPtr->stopServers();
+    Mediator::networkManagerPtr->stopServers();
 }
 
 void Mediator::stopClients() {
-    this->networkManagerPtr->stopClients();
+    Mediator::networkManagerPtr->stopClients();
 }
 
-void Mediator::temporarySendMethod(const std::string &message) const {
-    this->networkManagerPtr->temporarySendMethod(message);
+void Mediator::temporarySendMethod(const std::string &message) {
+    Mediator::networkManagerPtr->temporarySendMethod(message);
 }
 
 void Mediator::handleServerDisconnect() {
-    this->menuPtr->onServerDisconnect();
+    Mediator::menuPtr->onServerDisconnect();
 }
 
 int Mediator::setCharacterSpriteID(short id) {
@@ -64,6 +69,6 @@ int Mediator::setCharacterSpriteID(short id) {
     }
 
     // If the ID is valid and not taken, set it for the player character.
-    this->gamePtr->getPlayer().setSpriteID(id);
+    gamePtr->getPlayer().setSpriteID(id);
     return 0;
 }

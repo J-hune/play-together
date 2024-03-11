@@ -19,7 +19,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator) : renderer(renderer), font(font), gamePtr(game), quit(quit), mediatorPtr(mediator) {
+Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : renderer(renderer), font(font), gamePtr(game), quit(quit) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -206,13 +206,16 @@ void Menu::handleResumeButton(Button &button) {
 void Menu::handleStopButton(Button &button) {
     button.reset();
     gamePtr->stop();
+
+    Mediator::stopServers();
+    Mediator::stopClients();
 }
 
 void Menu::handleHostGameButton(Button &button) {
-    mediatorPtr->stopClients();
+    Mediator::stopClients();
 
     try {
-        mediatorPtr->startServers();
+        Mediator::startServers();
         setMenuAction(MenuAction::HOST_GAME);
     } catch (const TCPError& e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
@@ -224,10 +227,10 @@ void Menu::handleHostGameButton(Button &button) {
 }
 
 void Menu::handleJoinGameButton(Button &button) {
-    mediatorPtr->stopServers();
+    Mediator::stopServers();
 
     try {
-        mediatorPtr->startClients();
+        Mediator::startClients();
         setMenuAction(MenuAction::JOIN_GAME);
     } catch (const TCPError& e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
@@ -247,12 +250,12 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
     setMenuAction(MenuAction::PLAY);
     button.reset();
 
-    mediatorPtr->stopServers();
-    mediatorPtr->stopClients();
+    Mediator::stopServers();
+    Mediator::stopClients();
 }
 
 void Menu::handleSendMessageButton(Button &button) {
-    mediatorPtr->temporarySendMethod("Hello, World!");
+    Mediator::temporarySendMethod("Hello, World!");
     button.reset();
 }
 

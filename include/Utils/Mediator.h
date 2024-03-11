@@ -30,42 +30,43 @@ public:
      * @brief Sets the pointer to the associated Game object.
      * @param gamePtr The pointer to the Game object.
      */
-    void setGamePtr(Game *gamePtr);
+    static void setGamePtr(Game *gamePtr);
 
     /**
      * @brief Sets the pointer to the associated Menu object.
      * @param menuPtr The pointer to the Menu object.
      */
-    void setMenuPtr(Menu *menuPtr);
+    static void setMenuPtr(Menu *menuPtr);
 
     /**
      * @brief Sets the pointer to the associated NetworkManager object.
      * @param networkManagerPtr The pointer to the NetworkManager object.
      */
-    void setNetworkManagerPtr(NetworkManager *networkManagerPtr);
+    static void setNetworkManagerPtr(NetworkManager *networkManagerPtr);
 
 
     /** PUBLIC METHODS **/
 
     // NetworkManager methods
-    void startServers();
-    void startClients();
-    void stopServers();
-    void stopClients();
-    void temporarySendMethod(const std::string &message) const;
+    static void startServers();
+    static void startClients();
+    static void stopServers();
+    static void stopClients();
+    static void temporarySendMethod(const std::string &message);
 
     // Menu methods
-    void handleServerDisconnect();
+    static void handleServerDisconnect();
 
     // Game methods
-    int setPlayerID(int id);
-    int setCharacterSpriteID(short id);
+    static int setCharacterSpriteID(short id);
+
 private:
     /** ATTRIBUTES **/
 
-    Game *gamePtr = nullptr; /**< Pointer to the associated Game object. */
-    Menu *menuPtr = nullptr; /**< Pointer to the associated Menu object. */
-    NetworkManager *networkManagerPtr = nullptr; /**< Pointer to the associated NetworkManager object. */
+    static Game *gamePtr; /**< Pointer to the associated Game object. */
+    static Menu *menuPtr; /**< Pointer to the associated Menu object. */
+    static NetworkManager *networkManagerPtr; /**< Pointer to the associated NetworkManager object. */
+
 };
 
 #endif //PLAY_TOGETHER_MEDIATOR_H

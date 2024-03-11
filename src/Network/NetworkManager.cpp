@@ -2,9 +2,9 @@
 
 /** CONSTRUCTORS **/
 
-NetworkManager::NetworkManager(Mediator *mediator) : mediatorPtr(mediator) {
+NetworkManager::NetworkManager() {
     tcpClient.setDisconnectCallback([this] {
-        mediatorPtr->handleServerDisconnect();
+        Mediator::handleServerDisconnect();
         udpClient.stop();
     });
 };

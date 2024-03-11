@@ -28,7 +28,7 @@ class NetworkManager {
 public:
     /** CONSTRUCTORS **/
 
-    explicit NetworkManager(Mediator *mediator);
+    NetworkManager();
 
 
     /** DESTRUCTORS **/
@@ -38,18 +38,35 @@ public:
 
     /** PUBLIC METHODS **/
 
+    /**
+     * @brief Starts the TCP and UDP servers.
+     */
     void startServers();
+
+    /**
+     * @brief Starts the TCP and UDP clients.
+     */
     void startClients();
 
+    /**
+     * @brief Stops the TCP and UDP servers.
+     */
     void stopServers();
+
+    /**
+     * @brief Stops the TCP and UDP clients.
+     */
     void stopClients();
 
-    void temporarySendMethod(const std::string &message) const;
+    /**
+     * @brief Sends a message to the server if the client is connected, or to all clients if the server is connected. (TCP and UDP)
+     * @param message The message to send.
+     */
+     void temporarySendMethod(const std::string &message) const;
 
 private:
     /** ATTRIBUTES **/
 
-    Mediator *mediatorPtr; /**< Pointer to the network manager mediator. */
     TCPServer tcpServer; /**< TCP server instance for network communication. */
     TCPClient tcpClient; /**< TCP client instance for network communication. */
     UDPServer udpServer; /**< UDP server instance for network communication. */

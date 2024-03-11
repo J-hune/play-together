@@ -44,7 +44,7 @@ public:
      * @param game The game object.
      * @param quit A pointer to a boolean to control the game loop.
      */
-    Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator);
+    Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit);
 
 
     /** ACCESSORS **/
@@ -110,7 +110,6 @@ private:
     bool *quit; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-    Mediator *mediatorPtr; /**< Pointer to the network manager mediator. */
 
 
     /** ACCESSORS **/

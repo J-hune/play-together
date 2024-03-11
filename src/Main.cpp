@@ -50,23 +50,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
-    Mediator mediator;
 
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
     Player initialPlayer(0, 50, 50, 0.2F, 2, 20, 30);
     Game game(window, renderer, camera, level, initialPlayer);
-    mediator.setGamePtr(&game);
+    Mediator::setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit, &mediator);
-    mediator.setMenuPtr(&menu);
+    Menu menu(renderer, font, &game, &quit);
+    Mediator::setMenuPtr(&menu);
     menu.render();
 
     // Initialize NetworkManager
-    NetworkManager networkManager(&mediator);
-    mediator.setNetworkManagerPtr(&networkManager);
+    NetworkManager networkManager;
+    Mediator::setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);

@@ -107,7 +107,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             //game.addCharacter(character2);
             game.addCharacter(character3);
 
-            game.removeCharacter(character3);
+            game.removeCharacter(&character3);
             camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished

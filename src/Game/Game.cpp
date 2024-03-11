@@ -92,6 +92,15 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 
 /** METHODS **/
 
+Player* Game::findPlayerById (int id) {
+    for (Player &character : characters) {
+        if (character.getPlayerID() == id) {
+            return &character;
+        }
+    }
+    return nullptr;
+}
+
 void Game::teleportPlayer(float newX, float newY) {
     player.teleportPlayer(newX, newY);
 }
@@ -100,9 +109,16 @@ void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
 
-void Game::removeCharacter(const Player &character) {
+void Game::removeCharacter(Player* characterPtr) {
+    // Check if the pointer is valid
+    if (characterPtr == nullptr) {
+        return; // Exit if the pointer is null
+    }
+
     // Find the iterator corresponding to the character in the vector
-    std::input_iterator auto it = std::ranges::find(characters.begin(), characters.end(), character);
+    auto it = std::find_if(characters.begin(), characters.end(), [characterPtr](const Player& currentPlayer) {
+        return &currentPlayer == characterPtr;
+    });
 
     // Check if the character was found
     if (it != characters.end()) {

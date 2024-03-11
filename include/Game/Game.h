@@ -67,6 +67,13 @@ public:
     /** MODIFIERS **/
 
     /**
+     * @brief Find and return a player by its id.
+     * @param id The id of the player to find (0 for the main player).
+     * @return A pointer to the player object if found, nullptr otherwise.
+     */
+    Player* findPlayerById(int id);
+
+    /**
      * @brief Teleports the player to a specific location.
      * @param newX The X-coordinate of the location.
      * @param newY The Y-coordinate of the location.
@@ -135,9 +142,9 @@ public:
 
     /**
      * @brief Removes a character from the game.
-     * @param character The character to remove.
+     * @param characterPtr Pointer to the character to remove.
      */
-    void removeCharacter(const Player &character);
+    void removeCharacter(Player* characterPtr);
 
     /**
      * @brief Serialize the game object

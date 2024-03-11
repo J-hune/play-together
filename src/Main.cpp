@@ -1,6 +1,7 @@
 #include <thread>
 #include <mutex>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 #include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
@@ -43,10 +44,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
+    // Load initial player's sprite texture
+    SDL_Texture *texture = IMG_LoadTexture(renderer, "../assets/sprites/players/player1.png");
+    if (texture == nullptr) {
+        std::cerr << "Error loading texture: " << TTF_GetError() << std::endl;
+        return 1;
+    }
+    Sprite playerSprite(Player::idle, &texture, 24, 18);
+
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
-    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
+    Player initialPlayer(50, 50, 0.2F, 2, 48, 36, playerSprite);
     Game game(window, renderer, camera, level, initialPlayer);
 
     // Initialize Menu
@@ -84,9 +93,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 1, 2, 20, 30);
-            Player character2(150, 50, 1, 2, 20, 30);
-            Player character3(200, 50, 1, 2, 20, 30);
+            Player character1(100, 50, 1, 2, 20, 30, playerSprite);
+            Player character2(150, 50, 1, 2, 20, 30, playerSprite);
+            Player character3(200, 50, 1, 2, 20, 30, playerSprite);
 
             //game.addCharacter(character1);
             //game.addCharacter(character2);

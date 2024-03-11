@@ -1,12 +1,19 @@
 #include <thread>
-#include <mutex>
 #include <SDL_ttf.h>
-#include "../include/Game/Game.h"
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
+#include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+#ifdef _WIN32
+    WSADATA wsaData;
+    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (result != 0) {
+        std::cerr << "WSAStartup failed: " << result << std::endl;
+        return 1;
+    }
+#endif
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -43,15 +50,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
+    Mediator mediator;
+
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
     Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
     Game game(window, renderer, camera, level, initialPlayer);
+    mediator.setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit);
+    Menu menu(renderer, font, &game, &quit, &mediator);
+    mediator.setMenuPtr(&menu);
     menu.render();
+
+    // Initialize NetworkManager
+    NetworkManager networkManager(&mediator);
+    mediator.setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -116,5 +131,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     TTF_Quit();
     SDL_Quit();
 
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return 0;
 }

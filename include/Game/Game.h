@@ -27,13 +27,11 @@ enum class GameState {
  * @class Game
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
  */
-
 class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level,
-         const Player &initialPlayer);
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer);
 
     Game();
 

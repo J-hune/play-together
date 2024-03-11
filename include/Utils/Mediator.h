@@ -56,6 +56,10 @@ public:
 
     // Menu methods
     void handleServerDisconnect();
+
+    // Game methods
+    int setPlayerID(int id);
+    int setCharacterSpriteID(short id);
 private:
     /** ATTRIBUTES **/
 

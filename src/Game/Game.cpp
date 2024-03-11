@@ -15,7 +15,7 @@ Game::Game() :
                                     (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
             renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
             level("experimentation"),
-            player(-50, 50, 1, 2, 20, 30) {}
+            player(0, -50, 50, 1, 2, 20, 30) {}
 
 
 /** ACCESSORS **/
@@ -40,6 +40,14 @@ Point Game::getAveragePlayersPositions() const {
     x /= i; y /= i;
 
     return {x, y};
+}
+
+Player &Game::getPlayer() {
+    return player;
+}
+
+std::vector<Player> &Game::getCharacters() {
+    return characters;
 }
 
 

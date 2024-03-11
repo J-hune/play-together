@@ -55,7 +55,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
-    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
+    Player initialPlayer(0, 50, 50, 0.2F, 2, 20, 30);
     Game game(window, renderer, camera, level, initialPlayer);
     mediator.setGamePtr(&game);
 
@@ -99,9 +99,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 1, 2, 20, 30);
-            Player character2(150, 50, 1, 2, 20, 30);
-            Player character3(200, 50, 1, 2, 20, 30);
+            Player character1(1, 100, 50, 1, 2, 20, 30);
+            Player character2(2, 150, 50, 1, 2, 20, 30);
+            Player character3(3, 200, 50, 1, 2, 20, 30);
 
             //game.addCharacter(character1);
             //game.addCharacter(character2);

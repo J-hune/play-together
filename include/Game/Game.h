@@ -51,6 +51,18 @@ public:
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
+    /**
+     * @brief Get the player object.
+     * @return The player object.
+     */
+    [[nodiscard]] Player &getPlayer();
+
+    /**
+     * @brief Get the characters vector.
+     * @return The characters vector.
+     */
+    [[nodiscard]] std::vector<Player> &getCharacters();
+
 
     /** MODIFIERS **/
 

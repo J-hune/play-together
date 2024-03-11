@@ -5,7 +5,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <utility>
-#include <SDL2_gfxPrimitives.h>
+#include "../../dependencies/SDL2_gfx/SDL2_gfxPrimitives.h"
 
 /**
  * @brief A struct representing the position of a button.
@@ -23,10 +23,15 @@ enum class ButtonAction {
     START,
     RESUME,
     STOP,
-    MENU_MAIN,
-    MENU_PLAY,
-    MENU_LOAD_SAVE,
-    MENU_START_NEW_GAME,
+    HOST_GAME,
+    JOIN_GAME,
+    NAVIGATE_TO_MENU_MAIN,
+    NAVIGATE_TO_MENU_PLAY,
+    NAVIGATE_TO_MENU_HOST_GAME,
+    NAVIGATE_TO_MENU_JOIN_GAME,
+    NAVIGATE_TO_MENU_LOAD_SAVE,
+    NAVIGATE_TO_MENU_START_NEW_GAME,
+    SEND_MESSAGE,
 };
 
 /**

@@ -135,7 +135,7 @@ public:
      */
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version){
-        ar & player;
+        ar & initialPlayer;
         ar & characters;
         ar & camera;
     }
@@ -148,7 +148,7 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
-    Player player; /**< The player object. */
+    Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     bool isRunning = true; /**< Flag indicating if the game is running. */
     bool switchGravity = false;
@@ -166,24 +166,37 @@ private:
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
      */
-    void handleEvents();
+    void handleEvents(Player *player);
 
     /**
      * @brief Handles SDL Key up events, updating the movement variables accordingly.
      * @param keyEvent Reference to the key who was release.
      */
-    void handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent);
+    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
      * @param keyEvent Reference to the key who was press.
      */
-    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent);
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
 
     /**
      * @brief Applies player movement based on the current movement variables.
+     * @param player The player to whom the movement will be applied.
      */
-    void applyPlayerMovement();
+    void applyPlayerMovement(Player *player);
+
+    /**
+     * @brief Applies the movement to all players in the game.
+     * @see applyPlayerMovement() for applying movement to one player.
+     */
+    void applyAllPlayerMovement();
+
+    /**
+     * @brief Calculate the movement of all players in the game.
+     * @see Player::calculateMovement() for applying movement to one player.
+     */
+    void calculateAllPlayerMovement();
 
     /**
      * @brief Checks for collision between the player and a polygon obstacle.
@@ -196,22 +209,22 @@ private:
     /**
      * @brief Handles collisions between the player and platform.
      */
-    void handleCollisionsWithObstacles();
+    void handleCollisionsWithObstacles(Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms.
      */
-    void handleCollisionsWithPlatforms();
+    void handleCollisionsWithPlatforms(Player *player);
 
     /**
      * @brief Handles collisions between the player and other players.
      */
-    void handleCollisionsWithOtherPlayers();
+    void handleCollisionsWithOtherPlayers(Player *player);
 
     /**
      * @brief Handles collisions between the player and camera borders.
      */
-    void handleCollisionsWithCameraBorders();
+    void handleCollisionsWithCameraBorders(Player *player);
 
     /**
      * @brief Handles collisions between the player and every object.
@@ -222,22 +235,22 @@ private:
     /**
      * @brief Handles collisions between the player and platform when mavity is reversed.
      */
-    void handleCollisionsWithObstaclesReverseMavity();
+    void handleCollisionsWithObstaclesReverseMavity(Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms when the mavity is reversed.
      */
-    void handleCollisionsWithPlatformsReversedMavity();
+    void handleCollisionsWithPlatformsReversedMavity(Player *player);
 
     /**
      * @brief Handles collisions between the player and other players when mavity is reversed.
      */
-    void handleCollisionsWithCameraBordersReversedMavity();
+    void handleCollisionsWithCameraBordersReversedMavity(Player *player);
 
     /**
      * @brief Handles collisions between the player and camera borders when mavity is reversed.
      */
-    void handleCollisionsWithOtherPlayersReversedMavity();
+    void handleCollisionsWithOtherPlayersReversedMavity(Player *player);
 
     /**
      * @brief Main method that handle every collision when the mavity is reversed.

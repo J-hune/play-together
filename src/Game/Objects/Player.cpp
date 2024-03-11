@@ -233,7 +233,7 @@ void Player::teleportPlayer(float newX, float newY) {
     y = newY;
 }
 
-void Player::calculatePlayerMovement() {
+void Player::calculateMovement() {
 
     // The player move on the x-axis
     if (finishTheMovement && (wantToMoveLeft || wantToMoveRight)) {

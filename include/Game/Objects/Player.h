@@ -300,7 +300,7 @@ public:
     /**
      * @brief Calculate the new position of the player.
      */
-    void calculatePlayerMovement();
+    void calculateMovement();
 
     /**
      * @brief Renders the player's colliders.

@@ -35,6 +35,8 @@ struct GameStateKey {
  */
 class Menu {
 public:
+    /** CONSTRUCTOR **/
+
     /**
      * @brief Constructor for the Menu class.
      * @param renderer The SDL_Renderer to render the menu.
@@ -43,6 +45,7 @@ public:
      * @param quit A pointer to a boolean to control the game loop.
      */
     Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator);
+
 
     /** ACCESSORS **/
 
@@ -109,11 +112,17 @@ private:
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
     Mediator *mediatorPtr; /**< Pointer to the network manager mediator. */
 
+
+    /** ACCESSORS **/
+
     /**
      * @brief Get the buttons corresponding to the current menu state.
      * @return Reference to the vector of buttons.
      */
     std::vector<Button>& getCurrentMenuButtons();
+
+
+    /** PRIVATE METHODS **/
 
     // Button action handlers
     void handleButtonAction(Button &button);

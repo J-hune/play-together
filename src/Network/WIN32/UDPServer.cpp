@@ -2,11 +2,19 @@
 
 #include "../../../include/Network/WIN32/UDPServer.h"
 
+/** CONSTRUCTORS **/
+
 UDPServer::UDPServer() = default;
+
+
+/** ACCESSORS **/
 
 SOCKET UDPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
+
+
+/** METHODS **/
 
 void UDPServer::initialize(short port) {
     // Create socket

@@ -18,16 +18,21 @@
  */
 class UDPClient {
 public:
-    /**
-     * @brief Constructs a UDPClient object.
-     */
+    /** CONSTRUCTORS **/
+
     UDPClient();
+
+
+    /** ACCESSORS **/
 
     /**
      * @brief Gets the socket file descriptor.
      * @return The socket file descriptor.
      */
     [[nodiscard]] SOCKET getSocketFileDescriptor() const;
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Initializes the UDP client with the given server address and port.
@@ -65,6 +70,8 @@ public:
     void stop();
 
 private:
+    /** ATTRIBUTES **/
+
     SOCKET socketFileDescriptor = INVALID_SOCKET; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */
     struct sockaddr_in serverAddress{}; /**< The server address structure. */

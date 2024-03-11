@@ -2,11 +2,19 @@
 
 #include "../../../include/Network/Unix/UDPServer.h"
 
+/** CONSTRUCTORS **/
+
 UDPServer::UDPServer() = default;
+
+
+/** ACCESSORS **/
 
 int UDPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
+
+
+/** METHODS **/
 
 void UDPServer::initialize(short port) {
     // Create socket

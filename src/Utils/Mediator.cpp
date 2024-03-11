@@ -3,7 +3,12 @@
 #include "../../include/Game/Menu.h"
 #include "../../include/Network/NetworkManager.h"
 
+/** CONSTRUCTORS **/
+
 Mediator::Mediator() = default;
+
+
+/** MODIFIERS **/
 
 void Mediator::setGamePtr(Game *game) {
     this->gamePtr = game;
@@ -16,6 +21,9 @@ void Mediator::setMenuPtr(Menu *menu) {
 void Mediator::setNetworkManagerPtr(NetworkManager *networkManager) {
     this->networkManagerPtr = networkManager;
 }
+
+
+/** METHODS **/
 
 void Mediator::startServers() {
     this->networkManagerPtr->startServers();

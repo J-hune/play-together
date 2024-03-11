@@ -22,16 +22,21 @@
  */
 class TCPServer {
 public:
-    /**
-     * @brief Constructs a TCPServer object.
-     */
+    /** CONSTRUCTORS **/
+
     TCPServer();
+
+
+    /** ACCESSORS **/
 
     /**
      * @brief Returns the server socket file descriptor.
      * @return The server socket file descriptor.
      */
     [[nodiscard]] SOCKET getSocketFileDescriptor() const;
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Initializes the TCP server with the given port.
@@ -75,12 +80,17 @@ public:
     void stop();
 
 private:
+    /** ATTRIBUTES **/
+
     SOCKET socketFileDescriptor = INVALID_SOCKET; /**< The server socket file descriptor. */
     unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
     std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
     std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
     std::map<SOCKET, sockaddr_in> *clientAddressesPtr{}; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
     std::mutex *clientAddressesMutexPtr; /**< Pointer to the mutex to protect the client addresses map. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Waits for a new client connection.

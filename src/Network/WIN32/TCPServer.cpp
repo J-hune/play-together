@@ -22,13 +22,20 @@
     to the application's needs.
  */
 
+/** CONSTRUCTORS **/
+
 TCPServer::TCPServer() = default;
 
-// Get the socket file descriptor
 
+/** ACCESSORS **/
+
+// Get the socket file descriptor
 SOCKET TCPServer::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
+
+
+/** METHODS **/
 
 // Initialize the server with a specified port
 void TCPServer::initialize(short port) {

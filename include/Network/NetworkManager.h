@@ -26,8 +26,17 @@
  */
 class NetworkManager {
 public:
+    /** CONSTRUCTORS **/
+
     explicit NetworkManager(Mediator *mediator);
+
+
+    /** DESTRUCTORS **/
+    
     ~NetworkManager();
+
+
+    /** PUBLIC METHODS **/
 
     void startServers();
     void startClients();
@@ -38,6 +47,8 @@ public:
     void temporarySendMethod(const std::string &message) const;
 
 private:
+    /** ATTRIBUTES **/
+
     Mediator *mediatorPtr; /**< Pointer to the network manager mediator. */
     TCPServer tcpServer; /**< TCP server instance for network communication. */
     TCPClient tcpClient; /**< TCP client instance for network communication. */

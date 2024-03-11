@@ -2,11 +2,19 @@
 
 #include "../../../include/Network/Unix/UDPClient.h"
 
+/** CONSTRUCTORS **/
+
 UDPClient::UDPClient() = default;
+
+
+/** ACCESSORS **/
 
 int UDPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
+
+
+/** METHODS **/
 
 void UDPClient::initialize(const std::string &serverHostname, short serverPort, unsigned short clientPort) {
     // Create UDP socket

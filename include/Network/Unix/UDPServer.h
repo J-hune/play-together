@@ -24,9 +24,8 @@
  */
 class UDPServer {
 public:
-    /**
-     * @brief Constructs a UDPServer object.
-     */
+    /** CONSTRUCTORS **/
+
     UDPServer();
 
     /**
@@ -34,6 +33,9 @@ public:
      * @return The server socket file descriptor.
      */
     [[nodiscard]] int getSocketFileDescriptor() const;
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Initializes the UDP server with the given port.
@@ -76,10 +78,15 @@ public:
     void stop();
 
 private:
+    /** ATTRIBUTES **/
+
     int socketFileDescriptor = -1; /**< The server socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the server should stop. */
     std::map<int, sockaddr_in> *clientAddressesPtr = nullptr; /**< Pointer to the map of client IDs and their addresses. */
     std::mutex *clientAddressesMutexPtr = nullptr; /**< Pointer to the mutex to protect the client addresses map. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Waits for incoming messages.

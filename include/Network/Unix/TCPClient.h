@@ -20,10 +20,12 @@
  */
 class TCPClient {
 public:
-    /**
-     * @brief Constructs a TCPClient object.
-     */
+    /** CONSTRUCTORS **/
+
     TCPClient();
+
+
+    /** ACCESSORS **/
 
     /**
      * @brief Gets the socket file descriptor.
@@ -31,11 +33,17 @@ public:
      */
     [[nodiscard]] int getSocketFileDescriptor() const;
 
+
+    /** MODIFIERS **/
+
     /**
      * @brief Set a callback function to notify menu on server disconnect.
      * @param callback The callback function.
      */
     void setDisconnectCallback(std::function<void()> callback);
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Connects to the specified server.
@@ -73,6 +81,8 @@ public:
     void stop();
 
 private:
+    /** PRIVATE METHODS **/
+
     int socketFileDescriptor = -1; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */
     bool shouldSendDisconnect = true; /**< Flag to indicate if the client should send a disconnect message. */

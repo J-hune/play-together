@@ -19,7 +19,12 @@ class NetworkManager;
  */
 class Mediator {
 public:
+    /** CONSTRUCTORS **/
+
     Mediator();
+
+
+    /** SETTERS **/
 
     /**
      * @brief Sets the pointer to the associated Game object.
@@ -39,6 +44,9 @@ public:
      */
     void setNetworkManagerPtr(NetworkManager *networkManagerPtr);
 
+
+    /** PUBLIC METHODS **/
+
     // NetworkManager methods
     void startServers();
     void startClients();
@@ -49,6 +57,8 @@ public:
     // Menu methods
     void handleServerDisconnect();
 private:
+    /** ATTRIBUTES **/
+
     Game *gamePtr = nullptr; /**< Pointer to the associated Game object. */
     Menu *menuPtr = nullptr; /**< Pointer to the associated Menu object. */
     NetworkManager *networkManagerPtr = nullptr; /**< Pointer to the associated NetworkManager object. */

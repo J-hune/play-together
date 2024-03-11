@@ -2,15 +2,26 @@
 
 #include "../../../include/Network/WIN32/TCPClient.h"
 
+/** CONSTRUCTORS **/
+
 TCPClient::TCPClient() = default;
+
+
+/** ACCESSORS **/
 
 SOCKET TCPClient::getSocketFileDescriptor() const {
     return socketFileDescriptor;
 }
 
+
+/** ACCESSORS **/
+
 void TCPClient::setDisconnectCallback(std::function<void()> callback) {
     disconnectCallback = std::move(callback);
 }
+
+
+/** METHODS **/
 
 void TCPClient::connect(const std::string &serverAddress, short port, unsigned short& clientPort) {
     // Create temporary file descriptor for the socket

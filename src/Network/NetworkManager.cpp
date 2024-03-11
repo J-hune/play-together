@@ -1,5 +1,7 @@
 #include "../../include/Network/NetworkManager.h"
 
+/** CONSTRUCTORS **/
+
 NetworkManager::NetworkManager(Mediator *mediator) : mediatorPtr(mediator) {
     tcpClient.setDisconnectCallback([this] {
         mediatorPtr->handleServerDisconnect();
@@ -7,10 +9,16 @@ NetworkManager::NetworkManager(Mediator *mediator) : mediatorPtr(mediator) {
     });
 };
 
+
+/** DESTRUCTORS **/
+
 NetworkManager::~NetworkManager() {
     stopServers();
     stopClients();
 }
+
+
+/** METHODS **/
 
 void NetworkManager::startServers() {
     try {

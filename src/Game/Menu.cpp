@@ -95,6 +95,11 @@ MenuAction Menu::getCurrentMenuAction() const {
     return currentMenuAction;
 }
 
+std::vector<Button> &Menu::getCurrentMenuButtons() {
+    return buttons[{gamePtr->getGameState(), getCurrentMenuAction()}];
+}
+
+
 /** MODIFIERS **/
 
 void Menu::setDisplayMenu(bool display_menu) {
@@ -108,6 +113,7 @@ void Menu::setMenuAction(MenuAction menu_action) {
 void Menu::setQuit(bool quit_value) {
     *quit = quit_value;
 }
+
 
 /** METHODS **/
 
@@ -143,10 +149,6 @@ void Menu::handleEvent(const SDL_Event &event) {
             handleButtonAction(button);
         }
     }
-}
-
-std::vector<Button> &Menu::getCurrentMenuButtons() {
-    return buttons[{gamePtr->getGameState(), getCurrentMenuAction()}];
 }
 
 void Menu::handleButtonAction(Button &button) {

@@ -52,14 +52,6 @@ public:
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
 
-    /**
-     * @brief Get a point of the average position of all players combined.
-     * @param[out] x The x-coordinate of the average players position
-     * @param[out] y The y-coordinate of the average players position
-     */
-    [[nodiscard]] Point getAveragePlayersPositions() const;
-
-
     /** MODIFIERS **/
 
     /**

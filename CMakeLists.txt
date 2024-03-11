@@ -14,6 +14,9 @@ find_package(SDL2_ttf REQUIRED)
 # Find SDL2_gfx library
 find_package(SDL2_gfx REQUIRED)
 
+# Find SDL2_image library
+find_package(SDL2_image REQUIRED)
+
 if(NOT SDL2_FOUND)
     message(FATAL_ERROR "SDL2 not found!")
 endif()
@@ -26,9 +29,14 @@ if(NOT SDL2_GFX_FOUND)
     message(FATAL_ERROR "SDL2_gfx not found!")
 endif()
 
+if(NOT SDL2_IMAGE_FOUND)
+    message(FATAL_ERROR "SDL2_image not found!")
+endif()
+
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${SDL2_GFX_INCLUDE_DIRS})
+include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
 # Automatic retrieval of source files
 file(GLOB_RECURSE SOURCES src/*.cpp)
@@ -49,4 +57,4 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets)
 add_executable(play-together WIN32 ${SOURCES} ${HEADERS})
 
 # Link libraries
-target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_GFX_LIBRARY})
+target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_GFX_LIBRARY} ${SDL2_IMAGE_LIBRARY})

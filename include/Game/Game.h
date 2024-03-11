@@ -1,20 +1,16 @@
 #ifndef PLAY_TOGETHER_GAME_H
 #define PLAY_TOGETHER_GAME_H
 
-#include <vector>
 #include <SDL.h>
-#include "Polygon.h"
-#include "Player.h"
+#include <vector>
 #include <climits>
 #include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <ranges>
-
-constexpr float SCREEN_WIDTH = 800;
-constexpr float SCREEN_HEIGHT = 600;
-constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
+#include <cmath>
+#include "Polygon.h"
+#include "Camera.h"
+#include "Level.h"
+#include "Objects/Player.h"
 
 enum class GameState {
     RUNNING,
@@ -33,18 +29,84 @@ enum class GameState {
  */
 class Game {
 public:
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Player &initialPlayer); /**< Constructor for the Game class. */
+    /** CONSTRUCTORS **/
+
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer);
+
+    Game();
+
+
+    /** ACCESSORS **/
 
     /**
-    * @brief Returns the current game state.
-    * @return The current game state.
-    */
+     * @brief Returns the current game state.
+     * @return The current game state.
+     */
     [[nodiscard]] GameState getGameState() const;
 
     /**
-    * @brief Initialize the camera position according to players positions.
-    */
-    void initializeCameraPosition();
+     * @brief Get a point of the average position of all players combined.
+     * @param[out] x The x-coordinate of the average players position
+     * @param[out] y The y-coordinate of the average players position
+     */
+    [[nodiscard]] Point getAveragePlayersPositions() const;
+
+
+    /**
+     * @brief Get a point of the average position of all players combined.
+     * @param[out] x The x-coordinate of the average players position
+     * @param[out] y The y-coordinate of the average players position
+     */
+    [[nodiscard]] Point getAveragePlayersPositions() const;
+
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Teleports the player to a specific location.
+     * @param newX The X-coordinate of the location.
+     * @param newY The Y-coordinate of the location.
+     */
+    void teleportPlayer(float newX, float newY);
+
+    /**
+     * @brief Set the level attribute.
+     * @param map_name The name of the new map.
+     */
+    void setLevel(std::string const &map_name);
+
+    /**
+     * @brief Sets the shaking state of the camera.
+     * @param val The new value for the shaking state of the camera.
+     */
+    void setCameraIsShaking(bool state);
+
+    /**
+     * @brief Set a new state to render_camera_point
+     * @param state the state of render_camera_point
+     */
+    void setRenderCameraPoint(bool state);
+
+    /**
+     * @brief Set a new state to render_camera_area
+     * @param state the state of render_camera_area
+     */
+    void setRenderCameraArea(bool state);
+
+    /**
+     * @brief Set a new state to render_player_colliders
+     * @param state the state of render_player_colliders
+     */
+    void setRenderPlayerColliders(bool state);
+
+    /**
+     * @brief Set a new state to enable_platforms_movement
+     * @param state the state of enable_platforms_movement
+     */
+    void setEnablePlatformsMovement(bool state);
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Runs the game loop.
@@ -62,15 +124,9 @@ public:
     void stop();
 
     /**
-     * @brief Loads obstacles from a map file.
-     * @param mapName The name of the map file.
+     * @brief Adds a character to the game.
+     * @param character The character to add.
      */
-    void loadPolygonsFromMap(const std::string &mapName);
-
-    /**
-    * @brief Adds a character to the game.
-    * @param character The character to add.
-    */
     void addCharacter(const Player &character);
 
     /**
@@ -80,73 +136,128 @@ public:
     void removeCharacter(const Player &character);
 
     /**
-     * @brief Teleports the player to a specific location.
-     * @param x The X-coordinate of the location.
-     * @param y The Y-coordinate of the location.
+     * @brief Serialize the game object
+     * @tparam Archive
+     * @param ar
+     * @param version
      */
-    void teleportPlayer(float x, float y);
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int version){
+        ar & player;
+        ar & characters;
+        ar & camera;
+    }
+
 
 private:
+    /** ATTRIBUTES **/
+
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    Camera camera; /**< The camera object */
+    Level level; /**< The level object */
     Player player; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    SDL_FRect camera = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; /**< Rectangle for camera object */
+    bool isRunning = true; /**< Flag indicating if the game is running. */
+    bool switchGravity = false;
+
+    bool render_camera_point = false;
+    bool render_camera_area = false;
+    bool render_player_colliders = false;
+    bool enable_platforms_movement = true;
+
     GameState gameState = GameState::STOPPED; /**< The current game state. */
+
+
+    /** PRIVATE METHODS **/
 
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
-     * @param moveX Reference to the X-axis movement variable.
-     * @param moveY Reference to the Y-axis movement variable.
      */
-    void handleEvents(float &moveX, float &moveY);
+    void handleEvents();
+
+    /**
+     * @brief Handles SDL Key up events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was release.
+     */
+    void handleKeyUpEvent(const SDL_KeyboardEvent& keyEvent);
+
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     */
+    void handleKeyDownEvent(const SDL_KeyboardEvent& keyEvent);
 
     /**
      * @brief Applies player movement based on the current movement variables.
-     * @param moveX The movement along the X-axis.
-     * @param moveY The movement along the Y-axis.
      */
-    void applyPlayerMovement(float moveX, float moveY);
+    void applyPlayerMovement();
 
     /**
-     * @brief Get a point of the average position of all players combined.
-     * @param[out] x The x-coordinate of the average players position
-     * @param[out] y The y-coordinate of the average players position
+     * @brief Checks for collision between the player and a polygon obstacle.
+     * @param playerVertices The vector of Point representing the vertices of the player object.
+     * @param obstacle The polygon obstacle.
+     * @return True if a collision is detected, false otherwise.
      */
-    void getAveragePlayersPositions(float *x, float *y) const;
+    static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
 
     /**
-     * @brief Applies camera movement based on the positions of all players.
+     * @brief Handles collisions between the player and platform.
      */
-    void applyCameraMovement();
+    void handleCollisionsWithObstacles();
 
     /**
-     * @brief Handles collisions between the player and obstacles.
-     * @param moveX The movement along the X-axis.
-     * @param moveY The movement along the Y-axis.
+     * @brief Handles collisions between the player and platforms.
      */
-    void handleCollisions(float moveX, float moveY);
+    void handleCollisionsWithPlatforms();
+
+    /**
+     * @brief Handles collisions between the player and other players.
+     */
+    void handleCollisionsWithOtherPlayers();
+
+    /**
+     * @brief Handles collisions between the player and camera borders.
+     */
+    void handleCollisionsWithCameraBorders();
+
+    /**
+     * @brief Handles collisions between the player and every object.
+     * @see handleCollisionsReversedMavity() for handling collisions with reversed mavity.
+     */
+    void handleCollisions();
+
+    /**
+     * @brief Handles collisions between the player and platform when mavity is reversed.
+     */
+    void handleCollisionsWithObstaclesReverseMavity();
+
+    /**
+     * @brief Handles collisions between the player and platforms when the mavity is reversed.
+     */
+    void handleCollisionsWithPlatformsReversedMavity();
+
+    /**
+     * @brief Handles collisions between the player and other players when mavity is reversed.
+     */
+    void handleCollisionsWithCameraBordersReversedMavity();
+
+    /**
+     * @brief Handles collisions between the player and camera borders when mavity is reversed.
+     */
+    void handleCollisionsWithOtherPlayersReversedMavity();
+
+    /**
+     * @brief Main method that handle every collision when the mavity is reversed.
+     * @see handleCollisions() for handling collisions with normal mavity.
+     */
+    void handleCollisionsReversedMavity();
 
     /**
      * @brief Renders the game by drawing the player and obstacles.
      */
     void render();
 
-    /**
-     * @brief Checks for collision between the player and a polygon obstacle.
-     * @param player The player object.
-     * @param obstacle The polygon obstacle.
-     * @return True if a collision is detected, false otherwise.
-     */
-    static bool checkCollision(const Player &player, const Polygon &obstacle);
-
-    /**
-     * @brief Checks if a polygon is convex.
-     * @param polygon The polygon to check.
-     * @return True if the polygon is convex, false otherwise.
-     */
-    static bool isConvex(const Polygon &polygon);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

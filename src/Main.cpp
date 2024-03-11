@@ -33,6 +33,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
         return 1;
     }
+
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         fprintf(stderr, "Could not create renderer: %s\n", SDL_GetError());
@@ -52,8 +53,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Mediator mediator;
 
     // Initialize Game
-    Player initialPlayer(-50, 50, 2, 20, 30);
-    Game game(window, renderer, initialPlayer);
+    Camera camera = Camera();
+    Level level("diversity");
+    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
+    Game game(window, renderer, camera, level, initialPlayer);
     mediator.setGamePtr(&game);
 
     // Initialize Menu
@@ -96,18 +99,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 2, 20, 30);
-            Player character2(150, 50, 2, 20, 30);
-            Player character3(200, 50, 2, 20, 30);
+            Player character1(100, 50, 1, 2, 20, 30);
+            Player character2(150, 50, 1, 2, 20, 30);
+            Player character3(200, 50, 1, 2, 20, 30);
 
-            game.addCharacter(character1);
-            game.addCharacter(character2);
+            //game.addCharacter(character1);
+            //game.addCharacter(character2);
             game.addCharacter(character3);
 
-            game.loadPolygonsFromMap("experimentation");
-
             game.removeCharacter(character3);
-            game.initializeCameraPosition();
+            camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished
             game.run();

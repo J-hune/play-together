@@ -44,16 +44,7 @@ public:
      */
     Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator);
 
-    /**
-     * @brief Render the menu on the screen.
-     */
-    void render();
-
-    /**
-     * @brief Handle events for the menu.
-     * @param event The SDL_Event to handle.
-     */
-    void handleEvent(const SDL_Event &event);
+    /** ACCESSORS **/
 
     /**
      * @brief Check if the menu is displaying.
@@ -66,6 +57,19 @@ public:
      * @return The current menu action.
      */
     [[nodiscard]] MenuAction getCurrentMenuAction() const;
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Render the menu on the screen.
+     */
+    void render();
+
+    /**
+     * @brief Handle events for the menu.
+     * @param event The SDL_Event to handle.
+     */
+    void handleEvent(const SDL_Event &event);
 
     /**
      * @brief Set whether the menu should be displayed or not.
@@ -85,6 +89,8 @@ public:
      */
     void setQuit(bool quit_value);
 
+    /** PUBLIC METHODS **/
+
     /**
      * @brief Reset the menu.
      */
@@ -92,6 +98,8 @@ public:
 
     void onServerDisconnect();
 private:
+    /** ATTRIBUTES **/
+
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     TTF_Font *font; /**< TTF font for rendering text. */
     bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */

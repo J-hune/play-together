@@ -13,11 +13,16 @@
  */
 class ApplicationConsole {
 public:
+    /** CONSTRUCTOR **/
+
     /**
      * @brief Constructs a ApplicationConsole object.
      * @param game A pointer to the Game object that the console interacts with.
      */
     explicit ApplicationConsole(Game* game);
+
+
+    /** PUBLIC METHODS **/
 
     /**
      * @brief Runs the console, allowing the user to input commands.
@@ -31,6 +36,8 @@ public:
     void executeCommand(const std::string& command) const;
 
 private:
+    /** ATTRIBUTES **/
+
     std::mutex consoleMutex;  /**< Mutex for thread safety in the console. */
     Game* gamePtr;  /**< Pointer to the associated Game object. */
 };

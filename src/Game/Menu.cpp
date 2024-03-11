@@ -2,6 +2,8 @@
 #include "../../include/Network/TCPError.h"
 #include "../../include/Network/UDPError.h"
 
+/** FUNCTIONS **/
+
 /**
  * @brief Implementation of the Menu class responsible for rendering and handling events for the game menus.
  */
@@ -14,6 +16,8 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
     }
     return flattenedButtons;
 }
+
+/** CONSTRUCTOR **/
 
 Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator) : renderer(renderer), font(font), gamePtr(game), quit(quit), mediatorPtr(mediator) {
     // Create menu buttons
@@ -81,12 +85,7 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Media
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(stop_button);
 }
 
-void Menu::render() {
-    // Render buttons
-    for (Button &button: buttons[{gamePtr->getGameState(), getCurrentMenuAction()}]) {
-        button.render();
-    }
-}
+/** ACCESSORS **/
 
 bool Menu::isDisplayingMenu() const {
     return displayMenu;
@@ -95,6 +94,8 @@ bool Menu::isDisplayingMenu() const {
 MenuAction Menu::getCurrentMenuAction() const {
     return currentMenuAction;
 }
+
+/** MODIFIERS **/
 
 void Menu::setDisplayMenu(bool display_menu) {
     displayMenu = display_menu;
@@ -106,6 +107,15 @@ void Menu::setMenuAction(MenuAction menu_action) {
 
 void Menu::setQuit(bool quit_value) {
     *quit = quit_value;
+}
+
+/** METHODS **/
+
+void Menu::render() {
+    // Render buttons
+    for (Button &button: buttons[{gamePtr->getGameState(), getCurrentMenuAction()}]) {
+        button.render();
+    }
 }
 
 void Menu::reset() {

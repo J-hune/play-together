@@ -45,6 +45,12 @@ public:
     [[nodiscard]] GameState getGameState() const;
 
     /**
+     * @brief Returns the camera of the game.
+     * @return A pointer of Camera object representing the camera of the game.
+     */
+    [[nodiscard]] Camera* getCamera();
+
+    /**
      * @brief Get a point of the average position of all players combined.
      * @param[out] x The x-coordinate of the average players position
      * @param[out] y The y-coordinate of the average players position
@@ -66,12 +72,6 @@ public:
      * @param map_name The name of the new map.
      */
     void setLevel(std::string const &map_name);
-
-    /**
-     * @brief Sets the shaking state of the camera.
-     * @param val The new value for the shaking state of the camera.
-     */
-    void setCameraIsShaking(bool state);
 
     /**
      * @brief Set a new state to render_camera_point
@@ -153,6 +153,7 @@ private:
     bool isRunning = true; /**< Flag indicating if the game is running. */
     bool switchGravity = false;
 
+    // Debug variables used for the application console
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;

@@ -23,6 +23,10 @@ GameState Game::getGameState() const {
     return gameState;
 }
 
+Camera* Game::getCamera() {
+    return &camera;
+}
+
 Point Game::getAveragePlayersPositions() const {
     float i = 1;  // Number of player in the game (at least one)
     float x = initialPlayer.getX(); // Initialization of the point on the initial player
@@ -54,10 +58,6 @@ void Game::setRenderCameraPoint(bool state){
 
 void Game::setRenderCameraArea(bool state){
     render_camera_area = state;
-}
-
-void Game::setCameraIsShaking(bool state) {
-    camera.setIsShaking(state);
 }
 
 void Game::setRenderPlayerColliders(bool state) {

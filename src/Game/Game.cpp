@@ -588,17 +588,17 @@ void Game::render() {
     SDL_RenderClear(renderer);
 
     // Draw the player
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     initialPlayer.getSprite()->updateAnimation(); // Update sprite animation
     SDL_Rect srcRect = initialPlayer.getSprite()->getSrcRect();
     SDL_FRect playerRect = {initialPlayer.getX() - camera.getX(), initialPlayer.getY() - camera.getY(), initialPlayer.getW(), initialPlayer.getH()};
     SDL_RenderCopyExF(renderer, initialPlayer.getSprite()->getTexture(), &srcRect, &playerRect, 0.0, nullptr, initialPlayer.getSprite()->getFlip());
 
     // Draw the characters
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    for (const Player &character : characters) {
+    for (Player &character : characters) {
+        character.getSprite()->updateAnimation(); // Update sprite animation
         SDL_FRect characterRect = {character.getX() - camera.getX(), character.getY() - camera.getY(), character.getW(), character.getH()};
-        SDL_RenderFillRectF(renderer, &characterRect);
+        srcRect = character.getSprite()->getSrcRect();
+        SDL_RenderCopyExF(renderer, character.getSprite()->getTexture(), &srcRect, &characterRect, 0.0, nullptr, character.getSprite()->getFlip());
     }
 
 

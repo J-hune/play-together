@@ -29,9 +29,9 @@ class Player {
 public:
     /** STATIC ATTRIBUTES **/
 
-    static constexpr Animation idle = {0, 3, 100}; /**< Idle animation */
-    static constexpr Animation walk = {1, 7, 100}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 100}; /**< Hit animation */
+    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
+    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100}; /**< Run animation */
 

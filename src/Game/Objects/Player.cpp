@@ -8,8 +8,10 @@
 
 /** CONSTRUCTOR **/
 
-Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight){}
+Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight, Sprite &sprite)
+        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight), sprite(sprite) {
+
+}
 
 
 /** BASIC ACCESSORS **/
@@ -32,6 +34,10 @@ float Player::getH() const {
 
 float Player::getSpeed() const {
     return speed;
+}
+
+Sprite* Player::getSprite() {
+    return &sprite;
 }
 
 float Player::getMoveX() const {

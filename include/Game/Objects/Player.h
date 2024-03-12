@@ -3,7 +3,10 @@
 
 #include <vector>
 #include <SDL.h>
+#include <map>
 #include "../Point.h"
+#include "../../Graphics/Animation.h"
+#include "../../Graphics/Sprite.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
 const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */
@@ -24,7 +27,18 @@ constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
 
 class Player {
 public:
+    /** STATIC ATTRIBUTES **/
+
+    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
+    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
+    static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
+    static constexpr Animation run = {4, 7, 100}; /**< Run animation */
+
+
     /** CONSTRUCTOR **/
+
+    Player() = default; // Used for the useless empty Game constructor of Athena
 
     /**
      * @brief Constructor for the Player class.
@@ -35,7 +49,7 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
+    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight, Sprite &sprite);
 
 
     /** BASIC ACCESSORS **/
@@ -69,6 +83,12 @@ public:
      * @return The value of the speed attribute
      */
     [[nodiscard]] float getSpeed() const;
+
+    /**
+     * @brief Return the sprite attribute.
+     * @return A pointer of a sprite object representing the sprite of the player.
+     */
+    [[nodiscard]] Sprite* getSprite();
 
     /**
      * @brief Return the moveX attribute.
@@ -322,6 +342,7 @@ private:
     float moveY = 0;/**< The actual speed of the player into the y axis. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
+    Sprite sprite; /**< The sprite of the player. */
 
     float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
@@ -333,7 +354,6 @@ private:
     bool canMove = true; /**< If the player can move */
     bool wantToMoveRight = false; /**< If the player try to move right */
     bool wantToMoveLeft = false; /**< If the player try to move left */
-
 
     float timeSpentJumping = 0.; /**< The time that has elapsed since the player started jumping */
     bool isOnPlatform = false; /**< If the player is on a platform */

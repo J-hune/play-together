@@ -14,8 +14,7 @@ Game::Game() :
             window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                     (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
             renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
-            level("experimentation"),
-            initialPlayer(-50, 50, 1, 2, 20, 30) {}
+            level("experimentation") {}
 
 
 /** ACCESSORS **/
@@ -120,6 +119,8 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             if (!player->getWantToMoveRight()) {
                 player->setDesiredDirection(PLAYER_LEFT);
                 player->setWantToMoveLeft(true);
+                player->getSprite()->setAnimation(Player::walk);
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             }
             break;
         case SDLK_RIGHT:
@@ -128,12 +129,15 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             if (!player->getWantToMoveLeft()) {
                 player->setDesiredDirection(PLAYER_RIGHT);
                 player->setWantToMoveRight(true);
+                player->getSprite()->setAnimation(Player::walk);
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             }
             break;
         case SDLK_g:
             switchGravity = !switchGravity;
             player->setIsOnPlatform(false);
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
+            player->getSprite()->toggleFlipVertical();
             break;
         case SDLK_m:
             printf("Loading map 'diversity'\n");
@@ -162,11 +166,13 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
         case SDLK_d:
             player->setWantToMoveRight(false);
             player->setFinishTheMovement(false);
+            player->getSprite()->setAnimation(Player::idle);
             break;
         case SDLK_q:
         case SDLK_LEFT:
             player->setWantToMoveLeft(false);
             player->setFinishTheMovement(false);
+            player->getSprite()->setAnimation(Player::idle);
             break;
         default:
             break;
@@ -227,7 +233,7 @@ void Game::applyAllPlayerMovement() {
     applyPlayerMovement(&initialPlayer); // Apply movement for the initial player
 
     // Apply movement for other players
-    for (Player character : characters) {
+    for (Player &character : characters) {
         applyPlayerMovement(&character);
     }
 }
@@ -582,15 +588,17 @@ void Game::render() {
     SDL_RenderClear(renderer);
 
     // Draw the player
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    initialPlayer.getSprite()->updateAnimation(); // Update sprite animation
+    SDL_Rect srcRect = initialPlayer.getSprite()->getSrcRect();
     SDL_FRect playerRect = {initialPlayer.getX() - camera.getX(), initialPlayer.getY() - camera.getY(), initialPlayer.getW(), initialPlayer.getH()};
-    SDL_RenderFillRectF(renderer, &playerRect);
+    SDL_RenderCopyExF(renderer, initialPlayer.getSprite()->getTexture(), &srcRect, &playerRect, 0.0, nullptr, initialPlayer.getSprite()->getFlip());
 
     // Draw the characters
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    for (const Player &character : characters) {
+    for (Player &character : characters) {
+        character.getSprite()->updateAnimation(); // Update sprite animation
         SDL_FRect characterRect = {character.getX() - camera.getX(), character.getY() - camera.getY(), character.getW(), character.getH()};
-        SDL_RenderFillRectF(renderer, &characterRect);
+        srcRect = character.getSprite()->getSrcRect();
+        SDL_RenderCopyExF(renderer, character.getSprite()->getTexture(), &srcRect, &characterRect, 0.0, nullptr, character.getSprite()->getFlip());
     }
 
 
@@ -677,7 +685,7 @@ void Game::run() {
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
         handleEvents(&initialPlayer);
-        for (Player character : characters) handleEvents(&character);
+        for (Player &character : characters) handleEvents(&character);
         if (enable_platforms_movement) level.applyPlatformsMovement();
         calculateAllPlayerMovement();
         switchGravity ? handleCollisionsReversedMavity() : handleCollisions();

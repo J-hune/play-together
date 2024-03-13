@@ -295,6 +295,19 @@ void Player::calculateMovement() {
     }
 }
 
+void Player::render(SDL_Renderer *renderer, Point camera) {
+    sprite.updateAnimation(); // Update sprite animation
+    SDL_Rect srcRect = sprite.getSrcRect();
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());
+}
+
+void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderFillRectF(renderer, &playerRect);
+}
+
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     //Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);

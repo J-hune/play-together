@@ -40,7 +40,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
             std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
             std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
-
+            std::cout << "render - Toggle rendering between textures and collisions box\n";
         }
 
         // Teleport player to a specific location
@@ -183,6 +183,12 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             else {
                 std::cout << "Invalid syntax. Usage: disable [all | camera_shake | platforms]\n";
             }
+        }
+
+        // Toggle rendering
+        else if (command.find("render") != std::string::npos) {
+            gamePtr->toggleRenderTextures();
+            std::cout << "Rendering toggled.\n";
         }
 
         // Else display an error message

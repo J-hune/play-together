@@ -33,14 +33,14 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
 
 /** METHODS **/
 
-void Level::renderObstacles(SDL_Renderer *renderer, Camera camera) const {
+void Level::renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (const Polygon &obstacle: obstacles) {
         for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
             std::vector<Point> vertices = obstacle.getVertices();
             const auto &vertex1 = vertices[i];
             const auto &vertex2 = vertices[(i + 1) % vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
         }
     }
 }
@@ -62,7 +62,7 @@ void Level::applyPlatformsMovement() {
     }
 }
 
-void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
     for (const MovingPlatform1D &platform: movingPlatforms1D) {

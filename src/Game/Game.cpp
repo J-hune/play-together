@@ -68,6 +68,10 @@ void Game::setEnablePlatformsMovement(bool state) {
     enable_platforms_movement = state;
 }
 
+void Game::toggleRenderTextures() {
+    render_textures = !render_textures;
+}
+
 
 /** FUNCTIONS **/
 
@@ -583,42 +587,47 @@ void Game::handleCollisionsReversedMavity() {
 }
 
 void Game::render() {
+    Point cam = {camera.getX(), camera.getY()};
+
     // Clear the renderer
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
-    // Draw the player
-    initialPlayer.getSprite()->updateAnimation(); // Update sprite animation
-    SDL_Rect srcRect = initialPlayer.getSprite()->getSrcRect();
-    SDL_FRect playerRect = {initialPlayer.getX() - camera.getX(), initialPlayer.getY() - camera.getY(), initialPlayer.getW(), initialPlayer.getH()};
-    SDL_RenderCopyExF(renderer, initialPlayer.getSprite()->getTexture(), &srcRect, &playerRect, 0.0, nullptr, initialPlayer.getSprite()->getFlip());
+    // Render textures
+    if (render_textures) {
+        initialPlayer.render(renderer, cam); // Draw the initial player
 
-    // Draw the characters
-    for (Player &character : characters) {
-        character.getSprite()->updateAnimation(); // Update sprite animation
-        SDL_FRect characterRect = {character.getX() - camera.getX(), character.getY() - camera.getY(), character.getW(), character.getH()};
-        srcRect = character.getSprite()->getSrcRect();
-        SDL_RenderCopyExF(renderer, character.getSprite()->getTexture(), &srcRect, &characterRect, 0.0, nullptr, character.getSprite()->getFlip());
+        // Draw the characters
+        for (Player &character: characters) {
+            character.render(renderer, cam);
+        }
+
+        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPlatformsDebug(renderer, cam); // Draw the platforms
+    }
+    // Render collisions box
+    else {
+        initialPlayer.renderDebug(renderer, cam); // Draw the initial player
+
+        // Draw the characters
+        for (Player const &character: characters) {
+            character.renderDebug(renderer, cam);
+        }
+
+        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
 
+    // DEBUG DRAWING OF APPLICATION CONSOLE :
 
-    // Draw the player's colliders
-    if (render_player_colliders) {
-        initialPlayer.renderColliders(renderer, {camera.getX(), camera.getY()});
-    }
+    // Draw the camera point if enabled
+    if (render_camera_point) camera.renderCameraPoint(renderer, getAveragePlayersPositions());
 
-    level.renderObstacles(renderer, camera); // Draw the obstacles
-    level.renderPlatforms(renderer, {camera.getX(), camera.getY()}); // Draw the platforms
+    // Draw the camera area if enabled
+    if (render_camera_area) camera.renderCameraArea(renderer);
 
-    // Draw the camera point
-    if (render_camera_point) {
-        camera.renderCameraPoint(renderer, getAveragePlayersPositions());
-    }
-
-    // Draw the camera area
-    if (render_camera_area) {
-        camera.renderCameraArea(renderer);
-    }
+    // Draw the player's colliders if enabled
+    if (render_player_colliders) initialPlayer.renderColliders(renderer, cam);
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);

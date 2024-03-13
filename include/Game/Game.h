@@ -97,6 +97,11 @@ public:
      */
     void setEnablePlatformsMovement(bool state);
 
+    /**
+     * @brief Toggle the render_textures attribute, used for the application console.
+     */
+    void toggleRenderTextures();
+
 
     /** PUBLIC METHODS **/
 
@@ -154,6 +159,7 @@ private:
     bool switchGravity = false;
 
     // Debug variables used for the application console
+    bool render_textures = true;
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;
@@ -260,7 +266,7 @@ private:
     void handleCollisionsReversedMavity();
 
     /**
-     * @brief Renders the game by drawing the player and obstacles.
+     * @brief Renders the game by drawing all the game textures and sprites.
      */
     void render();
 

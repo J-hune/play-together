@@ -323,7 +323,21 @@ public:
     void calculateMovement();
 
     /**
-     * @brief Renders the player's colliders.
+     * @brief Renders the player's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera);
+
+    /**
+     * @brief Renders the player's box, used for debugging.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the player's colliders, used for debugging.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */

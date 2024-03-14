@@ -31,11 +31,6 @@ public:
     NetworkManager();
 
 
-    /** DESTRUCTORS **/
-    
-    ~NetworkManager();
-
-
     /** PUBLIC METHODS **/
 
     /**

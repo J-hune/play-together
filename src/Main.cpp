@@ -123,6 +123,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         SDL_Delay(4);
     }
 
+    networkManager.stopServers();
+    networkManager.stopClients();
+
     // Clean up resources
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

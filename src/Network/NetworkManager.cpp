@@ -10,14 +10,6 @@ NetworkManager::NetworkManager() {
 };
 
 
-/** DESTRUCTORS **/
-
-NetworkManager::~NetworkManager() {
-    stopServers();
-    stopClients();
-}
-
-
 /** METHODS **/
 
 void NetworkManager::startServers() {

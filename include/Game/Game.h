@@ -11,12 +11,7 @@
 #include "Camera.h"
 #include "Level.h"
 #include "Objects/Player.h"
-
-enum class GameState {
-    RUNNING,
-    PAUSED,
-    STOPPED
-};
+#include "../Utils/Mediator.h"
 
 /**
  * @file Game.h

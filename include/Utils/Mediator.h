@@ -8,6 +8,12 @@ class Game;
 class Menu;
 class NetworkManager;
 
+enum class GameState {
+    RUNNING,
+    PAUSED,
+    STOPPED
+};
+
 /**
  * @class Mediator
  * @brief The Mediator class is used to enable communication between the Menu, Game, and NetworkManager objects.
@@ -59,6 +65,41 @@ public:
 
     // Game methods
     static int setCharacterSpriteID(short id);
+    static GameState getGameState();
+    static void stop();
+
+    // Other methods
+    /**
+     * @brief Handles a client connection.
+     * @param playerID The ID of the player who connected.
+     */
+    static int handleClientConnect(int playerID);
+
+    /**
+     * @brief Handles a client disconnection.
+     * @param playerID The ID of the player who disconnected.
+     */
+    static int handleClientDisconnect(int playerID);
+
+    /**
+     * @brief Handles messages received from the network.
+     * @param message The message received.-
+     * @param playerID The ID of the player who sent the message. (0 for server messages)
+     */
+    static void handleMessages(const std::string &message, int playerID);
+
+    /**
+     * @brief Creates a mask of the keyboard state. Each bit represents a key.
+     * @return The mask of the keyboard state.
+     */
+    static uint16_t encodeKeyboardStateMask(const Uint8 *keyboardState);
+
+    /**
+     * @brief Decodes a mask of the keyboard state. Each bit represents a key.
+     * @param mask The mask of the keyboard state.
+     * @param keyStates The array of key states to update.
+     */
+    static void decodeKeyboardStateMask(uint16_t mask, int *keyStates);
 
 private:
     /** ATTRIBUTES **/

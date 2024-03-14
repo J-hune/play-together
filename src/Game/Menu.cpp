@@ -19,7 +19,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit) : renderer(renderer), font(font), gamePtr(game), quit(quit) {
+Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(renderer), font(font), quit(quit) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -96,7 +96,7 @@ MenuAction Menu::getCurrentMenuAction() const {
 }
 
 std::vector<Button> &Menu::getCurrentMenuButtons() {
-    return buttons[{gamePtr->getGameState(), getCurrentMenuAction()}];
+    return buttons[{Mediator::getGameState(), getCurrentMenuAction()}];
 }
 
 
@@ -119,7 +119,7 @@ void Menu::setQuit(bool quit_value) {
 
 void Menu::render() {
     // Render buttons
-    for (Button &button: buttons[{gamePtr->getGameState(), getCurrentMenuAction()}]) {
+    for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
 }
@@ -135,6 +135,7 @@ void Menu::reset() {
 
 void Menu::onServerDisconnect() {
     // Switch to MAIN menu on server disconnect
+    Mediator::stop();
     setMenuAction(MenuAction::MAIN);
     setDisplayMenu(true); // Make sure menu is displayed
 }
@@ -205,7 +206,7 @@ void Menu::handleResumeButton(Button &button) {
 
 void Menu::handleStopButton(Button &button) {
     button.reset();
-    gamePtr->stop();
+    Mediator::stop();
 
     Mediator::stopServers();
     Mediator::stopClients();

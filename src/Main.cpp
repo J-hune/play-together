@@ -59,7 +59,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Mediator::setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit);
+    Menu menu(renderer, font, &quit);
     Mediator::setMenuPtr(&menu);
     menu.render();
 

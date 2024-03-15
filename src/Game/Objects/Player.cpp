@@ -240,55 +240,57 @@ void Player::teleportPlayer(float newX, float newY) {
 }
 
 void Player::calculateMovement() {
-
-    // The player move on the x-axis
-    if (finishTheMovement && (wantToMoveLeft || wantToMoveRight)) {
-        timeSpeed += 0.1F;
-        moveX = speedMax * speed * timeSpeed;
-        if (moveX > speedMax) {
-            moveX = speedMax;
-            timeSpeed = maxSpeedReachWithThisTime;
-        }
-        moveX *= (float)desiredDirection;
-        currentDirection = desiredDirection;
+    // Determine the movement direction
+    int movementDirection = 0;
+    if (wantToMoveLeft && !wantToMoveRight) {
+        movementDirection = -1;
+    } else if (!wantToMoveLeft && wantToMoveRight) {
+        movementDirection = 1;
     }
-        // The player doesn't move on the x-axis
-    else {
-        if (timeSpeed > 0) {
-            timeSpeed -= 0.05F;
-            moveX = speedMax * speed * timeSpeed;
-            moveX *= (float)currentDirection;
-            finishTheMovement = false;
+
+    // Apply movement based on current speed and direction
+    if (movementDirection != 0) {
+        // If the movement direction has changed, reset the speed
+        if (movementDirection != currentDirection) {
+            currentDirection = movementDirection;
+            timeSpeed = 0.1F; // Start with a small speed to smooth the transition
         } else {
-            timeSpeed = 0;
+            // Gradually accelerate if the movement direction remains the same
+            timeSpeed += 0.1F;
+            if (timeSpeed > maxSpeedReachWithThisTime)
+                timeSpeed = maxSpeedReachWithThisTime;
+        }
+        moveX = speedMax * speed * timeSpeed * (float)movementDirection;
+        finishTheMovement = true; // Indicate that the player is moving
+    } else {
+        // If no movement key is pressed, gradually reduce the speed
+        if (timeSpeed > 0) {
+            timeSpeed -= 0.055F;
+            if (timeSpeed < 0)
+                timeSpeed = 0;
+            moveX = speedMax * speed * timeSpeed * (float)currentDirection; // Apply movement with current speed
+        } else {
             moveX = 0;
-            finishTheMovement = true;
+            finishTheMovement = true; // Indicate that movement is finished
         }
     }
 
-    // The player press "jump button" and he doesn't maintain more than 6
+    // Handle jump logic
     if (wantToJump && timeSpentJumping < PRESSURE_JUMP_MAX) {
-        // Player jump with the following mathematical function
         isJumping = true;
-        moveY = -(float) (2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
+        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
         timeSpentJumping += 0.1F;
     } else if (timeSpentJumping > 0 && timeSpentJumping < PRESSURE_JUMP_MIN) {
-        moveY = -(float) (2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
+        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
         timeSpentJumping += 0.1F;
-    }
-        // The player doesn't jump
-    else {
+    } else {
         timeSpentJumping = 0;
         wantToJump = false;
-
-        // The player is on a platform
         if (isOnPlatform) {
             moveY = 0;
             isJumping = false;
             timeAfterFall = COYOTE_TIME;
-        }
-            // The player is falling
-        else {
+        } else {
             moveY = (timeAfterFall > 0) ? 2 - timeAfterFall : 2;
             timeAfterFall -= 0.1F;
         }

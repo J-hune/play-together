@@ -69,21 +69,18 @@ public:
     void applyPlatformsMovement();
 
     /**
-     * @brief Renders the game by drawing the player and obstacles.
-     * @param[out] renderer The renderer associated to the current game
-     * @param camera The camera associated to the current game
-     */
-    void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
-
-
-    /** PUBLIC METHODS **/
-
-    /**
      * @brief Renders the collisions by drawing obstacles.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
-    void renderObstacles(SDL_Renderer *renderer, Camera camera) const;
+    void renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the game by drawing the player and obstacles.
+     * @param[out] renderer The renderer associated to the current game
+     * @param camera The camera associated to the current game
+     */
+    void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
 
 
 private:

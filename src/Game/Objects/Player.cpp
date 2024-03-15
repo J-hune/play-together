@@ -5,11 +5,20 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
+SDL_Texture *Player::spriteTexture1Ptr = nullptr;
+SDL_Texture *Player::spriteTexture2Ptr = nullptr;
+SDL_Texture *Player::spriteTexture3Ptr = nullptr;
+SDL_Texture *Player::spriteTexture4Ptr = nullptr;
+
 
 /** CONSTRUCTOR **/
 
 Player::Player(int playerID, float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : playerID(playerID), x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight){}
+        : playerID(playerID), x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
+
+    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+}
 
 
 /** BASIC ACCESSORS **/
@@ -40,6 +49,10 @@ float Player::getH() const {
 
 float Player::getSpeed() const {
     return speed;
+}
+
+Sprite* Player::getSprite() {
+    return &sprite;
 }
 
 float Player::getMoveX() const {
@@ -244,65 +257,104 @@ void Player::setSpriteID(short id) {
 
 /** METHODS **/
 
+bool Player::loadTextures(SDL_Renderer &renderer) {
+    // Load players' sprite texture
+    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player.png");
+    spriteTexture1Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player1.png");
+    spriteTexture2Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player2.png");
+    spriteTexture3Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player3.png");
+    spriteTexture4Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player4.png");
+
+    // Check errors
+    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {
+        return false; // Return failure
+    }
+
+    return true; // Return success
+}
+
+void Player::setSpriteTextureByID(int id) {
+    if (id == 0) sprite.setTexture(*baseSpriteTexturePtr); // Base texture
+    else if (id == 1) sprite.setTexture(*spriteTexture1Ptr); // Texture 1
+    else if (id == 2) sprite.setTexture(*spriteTexture2Ptr); // Texture 2
+    else if (id == 3) sprite.setTexture(*spriteTexture3Ptr); // Texture 3
+    else if (id == 4) sprite.setTexture(*spriteTexture4Ptr); // Texture 4
+}
+
 void Player::teleportPlayer(float newX, float newY) {
     x = newX;
     y = newY;
 }
 
-void Player::calculatePlayerMovement() {
-
-    // The player move on the x-axis
-    if (finishTheMovement && (wantToMoveLeft || wantToMoveRight)) {
-        timeSpeed += 0.1F;
-        moveX = speedMax * speed * timeSpeed;
-        if (moveX > speedMax) {
-            moveX = speedMax;
-            timeSpeed = maxSpeedReachWithThisTime;
-        }
-        moveX *= (float)desiredDirection;
-        currentDirection = desiredDirection;
+void Player::calculateMovement() {
+    // Determine the movement direction
+    int movementDirection = 0;
+    if (wantToMoveLeft && !wantToMoveRight) {
+        movementDirection = -1;
+    } else if (!wantToMoveLeft && wantToMoveRight) {
+        movementDirection = 1;
     }
-        // The player doesn't move on the x-axis
-    else {
-        if (timeSpeed > 0) {
-            timeSpeed -= 0.05F;
-            moveX = speedMax * speed * timeSpeed;
-            moveX *= (float)currentDirection;
-            finishTheMovement = false;
+
+    // Apply movement based on current speed and direction
+    if (movementDirection != 0) {
+        // If the movement direction has changed, reset the speed
+        if (movementDirection != currentDirection) {
+            currentDirection = movementDirection;
+            timeSpeed = 0.1F; // Start with a small speed to smooth the transition
         } else {
-            timeSpeed = 0;
+            // Gradually accelerate if the movement direction remains the same
+            timeSpeed += 0.1F;
+            if (timeSpeed > maxSpeedReachWithThisTime)
+                timeSpeed = maxSpeedReachWithThisTime;
+        }
+        moveX = speedMax * speed * timeSpeed * (float)movementDirection;
+        finishTheMovement = true; // Indicate that the player is moving
+    } else {
+        // If no movement key is pressed, gradually reduce the speed
+        if (timeSpeed > 0) {
+            timeSpeed -= 0.055F;
+            if (timeSpeed < 0)
+                timeSpeed = 0;
+            moveX = speedMax * speed * timeSpeed * (float)currentDirection; // Apply movement with current speed
+        } else {
             moveX = 0;
-            finishTheMovement = true;
+            finishTheMovement = true; // Indicate that movement is finished
         }
     }
 
-    // The player press "jump button" and he doesn't maintain more than 6
+    // Handle jump logic
     if (wantToJump && timeSpentJumping < PRESSURE_JUMP_MAX) {
-        // Player jump with the following mathematical function
         isJumping = true;
-        moveY = -(float) (2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
+        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
         timeSpentJumping += 0.1F;
     } else if (timeSpentJumping > 0 && timeSpentJumping < PRESSURE_JUMP_MIN) {
-        moveY = -(float) (2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
+        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
         timeSpentJumping += 0.1F;
-    }
-        // The player doesn't jump
-    else {
+    } else {
         timeSpentJumping = 0;
         wantToJump = false;
-
-        // The player is on a platform
         if (isOnPlatform) {
             moveY = 0;
             isJumping = false;
             timeAfterFall = COYOTE_TIME;
-        }
-            // The player is falling
-        else {
+        } else {
             moveY = (timeAfterFall > 0) ? 2 - timeAfterFall : 2;
             timeAfterFall -= 0.1F;
         }
     }
+}
+
+void Player::render(SDL_Renderer *renderer, Point camera) {
+    sprite.updateAnimation(); // Update sprite animation
+    SDL_Rect srcRect = sprite.getSrcRect();
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());
+}
+
+void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderFillRectF(renderer, &playerRect);
 }
 
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {

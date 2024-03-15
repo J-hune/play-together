@@ -40,7 +40,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
             std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
             std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
-
+            std::cout << "render - Toggle rendering between textures and collisions box\n";
         }
 
         // Teleport player to a specific location
@@ -135,12 +135,12 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             iss >> command_name >> option;
             if (command_name == "enable") {
                 if (option == "all") {
-                    gamePtr->setCameraIsShaking(true);
+                    gamePtr->getCamera()->setIsShaking(true);
                     gamePtr->setEnablePlatformsMovement(true);
                     std::cout << "Enabling all mechanics.\n";
                 }
                 else if (option == "camera_shake") {
-                    gamePtr->setCameraIsShaking(true);
+                    gamePtr->getCamera()->setIsShaking(true);
                     std::cout << "Enabling camera shaking.\n";
                 }
                 else if (option == "platforms") {
@@ -164,12 +164,12 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             iss >> command_name >> option;
             if (command_name == "disable") {
                 if (option == "all") {
-                    gamePtr->setCameraIsShaking(false);
+                    gamePtr->getCamera()->setIsShaking(false);
                     gamePtr->setEnablePlatformsMovement(false);
                     std::cout << "Disabling all mechanics.\n";
                 }
                 else if (option == "camera_shake") {
-                    gamePtr->setCameraIsShaking(false);
+                    gamePtr->getCamera()->setIsShaking(false);
                     std::cout << "Disabling camera shaking.\n";
                 }
                 else if (option == "platforms") {
@@ -183,6 +183,12 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             else {
                 std::cout << "Invalid syntax. Usage: disable [all | camera_shake | platforms]\n";
             }
+        }
+
+        // Toggle rendering
+        else if (command.find("render") != std::string::npos) {
+            gamePtr->toggleRenderTextures();
+            std::cout << "Rendering toggled.\n";
         }
 
         // Else display an error message

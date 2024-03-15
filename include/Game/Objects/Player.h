@@ -3,7 +3,11 @@
 
 #include <vector>
 #include <SDL.h>
+#include <SDL_image.h>
+#include <map>
 #include "../Point.h"
+#include "../../Graphics/Animation.h"
+#include "../../Graphics/Sprite.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
 const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */
@@ -24,7 +28,18 @@ constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
 
 class Player {
 public:
+    /** PUBLIC STATIC ATTRIBUTES **/
+
+    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
+    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
+    static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
+    static constexpr Animation run = {4, 7, 100}; /**< Run animation */
+
+
     /** CONSTRUCTOR **/
+
+    Player() = default; // Used for the useless empty Game constructor of Athena
 
     /**
      * @brief Constructor for the Player class.
@@ -81,6 +96,12 @@ public:
      * @return The value of the speed attribute
      */
     [[nodiscard]] float getSpeed() const;
+
+    /**
+     * @brief Return the sprite attribute.
+     * @return A pointer of a sprite object representing the sprite of the player.
+     */
+    [[nodiscard]] Sprite* getSprite();
 
     /**
      * @brief Return the moveX attribute.
@@ -313,6 +334,18 @@ public:
 
     /** PUBLIC METHODS **/
 
+    /**
+     * @brief Load all players textures.
+     * @param renderer The renderer of the game.
+     * @return Returns true if all textures were loaded correctly, false otherwise.
+     */
+    static bool loadTextures(SDL_Renderer &renderer);
+
+    /**
+     * @brief Assign a texture to a player's sprite according to the id.
+     * @param id The id of the texture.
+     */
+    void setSpriteTextureByID(int id);
 
     /**
      * @brief Teleports the player to a specific location.
@@ -324,10 +357,24 @@ public:
     /**
      * @brief Calculate the new position of the player.
      */
-    void calculatePlayerMovement();
+    void calculateMovement();
 
     /**
-     * @brief Renders the player's colliders.
+     * @brief Renders the player's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera);
+
+    /**
+     * @brief Renders the player's box, used for debugging.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the player's colliders, used for debugging.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
@@ -348,6 +395,7 @@ private:
     float moveY = 0;/**< The actual speed of the player into the y axis. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
+    Sprite sprite; /**< The sprite of the player. */
 
     float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
@@ -360,11 +408,16 @@ private:
     bool wantToMoveRight = false; /**< If the player try to move right */
     bool wantToMoveLeft = false; /**< If the player try to move left */
 
-
     float timeSpentJumping = 0.; /**< The time that has elapsed since the player started jumping */
     bool isOnPlatform = false; /**< If the player is on a platform */
     bool isJumping = false; /**< If the player is jumping */
     bool wantToJump = false; /**< If the player try to jump */
+
+    static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
+    static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
+    static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
+    static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
+    static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
 
 
     /** PRIVATE METHODS **/

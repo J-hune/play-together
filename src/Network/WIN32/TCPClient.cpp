@@ -71,15 +71,15 @@ void TCPClient::handleMessages() {
     while (!stopRequested) {
         std::string receivedMessage = receive();
         if (!receivedMessage.empty()) {
-            std::cout << "TCPClient: Received message: " << receivedMessage << std::endl;
-
             if (receivedMessage == "DISCONNECT") {
                 std::cout << "TCPClient: Server asked to disconnect" << std::endl;
                 shouldSendDisconnect = false; // Do not send a disconnect message
                 stop(); // Stop the client
                 disconnectCallback(); // Invoke the disconnect callback
+            } else {
+                // Handle received message
+                Mediator::handleMessages(receivedMessage, 0);
             }
-
         } else {
             // Handle disconnection or receive error cases
             if (!stopRequested) std::cerr << "TCPClient: Error receiving message or server disconnected." << std::endl;

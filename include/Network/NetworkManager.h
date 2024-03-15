@@ -7,6 +7,7 @@
 
 #include "../Game/Game.h"
 #include "../Utils/Mediator.h"
+#include "../../dependencies/json.hpp"
 
 #ifdef _WIN32
 #include "../Network/WIN32/TCPServer.h"
@@ -19,6 +20,13 @@
 #include "../Network/Unix/UDPServer.h"
 #include "../Network/Unix/UDPClient.h"
 #endif
+
+enum class MessageType {
+    INPUT,
+    PLAYER_UPDATE,
+    GAME_EVENT,
+    ITEM_PICKUP
+};
 
 /**
  * @class NetworkManager
@@ -58,6 +66,8 @@ public:
      * @param message The message to send.
      */
      void temporarySendMethod(const std::string &message) const;
+
+     void sendPlayerUpdate(uint16_t keyboardStateMask) const;
 
 private:
     /** ATTRIBUTES **/

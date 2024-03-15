@@ -14,6 +14,7 @@
 #include <functional>
 
 #include "../TCPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The TCPClient class provides functionality to create and manage a TCP client.
@@ -81,7 +82,7 @@ public:
     void stop();
 
 private:
-    /** PRIVATE METHODS **/
+    /** ATTRIBUTES **/
 
     int socketFileDescriptor = -1; /**< The client socket file descriptor. */
     bool stopRequested = false; /**< Flag to indicate if the client should stop. */

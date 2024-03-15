@@ -155,3 +155,23 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
     }
 #endif
 }
+
+void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
+
+    // Create a message with the player update
+    using json = nlohmann::json;
+    json message;
+
+    message["messageType"] = MessageType::PLAYER_UPDATE;
+    message["keyboardStateMask"] = keyboardStateMask;
+
+    if (udpClient.getSocketFileDescriptor() != -1) {
+        message["playerID"] = udpClient.getSocketFileDescriptor();
+        udpClient.send(message.dump());
+    }
+
+    if (udpServer.getSocketFileDescriptor() != -1) {
+        message["playerID"] = 0;
+        udpServer.broadcast(message.dump());
+    }
+}

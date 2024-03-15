@@ -41,6 +41,11 @@ void Mediator::startServers() {
 
 void Mediator::startClients() {
     Mediator::networkManagerPtr->startClients();
+
+    Player newPlayer(0, 50, 50, 0.2F, 2, 48, 36);
+    gamePtr->addCharacter(newPlayer);
+
+    std::cout << "Mediator: Player server created" << std::endl;
 }
 
 void Mediator::stopServers() {

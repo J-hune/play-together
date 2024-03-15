@@ -18,6 +18,7 @@
 #include <cstring>
 
 #include "../UDPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The UDPServer class provides functionality to create and manage a UDP server.

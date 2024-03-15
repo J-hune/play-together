@@ -219,6 +219,7 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
 
 void Game::handleEvents(Player *player) {
     SDL_Event e;
+    static uint16_t lastKeyboardStateMask = 0;
 
     // Main loop handling every event one by one
     while (SDL_PollEvent(&e) != 0) {
@@ -242,6 +243,9 @@ void Game::handleEvents(Player *player) {
             printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
     }
+
+    // Send the keyboard state to the network after handling all events
+    sendKeyboardStateToNetwork(&lastKeyboardStateMask);
 }
 
 
@@ -748,4 +752,23 @@ void Game::stop() {
     // Reset the player position
     initialPlayer.setX(50);
     initialPlayer.setY(50);
+}
+
+
+/** STATIC METHODS **/
+
+void Game::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) {
+
+    // Get the current keyboard state mask
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+    uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
+
+    // If the keyboard state has changed since the last message was sent
+    if (currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+        // Send the new keyboard state mask to the server
+        Mediator::sendPlayerUpdate(currentKeyboardStateMask);
+
+        // Update the last keyboard state mask and the last send time
+        *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
+    }
 }

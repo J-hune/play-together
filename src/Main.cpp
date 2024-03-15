@@ -99,15 +99,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(1, 100, 50, 1, 2, 48, 36);
-            Player character2(2, 150, 50, 1, 2, 48, 36);
-            Player character3(3, 200, 50, 1, 2, 48, 36);
-
-            //game.addCharacter(character1);
-            //game.addCharacter(character2);
-            game.addCharacter(character3);
-
-            game.removeCharacter(&character3);
             camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished

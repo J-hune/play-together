@@ -147,6 +147,19 @@ public:
     void removeCharacter(Player* characterPtr);
 
     /**
+    * @brief Handles SDL Key up events, updating the movement variables accordingly.
+    * @param keyEvent Reference to the key who was release.
+    */
+    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     */
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+
+
+    /**
      * @brief Serialize the game object
      * @tparam Archive
      * @param ar
@@ -188,18 +201,6 @@ private:
      * @brief Handles SDL events, updating the movement variables accordingly.
      */
     void handleEvents(Player *player);
-
-    /**
-     * @brief Handles SDL Key up events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was release.
-     */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
-
-    /**
-     * @brief Handles SDL Key down events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was press.
-     */
-    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
 
     /**
      * @brief Applies player movement based on the current movement variables.
@@ -284,6 +285,13 @@ private:
      */
     void render();
 
+
+    /** STATIC METHODS **/
+
+    /**
+     * @brief Sends the keyboard state to the network.
+     */
+    static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

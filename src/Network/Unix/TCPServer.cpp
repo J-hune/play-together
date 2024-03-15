@@ -114,6 +114,9 @@ int TCPServer::waitForConnection() {
     clientAddressesMutexPtr->unlock();
     std::cout << "TCPServer: New client connected with ID: " << clientSocket << std::endl;
 
+    // Notify the mediator of the new client connection
+    Mediator::handleClientConnect(clientSocket);
+
     return clientSocket;
 }
 
@@ -134,10 +137,9 @@ void TCPServer::handleMessage(int clientSocket) {
                 if (message == "DISCONNECT") {
                     std::cout << "TCPServer: Client " << clientSocket << " asked to disconnect" << std::endl;
                     clientConnected = false;
-                }
-
-                if (!message.empty()) {
-                    std::cout << "TCPServer: Received message: " << message << " (message length: " << message.length() << " bytes) from client " << clientSocket << std::endl;
+                } else if (!message.empty()) {
+                    // Handle received message
+                    Mediator::handleMessages(message, clientSocket);
                 }
             }
         } catch (const TCPSocketReceiveError& e) {
@@ -148,6 +150,10 @@ void TCPServer::handleMessage(int clientSocket) {
     }
 
     std::cout << "TCPServer: Client " << clientSocket << " disconnected" << std::endl;
+
+    // Notify the mediator of the client disconnection
+    Mediator::handleClientDisconnect(clientSocket);
+
     close(clientSocket);
 
     // Remove the client from the list of connected clients

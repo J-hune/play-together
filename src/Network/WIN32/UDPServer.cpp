@@ -124,8 +124,9 @@ void UDPServer::handleMessage() {
             }
             clientAddressesMutexPtr->unlock();
 
-            if (clientID != INVALID_SOCKET) {
-                std::cout << "UDPServer: Received message: " << message << " from " << clientID << std::endl;
+            if (clientID != -1) {
+                // Handle received message
+                Mediator::handleMessages(message, clientID);
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
             }

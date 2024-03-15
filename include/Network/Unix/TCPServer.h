@@ -18,6 +18,7 @@
 #include <cstring>
 
 #include "../TCPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The TCPServer class provides functionality to create and manage a TCP server.

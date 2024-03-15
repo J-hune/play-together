@@ -56,8 +56,10 @@ void UDPClient::handleMessages() {
     std::cout << "UDPClient: Handling incoming messages..." << std::endl;
     while (!stopRequested) {
         std::string receivedMessage = receive(200);
+
         if (!receivedMessage.empty()) {
-            std::cout << "UDPClient: Received message: " << receivedMessage << std::endl;
+            // Handle received message
+            Mediator::handleMessages(receivedMessage, 0);
         }
     }
 

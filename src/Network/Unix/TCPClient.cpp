@@ -76,7 +76,7 @@ void TCPClient::handleMessages() {
                 disconnectCallback(); // Invoke the disconnect callback
             } else {
                 // Handle received message
-                Mediator::handleMessages(receivedMessage, 0);
+                Mediator::handleMessages(0, receivedMessage, 0);
             }
         } else {
             // Handle disconnection or receive error cases

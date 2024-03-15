@@ -87,10 +87,11 @@ public:
 
     /**
      * @brief Handles messages received from the network.
-     * @param message The message received.-
-     * @param playerID The ID of the player who sent the message. (0 for server messages)
+     * @param protocol The protocol used to send the message (0 for TCP, 1 for UDP).
+     * @param message The message received.
+     * @param playerID The ID of the player who sent the message. (0 for server)
      */
-    static void handleMessages(const std::string &message, int playerID);
+    static void handleMessages(int protocol, const std::string &message, int playerID);
 
     /**
      * @brief Creates a mask of the keyboard state. Each bit represents a key.

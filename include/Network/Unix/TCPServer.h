@@ -68,7 +68,7 @@ public:
      * @param message The message to broadcast.
      * @return True if the message is sent successfully to all clients, false otherwise.
      */
-    bool broadcast(const std::string &message) const;
+    bool broadcast(const std::string &message, int socketIgnored) const;
 
     /**
      * @brief Receives a message from the specified client.

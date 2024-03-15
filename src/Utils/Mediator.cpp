@@ -103,8 +103,13 @@ int Mediator::handleClientDisconnect(int playerID) {
     return 0;
 }
 
-void Mediator::handleMessages(const std::string &rawMessage, int playerID) {
+void Mediator::handleMessages(int protocol, const std::string &rawMessage, int playerID) {
     std::cout << "Mediator: Received message: " << rawMessage << " from player " << playerID << std::endl;
+
+    // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
+    if (playerID != 0) {
+        Mediator::networkManagerPtr->broadcastMessage(protocol, rawMessage, playerID);
+    }
 
     using json = nlohmann::json;
     try {

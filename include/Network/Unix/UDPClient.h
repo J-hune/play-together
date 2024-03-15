@@ -52,7 +52,7 @@ public:
     /**
      * @brief Handles incoming messages from the server.
      */
-    void handleMessages();
+    void handleMessages() const;
 
     /**
      * @brief Sends a message to the server.

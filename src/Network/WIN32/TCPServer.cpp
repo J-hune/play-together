@@ -140,7 +140,7 @@ void TCPServer::handleMessage(SOCKET clientSocket) {
                     clientConnected = false;
                 } else if (!message.empty()) {
                     // Handle received message
-                    Mediator::handleMessages(message, clientSocket);
+                    Mediator::handleMessages(0, message, clientSocket);
                 }
             }
         } catch (const TCPSocketReceiveError& e) {
@@ -190,11 +190,12 @@ bool TCPServer::send(SOCKET clientSocket, const std::string &message) const {
 }
 
 // Broadcast a message to all connected clients
-bool TCPServer::broadcast(const std::string &message) const {
+bool TCPServer::broadcast(const std::string &message, SOCKET socketIgnored) const {
     clientAddressesMutexPtr->lock();
     std::cout << "TCPServer: Broadcasting message: " << message << " (" << message.length() << " bytes) to " << clientAddressesPtr->size() << " clients" << std::endl;
 
     auto send_successful = std::ranges::all_of(*clientAddressesPtr, [&](const auto& client) {
+        if (client.first == socketIgnored) return true;
         return send(client.first, message);
     });
 
@@ -258,7 +259,7 @@ void TCPServer::stop() {
         if (!clientAddressesPtr->empty()) {
             clientAddressesMutexPtr->unlock();
             std::cout << "TCPServer: Sending disconnect message to all clients" << std::endl;
-            broadcast("DISCONNECT");
+            broadcast("DISCONNECT", 0);
         } else {
             clientAddressesMutexPtr->unlock();
         }

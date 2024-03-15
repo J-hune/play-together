@@ -52,14 +52,14 @@ void UDPClient::start() {
     std::cout << "UDPClient: Client shutdown" << std::endl;
 }
 
-void UDPClient::handleMessages() {
+void UDPClient::handleMessages() const {
     std::cout << "UDPClient: Handling incoming messages..." << std::endl;
     while (!stopRequested) {
         std::string receivedMessage = receive(200);
 
         if (!receivedMessage.empty()) {
             // Handle received message
-            Mediator::handleMessages(receivedMessage, 0);
+            Mediator::handleMessages(1, receivedMessage, 0);
         }
     }
 

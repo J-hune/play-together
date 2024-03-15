@@ -62,6 +62,14 @@ public:
     void stopClients();
 
     /**
+     * @brief Sends a message to all clients (TCP and UDP) except the one specified.
+     * @param protocol The protocol to use (0 for TCP, 1 for UDP).
+     * @param message The message to send.
+     * @param playerIgnored The player to ignore. (0 for no player ignored)
+     */
+    void broadcastMessage(int protocol, const std::string &message, int socketIgnored) const;
+
+    /**
      * @brief Sends a message to the server if the client is connected, or to all clients if the server is connected. (TCP and UDP)
      * @param message The message to send.
      */

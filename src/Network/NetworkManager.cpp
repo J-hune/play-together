@@ -95,6 +95,35 @@ void NetworkManager::stopClients() {
     clientUDPThreadPtr.reset();
 }
 
+void NetworkManager::broadcastMessage(int protocol, const std::string &message, int socketIgnored) const {
+    if (message.empty()) {
+        std::cerr << "Message is empty" << std::endl;
+        return;
+    }
+
+    if (protocol == 0) {
+        if (tcpServer.getSocketFileDescriptor() != -1) {
+            bool success = tcpServer.broadcast(message, socketIgnored);
+            if (success) {
+                std::cout << "Message sent to all clients" << std::endl;
+            } else {
+                std::cerr << "Failed to send message to all clients" << std::endl;
+            }
+        }
+    } else if (protocol == 1) {
+        if (udpServer.getSocketFileDescriptor() != -1) {
+            bool success = udpServer.broadcast(message, socketIgnored);
+            if (success) {
+                std::cout << "Message sent to all clients" << std::endl;
+            } else {
+                std::cerr << "Failed to send message to all clients" << std::endl;
+            }
+        }
+    } else {
+        std::cerr << "Invalid protocol" << std::endl;
+    }
+}
+
 void NetworkManager::temporarySendMethod(const std::string &message) const {
     if (message.empty()) {
         std::cerr << "Message is empty" << std::endl;
@@ -137,7 +166,7 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
     }
 
     if (tcpServer.getSocketFileDescriptor() != -1) {
-        bool success = tcpServer.broadcast("Hello, World!");
+        bool success = tcpServer.broadcast("Hello, World!", 0);
         if (success) {
             std::cout << "Message sent to all clients" << std::endl;
         } else {
@@ -146,7 +175,7 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
     }
 
     if (udpServer.getSocketFileDescriptor() != -1) {
-        bool success = udpServer.broadcast("Hello, World!");
+        bool success = udpServer.broadcast("Hello, World!", 0);
         if (success) {
             std::cout << "Message sent to all clients" << std::endl;
         } else {
@@ -172,6 +201,6 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
 
     if (udpServer.getSocketFileDescriptor() != -1) {
         message["playerID"] = 0;
-        udpServer.broadcast(message.dump());
+        udpServer.broadcast(message.dump(), 0);
     }
 }

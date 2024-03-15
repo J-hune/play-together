@@ -1,4 +1,4 @@
-#include "../../include/Game/Player.h"
+#include "../../../include/Game/Objects/Player.h"
 
 /**
  * @file Player.cpp
@@ -8,8 +8,10 @@
 
 /** CONSTRUCTOR **/
 
-Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight){}
+Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight, Sprite &sprite)
+        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight), sprite(sprite) {
+
+}
 
 
 /** BASIC ACCESSORS **/
@@ -32,6 +34,10 @@ float Player::getH() const {
 
 float Player::getSpeed() const {
     return speed;
+}
+
+Sprite* Player::getSprite() {
+    return &sprite;
 }
 
 float Player::getMoveX() const {
@@ -92,18 +98,7 @@ std::vector<Point> Player::getVertices() const {
 }
 
 std::vector<Point> Player::getVerticesHorizontal() const {
-    // Return the vertices of the player's bounding box, with added margin to capture wall within the area.
-
-    std::vector<Point> verticesDirection;
-
-    if(currentDirection==PLAYER_LEFT){
-        verticesDirection = getVerticesLeft();
-    }
-    else{
-        verticesDirection = getVerticesRight();
-    }
-
-    return verticesDirection;
+    return currentDirection == PLAYER_LEFT ? getVerticesLeft() : getVerticesRight();
 }
 
 std::vector<Point> Player::getVerticesLeft() const {
@@ -142,6 +137,29 @@ std::vector<Point> Player::getVerticesRoof() const {
             {x + width - 2,  y },
             {x + 2,         y }
     };
+}
+
+SDL_FRect Player::getHorizontalColliderBoundingBox() const {
+    return currentDirection == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
+}
+
+SDL_FRect Player::getLeftColliderBoundingBox() const {
+    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
+    return {x - 2, y, 2, height};
+}
+
+SDL_FRect Player::getRightColliderBoundingBox() const {
+    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
+    return {x + width, y, 2, height};
+}
+
+SDL_FRect Player::getGroundColliderBoundingBox() const {
+    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
+    return {x, y + height, width, 2};
+}
+
+SDL_FRect Player::getRoofColliderBoundingBox() const {
+    return {x, y - 2 , width, 2};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -221,7 +239,7 @@ void Player::teleportPlayer(float newX, float newY) {
     y = newY;
 }
 
-void Player::calculatePlayerMovement() {
+void Player::calculateMovement() {
 
     // The player move on the x-axis
     if (finishTheMovement && (wantToMoveLeft || wantToMoveRight)) {
@@ -274,5 +292,53 @@ void Player::calculatePlayerMovement() {
             moveY = (timeAfterFall > 0) ? 2 - timeAfterFall : 2;
             timeAfterFall -= 0.1F;
         }
+    }
+}
+
+void Player::render(SDL_Renderer *renderer, Point camera) {
+    sprite.updateAnimation(); // Update sprite animation
+    SDL_Rect srcRect = sprite.getSrcRect();
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());
+}
+
+void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
+    SDL_RenderFillRectF(renderer, &playerRect);
+}
+
+void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
+    //Draw the right collider
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+    std::vector<Point> vertexRight = getVerticesRight();
+    for (size_t i = 0; i < vertexRight.size(); ++i) {
+        const auto &vertex1 = vertexRight[i];
+        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the left collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+    std::vector<Point> vertexLeft = getVerticesLeft();
+    for (size_t i = 0; i < vertexLeft.size(); ++i) {
+        const auto &vertex1 = vertexLeft[i];
+        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the roof collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertex = getVerticesRoof();
+    for (size_t i = 0; i < vertex.size(); ++i) {
+        const auto &vertex1 = vertex[i];
+        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+    //Draw the ground collider
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    std::vector<Point> vertexGround = getVerticesGround();
+    for (size_t i = 0; i < vertexGround.size(); ++i) {
+        const auto &vertex1 = vertexGround[i];
+        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+        SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
 }

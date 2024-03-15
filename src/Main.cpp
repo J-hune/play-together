@@ -1,12 +1,20 @@
 #include <thread>
-#include <mutex>
 #include <SDL_ttf.h>
-#include "../include/Game/Game.h"
+#include <SDL_image.h>
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
+#include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+#ifdef _WIN32
+    WSADATA wsaData;
+    int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (result != 0) {
+        std::cerr << "WSAStartup failed: " << result << std::endl;
+        return 1;
+    }
+#endif
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -43,15 +51,38 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
+    Mediator mediator;
+
+    // Load players' sprite texture
+    SDL_Texture *texture1 = IMG_LoadTexture(renderer, "../assets/sprites/players/player1.png");
+    SDL_Texture *texture2 = IMG_LoadTexture(renderer, "../assets/sprites/players/player2.png");
+    SDL_Texture *texture3 = IMG_LoadTexture(renderer, "../assets/sprites/players/player3.png");
+    SDL_Texture *texture4 = IMG_LoadTexture(renderer, "../assets/sprites/players/player4.png");
+    if (texture1 == nullptr || texture2 == nullptr || texture3 == nullptr || texture4 == nullptr) {
+        std::cerr << "Error loading texture: " << TTF_GetError() << std::endl;
+        return 1;
+    }
+    Sprite playerSprite1(Player::idle, &texture1, 24, 18);
+    Sprite playerSprite2(Player::idle, &texture2, 24, 18);
+    Sprite playerSprite3(Player::idle, &texture3, 24, 18);
+    Sprite playerSprite4(Player::idle, &texture4, 24, 18);
+
+
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
-    Player initialPlayer(50, 50, 0.2F, 2, 20, 30);
+    Player initialPlayer(50, 50, 0.2F, 2, 48, 36, playerSprite1);
     Game game(window, renderer, camera, level, initialPlayer);
+    mediator.setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit);
+    Menu menu(renderer, font, &game, &quit, &mediator);
+    mediator.setMenuPtr(&menu);
     menu.render();
+
+    // Initialize NetworkManager
+    NetworkManager networkManager(&mediator);
+    mediator.setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -84,9 +115,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 1, 2, 20, 30);
-            Player character2(150, 50, 1, 2, 20, 30);
-            Player character3(200, 50, 1, 2, 20, 30);
+            Player character1(100, 50, 1, 2, 48, 36, playerSprite2);
+            Player character2(150, 50, 1, 2, 48, 36, playerSprite3);
+            Player character3(200, 50, 1, 2, 48, 36, playerSprite4);
 
             //game.addCharacter(character1);
             //game.addCharacter(character2);
@@ -116,5 +147,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     TTF_Quit();
     SDL_Quit();
 
+#ifdef _WIN32
+    WSACleanup();
+#endif
     return 0;
 }

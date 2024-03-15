@@ -12,6 +12,8 @@
 #include "Level.h"
 #include "Objects/Player.h"
 
+const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
+
 enum class GameState {
     RUNNING,
     PAUSED,

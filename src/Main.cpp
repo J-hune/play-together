@@ -104,7 +104,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             Player character2(150, 50, 1, 2, 48, 36);
             Player character3(200, 50, 1, 2, 48, 36);
 
-            //game.addCharacter(character1);
+            game.addCharacter(character1);
             //game.addCharacter(character2);
             game.addCharacter(character3);
 

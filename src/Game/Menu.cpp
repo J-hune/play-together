@@ -60,20 +60,26 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
 
 
     // Add buttons to the host game menu
-    ButtonPosition main_menu_button_position2 = {200, 420, 400, 100};
     ButtonPosition send_message_button_position = {200, 60, 400, 100};
-    auto main_menu_button2 = Button(renderer, font, main_menu_button_position2, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
+    ButtonPosition view_game_button_position = {200, 180, 400, 100};
+    ButtonPosition main_menu_button_position2 = {200, 420, 400, 100};
     auto send_message_button = Button(renderer, font, send_message_button_position, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
-    buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(main_menu_button2);
+    auto view_game_button = Button(renderer, font, view_game_button_position, "View Game", ButtonAction::START, normal_color,hover_color, text_color, 10);
+    auto main_menu_button2 = Button(renderer, font, main_menu_button_position2, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(send_message_button);
+    buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(view_game_button);
+    buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(main_menu_button2);
 
     // Add buttons to the join game menu
-    ButtonPosition main_menu_button_position3 = {200, 420, 400, 100};
     ButtonPosition send_message_button_position2 = {200, 60, 400, 100};
-    auto main_menu_button3 = Button(renderer, font, main_menu_button_position3, "Main Précédent", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
+    ButtonPosition view_game_button_position2 = {200, 180, 400, 100};
+    ButtonPosition main_menu_button_position3 = {200, 420, 400, 100};
     auto send_message_button2 = Button(renderer, font, send_message_button_position2, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
-    buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(main_menu_button3);
+    auto view_game_button2 = Button(renderer, font, view_game_button_position2, "View Game", ButtonAction::START, normal_color,hover_color, text_color, 10);
+    auto main_menu_button3 = Button(renderer, font, main_menu_button_position3, "Main Précédent", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(send_message_button2);
+    buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(view_game_button2);
+    buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(main_menu_button3);
 
 
     // Add buttons to stop the game

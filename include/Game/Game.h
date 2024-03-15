@@ -7,6 +7,7 @@
 #include <string>
 #include <ranges>
 #include <cmath>
+#include <algorithm>
 #include "Polygon.h"
 #include "Camera.h"
 #include "Level.h"

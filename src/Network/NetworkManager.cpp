@@ -1,3 +1,9 @@
+#ifndef _WIN32
+#define SOCKET_VALID(fd) (fd != -1)
+#else
+#define SOCKET_VALID(fd) (fd != INVALID_SOCKET)
+#endif
+
 #include "../../include/Network/NetworkManager.h"
 
 /** CONSTRUCTORS **/
@@ -52,13 +58,8 @@ void NetworkManager::startClients() {
 }
 
 void NetworkManager::stopServers() {
-#ifndef _WIN32
-    if (tcpServer.getSocketFileDescriptor() != -1) tcpServer.stop();
-    if (udpServer.getSocketFileDescriptor() != -1) udpServer.stop();
-#else
-    if (tcpServer.getSocketFileDescriptor() != INVALID_SOCKET) tcpServer.stop();
-    if (udpServer.getSocketFileDescriptor() != INVALID_SOCKET) udpServer.stop();
-#endif
+    if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) tcpServer.stop();
+    if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) udpServer.stop();
 
     if (serverTCPThreadPtr && serverTCPThreadPtr->joinable()) {
         serverTCPThreadPtr->request_stop();
@@ -74,13 +75,8 @@ void NetworkManager::stopServers() {
 }
 
 void NetworkManager::stopClients() {
-#ifndef _WIN32
-    if (tcpClient.getSocketFileDescriptor() != -1) tcpClient.stop();
-    if (udpClient.getSocketFileDescriptor() != -1) udpClient.stop();
-#else
-    if (tcpClient.getSocketFileDescriptor() != INVALID_SOCKET) tcpClient.stop();
-    if (udpClient.getSocketFileDescriptor() != INVALID_SOCKET) udpClient.stop();
-#endif
+    if (SOCKET_VALID(tcpClient.getSocketFileDescriptor())) tcpClient.stop();
+    if (SOCKET_VALID(udpClient.getSocketFileDescriptor())) udpClient.stop();
 
     if (clientTCPThreadPtr && clientTCPThreadPtr->joinable()) {
         clientTCPThreadPtr->request_stop();
@@ -102,7 +98,7 @@ void NetworkManager::broadcastMessage(int protocol, const std::string &message, 
     }
 
     if (protocol == 0) {
-        if (tcpServer.getSocketFileDescriptor() != -1) {
+        if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) {
             bool success = tcpServer.broadcast(message, socketIgnored);
             if (success) {
                 std::cout << "Message sent to all clients" << std::endl;
@@ -111,7 +107,7 @@ void NetworkManager::broadcastMessage(int protocol, const std::string &message, 
             }
         }
     } else if (protocol == 1) {
-        if (udpServer.getSocketFileDescriptor() != -1) {
+        if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
             bool success = udpServer.broadcast(message, socketIgnored);
             if (success) {
                 std::cout << "Message sent to all clients" << std::endl;
@@ -130,42 +126,15 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
         return;
     }
 
-#ifdef _WIN32
-    if (tcpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
-        tcpClient.send("Hello, World from TCP!");
-    }
-
-    if (udpClient.getSocketFileDescriptor() != INVALID_SOCKET) {
-        udpClient.send("Hello, World from UDP!");
-    }
-
-    if (tcpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
-        bool success = tcpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-
-    if (udpServer.getSocketFileDescriptor() != INVALID_SOCKET) {
-        bool success = udpServer.broadcast("Hello, World!");
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-#else
-    if (tcpClient.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(tcpClient.getSocketFileDescriptor())) {
         tcpClient.send(message);
     }
 
-    if (udpClient.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(udpClient.getSocketFileDescriptor())) {
         udpClient.send(message);
     }
 
-    if (tcpServer.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) {
         bool success = tcpServer.broadcast("Hello, World!", 0);
         if (success) {
             std::cout << "Message sent to all clients" << std::endl;
@@ -174,7 +143,7 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
         }
     }
 
-    if (udpServer.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
         bool success = udpServer.broadcast("Hello, World!", 0);
         if (success) {
             std::cout << "Message sent to all clients" << std::endl;
@@ -182,7 +151,6 @@ void NetworkManager::temporarySendMethod(const std::string &message) const {
             std::cerr << "Failed to send message to all clients" << std::endl;
         }
     }
-#endif
 }
 
 void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
@@ -194,12 +162,12 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     message["messageType"] = MessageType::PLAYER_UPDATE;
     message["keyboardStateMask"] = keyboardStateMask;
 
-    if (udpClient.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(udpClient.getSocketFileDescriptor())) {
         message["playerID"] = udpClient.getSocketFileDescriptor();
         udpClient.send(message.dump());
     }
 
-    if (udpServer.getSocketFileDescriptor() != -1) {
+    if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
         message["playerID"] = 0;
         udpServer.broadcast(message.dump(), 0);
     }

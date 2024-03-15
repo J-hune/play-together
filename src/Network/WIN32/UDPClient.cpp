@@ -115,7 +115,7 @@ std::string UDPClient::receive(int timeoutMilliseconds) const {
 void UDPClient::stop() {
     // No need to disconnect in UDP
     if (socketFileDescriptor != INVALID_SOCKET) {
-        ::shutdown(socketFileDescriptor, SHUT_RDWR);
+        ::shutdown(socketFileDescriptor, SD_BOTH);
         closesocket(socketFileDescriptor); // Close socket on Windows
         socketFileDescriptor = INVALID_SOCKET;
 

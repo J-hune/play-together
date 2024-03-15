@@ -125,9 +125,9 @@ void UDPServer::handleMessage() {
             }
             clientAddressesMutexPtr->unlock();
 
-            if (clientID != -1) {
+            if (clientID != INVALID_SOCKET) {
                 // Handle received message
-                Mediator::handleMessages(1, message, clientID);
+                Mediator::handleMessages(1, message, (int)clientID);
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
             }
@@ -141,7 +141,7 @@ void UDPServer::handleMessage() {
 void UDPServer::stop() {
     stopRequested = true;
     if (socketFileDescriptor != INVALID_SOCKET) {
-        :shutdown(socketFileDescriptor, SHUT_RDWR);
+        ::shutdown(socketFileDescriptor, SD_BOTH);
         closesocket(socketFileDescriptor); // Close socket on Windows
         socketFileDescriptor = INVALID_SOCKET;
 

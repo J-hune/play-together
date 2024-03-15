@@ -7,6 +7,7 @@
 Game* Mediator::gamePtr = nullptr;
 Menu* Mediator::menuPtr = nullptr;
 NetworkManager* Mediator::networkManagerPtr = nullptr;
+std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> Mediator::playersKeyStates;
 const std::array<SDL_Scancode, 7> Mediator::keyMapping = {
         SDL_SCANCODE_UP, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN,
         SDL_SCANCODE_LSHIFT, SDL_SCANCODE_E, SDL_SCANCODE_F
@@ -100,7 +101,7 @@ int Mediator::handleClientConnect(int playerID) {
     }
 
     // If the ID is valid and not taken, create a new character for the new player.
-    Player newPlayer(playerID, 50, 50, 0.2F, 2, 20, 30);
+    Player newPlayer(playerID, 50, 50, 0.2F, 2, 48, 36);
     gamePtr->addCharacter(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
@@ -173,6 +174,7 @@ void Mediator::decodeKeyboardStateMask(uint16_t mask, int *keyStates) {
 }
 
 void Mediator::handleKeyboardState(Player *player, const int *keyStates) {
+    int playerID = player->getPlayerID();
     SDL_KeyboardEvent keyEvent;
 
     // Iterate through the keyStates (using the keyMapping array to reduce the number of iterations)
@@ -180,10 +182,16 @@ void Mediator::handleKeyboardState(Player *player, const int *keyStates) {
         keyEvent.keysym.scancode = static_cast<SDL_Scancode>(scancode);
         keyEvent.keysym.sym = SDL_GetKeyFromScancode(keyEvent.keysym.scancode);
 
-        if (keyStates[scancode] == 1) {
+        // If the key is pressed and was not pressed before, handle the key down event
+        if (keyStates[scancode] == 1 && !playersKeyStates[playerID][keyEvent.keysym.scancode]) {
             gamePtr->handleKeyDownEvent(player, keyEvent);
-        } else {
+            playersKeyStates[playerID][keyEvent.keysym.scancode] = true;
+        }
+
+        // If the key is released and was pressed before, handle the key up event
+        else if (keyStates[scancode] == 0 && playersKeyStates[playerID][keyEvent.keysym.scancode]) {
             gamePtr->handleKeyUpEvent(player, keyEvent);
+            playersKeyStates[playerID][keyEvent.keysym.scancode] = false;
         }
     }
 }

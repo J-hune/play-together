@@ -2,6 +2,10 @@
 #define PLAY_TOGETHER_MEDIATOR_H
 
 #include <string>
+#include <SDL.h>
+#include <array>
+#include <unordered_map>
+#include "../Game/Objects/Player.h"
 
 // Forward declarations
 class Game;
@@ -59,6 +63,7 @@ public:
     static void stopServers();
     static void stopClients();
     static void temporarySendMethod(const std::string &message);
+    static void sendPlayerUpdate(uint16_t keyboardStateMask);
 
     // Menu methods
     static void handleServerDisconnect();
@@ -107,6 +112,10 @@ private:
     static Game *gamePtr; /**< Pointer to the associated Game object. */
     static Menu *menuPtr; /**< Pointer to the associated Menu object. */
     static NetworkManager *networkManagerPtr; /**< Pointer to the associated NetworkManager object. */
+    static const std::array<SDL_Scancode, 7> keyMapping;
+    static std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> playersKeyStates; // Map of player ID to key states
+
+    static void handleKeyboardState(Player *player, const int *keyStates);
 
 };
 

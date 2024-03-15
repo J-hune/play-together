@@ -5,12 +5,19 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
+SDL_Texture *Player::spriteTexture1Ptr = nullptr;
+SDL_Texture *Player::spriteTexture2Ptr = nullptr;
+SDL_Texture *Player::spriteTexture3Ptr = nullptr;
+SDL_Texture *Player::spriteTexture4Ptr = nullptr;
+
 
 /** CONSTRUCTOR **/
 
-Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight, Sprite &sprite)
-        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight), sprite(sprite) {
+Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
+        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
 
+    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }
 
 
@@ -233,6 +240,30 @@ void Player::setWantToJump(bool state) {
 
 
 /** METHODS **/
+
+bool Player::loadTextures(SDL_Renderer &renderer) {
+    // Load players' sprite texture
+    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player.png");
+    spriteTexture1Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player1.png");
+    spriteTexture2Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player2.png");
+    spriteTexture3Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player3.png");
+    spriteTexture4Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player4.png");
+
+    // Check errors
+    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {
+        return false; // Return failure
+    }
+
+    return true; // Return success
+}
+
+void Player::setSpriteTextureByID(int id) {
+    if (id == 0) sprite.setTexture(*baseSpriteTexturePtr); // Base texture
+    else if (id == 1) sprite.setTexture(*spriteTexture1Ptr); // Texture 1
+    else if (id == 2) sprite.setTexture(*spriteTexture2Ptr); // Texture 2
+    else if (id == 3) sprite.setTexture(*spriteTexture3Ptr); // Texture 3
+    else if (id == 4) sprite.setTexture(*spriteTexture4Ptr); // Texture 4
+}
 
 void Player::teleportPlayer(float newX, float newY) {
     x = newX;

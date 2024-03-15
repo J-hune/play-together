@@ -7,14 +7,14 @@
 
 /** CONSTRUCTORS **/
 
-Sprite::Sprite(Animation animation, SDL_Texture **texture, int width, int height) :
-        animation(animation), texture(*texture), srcRect({0, 0, width, height}) {}
+Sprite::Sprite(Animation animation, SDL_Texture &texture, int width, int height) :
+        animation(animation), texturePtr(&texture), srcRect({0, 0, width, height}) {}
 
 
 /** ACCESSORS **/
 
 SDL_Texture* Sprite::getTexture() const {
-    return texture;
+    return texturePtr;
 }
 
 SDL_Rect Sprite::getSrcRect() const {
@@ -30,6 +30,10 @@ SDL_RendererFlip Sprite::getFlip() const {
 
 void Sprite::setAnimation(Animation newAnimation) {
     animation = newAnimation;
+}
+
+void Sprite::setTexture(SDL_Texture &newTexture) {
+    texturePtr = &newTexture;
 }
 
 void Sprite::setFlipHorizontal(SDL_RendererFlip flip) {

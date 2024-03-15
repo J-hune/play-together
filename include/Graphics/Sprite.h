@@ -27,7 +27,7 @@ public:
      * @param width The width of a tile in the texture.
      * @param height he height of a tile in the texture.
      */
-    Sprite(Animation animation, SDL_Texture **texture, int width, int height);
+    Sprite(Animation animation, SDL_Texture &texture, int width, int height);
 
 
     /** BASIC ACCESSORS **/
@@ -58,9 +58,15 @@ public:
 
     /**
      * @brief Set the animation attribute.
-     * @param animation The new Animation of sprite.
+     * @param animation The new Animation of the sprite.
      */
     void setAnimation(Animation newAnimation);
+
+    /**
+     * @brief Set the texture attribute.
+     * @param texture The new texture of the sprite.
+     */
+    void setTexture(SDL_Texture &newTexture);
 
     /**
      * @brief Set the flipHorizontal attribute.
@@ -95,7 +101,7 @@ private:
     /** ATTRIBUTES **/
 
     Animation animation; /**< The current animation of the sprite. */
-    SDL_Texture *texture; /**< The texture of the sprite. */
+    SDL_Texture *texturePtr; /**< The texture of the sprite. */
     SDL_Rect srcRect; /**< The square that will be copied in the texture. */
     SDL_RendererFlip flipHorizontal = SDL_FLIP_NONE; /**< If the sprite is flipped horizontally. */
     SDL_RendererFlip flipVertical = SDL_FLIP_NONE; /**< If the sprite is flipped vertically. */

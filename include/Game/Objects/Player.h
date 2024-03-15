@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <SDL.h>
+#include <SDL_image.h>
 #include <map>
 #include "../Point.h"
 #include "../../Graphics/Animation.h"
@@ -27,7 +28,7 @@ constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
 
 class Player {
 public:
-    /** STATIC ATTRIBUTES **/
+    /** PUBLIC STATIC ATTRIBUTES **/
 
     static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
     static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
@@ -49,7 +50,7 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight, Sprite &sprite);
+    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
 
 
     /** BASIC ACCESSORS **/
@@ -309,6 +310,18 @@ public:
 
     /** PUBLIC METHODS **/
 
+    /**
+     * @brief Load all players textures.
+     * @param renderer The renderer of the game.
+     * @return Returns true if all textures were loaded correctly, false otherwise.
+     */
+    static bool loadTextures(SDL_Renderer &renderer);
+
+    /**
+     * @brief Assign a texture to a player's sprite according to the id.
+     * @param id The id of the texture.
+     */
+    void setSpriteTextureByID(int id);
 
     /**
      * @brief Teleports the player to a specific location.
@@ -373,6 +386,12 @@ private:
     bool isOnPlatform = false; /**< If the player is on a platform */
     bool isJumping = false; /**< If the player is jumping */
     bool wantToJump = false; /**< If the player try to jump */
+
+    static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
+    static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
+    static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
+    static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
+    static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
 
 
     /** PRIVATE METHODS **/

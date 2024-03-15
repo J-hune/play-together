@@ -119,23 +119,17 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             break;
         case SDLK_LEFT:
         case SDLK_q:
-            // If the player don't already move to the right
-            if (!player->getWantToMoveRight()) {
-                player->setDesiredDirection(PLAYER_LEFT);
-                player->setWantToMoveLeft(true);
-                player->getSprite()->setAnimation(Player::walk);
-                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
-            }
+            player->setDesiredDirection(PLAYER_LEFT);
+            player->setWantToMoveLeft(true);
+            player->getSprite()->setAnimation(Player::walk);
+            player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            // If the player don't already move to the left
-            if (!player->getWantToMoveLeft()) {
-                player->setDesiredDirection(PLAYER_RIGHT);
-                player->setWantToMoveRight(true);
-                player->getSprite()->setAnimation(Player::walk);
-                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
-            }
+            player->setDesiredDirection(PLAYER_RIGHT);
+            player->setWantToMoveRight(true);
+            player->getSprite()->setAnimation(Player::walk);
+            player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             break;
         case SDLK_g:
             switchGravity = !switchGravity;
@@ -161,22 +155,38 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
 void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
     switch (keyEvent.keysym.sym) {
         case SDLK_UP:
-        case SDLK_DOWN:
         case SDLK_z:
         case SDLK_SPACE:
-            player->setWantToJump(false);
+            // Reset vertical movement if moving upwards
+            if (player->getMoveY() < 0) player->setMoveY(0);
+            player->setWantToJump(false); // Disable jumping
+            break;
+        case SDLK_DOWN:
+            // Reset vertical movement if moving downwards
+            if (player->getMoveY() > 0) player->setMoveY(0);
+        case SDLK_q:
+        case SDLK_LEFT:
+            // Reset horizontal movement if moving left
+            if (player->getMoveX() < 0) player->setMoveX(0);
+            player->setWantToMoveLeft(false); // Disable left movement
+            // Trigger idle animation if not moving right
+            if (!player->getWantToMoveRight()) {
+                player->setFinishTheMovement(false);
+                player->getSprite()->setAnimation(Player::idle);
+            }
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            player->setWantToMoveRight(false);
-            player->setFinishTheMovement(false);
-            player->getSprite()->setAnimation(Player::idle);
-            break;
-        case SDLK_q:
-        case SDLK_LEFT:
-            player->setWantToMoveLeft(false);
-            player->setFinishTheMovement(false);
-            player->getSprite()->setAnimation(Player::idle);
+            // Reset horizontal movement if moving right
+            if (player->getMoveX() > 0) {
+                player->setMoveX(0);
+            }
+            player->setWantToMoveRight(false); // Disable right movement
+            // Trigger idle animation if not moving left
+            if (!player->getWantToMoveLeft()) {
+                player->setFinishTheMovement(false);
+                player->getSprite()->setAnimation(Player::idle);
+            }
             break;
         default:
             break;

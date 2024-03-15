@@ -7,8 +7,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer), quitFlagPtr(quitFlag) {}
 
 Game::Game() :
             window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -226,8 +226,9 @@ void Game::handleEvents(Player *player) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
             printf("Quit event detected\n");
+
+            *quitFlagPtr = true;
             stop();
-            exit(0);
         }
 
         // Handle key events

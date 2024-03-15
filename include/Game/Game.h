@@ -26,7 +26,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer);
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag);
 
     Game();
 
@@ -182,8 +182,8 @@ private:
     Level level; /**< The level object */
     Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    bool isRunning = true; /**< Flag indicating if the game is running. */
-    bool switchGravity = false;
+    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
 
     // Debug variables used for the application console
     bool render_textures = true;

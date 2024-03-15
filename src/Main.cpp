@@ -56,7 +56,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Level level("diversity");
     Player::loadTextures(*renderer);
     Player initialPlayer(0, 50, 50, 0.2F, 2, 48, 36);
-    Game game(window, renderer, camera, level, initialPlayer);
+    Game game(window, renderer, camera, level, initialPlayer, &quit);
     Mediator::setGamePtr(&game);
 
     // Initialize Menu

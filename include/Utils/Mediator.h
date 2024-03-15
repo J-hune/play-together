@@ -69,7 +69,6 @@ public:
     static void handleServerDisconnect();
 
     // Game methods
-    static int setCharacterSpriteID(short id);
     static GameState getGameState();
     static void stop();
 
@@ -104,7 +103,7 @@ public:
      * @param mask The mask of the keyboard state.
      * @param keyStates The array of key states to update.
      */
-    static void decodeKeyboardStateMask(uint16_t mask, int *keyStates);
+    static void decodeKeyboardStateMask(uint16_t mask, std::array<int, SDL_NUM_SCANCODES> &keyStates);
 
 private:
     /** ATTRIBUTES **/
@@ -115,7 +114,7 @@ private:
     static const std::array<SDL_Scancode, 7> keyMapping;
     static std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> playersKeyStates; // Map of player ID to key states
 
-    static void handleKeyboardState(Player *player, const int *keyStates);
+    static void handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANCODES> &keyStates);
 
 };
 

@@ -144,13 +144,13 @@ public:
      * @brief Removes a character from the game.
      * @param characterPtr Pointer to the character to remove.
      */
-    void removeCharacter(Player* characterPtr);
+    void removeCharacter(const Player* characterPtr);
 
     /**
     * @brief Handles SDL Key up events, updating the movement variables accordingly.
     * @param keyEvent Reference to the key who was release.
     */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
@@ -206,7 +206,7 @@ private:
      * @brief Applies player movement based on the current movement variables.
      * @param player The player to whom the movement will be applied.
      */
-    void applyPlayerMovement(Player *player);
+    void applyPlayerMovement(Player *player) const;
 
     /**
      * @brief Applies the movement to all players in the game.
@@ -231,12 +231,12 @@ private:
     /**
      * @brief Handles collisions between the player and platform.
      */
-    void handleCollisionsWithObstacles(Player *player);
+    void handleCollisionsWithObstacles(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and platforms.
      */
-    void handleCollisionsWithPlatforms(Player *player);
+    void handleCollisionsWithPlatforms(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and other players.
@@ -257,12 +257,12 @@ private:
     /**
      * @brief Handles collisions between the player and platform when mavity is reversed.
      */
-    void handleCollisionsWithObstaclesReverseMavity(Player *player);
+    void handleCollisionsWithObstaclesReverseMavity(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and platforms when the mavity is reversed.
      */
-    void handleCollisionsWithPlatformsReversedMavity(Player *player);
+    void handleCollisionsWithPlatformsReversedMavity(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and other players when mavity is reversed.

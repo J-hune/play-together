@@ -11,8 +11,7 @@ Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Lev
         : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer), quitFlagPtr(quitFlag) {}
 
 Game::Game() :
-            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                    (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
+            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,(int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
             renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
             level("experimentation") {}
 
@@ -60,11 +59,11 @@ void Game::setLevel(std::string const &map_name) {
     level = Level(map_name);
 }
 
-void Game::setRenderCameraPoint(bool state){
+void Game::setRenderCameraPoint(bool state) {
     render_camera_point = state;
 }
 
-void Game::setRenderCameraArea(bool state){
+void Game::setRenderCameraArea(bool state) {
     render_camera_area = state;
 }
 
@@ -112,7 +111,7 @@ void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
 
-void Game::removeCharacter(Player* characterPtr) {
+void Game::removeCharacter(const Player *characterPtr) {
     // Check if the pointer is valid
     if (characterPtr == nullptr) {
         return; // Exit if the pointer is null
@@ -176,7 +175,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
     }
 }
 
-void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
+void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
     switch (keyEvent.keysym.sym) {
         case SDLK_UP:
         case SDLK_z:
@@ -250,7 +249,7 @@ void Game::handleEvents(Player *player) {
 }
 
 
-void Game::applyPlayerMovement(Player *player) {
+void Game::applyPlayerMovement(Player *player) const {
     // If the gravity is switched change the direction of the y-axis move
     if (switchGravity) {
         player->setMoveY(player->getMoveY()* -1);
@@ -293,7 +292,7 @@ void Game::calculateAllPlayerMovement() {
 
 /** HANDLE COLLISIONS **/
 
-void Game::handleCollisionsWithObstacles(Player *player) {
+void Game::handleCollisionsWithObstacles(Player *player) const {
     // Check collisions with each obstacle
     for (const Polygon &obstacle: level.getObstacles()) {
         // If collision detected with the roof, the player can't jump anymore
@@ -312,7 +311,7 @@ void Game::handleCollisionsWithObstacles(Player *player) {
     }
 }
 
-void Game::handleCollisionsWithPlatforms(Player *player) {
+void Game::handleCollisionsWithPlatforms(Player *player) const {
     // Check for collisions with each 1D moving platforms
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
         // If collision detected with the roof, the player can't jump anymore
@@ -461,7 +460,7 @@ void Game::handleCollisions() {
 
 /** HANDLE COLLISIONS REVERSED MAVITY **/
 
-void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) {
+void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) const {
     // Check collisions with each obstacle
     for (const Polygon &obstacle: level.getObstacles()) {
         // If collision detected with the roof, the player is on a platform
@@ -480,7 +479,7 @@ void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) {
     }
 }
 
-void Game::handleCollisionsWithPlatformsReversedMavity(Player *player) {
+void Game::handleCollisionsWithPlatformsReversedMavity(Player *player) const {
     // Check for collisions with each 1D moving platforms
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
         // If collision detected with the roof, the player is on the platform

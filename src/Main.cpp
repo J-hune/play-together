@@ -109,10 +109,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         } else {
             // Render the menu
             menu.render();
+            SDL_RenderPresent(renderer);
+            SDL_Delay(4);
         }
-
-        SDL_RenderPresent(renderer);
-        SDL_Delay(4);
     }
 
     networkManager.stopServers();

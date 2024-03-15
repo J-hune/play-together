@@ -60,18 +60,8 @@ public:
      */
     [[nodiscard]] MenuAction getCurrentMenuAction() const;
 
+
     /** MODIFIERS **/
-
-    /**
-     * @brief Render the menu on the screen.
-     */
-    void render();
-
-    /**
-     * @brief Handle events for the menu.
-     * @param event The SDL_Event to handle.
-     */
-    void handleEvent(const SDL_Event &event);
 
     /**
      * @brief Set whether the menu should be displayed or not.
@@ -91,21 +81,37 @@ public:
      */
     void setQuit(bool quit_value);
 
-    /** PUBLIC METHODS **/
+
+    /** METHODS **/
+
+    /**
+     * @brief Render the menu on the screen.
+     */
+    void render();
+
+    /**
+     * @brief Handle events for the menu.
+     * @param event The SDL_Event to handle.
+     */
+    void handleEvent(const SDL_Event &event);
 
     /**
      * @brief Reset the menu.
      */
     void reset();
 
+    /**
+     * @brief Handle the server disconnect event.
+     */
     void onServerDisconnect();
+
 private:
     /** ATTRIBUTES **/
 
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    TTF_Font *font; /**< TTF font for rendering text. */
+    TTF_Font *fontPtr; /**< TTF font for rendering text. */
     bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
-    bool *quit; /**< Pointer to a boolean controlling the game loop. */
+    bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
 
@@ -125,15 +131,15 @@ private:
     void handleButtonAction(Button &button);
     void handleStartButton(Button &button);
     void handleResumeButton(Button &button);
-    void handleStopButton(Button &button);
+    void handleStopButton(Button &button) const;
     void handleHostGameButton(Button &button);
     void handleJoinGameButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);
     void handleNavigateToPlayMenuButton(Button &button);
-    void handleSendMessageButton(Button &button);
+    void handleSendMessageButton(Button &button) const;
     void handleNavigateToLoadSaveMenuButton(Button &button);
     void handleNavigateToStartNewGameMenuButton(Button &button);
-    void handleQuitButton([[maybe_unused]] Button &button);
+    void handleQuitButton(Button &button);
 };
 
 #endif //PLAY_TOGETHER_MENU_H

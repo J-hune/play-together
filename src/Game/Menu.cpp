@@ -19,7 +19,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(renderer), font(font), quit(quit) {
+Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(renderer), fontPtr(font), quitPtr(quit) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -117,7 +117,7 @@ void Menu::setMenuAction(MenuAction menu_action) {
 }
 
 void Menu::setQuit(bool quit_value) {
-    *quit = quit_value;
+    *quitPtr = quit_value;
 }
 
 
@@ -210,7 +210,7 @@ void Menu::handleResumeButton(Button &button) {
     button.reset();
 }
 
-void Menu::handleStopButton(Button &button) {
+void Menu::handleStopButton(Button &button) const {
     button.reset();
     Mediator::stop();
 
@@ -261,7 +261,7 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
     Mediator::stopClients();
 }
 
-void Menu::handleSendMessageButton(Button &button) {
+void Menu::handleSendMessageButton(Button &button) const {
     Mediator::temporarySendMethod("Hello, World!");
     button.reset();
 }
@@ -277,5 +277,6 @@ void Menu::handleNavigateToStartNewGameMenuButton(Button &button) {
 }
 
 void Menu::handleQuitButton([[maybe_unused]] Button &button) {
+    button.reset();
     setQuit(true);
 }

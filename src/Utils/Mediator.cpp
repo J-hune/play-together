@@ -69,25 +69,6 @@ void Mediator::handleServerDisconnect() {
     Mediator::menuPtr->onServerDisconnect();
 }
 
-int Mediator::setCharacterSpriteID(short id) {
-    // Check if the character ID is valid (i.e., between 1 and 4)
-    if (id < 1 || id > 4) {
-        return -1; // Invalid character ID.
-    }
-
-    // Check if the ID is already taken by another character.
-    if (gamePtr->getPlayer().getSpriteID() == id) return -1;
-    for (const auto &character : gamePtr->getCharacters()) {
-        if (character.getSpriteID() == id) {
-            return -1;
-        }
-    }
-
-    // If the ID is valid and not taken, set it for the player character.
-    gamePtr->getPlayer().setSpriteID(id);
-    return 0;
-}
-
 GameState Mediator::getGameState() {
     return gamePtr->getGameState();
 }
@@ -115,7 +96,7 @@ int Mediator::handleClientConnect(int playerID) {
 
 int Mediator::handleClientDisconnect(int playerID) {
     // Find the character with the given player ID and remove it from the game.
-    Player *characterPtr = gamePtr->findPlayerById(playerID);
+    Player const *characterPtr = gamePtr->findPlayerById(playerID);
     gamePtr->removeCharacter(characterPtr);
 
     std::cout << "Mediator: Player " << playerID << " disconnected" << std::endl;
@@ -139,7 +120,7 @@ void Mediator::handleMessages(const std::string &rawMessage, int playerID) {
 
             // Decode the keyboard state mask
             uint16_t keyboardStateMask = message["keyboardStateMask"];
-            int keyStates[SDL_NUM_SCANCODES] = {0};
+            std::array<int, SDL_NUM_SCANCODES> keyStates = {0};
             decodeKeyboardStateMask(keyboardStateMask, keyStates);
 
             Player *playerPtr = gamePtr->findPlayerById(playerID);
@@ -167,7 +148,7 @@ uint16_t Mediator::encodeKeyboardStateMask(const Uint8 *keyboardState) {
     return mask;
 }
 
-void Mediator::decodeKeyboardStateMask(uint16_t mask, int *keyStates) {
+void Mediator::decodeKeyboardStateMask(uint16_t mask, std::array<int, SDL_NUM_SCANCODES> &keyStates) {
     // Unmasking equivalent keys
     keyStates[SDL_SCANCODE_UP] = (mask & (1 << 1)) != 0;
     keyStates[SDL_SCANCODE_LEFT] = (mask & (1 << 2)) != 0;
@@ -178,7 +159,7 @@ void Mediator::decodeKeyboardStateMask(uint16_t mask, int *keyStates) {
     keyStates[SDL_SCANCODE_F] = (mask & (1 << 7)) != 0;
 }
 
-void Mediator::handleKeyboardState(Player *player, const int *keyStates) {
+void Mediator::handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANCODES> &keyStates) {
     int playerID = player->getPlayerID();
     SDL_KeyboardEvent keyEvent;
 

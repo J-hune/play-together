@@ -7,7 +7,7 @@ NetworkManager::NetworkManager() {
         Mediator::handleServerDisconnect();
         udpClient.stop();
     });
-};
+}
 
 
 /** METHODS **/

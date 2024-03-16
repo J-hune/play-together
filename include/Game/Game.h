@@ -201,7 +201,7 @@ private:
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
      */
-    void handleEvents(Player *player);
+    void handleEvents();
 
     /**
      * @brief Applies player movement based on the current movement variables.

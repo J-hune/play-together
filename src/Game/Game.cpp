@@ -216,7 +216,7 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
     }
 }
 
-void Game::handleEvents(Player *player) {
+void Game::handleEvents() {
     SDL_Event e;
     static uint16_t lastKeyboardStateMask = 0;
 
@@ -232,10 +232,10 @@ void Game::handleEvents(Player *player) {
 
         // Handle key events
         if (e.type == SDL_KEYUP) {
-            handleKeyUpEvent(player, e.key);
+            handleKeyUpEvent(&initialPlayer, e.key);
         }
         if (e.type == SDL_KEYDOWN) {
-            handleKeyDownEvent(player, e.key);
+            handleKeyDownEvent(&initialPlayer, e.key);
         }
 
             // Handle SDL_MOUSEBUTTONDOWN events
@@ -731,8 +731,7 @@ void Game::run() {
     // Game loop
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
-        handleEvents(&initialPlayer);
-        for (Player &character : characters) handleEvents(&character);
+        handleEvents();
         if (enable_platforms_movement) level.applyPlatformsMovement();
         calculateAllPlayerMovement();
         switchGravity ? handleCollisionsReversedMavity() : handleCollisions();

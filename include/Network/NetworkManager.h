@@ -21,13 +21,6 @@
 #include "../Network/Unix/UDPClient.h"
 #endif
 
-enum class MessageType {
-    INPUT,
-    PLAYER_UPDATE,
-    GAME_EVENT,
-    ITEM_PICKUP
-};
-
 /**
  * @class NetworkManager
  * @brief Class that manages the network communication.
@@ -37,6 +30,15 @@ public:
     /** CONSTRUCTORS **/
 
     NetworkManager();
+
+
+    /** ACCESSORS **/
+
+    /**
+     * @brief Checks if the server is running.
+     * @return
+     */
+    bool isServer() const;
 
 
     /** PUBLIC METHODS **/

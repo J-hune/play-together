@@ -16,6 +16,13 @@ NetworkManager::NetworkManager() {
 }
 
 
+/** ACCESSORS **/
+
+bool NetworkManager::isServer() const {
+    return SOCKET_VALID(tcpServer.getSocketFileDescriptor()) && SOCKET_VALID(udpServer.getSocketFileDescriptor());
+}
+
+
 /** METHODS **/
 
 void NetworkManager::startServers() {
@@ -159,16 +166,12 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     using json = nlohmann::json;
     json message;
 
-    message["messageType"] = MessageType::PLAYER_UPDATE;
+    message["messageType"] = "playerUpdate";
     message["keyboardStateMask"] = keyboardStateMask;
 
-    if (SOCKET_VALID(udpClient.getSocketFileDescriptor())) {
-        message["playerID"] = udpClient.getSocketFileDescriptor();
-        udpClient.send(message.dump());
-    }
-
-    if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
-        message["playerID"] = 0;
+    if (isServer()) {
         udpServer.broadcast(message.dump(), 0);
+    } else {
+        udpClient.send(message.dump());
     }
 }

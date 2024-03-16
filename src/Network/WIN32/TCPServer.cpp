@@ -116,7 +116,9 @@ SOCKET TCPServer::waitForConnection() {
     std::cout << "TCPServer: New client connected with ID: " << clientSocket << std::endl;
 
     // Notify the mediator of the new client connection
-    Mediator::handleClientConnect(clientSocket);
+    Mediator::handleClientConnect((int)clientSocket);
+    sendPlayerList(clientSocket);
+    relayClientConnection(clientSocket);
 
     return clientSocket;
 }
@@ -141,6 +143,9 @@ void TCPServer::handleMessage(SOCKET clientSocket) {
                 } else if (!message.empty()) {
                     // Handle received message
                     Mediator::handleMessages(0, message, clientSocket);
+                } else {
+                    std::cout << "TCPServer: Client " << clientSocket << " disconnected" << std::endl;
+                    clientConnected = false;
                 }
             }
         } catch (const TCPSocketReceiveError& e) {
@@ -154,6 +159,7 @@ void TCPServer::handleMessage(SOCKET clientSocket) {
 
     // Notify the mediator of the client disconnection
     Mediator::handleClientDisconnect(clientSocket);
+    relayClientDisconnection(clientSocket);
 
     closesocket(clientSocket);
 
@@ -250,6 +256,43 @@ std::string TCPServer::receive(SOCKET clientSocket) const {
     }
 
     return receivedData;
+}
+
+bool TCPServer::sendPlayerList(SOCKET clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerList";
+    message["players"] = json::array();
+
+    clientAddressesMutexPtr->lock();
+    for (const auto& [socket, _]: *clientAddressesPtr) {
+        if (socket == clientSocket) message["players"].push_back(0);
+        else message["players"].push_back(socket);
+    }
+    clientAddressesMutexPtr->unlock();
+
+    return send(clientSocket, message.dump());
+}
+
+bool TCPServer::relayClientConnection(SOCKET clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerConnect";
+    message["playerID"] = clientSocket;
+
+    return broadcast(message.dump(), clientSocket);
+}
+
+bool TCPServer::relayClientDisconnection(SOCKET clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerDisconnect";
+    message["playerID"] = clientSocket;
+
+    return broadcast(message.dump(), clientSocket);
 }
 
 // Stop the server

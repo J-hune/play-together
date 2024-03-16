@@ -41,11 +41,6 @@ void Mediator::startServers() {
 
 void Mediator::startClients() {
     Mediator::networkManagerPtr->startClients();
-
-    Player newPlayer(0, 50, 50, 0.2F, 2, 48, 36);
-    gamePtr->addCharacter(newPlayer);
-
-    std::cout << "Mediator: Player server created" << std::endl;
 }
 
 void Mediator::stopServers() {
@@ -106,32 +101,56 @@ int Mediator::handleClientDisconnect(int playerID) {
 void Mediator::handleMessages(int protocol, const std::string &rawMessage, int playerID) {
     std::cout << "Mediator: Received message: " << rawMessage << " from player " << playerID << std::endl;
 
-    // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
-    if (playerID != 0) {
-        Mediator::networkManagerPtr->broadcastMessage(protocol, rawMessage, playerID);
-    }
-
     using json = nlohmann::json;
     try {
-        // Parse the received message as JSON
-        json message = json::parse(rawMessage);
 
-        // Check message type
-        MessageType messageType = message["messageType"];
+    // Parse the received message as JSON
+    json message = json::parse(rawMessage);
 
+    // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
+    if (networkManagerPtr->isServer()) {
+        message["playerID"] = playerID;
+        Mediator::networkManagerPtr->broadcastMessage(protocol, message.dump(), playerID);
+    }
 
-        if (messageType == MessageType::PLAYER_UPDATE) {
-            std::cout << "Mediator: Handling player update message" << std::endl;
+    // Check message type and handle it accordingly
+    std::string messageType = message["messageType"];
+    std::cout << "Mediator: Handling " << messageType << " message" << std::endl;
 
-            // Decode the keyboard state mask
-            uint16_t keyboardStateMask = message["keyboardStateMask"];
-            std::array<int, SDL_NUM_SCANCODES> keyStates = {0};
-            decodeKeyboardStateMask(keyboardStateMask, keyStates);
+    if (messageType == "playerUpdate") {
+        // Get the player ID from the message if it exists, otherwise use the playerID parameter
+        int playerSocketID = (message.contains("playerID") ? (int)message["playerID"] : playerID);
 
-            Player *playerPtr = gamePtr->findPlayerById(playerID);
-            std::cout << "Mediator: Player ID: " << playerID << " check:" << playerPtr << std::endl;
-            handleKeyboardState(playerPtr, keyStates);
+        // Decode the keyboard state mask
+        uint16_t keyboardStateMask = message["keyboardStateMask"];
+        std::array<int, SDL_NUM_SCANCODES> keyStates = {0};
+        decodeKeyboardStateMask(keyboardStateMask, keyStates);
+
+        Player *playerPtr = gamePtr->findPlayerById(playerSocketID);
+        std::cout << "Mediator: Player ID: " << playerSocketID << " check:" << playerPtr << std::endl;
+        handleKeyboardState(playerPtr, keyStates);
+    }
+
+    else if (messageType == "playerConnect") {
+        int playerSocketID = message["playerID"];
+        gamePtr->addCharacter(Player(playerSocketID, 50, 50, 0.2F, 2, 48, 36));
+        std::cout << "Mediator: Player " << playerSocketID << " added to the game" << std::endl;
+    }
+
+    else if (messageType == "playerDisconnect") {
+        int playerSocketID = message["playerID"];
+        gamePtr->removeCharacter(gamePtr->findPlayerById(playerSocketID));
+        std::cout << "Mediator: Player " << playerSocketID << " removed from the game" << std::endl;
+    }
+
+    else if (messageType == "playerList") {
+        std::cout << "Mediator: Players: " << message["players"] << std::endl;
+
+        json playersArray = message["players"];
+        for (const auto & i : playersArray) {
+            gamePtr->addCharacter(Player(i, 50, 50, 0.2F, 2, 48, 36));
         }
+    }
 
     } catch (const json::parse_error &e) {
         std::cerr << "Mediator: Error parsing message: " << e.what() << std::endl;

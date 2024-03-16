@@ -55,7 +55,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Camera camera = Camera();
     Level level("diversity");
     Player::loadTextures(*renderer);
-    Player initialPlayer(0, 50, 50, 0.2F, 2, 48, 36);
+
+    // Some players have a special id. The initial player has id -1 and the server has id 0.
+    Player initialPlayer(-1, 50, 50, 0.2F, 2, 48, 36);
+    initialPlayer.setSpriteTextureByID(1);
     Game game(window, renderer, camera, level, initialPlayer, &quit);
     Mediator::setGamePtr(&game);
 

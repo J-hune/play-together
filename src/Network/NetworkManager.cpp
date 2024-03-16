@@ -108,9 +108,9 @@ void NetworkManager::broadcastMessage(int protocol, const std::string &message, 
         if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) {
             bool success = tcpServer.broadcast(message, socketIgnored);
             if (success) {
-                std::cout << "Message sent to all clients" << std::endl;
+                std::cout << "NetworkManager: Message sent to all clients" << std::endl;
             } else {
-                std::cerr << "Failed to send message to all clients" << std::endl;
+                std::cerr << "NetworkManager: Failed to send message to all clients" << std::endl;
             }
         }
     } else if (protocol == 1) {

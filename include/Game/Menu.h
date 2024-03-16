@@ -131,7 +131,7 @@ private:
     void handleButtonAction(Button &button);
     void handleStartButton(Button &button);
     void handleResumeButton(Button &button);
-    void handleStopButton(Button &button) const;
+    void handleStopButton(Button &button);
     void handleHostGameButton(Button &button);
     void handleJoinGameButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);

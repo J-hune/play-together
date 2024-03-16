@@ -67,9 +67,8 @@ void UDPClient::handleMessages() const {
 }
 
 bool UDPClient::send(const std::string &message) const {
-    std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes)" << std::endl;
+    std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes) to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
 
-    std::cout << "UDPClient: Sending message to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
     if (sendto(socketFileDescriptor, message.c_str(), static_cast<int>(message.length()), 0, (const sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         std::cerr << "UDPClient: Error sending message: " << WSAGetLastError() << std::endl;
         return false;

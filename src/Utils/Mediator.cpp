@@ -127,7 +127,6 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         decodeKeyboardStateMask(keyboardStateMask, keyStates);
 
         Player *playerPtr = gamePtr->findPlayerById(playerSocketID);
-        std::cout << "Mediator: Player ID: " << playerSocketID << " check:" << playerPtr << std::endl;
         handleKeyboardState(playerPtr, keyStates);
     }
 
@@ -144,7 +143,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
     }
 
     else if (messageType == "playerList") {
-        std::cout << "Mediator: Players: " << message["players"] << std::endl;
+        std::cout << "Mediator: Players list received: " << message["players"] << std::endl;
 
         json playersArray = message["players"];
         for (const auto & i : playersArray) {

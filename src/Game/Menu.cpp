@@ -210,9 +210,10 @@ void Menu::handleResumeButton(Button &button) {
     button.reset();
 }
 
-void Menu::handleStopButton(Button &button) const {
+void Menu::handleStopButton(Button &button) {
     button.reset();
     Mediator::stop();
+    setDisplayMenu(true);
 
     Mediator::stopServers();
     Mediator::stopClients();

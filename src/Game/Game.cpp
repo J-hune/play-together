@@ -196,6 +196,8 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
             if (!player->getWantToMoveRight()) {
                 player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             }
             break;
         case SDLK_RIGHT:
@@ -209,6 +211,8 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
             if (!player->getWantToMoveLeft()) {
                 player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             }
             break;
         default:

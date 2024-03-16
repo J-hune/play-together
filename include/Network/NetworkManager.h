@@ -38,7 +38,13 @@ public:
      * @brief Checks if the server is running.
      * @return
      */
-    bool isServer() const;
+    [[nodiscard]] bool isServer() const;
+
+    /**
+     * @brief Checks if the client is running.
+     * @return
+     */
+    [[nodiscard]] bool isClient() const;
 
 
     /** PUBLIC METHODS **/

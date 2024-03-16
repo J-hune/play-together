@@ -51,7 +51,7 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     ButtonPosition main_menu_button_position = {200, 420, 400, 100};
     auto host_game_button = Button(renderer, font, host_game_button_position, "Host Game", ButtonAction::HOST_GAME, normal_color,hover_color, text_color, 10);
     auto join_game_button = Button(renderer, font, join_game_button_position, "Join Hosted Game", ButtonAction::JOIN_GAME, normal_color,hover_color, text_color, 10);
-    auto start_new_game_button = Button(renderer, font, start_new_game_button_position, "Start New Game", ButtonAction::START, normal_color, hover_color,text_color, 10);
+    auto start_new_game_button = Button(renderer, font, start_new_game_button_position, "Start Local Game", ButtonAction::START, normal_color, hover_color,text_color, 10);
     auto main_menu_button = Button(renderer, font, main_menu_button_position, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(host_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(join_game_button);

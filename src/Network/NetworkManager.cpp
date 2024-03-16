@@ -22,6 +22,10 @@ bool NetworkManager::isServer() const {
     return SOCKET_VALID(tcpServer.getSocketFileDescriptor()) && SOCKET_VALID(udpServer.getSocketFileDescriptor());
 }
 
+bool NetworkManager::isClient() const {
+    return SOCKET_VALID(tcpClient.getSocketFileDescriptor()) && SOCKET_VALID(udpClient.getSocketFileDescriptor());
+}
+
 
 /** METHODS **/
 
@@ -169,9 +173,15 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     message["messageType"] = "playerUpdate";
     message["keyboardStateMask"] = keyboardStateMask;
 
+    // If the application is a server, broadcast the message to all clients
     if (isServer()) {
         udpServer.broadcast(message.dump(), 0);
-    } else {
+    }
+
+    // If the application is a client, send the message to the server
+    else if (isClient()) {
         udpClient.send(message.dump());
     }
+
+    // Otherwise, the game is local only (development mode)
 }

@@ -425,6 +425,9 @@ void Game::narrowPhase() {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
+        //if it gets in contact with the danger obstacles he gets smaller  and if we want him bigger we can just change the values to *2
+        checks(level.getSpecialBoxes(), &Game::playerChange, *this,character.getH()/2,character.getW()/2);
+
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         // Handle collisions with death zones
         if (handleCollisionsWithDeathZones(character, deathZones)) {
@@ -474,6 +477,18 @@ void Game::render() {
 
         level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
+    }
+
+    /*SDL_FRect boxRec = {vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY()};
+            SDL_RenderFillRectF(renderer, &boxRec);*/
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    for (const Polygon &obstacle: level.getSpecialBoxes()) {
+        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+            std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY());
+        }
     }
 
     // DEBUG DRAWING OF APPLICATION CONSOLE :
@@ -598,6 +613,26 @@ void Game::saveGame() const {
     std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
 }
 
+void Game::checks(const std::vector<Polygon> &polygons,void (Game::*func)(float,float),Game game,float h,float w) {
+    for (const Polygon &obstacle: polygons) {
+        if (checkSATCollision(characters[0].getGroundColliderVertices(), obstacle)
+            || checkSATCollision(characters[0].getRoofColliderVertices(), obstacle)
+            || checkSATCollision(characters[0].getHorizontalColliderVertices(), obstacle)) {
+            (game.*func)(h,w);
+        }
+    }
+}
+
+void Game::playerChange(float h,float w){
+    int err = SDL_RenderClear(renderer);
+    if(err != 0) {
+        std::cout<< SDL_GetError()<<std::endl;
+        exit(1);
+    }
+    characters[0].setH(h);
+    characters[0].setW(w);
+    render();
+}
 
 /** STATIC METHODS **/
 
@@ -616,3 +651,4 @@ void Game::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) {
         *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
     }
 }
+

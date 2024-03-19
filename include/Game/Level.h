@@ -14,7 +14,7 @@
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
-
+constexpr char BOXES_FILE[] = "boxes.txt";
 
 /**
  * @file Level.h
@@ -78,6 +78,12 @@ public:
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
 
     /**
+    * @brief Return the specialBoxes attribute.
+    * @return A vector of Polygon.
+    */
+    [[nodiscard]] std::vector<Polygon> getSpecialBoxes() const;
+
+    /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.
      */
@@ -133,6 +139,7 @@ private:
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+    std::vector<Polygon> specialBoxes;/**< Collection of polygons representing special Boxes with power. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
     /** PRIVATE METHODS **/
@@ -163,6 +170,15 @@ private:
      * @param mapName Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &mapName);
+
+    /**
+     * @brief Loads obstacles from a map file.
+     * @param mapName The name of the map file.
+     * @param obstacles The type of obstacles that we want to load
+     * @param filename The name of the obstacles file
+     */
+    void loadPolygonsFromMap(const std::string &mapName,std::vector<Polygon> &obstacles, const char *filename);
+
 };
 
 #endif //PLAY_TOGETHER_LEVEL_H

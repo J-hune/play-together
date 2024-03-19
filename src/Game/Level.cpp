@@ -13,6 +13,7 @@ Level::Level(const std::string &map_name) {
     loadMapProperties(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
+    loadPolygonsFromMap(map_name, specialBoxes, BOXES_FILE);
 }
 
 
@@ -55,6 +56,10 @@ std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
 
 std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
+}
+
+std::vector<Polygon> Level::getSpecialBoxes() const {
+    return specialBoxes;
 }
 
 short Level::getLastCheckpoint() const {

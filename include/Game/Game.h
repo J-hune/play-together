@@ -277,6 +277,20 @@ private:
      */
     void render();
 
+    /**
+    * @brief for the type of obstacles that are in contact applies
+     * the function passes in parameter
+    *TODO : not done yet
+    */
+    void checks(const std::vector<Polygon>& polygons,void (Game::*func)(float,float),Game game,float h,float w);
+
+    /**
+     * @brief changes the image of the player and redraw him with his new dimensions
+     * @param h the new height of the player
+     * @param w the new width of the player
+     * */
+    void playerChange(float h,float w);
+
 
     /** STATIC METHODS **/
 

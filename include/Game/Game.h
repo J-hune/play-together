@@ -14,6 +14,8 @@
 #include "Objects/Player.h"
 #include "../Utils/Mediator.h"
 
+const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
+
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
@@ -258,12 +260,12 @@ private:
     /**
      * @brief Handles collisions between the player and platform when mavity is reversed.
      */
-    void handleCollisionsWithObstaclesReverseMavity(Player *player) const;
+    void handleCollisionsWithObstaclesReverseMavity(Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms when the mavity is reversed.
      */
-    void handleCollisionsWithPlatformsReversedMavity(Player *player) const;
+    void handleCollisionsWithPlatformsReversedMavity(Player *player);
 
     /**
      * @brief Handles collisions between the player and other players when mavity is reversed.

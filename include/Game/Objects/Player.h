@@ -400,7 +400,7 @@ private:
     float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
 
     bool finishTheMovement = true; /**< If the player has finish the movement and can change direction */
-    int desiredDirection = 0;/**< The direction the player wants to go (-1 for left, 1 for right) */
+    int desiredDirection = 0; /**< The direction the player wants to go (-1 for left, 1 for right) */
     int currentDirection = 0; /**< The current direction of the player (-1 for left, 1 for right) */
     float timeSpeed = 0; /**< The time that has elapsed since the player started running */
     float maxSpeedReachWithThisTime = 5.2F; /**< the speed max is reach at this time */

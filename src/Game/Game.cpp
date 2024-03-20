@@ -131,43 +131,43 @@ void Game::removeCharacter(const Player *characterPtr) {
 
 
 void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
             // If the coyote time is passed and the player is not already in a jump
             if (player->getTimeAfterFall() > 0 && !player->getIsJumping()) {
                 player->setWantToJump(true);
             }
             break;
-        case SDLK_LEFT:
-        case SDLK_q:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
             player->setDesiredDirection(PLAYER_LEFT);
             player->setWantToMoveLeft(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
             player->setDesiredDirection(PLAYER_RIGHT);
             player->setWantToMoveRight(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             break;
-        case SDLK_g:
+        case SDL_SCANCODE_G:
             switchGravity = !switchGravity;
             player->setIsOnPlatform(false);
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
             player->getSprite()->toggleFlipVertical();
             break;
-        case SDLK_m:
+        case SDL_SCANCODE_M:
             printf("Loading map 'diversity'\n");
             setLevel("diversity");
             break;
-        case SDLK_ESCAPE:
+        case SDL_SCANCODE_ESCAPE:
             pause();
             break;
-        case SDLK_DELETE:
+        case SDL_SCANCODE_DELETE:
             stop();
             break;
         default:
@@ -176,19 +176,19 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
 }
 
 void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
             // Reset vertical movement if moving upwards
             if (player->getMoveY() < 0) player->setMoveY(0);
             player->setWantToJump(false); // Disable jumping
             break;
-        case SDLK_DOWN:
+        case SDL_SCANCODE_DOWN:
             // Reset vertical movement if moving downwards
             if (player->getMoveY() > 0) player->setMoveY(0);
-        case SDLK_q:
-        case SDLK_LEFT:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
             // Reset horizontal movement if moving left
             if (player->getMoveX() < 0) player->setMoveX(0);
             player->setWantToMoveLeft(false); // Disable left movement
@@ -200,8 +200,8 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
                 player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             }
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
             // Reset horizontal movement if moving right
             if (player->getMoveX() > 0) {
                 player->setMoveX(0);

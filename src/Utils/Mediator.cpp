@@ -160,8 +160,8 @@ uint16_t Mediator::encodeKeyboardStateMask(const Uint8 *keyboardState) {
     uint16_t mask = 0;
 
     // Encoding the keyboard state into a 16-bit mask (9 bits left)
-    mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_Z] || keyboardState[SDL_SCANCODE_SPACE]) << 1; // Up action
-    mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_Q]) << 2; // Left action
+    mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_SPACE]) << 1; // Up action
+    mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) << 2; // Left action
     mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) << 3; // Right action
     mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) << 4; // Down action
     mask |= static_cast<uint16_t>(keyboardState[SDL_SCANCODE_LSHIFT]) << 5; // Run action

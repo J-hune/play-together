@@ -53,11 +53,12 @@ bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &messag
     return true;
 }
 
-bool UDPServer::broadcast(const std::string &message) const {
+bool UDPServer::broadcast(const std::string &message, SOCKET socketIgnored) const {
     std::cout << "UDPServer: Broadcasting message: " << message << " (" << message.length() << " bytes)" << std::endl;
 
     clientAddressesMutexPtr->lock();
     for (const auto& [id, address] : *clientAddressesPtr) {
+        if (id == socketIgnored) continue;
         if (!send(address, message)) {
             clientAddressesMutexPtr->unlock();
 
@@ -125,7 +126,8 @@ void UDPServer::handleMessage() {
             clientAddressesMutexPtr->unlock();
 
             if (clientID != INVALID_SOCKET) {
-                std::cout << "UDPServer: Received message: " << message << " from " << clientID << std::endl;
+                // Handle received message
+                Mediator::handleMessages(1, message, (int)clientID);
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
             }
@@ -139,7 +141,7 @@ void UDPServer::handleMessage() {
 void UDPServer::stop() {
     stopRequested = true;
     if (socketFileDescriptor != INVALID_SOCKET) {
-        :shutdown(socketFileDescriptor, SHUT_RDWR);
+        ::shutdown(socketFileDescriptor, SD_BOTH);
         closesocket(socketFileDescriptor); // Close socket on Windows
         socketFileDescriptor = INVALID_SOCKET;
 

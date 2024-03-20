@@ -12,6 +12,7 @@
 #include <ws2tcpip.h>
 
 #include "../TCPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The TCPClient class provides functionality to create and manage a TCP client.

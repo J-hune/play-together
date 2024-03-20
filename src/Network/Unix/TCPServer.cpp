@@ -114,6 +114,11 @@ int TCPServer::waitForConnection() {
     clientAddressesMutexPtr->unlock();
     std::cout << "TCPServer: New client connected with ID: " << clientSocket << std::endl;
 
+    // Notify the mediator of the new client connection
+    Mediator::handleClientConnect(clientSocket);
+    sendPlayerList(clientSocket);
+    relayClientConnection(clientSocket);
+
     return clientSocket;
 }
 
@@ -134,10 +139,12 @@ void TCPServer::handleMessage(int clientSocket) {
                 if (message == "DISCONNECT") {
                     std::cout << "TCPServer: Client " << clientSocket << " asked to disconnect" << std::endl;
                     clientConnected = false;
-                }
-
-                if (!message.empty()) {
-                    std::cout << "TCPServer: Received message: " << message << " (message length: " << message.length() << " bytes) from client " << clientSocket << std::endl;
+                } else if (!message.empty()) {
+                    // Handle received message
+                    Mediator::handleMessages(0, message, clientSocket);
+                } else {
+                    std::cout << "TCPServer: Client " << clientSocket << " disconnected" << std::endl;
+                    clientConnected = false;
                 }
             }
         } catch (const TCPSocketReceiveError& e) {
@@ -148,6 +155,11 @@ void TCPServer::handleMessage(int clientSocket) {
     }
 
     std::cout << "TCPServer: Client " << clientSocket << " disconnected" << std::endl;
+
+    // Notify the mediator of the client disconnection
+    Mediator::handleClientDisconnect(clientSocket);
+    relayClientDisconnection(clientSocket);
+
     close(clientSocket);
 
     // Remove the client from the list of connected clients
@@ -183,11 +195,12 @@ bool TCPServer::send(int clientSocket, const std::string &message) const {
 }
 
 // Broadcast a message to all connected clients
-bool TCPServer::broadcast(const std::string &message) const {
+bool TCPServer::broadcast(const std::string &message, int socketIgnored) const {
     clientAddressesMutexPtr->lock();
     std::cout << "TCPServer: Broadcasting message: " << message << " (" << message.length() << " bytes) to " << clientAddressesPtr->size() << " clients" << std::endl;
 
     auto send_successful = std::ranges::all_of(*clientAddressesPtr, [&](const auto& client) {
+        if (client.first == socketIgnored) return true;
         return send(client.first, message);
     });
 
@@ -236,6 +249,43 @@ std::string TCPServer::receive(int clientSocket) const {
     return receivedData;
 }
 
+bool TCPServer::sendPlayerList(int clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerList";
+    message["players"] = json::array();
+
+    clientAddressesMutexPtr->lock();
+    for (const auto& [socket, _]: *clientAddressesPtr) {
+        if (socket == clientSocket) message["players"].push_back(0);
+        else message["players"].push_back(socket);
+    }
+    clientAddressesMutexPtr->unlock();
+
+    return send(clientSocket, message.dump());
+}
+
+bool TCPServer::relayClientConnection(int clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerConnect";
+    message["playerID"] = clientSocket;
+
+    return broadcast(message.dump(), clientSocket);
+}
+
+bool TCPServer::relayClientDisconnection(int clientSocket) const {
+    using json = nlohmann::json;
+
+    json message;
+    message["messageType"] = "playerDisconnect";
+    message["playerID"] = clientSocket;
+
+    return broadcast(message.dump(), clientSocket);
+}
+
 // Stop the server
 void TCPServer::stop() {
     // Send a disconnect message to all connected clients
@@ -243,7 +293,7 @@ void TCPServer::stop() {
         if (!clientAddressesPtr->empty()) {
             clientAddressesMutexPtr->unlock();
             std::cout << "TCPServer: Sending disconnect message to all clients" << std::endl;
-            broadcast("DISCONNECT");
+            broadcast("DISCONNECT", 0);
         } else {
             clientAddressesMutexPtr->unlock();
         }

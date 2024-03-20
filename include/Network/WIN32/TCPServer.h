@@ -16,6 +16,8 @@
 #include <ws2tcpip.h>
 
 #include "../TCPError.h"
+#include "../../Utils/Mediator.h"
+#include "../../../dependencies/json.hpp"
 
 /**
  * @brief The TCPServer class provides functionality to create and manage a TCP server.
@@ -65,7 +67,7 @@ public:
      * @param message The message to broadcast.
      * @return True if the message is sent successfully to all clients, false otherwise.
      */
-    bool broadcast(const std::string &message) const;
+    bool broadcast(const std::string &message, SOCKET socketIgnored) const;
 
     /**
      * @brief Receives a message from the specified client.
@@ -73,6 +75,27 @@ public:
      * @return The received message.
      */
     [[nodiscard]] std::string receive(SOCKET clientSocket) const;
+
+    /**
+     * @brief Sends the list of players to the specified client.
+     * @param clientSocket The client socket file descriptor.
+     * @return
+     */
+    bool sendPlayerList(SOCKET clientSocket) const;
+
+    /**
+     * Relay the client connection to all clients.
+     * @param clientSocket The client socket file descriptor
+     * @return
+     */
+    bool relayClientConnection(SOCKET clientSocket) const;
+
+    /**
+     * @brief Relay the client disconnection to all clients.
+     * @param clientSocket The client socket file descriptor.
+     * @return
+     */
+    bool relayClientDisconnection(SOCKET clientSocket) const;
 
     /**
      * @brief Shuts down the server, closing all client connections.

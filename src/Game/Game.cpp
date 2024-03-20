@@ -7,12 +7,11 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer), quitFlagPtr(quitFlag) {}
 
 Game::Game() :
-            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                    (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
+            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,(int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
             renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
             level("experimentation") {}
 
@@ -45,6 +44,14 @@ Point Game::getAveragePlayersPositions() const {
     return {x, y};
 }
 
+Player &Game::getPlayer() {
+    return initialPlayer;
+}
+
+std::vector<Player> &Game::getCharacters() {
+    return characters;
+}
+
 
 /** MODIFIERS **/
 
@@ -52,11 +59,11 @@ void Game::setLevel(std::string const &map_name) {
     level = Level(map_name);
 }
 
-void Game::setRenderCameraPoint(bool state){
+void Game::setRenderCameraPoint(bool state) {
     render_camera_point = state;
 }
 
-void Game::setRenderCameraArea(bool state){
+void Game::setRenderCameraArea(bool state) {
     render_camera_area = state;
 }
 
@@ -87,6 +94,15 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 
 /** METHODS **/
 
+Player* Game::findPlayerById (int id) {
+    for (Player &character : characters) {
+        if (character.getPlayerID() == id) {
+            return &character;
+        }
+    }
+    return nullptr;
+}
+
 void Game::teleportPlayer(float newX, float newY) {
     initialPlayer.teleportPlayer(newX, newY);
 }
@@ -95,9 +111,16 @@ void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
 
-void Game::removeCharacter(const Player &character) {
+void Game::removeCharacter(const Player *characterPtr) {
+    // Check if the pointer is valid
+    if (characterPtr == nullptr) {
+        return; // Exit if the pointer is null
+    }
+
     // Find the iterator corresponding to the character in the vector
-    std::input_iterator auto it = std::ranges::find(characters.begin(), characters.end(), character);
+    auto it = std::find_if(characters.begin(), characters.end(), [characterPtr](const Player& currentPlayer) {
+        return &currentPlayer == characterPtr;
+    });
 
     // Check if the character was found
     if (it != characters.end()) {
@@ -108,43 +131,43 @@ void Game::removeCharacter(const Player &character) {
 
 
 void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
             // If the coyote time is passed and the player is not already in a jump
             if (player->getTimeAfterFall() > 0 && !player->getIsJumping()) {
                 player->setWantToJump(true);
             }
             break;
-        case SDLK_LEFT:
-        case SDLK_q:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
             player->setDesiredDirection(PLAYER_LEFT);
             player->setWantToMoveLeft(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
             player->setDesiredDirection(PLAYER_RIGHT);
             player->setWantToMoveRight(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             break;
-        case SDLK_g:
+        case SDL_SCANCODE_G:
             switchGravity = !switchGravity;
             player->setIsOnPlatform(false);
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
             player->getSprite()->toggleFlipVertical();
             break;
-        case SDLK_m:
+        case SDL_SCANCODE_M:
             printf("Loading map 'diversity'\n");
             setLevel("diversity");
             break;
-        case SDLK_ESCAPE:
+        case SDL_SCANCODE_ESCAPE:
             pause();
             break;
-        case SDLK_DELETE:
+        case SDL_SCANCODE_DELETE:
             stop();
             break;
         default:
@@ -152,20 +175,20 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
     }
 }
 
-void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
             // Reset vertical movement if moving upwards
             if (player->getMoveY() < 0) player->setMoveY(0);
             player->setWantToJump(false); // Disable jumping
             break;
-        case SDLK_DOWN:
+        case SDL_SCANCODE_DOWN:
             // Reset vertical movement if moving downwards
             if (player->getMoveY() > 0) player->setMoveY(0);
-        case SDLK_q:
-        case SDLK_LEFT:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
             // Reset horizontal movement if moving left
             if (player->getMoveX() < 0) player->setMoveX(0);
             player->setWantToMoveLeft(false); // Disable left movement
@@ -173,10 +196,12 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             if (!player->getWantToMoveRight()) {
                 player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             }
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
             // Reset horizontal movement if moving right
             if (player->getMoveX() > 0) {
                 player->setMoveX(0);
@@ -186,6 +211,8 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             if (!player->getWantToMoveLeft()) {
                 player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             }
             break;
         default:
@@ -193,24 +220,26 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
     }
 }
 
-void Game::handleEvents(Player *player) {
+void Game::handleEvents() {
     SDL_Event e;
+    static uint16_t lastKeyboardStateMask = 0;
 
     // Main loop handling every event one by one
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
             printf("Quit event detected\n");
+
+            *quitFlagPtr = true;
             stop();
-            exit(0);
         }
 
         // Handle key events
         if (e.type == SDL_KEYUP) {
-            handleKeyUpEvent(player, e.key);
+            handleKeyUpEvent(&initialPlayer, e.key);
         }
         if (e.type == SDL_KEYDOWN) {
-            handleKeyDownEvent(player, e.key);
+            handleKeyDownEvent(&initialPlayer, e.key);
         }
 
             // Handle SDL_MOUSEBUTTONDOWN events
@@ -218,10 +247,13 @@ void Game::handleEvents(Player *player) {
             printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
     }
+
+    // Send the keyboard state to the network after handling all events
+    sendKeyboardStateToNetwork(&lastKeyboardStateMask);
 }
 
 
-void Game::applyPlayerMovement(Player *player) {
+void Game::applyPlayerMovement(Player *player) const {
     // If the gravity is switched change the direction of the y-axis move
     if (switchGravity) {
         player->setMoveY(player->getMoveY()* -1);
@@ -264,7 +296,7 @@ void Game::calculateAllPlayerMovement() {
 
 /** HANDLE COLLISIONS **/
 
-void Game::handleCollisionsWithObstacles(Player *player) {
+void Game::handleCollisionsWithObstacles(Player *player) const {
     // Check collisions with each obstacle
     for (const Polygon &obstacle: level.getObstacles()) {
         // If collision detected with the roof, the player can't jump anymore
@@ -283,7 +315,7 @@ void Game::handleCollisionsWithObstacles(Player *player) {
     }
 }
 
-void Game::handleCollisionsWithPlatforms(Player *player) {
+void Game::handleCollisionsWithPlatforms(Player *player) const {
     // Check for collisions with each 1D moving platforms
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
         // If collision detected with the roof, the player can't jump anymore
@@ -720,8 +752,7 @@ void Game::run() {
     // Game loop
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
-        handleEvents(&initialPlayer);
-        for (Player &character : characters) handleEvents(&character);
+        handleEvents();
         if (enable_platforms_movement) level.applyPlatformsMovement();
         calculateAllPlayerMovement();
         switchGravity ? handleCollisionsReversedMavity() : handleCollisions();
@@ -741,4 +772,23 @@ void Game::stop() {
     // Reset the player position
     initialPlayer.setX(50);
     initialPlayer.setY(50);
+}
+
+
+/** STATIC METHODS **/
+
+void Game::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) {
+
+    // Get the current keyboard state mask
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+    uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
+
+    // If the keyboard state has changed since the last message was sent
+    if (currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+        // Send the new keyboard state mask to the server
+        Mediator::sendPlayerUpdate(currentKeyboardStateMask);
+
+        // Update the last keyboard state mask and the last send time
+        *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
+    }
 }

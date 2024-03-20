@@ -51,12 +51,14 @@ void UDPClient::start() {
     std::cout << "UDPClient: Client shutdown" << std::endl;
 }
 
-void UDPClient::handleMessages() {
+void UDPClient::handleMessages() const {
     std::cout << "UDPClient: Handling incoming messages..." << std::endl;
     while (!stopRequested) {
         std::string receivedMessage = receive(200);
+
         if (!receivedMessage.empty()) {
-            std::cout << "UDPClient: Received message: " << receivedMessage << std::endl;
+            // Handle received message
+            Mediator::handleMessages(1, receivedMessage, 0);
         }
     }
 
@@ -64,9 +66,8 @@ void UDPClient::handleMessages() {
 }
 
 bool UDPClient::send(const std::string &message) const {
-    std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes)" << std::endl;
+    std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes) to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
 
-    std::cout << "UDPClient: Sending message to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
     if (sendto(socketFileDescriptor, message.c_str(), message.length(), 0, (const sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         perror("UDPClient: Error sending message");
         return false;

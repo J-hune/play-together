@@ -16,6 +16,7 @@
 #include <ws2tcpip.h>
 
 #include "../UDPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The UDPServer class provides functionality to create and manage a UDP server.
@@ -62,9 +63,10 @@ public:
     /**
      * @brief Broadcasts a message to all connected clients.
      * @param message The message to broadcast.
+     * @param socketIgnored The socket to ignore when broadcasting. (0 to broadcast to all clients)
      * @return True if the message is sent successfully to all clients, false otherwise.
      */
-    bool broadcast(const std::string &message) const;
+    bool broadcast(const std::string &message, SOCKET socketIgnored) const;
 
     /**
      * @brief Receives a message from a client.

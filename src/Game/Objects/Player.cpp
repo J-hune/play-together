@@ -14,14 +14,22 @@ SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 /** CONSTRUCTOR **/
 
-Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
+Player::Player(int playerID, float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
+        : playerID(playerID), x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }
 
 
 /** BASIC ACCESSORS **/
+
+int Player::getPlayerID() const {
+    return playerID;
+}
+
+short Player::getSpriteID() const {
+    return SpriteID;
+}
 
 float Player::getX() const {
     return x;
@@ -236,6 +244,14 @@ void Player::setIsOnPlatform(bool state) {
 
 void Player::setWantToJump(bool state) {
     wantToJump = state;
+}
+
+void Player::setPlayerID(int id) {
+    playerID = id;
+}
+
+void Player::setSpriteID(short id) {
+    SpriteID = id;
 }
 
 

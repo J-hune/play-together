@@ -50,24 +50,26 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
-    Mediator mediator;
 
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
     Player::loadTextures(*renderer);
-    Player initialPlayer(50, 50, 0.2F, 2, 48, 36);
-    Game game(window, renderer, camera, level, initialPlayer);
-    mediator.setGamePtr(&game);
+
+    // Some players have a special id. The initial player has id -1 and the server has id 0.
+    Player initialPlayer(-1, 50, 50, 0.2F, 2, 48, 36);
+    initialPlayer.setSpriteTextureByID(1);
+    Game game(window, renderer, camera, level, initialPlayer, &quit);
+    Mediator::setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit, &mediator);
-    mediator.setMenuPtr(&menu);
+    Menu menu(renderer, font, &quit);
+    Mediator::setMenuPtr(&menu);
     menu.render();
 
     // Initialize NetworkManager
-    NetworkManager networkManager(&mediator);
-    mediator.setNetworkManagerPtr(&networkManager);
+    NetworkManager networkManager;
+    Mediator::setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -100,15 +102,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 1, 2, 48, 36);
-            Player character2(150, 50, 1, 2, 48, 36);
-            Player character3(200, 50, 1, 2, 48, 36);
-
-            game.addCharacter(character1);
-            //game.addCharacter(character2);
-            game.addCharacter(character3);
-
-            game.removeCharacter(character3);
             camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished
@@ -119,11 +112,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         } else {
             // Render the menu
             menu.render();
+            SDL_RenderPresent(renderer);
+            SDL_Delay(4);
         }
-
-        SDL_RenderPresent(renderer);
-        SDL_Delay(4);
     }
+
+    networkManager.stopServers();
+    networkManager.stopClients();
 
     // Clean up resources
     SDL_DestroyRenderer(renderer);

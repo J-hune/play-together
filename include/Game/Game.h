@@ -7,18 +7,14 @@
 #include <string>
 #include <ranges>
 #include <cmath>
+#include <algorithm>
 #include "Polygon.h"
 #include "Camera.h"
 #include "Level.h"
 #include "Objects/Player.h"
+#include "../Utils/Mediator.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
-
-enum class GameState {
-    RUNNING,
-    PAUSED,
-    STOPPED
-};
 
 /**
  * @file Game.h
@@ -33,7 +29,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer);
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag);
 
     Game();
 
@@ -59,8 +55,27 @@ public:
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
+    /**
+     * @brief Get the player object.
+     * @return The player object.
+     */
+    [[nodiscard]] Player &getPlayer();
+
+    /**
+     * @brief Get the characters vector.
+     * @return The characters vector.
+     */
+    [[nodiscard]] std::vector<Player> &getCharacters();
+
 
     /** MODIFIERS **/
+
+    /**
+     * @brief Find and return a player by its id.
+     * @param id The id of the player to find (0 for the main player).
+     * @return A pointer to the player object if found, nullptr otherwise.
+     */
+    Player* findPlayerById(int id);
 
     /**
      * @brief Teleports the player to a specific location.
@@ -130,9 +145,22 @@ public:
 
     /**
      * @brief Removes a character from the game.
-     * @param character The character to remove.
+     * @param characterPtr Pointer to the character to remove.
      */
-    void removeCharacter(const Player &character);
+    void removeCharacter(const Player* characterPtr);
+
+    /**
+    * @brief Handles SDL Key up events, updating the movement variables accordingly.
+    * @param keyEvent Reference to the key who was release.
+    */
+    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
+
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     */
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+
 
     /**
      * @brief Serialize the game object
@@ -157,8 +185,8 @@ private:
     Level level; /**< The level object */
     Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    bool isRunning = true; /**< Flag indicating if the game is running. */
-    bool switchGravity = false;
+    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
 
     // Debug variables used for the application console
     bool render_textures = true;
@@ -175,25 +203,13 @@ private:
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
      */
-    void handleEvents(Player *player);
-
-    /**
-     * @brief Handles SDL Key up events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was release.
-     */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
-
-    /**
-     * @brief Handles SDL Key down events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was press.
-     */
-    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    void handleEvents();
 
     /**
      * @brief Applies player movement based on the current movement variables.
      * @param player The player to whom the movement will be applied.
      */
-    void applyPlayerMovement(Player *player);
+    void applyPlayerMovement(Player *player) const;
 
     /**
      * @brief Applies the movement to all players in the game.
@@ -218,12 +234,12 @@ private:
     /**
      * @brief Handles collisions between the player and platform.
      */
-    void handleCollisionsWithObstacles(Player *player);
+    void handleCollisionsWithObstacles(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and platforms.
      */
-    void handleCollisionsWithPlatforms(Player *player);
+    void handleCollisionsWithPlatforms(Player *player) const;
 
     /**
      * @brief Handles collisions between the player and other players.
@@ -272,6 +288,13 @@ private:
      */
     void render();
 
+
+    /** STATIC METHODS **/
+
+    /**
+     * @brief Sends the keyboard state to the network.
+     */
+    static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

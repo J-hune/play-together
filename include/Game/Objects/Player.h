@@ -50,10 +50,22 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
+    Player(int playerID, float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
 
 
     /** BASIC ACCESSORS **/
+
+    /**
+     * @brief Return the player ID.
+     * @return The player ID.
+     */
+    [[nodiscard]] int getPlayerID() const;
+
+    /**
+     * @brief Return the sprite ID of the character.
+     * @return The sprite ID of the character.
+     */
+    [[nodiscard]] short getSpriteID() const;
 
     /**
      * @brief Return the x attribute.
@@ -307,6 +319,18 @@ public:
      */
     void setWantToJump(bool state);
 
+    /**
+     * @brief Set the player ID.
+     * @param id The player ID to set (socket file descriptor).
+     */
+    void setPlayerID(int id);
+
+    /**
+    * @brief Set the sprite ID of the character.
+    * @param id The sprite ID to set (between 1 and 4).
+    */
+    void setSpriteID(short id);
+
 
     /** PUBLIC METHODS **/
 
@@ -360,6 +384,8 @@ public:
 
 private:
     /** ATTRIBUTES **/
+    int playerID; /**< The ID of the player */
+    short SpriteID = -1; /**< The character ID (sprite) of the player */
 
     float x; /**< The x-coordinate of the player's position. (in pixels) */
     float y; /**< The y-coordinate of the player's position. */

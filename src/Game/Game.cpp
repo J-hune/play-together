@@ -53,6 +53,10 @@ std::vector<Player> &Game::getCharacters() {
     return characters;
 }
 
+Level &Game::getLevel() {
+    return level;
+}
+
 
 /** MODIFIERS **/
 
@@ -166,8 +170,8 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             player->getSprite()->toggleFlipVertical();
             break;
         case SDL_SCANCODE_M:
-            printf("Loading map 'diversity'\n");
-            setLevel("diversity");
+            if (level.getMapID() == 1) setLevel("assurance");
+            else setLevel("diversity");
             break;
         case SDL_SCANCODE_ESCAPE:
             pause();
@@ -758,7 +762,7 @@ void Game::run() {
 
     // If the player starts the server or is playing alone
     if (!Mediator::isClientRunning()) {
-        Point spawnPoint = Point(50, 50);
+        Point spawnPoint = level.getSpawnPoints()[0];
 
         // Add the initial player to the game
         Player initialPlayer(-1, spawnPoint, 0.2F, 2, 48, 36);

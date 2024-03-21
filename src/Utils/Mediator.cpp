@@ -89,7 +89,11 @@ int Mediator::handleClientConnect(int playerID) {
     }
 
     // If the ID is valid and not taken, create a new character for the new player.
-    Player newPlayer(playerID, Point(50, 50), 0.2F, 2, 48, 36);
+    // Get the player's position id based on his position in the players list
+
+    size_t spawnIndex = gamePtr->getCharacters().size();
+    Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+    Player newPlayer(playerID, spawnPoint, 0.2F, 2, 48, 36);
     gamePtr->addCharacter(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
@@ -140,7 +144,11 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
     else if (messageType == "playerConnect") {
         int playerSocketID = message["playerID"];
 
-        gamePtr->addCharacter(Player(playerSocketID, Point(50, 50), 0.2F, 2, 48, 36));
+        // Get the player's spawn point based on his position in the players list
+        size_t spawnIndex = gamePtr->getCharacters().size();
+        Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+
+        gamePtr->addCharacter(Player(playerSocketID, spawnPoint, 0.2F, 2, 48, 36));
         std::cout << "Mediator: Player " << playerSocketID << " added to the game" << std::endl;
     }
 
@@ -157,7 +165,8 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         size_t spawnIndex = gamePtr->getCharacters().size();
         for (const auto &player : playersArray) {
 
-            Player newPlayer(player, Point(50, 50), 0.2F, 2, 48, 36);
+            Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+            Player newPlayer(player, spawnPoint, 0.2F, 2, 48, 36);
 
             if (player == -1) newPlayer.setSpriteTextureByID(3);
             else if (player == 0) newPlayer.setSpriteTextureByID(2);

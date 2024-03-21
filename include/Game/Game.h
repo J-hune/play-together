@@ -61,6 +61,12 @@ public:
      */
     [[nodiscard]] std::vector<Player> &getCharacters();
 
+    /**
+     * @brief Get the level object.
+     * @return The level object.
+     */
+    [[nodiscard]] Level &getLevel();
+
 
     /** MODIFIERS **/
 

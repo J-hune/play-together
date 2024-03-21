@@ -14,8 +14,8 @@ SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 /** CONSTRUCTOR **/
 
-Player::Player(int playerID, float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : playerID(playerID), x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
+Player::Player(int playerID, Point spawnPoint, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }

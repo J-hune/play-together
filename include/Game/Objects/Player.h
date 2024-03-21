@@ -43,14 +43,13 @@ public:
 
     /**
      * @brief Constructor for the Player class.
-     * @param startX Initial x-coordinate of the player.
-     * @param startY Initial y-coordinate of the player.
+     * @param spawnPoint The spawn point of the player.
      * @param playerSpeed Speed of the player.
      * @param speedMax Maximum player speed.
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(int playerID, float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
+    Player(int playerID, Point spawnPoint, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
 
 
     /** BASIC ACCESSORS **/

@@ -252,15 +252,24 @@ std::string TCPServer::receive(int clientSocket) const {
 bool TCPServer::sendPlayerList(int clientSocket) const {
     using json = nlohmann::json;
 
+    // Create JSON message
     json message;
     message["messageType"] = "playerList";
     message["players"] = json::array();
 
+    // Add the server to the player list (ID 0)
+    message["players"].push_back(0);
+
+    // Lock the mutex to safely access client addresses
     clientAddressesMutexPtr->lock();
+
+    // Add all connected clients to the player list
     for (const auto& [socket, _]: *clientAddressesPtr) {
-        if (socket == clientSocket) message["players"].push_back(0);
-        else message["players"].push_back(socket);
+        // Replace the client socket with -1 for the client itself
+        message["players"].push_back((socket == clientSocket) ? -1 : socket);
     }
+
+    // Unlock the mutex after accessing client addresses
     clientAddressesMutexPtr->unlock();
 
     return send(clientSocket, message.dump());

@@ -89,6 +89,8 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     auto stop_button = Button(renderer, font, stop_button_position, "Stop the Game!", ButtonAction::STOP, normal_color, hover_color,text_color, 10);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(resume_button);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(stop_button);
+
+
 }
 
 /** ACCESSORS **/

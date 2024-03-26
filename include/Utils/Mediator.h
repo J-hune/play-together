@@ -72,6 +72,7 @@ public:
 
     // Game methods
     static GameState getGameState();
+    static void initializeGame();
     static void stop();
 
     // Other methods

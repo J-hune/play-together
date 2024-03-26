@@ -99,6 +99,18 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 
 /** METHODS **/
 
+void Game::initialize() {
+    // If the player starts the server or is playing alone
+    if (!Mediator::isClientRunning()) {
+        Point spawnPoint = level.getSpawnPoints()[0];
+
+        // Add the initial player to the game
+        Player initialPlayer(-1, spawnPoint, 0.2F, 2, 48, 36);
+        initialPlayer.setSpriteTextureByID(2);
+        addCharacter(initialPlayer);
+    }
+}
+
 Player* Game::findPlayerById (int id) {
     for (Player &character : characters) {
         if (character.getPlayerID() == id) {
@@ -755,16 +767,6 @@ bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygo
 
 void Game::run() {
     gameState = GameState::RUNNING;
-
-    // If the player starts the server or is playing alone
-    if (!Mediator::isClientRunning()) {
-        Point spawnPoint = level.getSpawnPoints()[0];
-
-        // Add the initial player to the game
-        Player initialPlayer(-1, spawnPoint, 0.2F, 2, 48, 36);
-        initialPlayer.setSpriteTextureByID(2);
-        addCharacter(initialPlayer);
-    }
 
     // Game loop
     while (gameState == GameState::RUNNING) {

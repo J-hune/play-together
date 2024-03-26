@@ -76,6 +76,10 @@ GameState Mediator::getGameState() {
     return gamePtr->getGameState();
 }
 
+void Mediator::initializeGame() {
+    gamePtr->initialize();
+}
+
 void Mediator::stop() {
     gamePtr->stop();
 }

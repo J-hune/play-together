@@ -123,6 +123,11 @@ public:
     /** PUBLIC METHODS **/
 
     /**
+     * @brief Initializes the game.
+     */
+    void initialize();
+
+    /**
      * @brief Runs the game loop.
      */
     void run();

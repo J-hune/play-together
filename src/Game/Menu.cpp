@@ -201,6 +201,7 @@ void Menu::handleButtonAction(Button &button) {
 
 void Menu::handleStartButton(Button &button) {
     button.reset();
+    Mediator::initializeGame();
     displayMenu = false;
     setMenuAction(MenuAction::MAIN);
 }

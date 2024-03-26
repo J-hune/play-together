@@ -29,7 +29,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, bool *quitFlag);
 
     Game();
 
@@ -56,16 +56,16 @@ public:
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
     /**
-     * @brief Get the player object.
-     * @return The player object.
-     */
-    [[nodiscard]] Player &getPlayer();
-
-    /**
      * @brief Get the characters vector.
      * @return The characters vector.
      */
     [[nodiscard]] std::vector<Player> &getCharacters();
+
+    /**
+     * @brief Get the level object.
+     * @return The level object.
+     */
+    [[nodiscard]] Level &getLevel();
 
 
     /** MODIFIERS **/
@@ -78,11 +78,11 @@ public:
     Player* findPlayerById(int id);
 
     /**
-     * @brief Teleports the player to a specific location.
-     * @param newX The X-coordinate of the location.
-     * @param newY The Y-coordinate of the location.
+     * @brief Find and return a player by its id.
+     * @param id The id of the player to find (0 for the main player).
+     * @return The index of the player object if found, -1 otherwise.
      */
-    void teleportPlayer(float newX, float newY);
+    int findPlayerIndexById(int id);
 
     /**
      * @brief Set the level attribute.
@@ -170,7 +170,6 @@ public:
      */
     template<class Archive>
     void serialize(Archive & ar, const unsigned int version){
-        ar & initialPlayer;
         ar & characters;
         ar & camera;
     }
@@ -183,7 +182,6 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
-    Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
     bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */

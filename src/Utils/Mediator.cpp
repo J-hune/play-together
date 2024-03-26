@@ -35,6 +35,14 @@ void Mediator::setNetworkManagerPtr(NetworkManager *networkManager) {
 
 /** METHODS **/
 
+bool Mediator::isServerRunning() {
+    return Mediator::networkManagerPtr->isServerRunning();
+}
+
+bool Mediator::isClientRunning() {
+    return Mediator::networkManagerPtr->isClientRunning();
+}
+
 void Mediator::startServers() {
     Mediator::networkManagerPtr->startServers();
 }
@@ -74,7 +82,6 @@ void Mediator::stop() {
 
 int Mediator::handleClientConnect(int playerID) {
     // Check if the player ID is not already taken by another character.
-    if (gamePtr->getPlayer().getPlayerID() == playerID) return -1;
     for (const auto &character : gamePtr->getCharacters()) {
         if (character.getPlayerID() == playerID) {
             return -1; // ID already taken.
@@ -82,7 +89,11 @@ int Mediator::handleClientConnect(int playerID) {
     }
 
     // If the ID is valid and not taken, create a new character for the new player.
-    Player newPlayer(playerID, 50, 50, 0.2F, 2, 48, 36);
+    // Get the player's position id based on his position in the players list
+
+    size_t spawnIndex = gamePtr->getCharacters().size();
+    Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+    Player newPlayer(playerID, spawnPoint, 0.2F, 2, 48, 36);
     gamePtr->addCharacter(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
@@ -108,7 +119,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
     json message = json::parse(rawMessage);
 
     // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
-    if (networkManagerPtr->isServer()) {
+    if (networkManagerPtr->isServerRunning()) {
         message["playerID"] = playerID;
         Mediator::networkManagerPtr->broadcastMessage(protocol, message.dump(), playerID);
     }
@@ -132,7 +143,12 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
 
     else if (messageType == "playerConnect") {
         int playerSocketID = message["playerID"];
-        gamePtr->addCharacter(Player(playerSocketID, 50, 50, 0.2F, 2, 48, 36));
+
+        // Get the player's spawn point based on his position in the players list
+        size_t spawnIndex = gamePtr->getCharacters().size();
+        Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+
+        gamePtr->addCharacter(Player(playerSocketID, spawnPoint, 0.2F, 2, 48, 36));
         std::cout << "Mediator: Player " << playerSocketID << " added to the game" << std::endl;
     }
 
@@ -146,8 +162,17 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         std::cout << "Mediator: Players list received: " << message["players"] << std::endl;
 
         json playersArray = message["players"];
-        for (const auto & i : playersArray) {
-            gamePtr->addCharacter(Player(i, 50, 50, 0.2F, 2, 48, 36));
+        size_t spawnIndex = gamePtr->getCharacters().size();
+        for (const auto &player : playersArray) {
+
+            Point spawnPoint = gamePtr->getLevel().getSpawnPoints()[spawnIndex];
+            Player newPlayer(player, spawnPoint, 0.2F, 2, 48, 36);
+
+            if (player == -1) newPlayer.setSpriteTextureByID(3);
+            else if (player == 0) newPlayer.setSpriteTextureByID(2);
+
+            gamePtr->addCharacter(newPlayer);
+            spawnIndex++;
         }
     }
 

@@ -18,11 +18,11 @@ NetworkManager::NetworkManager() {
 
 /** ACCESSORS **/
 
-bool NetworkManager::isServer() const {
+bool NetworkManager::isServerRunning() const {
     return SOCKET_VALID(tcpServer.getSocketFileDescriptor()) && SOCKET_VALID(udpServer.getSocketFileDescriptor());
 }
 
-bool NetworkManager::isClient() const {
+bool NetworkManager::isClientRunning() const {
     return SOCKET_VALID(tcpClient.getSocketFileDescriptor()) && SOCKET_VALID(udpClient.getSocketFileDescriptor());
 }
 
@@ -174,12 +174,12 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     message["keyboardStateMask"] = keyboardStateMask;
 
     // If the application is a server, broadcast the message to all clients
-    if (isServer()) {
+    if (isServerRunning()) {
         udpServer.broadcast(message.dump(), 0);
     }
 
     // If the application is a client, send the message to the server
-    else if (isClient()) {
+    else if (isClientRunning()) {
         udpClient.send(message.dump());
     }
 

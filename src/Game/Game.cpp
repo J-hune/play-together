@@ -7,8 +7,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer, bool *quitFlag)
-        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer), quitFlagPtr(quitFlag) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, bool *quitFlag)
+        : window(window), renderer(renderer), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {}
 
 Game::Game() :
             window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,(int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
@@ -27,29 +27,34 @@ Camera* Game::getCamera() {
 }
 
 Point Game::getAveragePlayersPositions() const {
-    float i = 1;  // Number of player in the game (at least one)
-    float x = initialPlayer.getX(); // Initialization of the point on the initial player
-    float y = initialPlayer.getY();
+    // Initialize sum variables
+    float totalX = 0.0f;
+    float totalY = 0.0f;
 
-    // Add x and y position of all players
+    // Calculate sum of x and y positions of all players
     for (const Player &character : characters) {
-        x += character.getX();
-        y += character.getY();
-        i++;
+        totalX += character.getX();
+        totalY += character.getY();
     }
 
-    // Average x and y position of all players
-    x /= i; y /= i;
-
-    return {x, y};
-}
-
-Player &Game::getPlayer() {
-    return initialPlayer;
+    // Calculate the average by dividing by the total number of players
+    size_t numPlayers = characters.size();
+    if (numPlayers > 0) {
+        float averageX = totalX / static_cast<float>(numPlayers);
+        float averageY = totalY / static_cast<float>(numPlayers);
+        return Point(averageX, averageY);
+    } else {
+        // If no players are present, return the origin point
+        return Point(0.0f, 0.0f);
+    }
 }
 
 std::vector<Player> &Game::getCharacters() {
     return characters;
+}
+
+Level &Game::getLevel() {
+    return level;
 }
 
 
@@ -103,8 +108,13 @@ Player* Game::findPlayerById (int id) {
     return nullptr;
 }
 
-void Game::teleportPlayer(float newX, float newY) {
-    initialPlayer.teleportPlayer(newX, newY);
+int Game::findPlayerIndexById(int id) {
+    for (size_t i = 0; i < characters.size(); ++i) {
+        if (characters[i].getPlayerID() == id) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
 }
 
 void Game::addCharacter(const Player &character) {
@@ -128,7 +138,6 @@ void Game::removeCharacter(const Player *characterPtr) {
         characters.erase(it);
     }
 }
-
 
 void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
     switch (keyEvent.keysym.scancode) {
@@ -161,8 +170,8 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             player->getSprite()->toggleFlipVertical();
             break;
         case SDL_SCANCODE_M:
-            printf("Loading map 'diversity'\n");
-            setLevel("diversity");
+            if (level.getMapID() == 1) setLevel("assurance");
+            else setLevel("diversity");
             break;
         case SDL_SCANCODE_ESCAPE:
             pause();
@@ -223,6 +232,7 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
 void Game::handleEvents() {
     SDL_Event e;
     static uint16_t lastKeyboardStateMask = 0;
+    Player *playerPtr = findPlayerById(-1);
 
     // Main loop handling every event one by one
     while (SDL_PollEvent(&e) != 0) {
@@ -236,10 +246,10 @@ void Game::handleEvents() {
 
         // Handle key events
         if (e.type == SDL_KEYUP) {
-            handleKeyUpEvent(&initialPlayer, e.key);
+            handleKeyUpEvent(playerPtr, e.key);
         }
         if (e.type == SDL_KEYDOWN) {
-            handleKeyDownEvent(&initialPlayer, e.key);
+            handleKeyDownEvent(playerPtr, e.key);
         }
 
             // Handle SDL_MOUSEBUTTONDOWN events
@@ -276,18 +286,14 @@ void Game::applyPlayerMovement(Player *player) const {
 }
 
 void Game::applyAllPlayerMovement() {
-    applyPlayerMovement(&initialPlayer); // Apply movement for the initial player
-
-    // Apply movement for other players
+    // Apply movement to all players
     for (Player &character : characters) {
         applyPlayerMovement(&character);
     }
 }
 
 void Game::calculateAllPlayerMovement() {
-    initialPlayer.calculateMovement(); // Calculate movement for the initial player
-
-    // Apply movement for other players
+    // Apply movement to all players
     for (Player &character : characters) {
         character.calculateMovement();
     }
@@ -376,7 +382,6 @@ void Game::handleCollisionsWithPlatforms(Player *player) const {
 void Game::handleCollisionsWithOtherPlayers(Player *player) {
     // Get others players in a vector
     std::vector<Player*> otherCharacters;
-    if (*player != initialPlayer) otherCharacters.push_back(&initialPlayer);
     for (Player &character : characters) {
         if (*player != character) otherCharacters.push_back(&character);
     }
@@ -430,6 +435,9 @@ void Game::handleCollisionsWithOtherPlayers(Player *player) {
 }
 
 void Game::handleCollisionsWithCameraBorders(Player *player) {
+    // Find the initial player
+    Player initialPlayer = *findPlayerById(-1);
+
     // Get others players in a vector
     std::vector<Player> otherCharacters;
     if (*player != initialPlayer) otherCharacters.push_back(initialPlayer);
@@ -497,22 +505,24 @@ void Game::handleCollisionsWithCameraBorders(Player *player) {
 
 
 void Game::handleCollisions() {
+    Player *playerPtr = findPlayerById(-1);
 
     // Check collisions for the initial player
-    this->initialPlayer.setCanMove(true);
+    playerPtr->setCanMove(true);
 
     // Check obstacles collisions only if the player has moved
-    if (this->initialPlayer.getMoveY() != 0 || this->initialPlayer.getCurrentDirection() != 0) {
-        this->initialPlayer.setIsOnPlatform(false);
-        handleCollisionsWithObstacles(&this->initialPlayer);
+    if (playerPtr->getMoveY() != 0 || playerPtr->getCurrentDirection() != 0) {
+        playerPtr->setIsOnPlatform(false);
+        handleCollisionsWithObstacles(playerPtr);
     }
 
-    handleCollisionsWithOtherPlayers(&this->initialPlayer); // Check collisions with other players
-    handleCollisionsWithPlatforms(&this->initialPlayer); // Check collisions with platforms
-    handleCollisionsWithCameraBorders(&this->initialPlayer); // Check collisions with camera borders
+    handleCollisionsWithOtherPlayers(playerPtr); // Check collisions with other players
+    handleCollisionsWithPlatforms(playerPtr); // Check collisions with platforms
+    handleCollisionsWithCameraBorders(playerPtr); // Check collisions with camera borders
 
     // Check collisions for other players
     for (Player &character : characters) {
+        if (character == *playerPtr) continue;
         character.setCanMove(true);
 
         // Check obstacles collisions only if the player has moved
@@ -615,22 +625,24 @@ void Game::handleCollisionsWithCameraBordersReversedMavity(Player *player) {
 }
 
 void Game::handleCollisionsReversedMavity() {
+    Player *playerPtr = findPlayerById(-1);
 
     // Check collisions for the initial player
-    this->initialPlayer.setCanMove(true);
+    playerPtr->setCanMove(true);
 
     // Check obstacles collisions only if the player has moved
-    if (this->initialPlayer.getMoveY() != 0 || this->initialPlayer.getCurrentDirection() != 0) {
-        this->initialPlayer.setIsOnPlatform(false);
-        handleCollisionsWithObstaclesReverseMavity(&this->initialPlayer);
+    if (playerPtr->getMoveY() != 0 || playerPtr->getCurrentDirection() != 0) {
+        playerPtr->setIsOnPlatform(false);
+        handleCollisionsWithObstaclesReverseMavity(playerPtr);
     }
 
-    handleCollisionsWithOtherPlayersReversedMavity(&this->initialPlayer); // Check collisions with other players
-    handleCollisionsWithPlatformsReversedMavity(&this->initialPlayer); // Check collisions with platforms
-    handleCollisionsWithCameraBordersReversedMavity(&this->initialPlayer); // Check collisions with camera borders
+    handleCollisionsWithOtherPlayersReversedMavity(playerPtr); // Check collisions with other players
+    handleCollisionsWithPlatformsReversedMavity(playerPtr); // Check collisions with platforms
+    handleCollisionsWithCameraBordersReversedMavity(playerPtr); // Check collisions with camera borders
 
     // Check collisions for other players
     for (Player &character : characters) {
+        if (character == *playerPtr) continue;
         character.setCanMove(true);
 
         // Check obstacles collisions only if the player has moved
@@ -654,8 +666,6 @@ void Game::render() {
 
     // Render textures
     if (render_textures) {
-        initialPlayer.render(renderer, cam); // Draw the initial player
-
         // Draw the characters
         for (Player &character: characters) {
             character.render(renderer, cam);
@@ -666,8 +676,6 @@ void Game::render() {
     }
     // Render collisions box
     else {
-        initialPlayer.renderDebug(renderer, cam); // Draw the initial player
-
         // Draw the characters
         for (Player const &character: characters) {
             character.renderDebug(renderer, cam);
@@ -686,7 +694,10 @@ void Game::render() {
     if (render_camera_area) camera.renderCameraArea(renderer);
 
     // Draw the player's colliders if enabled
-    if (render_player_colliders) initialPlayer.renderColliders(renderer, cam);
+    if (render_player_colliders) {
+        Player initialPlayer = *findPlayerById(-1);
+        initialPlayer.renderColliders(renderer, cam);
+    }
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
@@ -749,6 +760,16 @@ bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygo
 void Game::run() {
     gameState = GameState::RUNNING;
 
+    // If the player starts the server or is playing alone
+    if (!Mediator::isClientRunning()) {
+        Point spawnPoint = level.getSpawnPoints()[0];
+
+        // Add the initial player to the game
+        Player initialPlayer(-1, spawnPoint, 0.2F, 2, 48, 36);
+        initialPlayer.setSpriteTextureByID(2);
+        addCharacter(initialPlayer);
+    }
+
     // Game loop
     while (gameState == GameState::RUNNING) {
         // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
@@ -768,10 +789,7 @@ void Game::pause() {
 
 void Game::stop() {
     gameState = GameState::STOPPED;
-
-    // Reset the player position
-    initialPlayer.setX(50);
-    initialPlayer.setY(50);
+    characters.clear();
 }
 
 

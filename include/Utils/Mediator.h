@@ -58,6 +58,8 @@ public:
     /** PUBLIC METHODS **/
 
     // NetworkManager methods
+    static bool isServerRunning();
+    static bool isClientRunning();
     static void startServers();
     static void startClients();
     static void stopServers();

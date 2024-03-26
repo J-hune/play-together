@@ -54,10 +54,16 @@ public:
     [[nodiscard]] std::array<Point, 4> getSpawnPoints() const;
 
     /**
-     * @brief Return the obstacles attribute.
+     * @brief Return the collisionZones attribute.
      * @return A vector of Polygon.
      */
-    [[nodiscard]] std::vector<Polygon> getObstacles() const;
+    [[nodiscard]] std::vector<Polygon> getCollisionZones() const;
+
+    /**
+     * @brief Return the iceZones attribute.
+     * @return A vector of Polygon.
+     */
+    [[nodiscard]] std::vector<Polygon> getDeathZones() const;
 
     /**
      * @brief Return the movingPlatform attribute.
@@ -90,7 +96,7 @@ public:
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
-    void renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const;
+    void renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
      * @brief Renders the game by drawing the player and obstacles.
@@ -133,7 +139,7 @@ private:
      * @param[out] zones Represents the collection of polygons.
      * @return The number of polygons loaded.
      */
-    int loadPolygonsFromJson(const nlohmann::json& jsonData, const std::string& zoneName, std::vector<Polygon> &zones);
+    int loadPolygonsFromJson(const nlohmann::json& jsonData, const std::string& zoneName, std::vector<Polygon> &zones, zoneType type);
 
     /**
      * @brief Load the polygons from a map.

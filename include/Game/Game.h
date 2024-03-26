@@ -183,6 +183,7 @@ private:
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
     std::vector<Player> characters; /**< Collection of characters in the game. */
+    std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
     bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
 
@@ -222,6 +223,11 @@ private:
     void calculateAllPlayerMovement();
 
     /**
+     * @brief Updates the camera position based on the player's position.
+     */
+    void killPlayer(Player *player);
+
+    /**
      * @brief Checks for collision between the player and a polygon obstacle.
      * @param playerVertices The vector of Point representing the vertices of the player object.
      * @param obstacle The polygon obstacle.
@@ -230,9 +236,14 @@ private:
     static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
 
     /**
-     * @brief Handles collisions between the player and platform.
+     * @brief Handles collisions between the player and obstacles.
      */
     void handleCollisionsWithObstacles(Player *player) const;
+
+    /**
+     * @brief Handles collisions between the player and death zones.
+     */
+    void handleCollisionsWithDeathZone(Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms.

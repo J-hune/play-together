@@ -30,8 +30,12 @@ std::array<Point, 4> Level::getSpawnPoints() const {
     return spawnPoints;
 }
 
-std::vector<Polygon> Level::getObstacles() const {
+std::vector<Polygon> Level::getCollisionZones() const {
     return collisionZones;
+}
+
+std::vector<Polygon> Level::getDeathZones() const {
+    return deathZones;
 }
 
 std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
@@ -49,9 +53,19 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
 
 /** METHODS **/
 
-void Level::renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for (const Polygon &obstacle: collisionZones) {
+        for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
+            std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+        }
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 25, 25, 255);
+    for (const Polygon &obstacle: deathZones) {
         for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
             std::vector<Point> vertices = obstacle.getVertices();
             const auto &vertex1 = vertices[i];
@@ -124,13 +138,13 @@ void Level::loadMapProperties(const std::string& mapFileName) {
     }
 }
 
-int Level::loadPolygonsFromJson(const nlohmann::json& jsonData, const std::string& zoneName, std::vector<Polygon> &zones) {
+int Level::loadPolygonsFromJson(const nlohmann::json& jsonData, const std::string& zoneName, std::vector<Polygon> &zones, zoneType type) {
     for (const auto& polygon : jsonData[zoneName]) {
         std::vector<Point> vertices;
         for (const auto& vertex : polygon) {
             vertices.emplace_back(vertex[0], vertex[1]);
         }
-        zones.emplace_back(vertices);
+        zones.emplace_back(vertices, type);
     }
 
     return (int)jsonData[zoneName].size();
@@ -153,13 +167,13 @@ void Level::loadPolygonsFromMap(const std::string& mapFileName) {
         file >> j;
         file.close();
 
-        int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones);
-        int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones);
-        int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones);
-        int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones);
-        int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones);
-        int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones);
-        int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones);
+        int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones, zoneType::COLLISION);
+        int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones, zoneType::ICE);
+        int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones, zoneType::SAND);
+        int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones, zoneType::DEATH);
+        int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, zoneType::CINEMATIC);
+        int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, zoneType::BOSS);
+        int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, zoneType::EVENT);
 
         std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones." << std::endl;
     } else {

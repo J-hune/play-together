@@ -144,6 +144,9 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
         case SDL_SCANCODE_SPACE:
+            // If the player is dead ignore
+            if (player == nullptr) break;
+
             // If the coyote time is passed and the player is not already in a jump
             if (player->getTimeAfterFall() > 0 && !player->getIsJumping()) {
                 player->setWantToJump(true);
@@ -151,6 +154,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             break;
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
+            if (player == nullptr) break;
             player->setDesiredDirection(PLAYER_LEFT);
             player->setWantToMoveLeft(true);
             player->getSprite()->setAnimation(Player::walk);
@@ -158,6 +162,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
+            if (player == nullptr) break;
             player->setDesiredDirection(PLAYER_RIGHT);
             player->setWantToMoveRight(true);
             player->getSprite()->setAnimation(Player::walk);
@@ -165,6 +170,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             break;
         case SDL_SCANCODE_G:
             switchGravity = !switchGravity;
+            if (player == nullptr) break;
             player->setIsOnPlatform(false);
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
             player->getSprite()->toggleFlipVertical();
@@ -189,15 +195,21 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
         case SDL_SCANCODE_SPACE:
+            if (player == nullptr) break;
+
             // Reset vertical movement if moving upwards
             if (player->getMoveY() < 0) player->setMoveY(0);
             player->setWantToJump(false); // Disable jumping
             break;
         case SDL_SCANCODE_DOWN:
+            if (player == nullptr) break;
+
             // Reset vertical movement if moving downwards
             if (player->getMoveY() > 0) player->setMoveY(0);
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
+            if (player == nullptr) break;
+
             // Reset horizontal movement if moving left
             if (player->getMoveX() < 0) player->setMoveX(0);
             player->setWantToMoveLeft(false); // Disable left movement
@@ -211,6 +223,8 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) c
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
+            if (player == nullptr) break;
+
             // Reset horizontal movement if moving right
             if (player->getMoveX() > 0) {
                 player->setMoveX(0);
@@ -299,12 +313,24 @@ void Game::calculateAllPlayerMovement() {
     }
 }
 
+void Game::killPlayer(Player *player) {
+    Point spawnPoint = level.getSpawnPoints()[findPlayerIndexById(player->getPlayerID())];
+
+    // Add the player to the dead characters list
+    deadCharacters.push_back(*player);
+    characters.erase(characters.begin() + findPlayerIndexById(player->getPlayerID()));
+
+    // Teleport the player to the spawn point
+    player->teleportPlayer(spawnPoint.x, spawnPoint.y);
+
+}
+
 
 /** HANDLE COLLISIONS **/
 
 void Game::handleCollisionsWithObstacles(Player *player) const {
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getObstacles()) {
+    for (const Polygon &obstacle: level.getCollisionZones()) {
         // If collision detected with the roof, the player can't jump anymore
         if (checkCollision(player->getVerticesRoof(), obstacle)) {
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
@@ -317,6 +343,16 @@ void Game::handleCollisionsWithObstacles(Player *player) const {
         if (player->getCanMove() && checkCollision(player->getVerticesHorizontal(), obstacle)) {
             player->setCanMove(false);
             player->setTimeSpeed(0);
+        }
+    }
+}
+
+void Game::handleCollisionsWithDeathZone(Player *player) {
+    // Check collisions with each death zone
+    for (const Polygon &deathZone: level.getDeathZones()) {
+        // If collision detected with the roof, kill the player
+        if (checkCollision(player->getVertices(), deathZone)) {
+            killPlayer(player);
         }
     }
 }
@@ -435,15 +471,6 @@ void Game::handleCollisionsWithOtherPlayers(Player *player) {
 }
 
 void Game::handleCollisionsWithCameraBorders(Player *player) {
-    // Find the initial player
-    Player initialPlayer = *findPlayerById(-1);
-
-    // Get others players in a vector
-    std::vector<Player> otherCharacters;
-    if (*player != initialPlayer) otherCharacters.push_back(initialPlayer);
-    for (const Player &character : characters) {
-        if (*player != character) otherCharacters.push_back(character);
-    }
 
     // Check for collisions with down camera borders
     if (player->getY() > camera.getY() + camera.getH() - player->getH() + DISTANCE_OUT_MAP_BEFORE_DEATH){
@@ -479,7 +506,7 @@ void Game::handleCollisionsWithCameraBorders(Player *player) {
         camera.setX(camera.getX() + player->getMoveX());
 
         // Check if others players touch the left camera borders
-        for (Player &character : otherCharacters){
+        for (Player &character : characters){
             if(character.getX() < camera.getX()){
                     character.setMoveX(player->getMoveX());
             }
@@ -495,7 +522,7 @@ void Game::handleCollisionsWithCameraBorders(Player *player) {
         camera.setX(camera.getX() + player->getMoveX());
 
         // Check if others players touch the right camera borders
-        for (Player &character: otherCharacters) {
+        for (Player &character: characters) {
             if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
                     character.setX(player->getMoveX());
             }
@@ -505,24 +532,8 @@ void Game::handleCollisionsWithCameraBorders(Player *player) {
 
 
 void Game::handleCollisions() {
-    Player *playerPtr = findPlayerById(-1);
-
-    // Check collisions for the initial player
-    playerPtr->setCanMove(true);
-
-    // Check obstacles collisions only if the player has moved
-    if (playerPtr->getMoveY() != 0 || playerPtr->getCurrentDirection() != 0) {
-        playerPtr->setIsOnPlatform(false);
-        handleCollisionsWithObstacles(playerPtr);
-    }
-
-    handleCollisionsWithOtherPlayers(playerPtr); // Check collisions with other players
-    handleCollisionsWithPlatforms(playerPtr); // Check collisions with platforms
-    handleCollisionsWithCameraBorders(playerPtr); // Check collisions with camera borders
-
-    // Check collisions for other players
+    // Check collisions for all players
     for (Player &character : characters) {
-        if (character == *playerPtr) continue;
         character.setCanMove(true);
 
         // Check obstacles collisions only if the player has moved
@@ -532,6 +543,7 @@ void Game::handleCollisions() {
         }
 
         handleCollisionsWithOtherPlayers(&character); // Check collisions with other players
+        handleCollisionsWithDeathZone(&character); // Check collisions with death zones
         handleCollisionsWithPlatforms(&character); // Check collisions with platforms
         handleCollisionsWithCameraBorders(&character); // Check collisions with camera borders
     }
@@ -541,7 +553,7 @@ void Game::handleCollisions() {
 /** HANDLE COLLISIONS REVERSED MAVITY **/
 void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) {
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getObstacles()) {
+    for (const Polygon &obstacle: level.getCollisionZones()) {
         // If collision detected with the roof, the player is on a platform
         if (checkCollision(player->getVerticesRoof(), obstacle)) {
             player->setIsOnPlatform(true);
@@ -625,24 +637,8 @@ void Game::handleCollisionsWithCameraBordersReversedMavity(Player *player) {
 }
 
 void Game::handleCollisionsReversedMavity() {
-    Player *playerPtr = findPlayerById(-1);
-
-    // Check collisions for the initial player
-    playerPtr->setCanMove(true);
-
-    // Check obstacles collisions only if the player has moved
-    if (playerPtr->getMoveY() != 0 || playerPtr->getCurrentDirection() != 0) {
-        playerPtr->setIsOnPlatform(false);
-        handleCollisionsWithObstaclesReverseMavity(playerPtr);
-    }
-
-    handleCollisionsWithOtherPlayersReversedMavity(playerPtr); // Check collisions with other players
-    handleCollisionsWithPlatformsReversedMavity(playerPtr); // Check collisions with platforms
-    handleCollisionsWithCameraBordersReversedMavity(playerPtr); // Check collisions with camera borders
-
-    // Check collisions for other players
+    // Check collisions for all players
     for (Player &character : characters) {
-        if (character == *playerPtr) continue;
         character.setCanMove(true);
 
         // Check obstacles collisions only if the player has moved
@@ -671,7 +667,7 @@ void Game::render() {
             character.render(renderer, cam);
         }
 
-        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
     // Render collisions box
@@ -681,7 +677,7 @@ void Game::render() {
             character.renderDebug(renderer, cam);
         }
 
-        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
 

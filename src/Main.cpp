@@ -41,7 +41,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     }
 
     // Load font from a TrueType (TTF) file
-    TTF_Font *font = TTF_OpenFont("../assets/font/arial.ttf", 24);
+    TTF_Font *font = TTF_OpenFont("assets/font/arial.ttf", 24);
     if (font == nullptr) {
         std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
         return 1;

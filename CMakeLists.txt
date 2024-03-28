@@ -31,6 +31,15 @@ include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
+# Set assets directory
+set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+
+# Copy assets to binary directory
+file(COPY ${ASSETS_DIR} DESTINATION ${CMAKE_BINARY_DIR})
+
+# Create 'saves' directory in the binary directory
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/saves)
+
 # Automatic retrieval of source files
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -39,15 +48,6 @@ file(GLOB_RECURSE HEADERS include/*.h)
 
 # Automatic retrieval of dependencies
 file(GLOB_RECURSE DEPENDENCIES ${DEPENDENCIES_DIR}/*)
-
-# Copy asset files with their folder structure
-file(GLOB_RECURSE ASSETS_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/assets assets/*)
-foreach(ASSET ${ASSETS_LIST})
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/${ASSET} ${CMAKE_CURRENT_BINARY_DIR}/assets/${ASSET} COPYONLY)
-endforeach()
-
-# Copy assets to binary directory
-file(COPY ${ASSETS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/assets)
 
 # Create the executable
 add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
@@ -59,3 +59,8 @@ target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SD
 if (WIN32)
     target_link_libraries(play-together Ws2_32.lib)
 endif()
+
+# Set the output directory for the executable
+set_target_properties(play-together PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)

@@ -13,7 +13,7 @@
 #include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
-constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
+constexpr char MAPS_DIRECTORY[] = "assets/maps/";
 
 
 /**

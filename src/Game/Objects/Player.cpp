@@ -361,6 +361,11 @@ void Player::calculateMovement(float deltaTime) {
     calculateYaxisMovement(deltaTime);
 }
 
+void Player::applyMovement() {
+    x += moveX;
+    y += moveY;
+}
+
 void Player::render(SDL_Renderer *renderer, Point camera) {
     sprite.updateAnimation(); // Update sprite animation
     SDL_Rect srcRect = sprite.getSrcRect();

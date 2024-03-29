@@ -343,6 +343,11 @@ public:
     void calculateMovement(float deltaTime);
 
     /**
+     * @brief Apply the movement by adding moveX and moveY to the player position.
+     */
+    void applyMovement();
+
+    /**
      * @brief Renders the player's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.

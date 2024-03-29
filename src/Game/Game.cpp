@@ -210,39 +210,21 @@ void Game::handleEvents(Player *player) {
     }
 }
 
-
-void Game::applyPlayerMovement(Player *player) const {
-    // If the player can't move on x-axis, don't apply the movement
-    if(!player->getCanMove()){
-        player->setMoveX(0);
-    }
-    if(player->getX() < camera.getX()){
-        player->setX(camera.getX());
-    }
-    else if(player->getX() + player->getW() > camera.getX() + camera.getW()) {
-        player->setX(camera.getX() + camera.getW() - player->getW());
-    }
-    else{
-        player->setX(player->getX() + player->getMoveX());
-    }
-    player->setY(player->getY() + player->getMoveY());
-}
-
-void Game::applyAllPlayerMovement() {
-    applyPlayerMovement(&initialPlayer); // Apply movement for the initial player
-
-    // Apply movement for other players
-    for (Player &character : characters) {
-        applyPlayerMovement(&character);
-    }
-}
-
-void Game::calculateAllPlayerMovement() {
+void Game::calculatePlayersMovement() {
     initialPlayer.calculateMovement(deltaTime); // Calculate movement for the initial player
 
     // Apply movement for other players
     for (Player &character : characters) {
         character.calculateMovement(deltaTime);
+    }
+}
+
+void Game::applyPlayersMovement() {
+    initialPlayer.applyMovement(); // Apply movement for the initial player
+
+    // Apply movement for other players
+    for (Player &character : characters) {
+        character.applyMovement();
     }
 }
 
@@ -352,9 +334,9 @@ void Game::run() {
         handleEvents(&initialPlayer);
         for (Player &character : characters) handleEvents(&character);
         if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-        calculateAllPlayerMovement();
+        calculatePlayersMovement();
         handleCollisions();
-        applyAllPlayerMovement();
+        applyPlayersMovement();
         camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
         render();
 

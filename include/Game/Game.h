@@ -187,22 +187,14 @@ private:
     void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
 
     /**
-     * @brief Applies player movement based on the current movement variables.
-     * @param player The player to whom the movement will be applied.
-     */
-    void applyPlayerMovement(Player *player) const;
-
-    /**
      * @brief Applies the movement to all players in the game.
-     * @see applyPlayerMovement() for applying movement to one player.
      */
-    void applyAllPlayerMovement();
+    void applyPlayersMovement();
 
     /**
-     * @brief Calculate the movement of all players in the game.
-     * @see Player::calculateMovement() for applying movement to one player.
+     * @brief Calculates the movement of all players in the game.
      */
-    void calculateAllPlayerMovement();
+    void calculatePlayersMovement();
 
     /**
      * @brief Switch mavity between normal and reversed.

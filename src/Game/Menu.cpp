@@ -288,6 +288,21 @@ void Menu::handleNavigateToPlayMenuButton(Button &button) {
     Mediator::stopClients();
 }
 
+void Menu::handleSendMessageButton(Button &button) const {
+    Mediator::temporarySendMethod("Hello, World!");
+    button.reset();
+}
+
+void Menu::handleNavigateToLoadSaveMenuButton(Button &button) {
+    setMenuAction(MenuAction::LOAD_SAVE);
+    button.reset();
+}
+
+void Menu::handleNavigateToStartNewGameMenuButton(Button &button) {
+    setMenuAction(MenuAction::START_NEW_GAME);
+    button.reset();
+}
+
 void Menu::handleQuitButton([[maybe_unused]] Button &button) {
     button.reset();
     setQuit(true);

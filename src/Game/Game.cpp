@@ -342,7 +342,7 @@ void Game::killPlayer(Player *player) {
 
 void Game::handleCollisionsWithObstacles(Player *player) const {
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getCollisionZones()) {
+    for (const Polygon &obstacle: level.getZones(zoneType::COLLISION)) {
         // If collision detected with the roof, the player can't jump anymore
         if (checkCollision(player->getVerticesRoof(), obstacle)) {
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
@@ -361,10 +361,23 @@ void Game::handleCollisionsWithObstacles(Player *player) const {
 
 void Game::handleCollisionsWithDeathZone(Player *player) {
     // Check collisions with each death zone
-    for (const Polygon &deathZone: level.getDeathZones()) {
-        // If collision detected with the roof, kill the player
+    for (const Polygon &deathZone: level.getZones(zoneType::DEATH)) {
+        // If collision detected with the death zone, kill the player
         if (checkCollision(player->getVertices(), deathZone)) {
             killPlayer(player);
+        }
+    }
+}
+
+void Game::handleCollisionsWithSaveZone(Player *player) {
+    // Check collisions with each save zone
+    const auto &saveZones = level.getZones(zoneType::SAVE);
+    for (size_t i = 0; i < saveZones.size(); ++i) {
+        const Polygon &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
+        auto savePointID = static_cast<short>(i + 1);
+        if (checkCollision(player->getVertices(), saveZone) && !Mediator::isClientRunning() && level.getLastCheckpoint() < savePointID) {
+            level.setLastCheckpoint(savePointID);
+            std::cout << "Checkpoint reached: " << savePointID << std::endl;
         }
     }
 }
@@ -556,6 +569,7 @@ void Game::handleCollisions() {
 
         handleCollisionsWithOtherPlayers(&character); // Check collisions with other players
         handleCollisionsWithDeathZone(&character); // Check collisions with death zones
+        handleCollisionsWithSaveZone(&character); // Check collisions with save zones
         handleCollisionsWithPlatforms(&character); // Check collisions with platforms
         handleCollisionsWithCameraBorders(&character); // Check collisions with camera borders
     }
@@ -565,7 +579,7 @@ void Game::handleCollisions() {
 /** HANDLE COLLISIONS REVERSED MAVITY **/
 void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) {
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getCollisionZones()) {
+    for (const Polygon &obstacle: level.getZones(zoneType::COLLISION)) {
         // If collision detected with the roof, the player is on a platform
         if (checkCollision(player->getVerticesRoof(), obstacle)) {
             player->setIsOnPlatform(true);

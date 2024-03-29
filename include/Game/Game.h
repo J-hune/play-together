@@ -251,6 +251,11 @@ private:
     void handleCollisionsWithDeathZone(Player *player);
 
     /**
+     * @brief Handles collisions between the player and save zones.
+     */
+    void handleCollisionsWithSaveZone(Player *player);
+
+    /**
      * @brief Handles collisions between the player and platforms.
      */
     void handleCollisionsWithPlatforms(Player *player) const;

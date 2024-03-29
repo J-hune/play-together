@@ -630,49 +630,6 @@ void Game::saveGame() const {
     std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
 }
 
-/*
-void Game::checks(const std::vector<Polygon> &polygons,void (Game::*func)(float,float),void (Game::*func2)(Polygon obs),Game& game,float h,float w) {
-    for (const Polygon &obstacle: polygons) {
-        if (checkSATCollision(characters[0].getGroundColliderVertices(), obstacle)
-            || checkSATCollision(characters[0].getRoofColliderVertices(), obstacle)
-            || checkSATCollision(characters[0].getHorizontalColliderVertices(), obstacle)) {
-            (game.*func)(h,w);
-            (game.*func2)(obstacle);
-        }
-    }
-}
-
-void Game :: playerSpecial(float h, float w, const SpecialBoxes& obs){
-    playerChange(h,w);
-
-   auto it = std::find(level.getSpecialBoxes().begin(), level.getSpecialBoxes().end(), obs);
-
-    // Check if the character was found
-    if (it != level.getSpecialBoxes().end()) {
-        // Erase the character from the vector
-        level.getSpecialBoxes().erase(it);
-    }
-
-}
-
-
-
-
-void Game::playerChange(float h, float w){
-    int err = SDL_RenderClear(renderer);
-    if(err != 0) {
-        std::cout<< SDL_GetError()<<std::endl;
-        exit(1);
-    }
-
-    characters[0].setH(h);
-    characters[0].setW(w);
-    //std::cout <<"BEFORE" <<player.getW() << std::endl;
-    render();
-    //std::cout <<"AFTER"<< player.getW() << std::endl;
-}
-*/
-
 
 /** STATIC METHODS **/
 

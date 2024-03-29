@@ -17,7 +17,8 @@ enum class zoneType {
     DEATH,
     CINEMATIC,
     BOSS,
-    EVENT
+    EVENT,
+    SAVE
 };
 
 /**

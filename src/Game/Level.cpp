@@ -26,16 +26,23 @@ std::string Level::getMapName() const {
     return mapName;
 }
 
-std::array<Point, 4> Level::getSpawnPoints() const {
-    return spawnPoints;
+std::array<Point, 4> Level::getSpawnPoints(int index) const {
+    return spawnPoints[index];
 }
 
-std::vector<Polygon> Level::getCollisionZones() const {
-    return collisionZones;
-}
-
-std::vector<Polygon> Level::getDeathZones() const {
-    return deathZones;
+std::vector<Polygon> Level::getZones(zoneType type) const {
+    switch(type) {
+        using enum zoneType;
+        case COLLISION: return collisionZones;
+        case ICE: return iceZones;
+        case SAND: return sandZones;
+        case DEATH: return deathZones;
+        case CINEMATIC: return cinematicZones;
+        case BOSS: return bossZones;
+        case EVENT: return eventZones;
+        case SAVE: return saveZones;
+        default: return {};
+    }
 }
 
 std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
@@ -48,6 +55,17 @@ std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
 
 std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
+}
+
+short Level::getLastCheckpoint() const {
+    return lastCheckpoint;
+}
+
+
+/** MUTATORS **/
+
+void Level::setLastCheckpoint(short checkpoint) {
+    lastCheckpoint = checkpoint;
 }
 
 
@@ -68,6 +86,16 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     for (const Polygon &obstacle: deathZones) {
         for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
             std::vector<Point> vertices = obstacle.getVertices();
+            const auto &vertex1 = vertices[i];
+            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+        }
+    }
+
+    SDL_SetRenderDrawColor(renderer, 144, 238, 144, 255);
+    for (const Polygon &saveZone: saveZones) {
+        for (size_t i = 0; i < saveZone.getVertices().size(); ++i) {
+            std::vector<Point> vertices = saveZone.getVertices();
             const auto &vertex1 = vertices[i];
             const auto &vertex2 = vertices[(i + 1) % vertices.size()];
             SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
@@ -126,12 +154,15 @@ void Level::loadMapProperties(const std::string& mapFileName) {
 
         mapID = j["id"];
         mapName = j["name"];
-        spawnPoints = {
-            Point(j["spawnPoints"][0][0], j["spawnPoints"][0][1]),
-            Point(j["spawnPoints"][1][0], j["spawnPoints"][1][1]),
-            Point(j["spawnPoints"][2][0], j["spawnPoints"][2][1]),
-            Point(j["spawnPoints"][3][0], j["spawnPoints"][3][1])
-        };
+
+        for (const auto& spawnPoint : j["spawnPoints"]) {
+            spawnPoints.push_back({
+                   Point(spawnPoint[0][0], spawnPoint[0][1]),
+                   Point(spawnPoint[1][0], spawnPoint[1][1]),
+                   Point(spawnPoint[2][0], spawnPoint[2][1]),
+                   Point(spawnPoint[3][0], spawnPoint[3][1])
+            });
+        }
         std::cout << "Level: Loaded map properties." << std::endl;
     } else {
         std::cerr << "Level: Unable to open the properties file. Please check the file path." << std::endl;
@@ -158,6 +189,7 @@ void Level::loadPolygonsFromMap(const std::string& mapFileName) {
     cinematicZones.clear();
     bossZones.clear();
     eventZones.clear();
+    saveZones.clear();
 
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/polygons.json";
     std::ifstream file(filePath);
@@ -174,8 +206,9 @@ void Level::loadPolygonsFromMap(const std::string& mapFileName) {
         int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, zoneType::CINEMATIC);
         int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, zoneType::BOSS);
         int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, zoneType::EVENT);
+        int saveZonesSize = loadPolygonsFromJson(j, "saveZones", saveZones, zoneType::SAVE);
 
-        std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones." << std::endl;
+        std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones and " << saveZonesSize << " save zones." << std::endl;
     } else {
         std::cerr << "Level: Unable to open the polygons file. Please check the file path." << std::endl;
     }

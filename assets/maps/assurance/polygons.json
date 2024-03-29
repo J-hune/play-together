@@ -10,5 +10,6 @@
     "deathZones": [],
     "cinematicZones": [],
     "bossZones": [],
-    "eventZones": []
+    "eventZones": [],
+    "saveZones": []
 }

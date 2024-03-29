@@ -31,8 +31,6 @@ public:
 
     Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, bool *quitFlag);
 
-    Game();
-
 
     /** ACCESSORS **/
 
@@ -66,6 +64,12 @@ public:
      * @return The level object.
      */
     [[nodiscard]] Level &getLevel();
+
+    /**
+     * @brief Get the save slot.
+     * @return The save slot.
+     */
+    [[nodiscard]] int getSaveSlot() const;
 
 
     /** MODIFIERS **/
@@ -115,6 +119,12 @@ public:
     void setEnablePlatformsMovement(bool state);
 
     /**
+     * @brief Set the save slot.
+     * @param slot The save slot.
+     */
+    void setSaveSlot(int slot);
+
+    /**
      * @brief Toggle the render_textures attribute, used for the application console.
      */
     void toggleRenderTextures();
@@ -124,8 +134,9 @@ public:
 
     /**
      * @brief Initializes the game.
+     * @param slot The save slot to use when saving the game.
      */
-    void initialize();
+    void initialize(int slot=0);
 
     /**
      * @brief Runs the game loop.
@@ -166,19 +177,10 @@ public:
      */
     void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
 
-
     /**
-     * @brief Serialize the game object
-     * @tparam Archive
-     * @param ar
-     * @param version
+     * @brief Saves the game state to a json file.
      */
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version){
-        ar & characters;
-        ar & camera;
-    }
-
+    void saveGame();
 
 private:
     /** ATTRIBUTES **/
@@ -191,6 +193,7 @@ private:
     std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
     bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
+    int saveSlot = 0; /**< The save slot to use when saving the game. */
 
     // Debug variables used for the application console
     bool render_textures = true;
@@ -249,6 +252,11 @@ private:
      * @brief Handles collisions between the player and death zones.
      */
     void handleCollisionsWithDeathZone(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and save zones.
+     */
+    void handleCollisionsWithSaveZone(Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms.

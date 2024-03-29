@@ -64,7 +64,6 @@ public:
     static void startClients();
     static void stopServers();
     static void stopClients();
-    static void temporarySendMethod(const std::string &message);
     static void sendPlayerUpdate(uint16_t keyboardStateMask);
 
     // Menu methods
@@ -72,8 +71,10 @@ public:
 
     // Game methods
     static GameState getGameState();
-    static void initializeGame();
+    static void initializeGame(int slot);
     static void stop();
+    static void save();
+
 
     // Other methods
     /**

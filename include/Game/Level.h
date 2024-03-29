@@ -10,6 +10,7 @@
 #include "Objects/MovingPlatform1D.h"
 #include "Objects/MovingPlatform2D.h"
 #include "Objects/SwitchingPlatform.h"
+#include "SpecialBoxes.h"
 #include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
@@ -81,7 +82,12 @@ public:
     * @brief Return the specialBoxes attribute.
     * @return A vector of Polygon.
     */
-    [[nodiscard]] std::vector<Polygon> getSpecialBoxes() const;
+    [[nodiscard]] std::vector<SpecialBoxes> getSpecialBoxes() const;
+
+    /**
+     * @brief Removes the polygon
+     * */
+    void removeSpecialBoxe(const SpecialBoxes &box);
 
     /**
      * @brief Return the last checkpoint reached by the player.
@@ -139,7 +145,7 @@ private:
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<Polygon> specialBoxes;/**< Collection of polygons representing special Boxes with power. */
+    std::vector<SpecialBoxes> specialBoxes;/**< Collection of SpecialBoxes representing special Boxes with power. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
     /** PRIVATE METHODS **/
@@ -178,6 +184,10 @@ private:
      * @param filename The name of the obstacles file
      */
     void loadPolygonsFromMap(const std::string &mapName,std::vector<Polygon> &obstacles, const char *filename);
+
+    //TODO: doc
+    void loadSpecialBoxesFroMap(const std::string &mapName,std::vector<SpecialBoxes> &boxes, const char *filename);
+
 
 };
 

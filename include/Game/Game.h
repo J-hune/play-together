@@ -282,7 +282,7 @@ private:
      * the function passes in parameter
     *TODO : not done yet
     */
-    void checks(const std::vector<Polygon>& polygons,void (Game::*func)(float,float),Game game,float h,float w);
+    void checks(const std::vector<SpecialBoxes>& polygons,void (Game::*func)(float,float),void (Game::*func2)(SpecialBoxes obs),Game& game,float h,float w);
 
     /**
      * @brief changes the image of the player and redraw him with his new dimensions
@@ -291,6 +291,9 @@ private:
      * */
     void playerChange(float h,float w);
 
+    //TODO : commet
+    void playerSpecial(float h,float w,const SpecialBoxes& obs);
+
 
     /** STATIC METHODS **/
 
@@ -298,6 +301,7 @@ private:
      * @brief Sends the keyboard state to the network.
      */
     static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
+
 };
 
 #endif //PLAY_TOGETHER_GAME_H

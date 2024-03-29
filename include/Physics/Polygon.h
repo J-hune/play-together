@@ -32,7 +32,7 @@ public:
     Polygon(const std::vector<Point> &vertices, zoneType type);
 
 
-    /** ACCESSORS **/
+/** ACCESSORS **/
 
     /**
      * @brief Get the vertices of the polygon.

@@ -75,3 +75,4 @@ bool Polygon::isConvex() const{
     const double tolerance = 1e-3;
     return std::abs(totalAngles() - static_cast<double>(n - 2) * 180) < tolerance;
 }
+

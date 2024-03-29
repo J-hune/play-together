@@ -77,12 +77,6 @@ public:
      */
     void broadcastMessage(int protocol, const std::string &message, int socketIgnored) const;
 
-    /**
-     * @brief Sends a message to the server if the client is connected, or to all clients if the server is connected. (TCP and UDP)
-     * @param message The message to send.
-     */
-     void temporarySendMethod(const std::string &message) const;
-
      void sendPlayerUpdate(uint16_t keyboardStateMask) const;
 
 private:

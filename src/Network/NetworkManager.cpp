@@ -131,39 +131,6 @@ void NetworkManager::broadcastMessage(int protocol, const std::string &message, 
     }
 }
 
-void NetworkManager::temporarySendMethod(const std::string &message) const {
-    if (message.empty()) {
-        std::cerr << "Message is empty" << std::endl;
-        return;
-    }
-
-    if (SOCKET_VALID(tcpClient.getSocketFileDescriptor())) {
-        tcpClient.send(message);
-    }
-
-    if (SOCKET_VALID(udpClient.getSocketFileDescriptor())) {
-        udpClient.send(message);
-    }
-
-    if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) {
-        bool success = tcpServer.broadcast("Hello, World!", 0);
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-
-    if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
-        bool success = udpServer.broadcast("Hello, World!", 0);
-        if (success) {
-            std::cout << "Message sent to all clients" << std::endl;
-        } else {
-            std::cerr << "Failed to send message to all clients" << std::endl;
-        }
-    }
-}
-
 void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
 
     // Create a message with the player update

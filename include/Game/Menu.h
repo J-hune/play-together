@@ -15,8 +15,7 @@ constexpr unsigned int MAX_JSON_SIZE = 1024;
 enum class MenuAction {
     MAIN,
     PLAY,
-    LOAD_SAVE,
-    START_NEW_GAME,
+    CREATE_OR_LOAD_GAME,
     HOST_GAME,
     JOIN_GAME,
 };
@@ -114,7 +113,7 @@ private:
     bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-
+    short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
 
     /** ACCESSORS **/
 
@@ -129,17 +128,21 @@ private:
 
     // Button action handlers
     void handleButtonAction(Button &button);
-    void handleStartButton(Button &button);
+    void handleStartButton(Button &button, int slot);
     void handleResumeButton(Button &button);
+    void handleSaveButton(Button &button);
     void handleStopButton(Button &button);
-    void handleHostGameButton(Button &button);
-    void handleJoinGameButton(Button &button);
+    void handleCreateOrLoadGameButton(Button &button);
+    void handleJoinHostedGameButton(Button &button);
+    void handleDeleteSaveButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);
     void handleNavigateToPlayMenuButton(Button &button);
-    void handleSendMessageButton(Button &button) const;
-    void handleNavigateToLoadSaveMenuButton(Button &button);
-    void handleNavigateToStartNewGameMenuButton(Button &button);
     void handleQuitButton(Button &button);
+
+    /**
+     * @brief Update the save slots displayed on the menu.
+     */
+    void updateSaveSlots();
 };
 
 #endif //PLAY_TOGETHER_MENU_H

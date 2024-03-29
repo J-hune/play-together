@@ -51,7 +51,7 @@ public:
      * @brief Return the spawn points of the map.
      * @return A vector of Point representing the spawn points of the map.
      */
-    [[nodiscard]] std::array<Point, 4> getSpawnPoints() const;
+    [[nodiscard]] std::array<Point, 4> getSpawnPoints(int index) const;
 
     /**
      * @brief Return the zones of a specific type.
@@ -121,7 +121,7 @@ private:
 
     int mapID = 0; /**< Represents the ID of the map. */
     std::string mapName; /**< Represents the name of the map. */
-    std::array<Point, 4> spawnPoints = {}; /**< Represents the spawn points of the map. */
+    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
     std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
     std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
     std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */

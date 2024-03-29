@@ -26,8 +26,6 @@ public:
 
     Camera();
 
-    Camera(float x, float y, float w, float h);
-
 
     /** ACCESSORS **/
 
@@ -116,20 +114,6 @@ public:
      * @param renderer Represents the renderer of the game.
      */
     void renderCameraArea(SDL_Renderer *renderer) const;
-
-    /**
-     * @brief Serialize the camera object
-     * @tparam Archive
-     * @param ar
-     * @param version
-     */
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int version) {
-        ar & w;
-        ar & h;
-        ar & x;
-        ar & y;
-    }
 
 
 private:

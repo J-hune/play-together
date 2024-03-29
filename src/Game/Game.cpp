@@ -10,11 +10,6 @@
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, bool *quitFlag)
         : window(window), renderer(renderer), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {}
 
-Game::Game() :
-            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,(int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
-            renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
-            level("experimentation") {}
-
 
 /** ACCESSORS **/
 
@@ -57,6 +52,10 @@ Level &Game::getLevel() {
     return level;
 }
 
+int Game::getSaveSlot() const {
+    return saveSlot;
+}
+
 
 /** MODIFIERS **/
 
@@ -80,6 +79,11 @@ void Game::setEnablePlatformsMovement(bool state) {
     enable_platforms_movement = state;
 }
 
+void Game::setSaveSlot(int slot) {
+    saveSlot = slot;
+    std::cout << "Game: Save slot set to " << slot << std::endl;
+}
+
 void Game::toggleRenderTextures() {
     render_textures = !render_textures;
 }
@@ -99,10 +103,36 @@ bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
 
 /** METHODS **/
 
-void Game::initialize() {
+void Game::initialize(int slot) {
+
     // If the player starts the server or is playing alone
     if (!Mediator::isClientRunning()) {
-        Point spawnPoint = level.getSpawnPoints()[0];
+        saveSlot = slot;
+
+        // Prepare the level
+        using json = nlohmann::json;
+        std::string slotFile = "saves/slot_" + std::to_string(saveSlot) + ".json";
+        Point spawnPoint;
+
+        // If a save file exists in the slot, load the game from the save file
+        if (std::filesystem::exists(slotFile)) {
+            std::ifstream file(slotFile);
+            json saveData;
+            file >> saveData;
+
+            level = Level(saveData["level"]);
+            level.setLastCheckpoint(saveData["lastCheckpoint"]);
+            spawnPoint = level.getSpawnPoints(saveData["lastCheckpoint"])[0];
+
+            std::cout << "Game: Loaded save file from slot " << saveSlot << ", level: " << level.getMapName() << " at checkpoint " << level.getLastCheckpoint() << std::endl;
+        }
+
+        // If no save file exists in the slot, start a new game
+        else {
+            level = Level("diversity");
+            spawnPoint = level.getSpawnPoints(0)[0];
+            std::cout << "Game: No save file found in slot " << saveSlot << ", starting new game at level: " << level.getMapName() << std::endl;
+        }
 
         // Add the initial player to the game
         Player initialPlayer(-1, spawnPoint, 0.2F, 2, 48, 36);
@@ -296,16 +326,10 @@ void Game::applyPlayerMovement(Player *player) const {
     }
 
     // If the player can't move on x-axis, don't apply the movement
-    if(!player->getCanMove()){
+    if (!player->getCanMove()){
         player->setMoveX(0);
     }
-    if(player->getX() < camera.getX()){
-        player->setX(camera.getX());
-    }
-    else if(player->getX() + player->getW() > camera.getX() + camera.getW()) {
-        player->setX(camera.getX() + camera.getW() - player->getW());
-    }
-    else{
+    else {
         player->setX(player->getX() + player->getMoveX());
     }
     player->setY(player->getY() + player->getMoveY());
@@ -326,7 +350,7 @@ void Game::calculateAllPlayerMovement() {
 }
 
 void Game::killPlayer(Player *player) {
-    Point spawnPoint = level.getSpawnPoints()[findPlayerIndexById(player->getPlayerID())];
+    Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[findPlayerIndexById(player->getPlayerID())];
 
     // Add the player to the dead characters list
     deadCharacters.push_back(*player);
@@ -334,7 +358,6 @@ void Game::killPlayer(Player *player) {
 
     // Teleport the player to the spawn point
     player->teleportPlayer(spawnPoint.x, spawnPoint.y);
-
 }
 
 
@@ -802,6 +825,34 @@ void Game::pause() {
 void Game::stop() {
     gameState = GameState::STOPPED;
     characters.clear();
+    switchGravity = false;
+    saveSlot = -1;
+}
+
+void Game::saveGame() {
+
+    // Create a JSON object to store the game state
+    using json = nlohmann::json;
+    json gameStateJSON;
+
+    // Store the game state
+
+    // Save date to format YYYY-MM-DD (local time) using the C++ standard library
+    auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm const *localTime = std::localtime(&currentTime);
+    std::stringstream ss;
+    ss << std::put_time(localTime, "%Y-%m-%d");
+
+    gameStateJSON["date"] = ss.str();
+    gameStateJSON["level"] = level.getMapName();
+    gameStateJSON["lastCheckpoint"] = level.getLastCheckpoint();
+
+    // Write the game state to a file in the "saves" directory
+    std::ofstream file("saves/slot_" + std::to_string(saveSlot) + ".json");
+    file << gameStateJSON.dump(4);
+    file.close();
+
+    std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
 }
 
 

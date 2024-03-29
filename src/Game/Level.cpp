@@ -26,8 +26,8 @@ std::string Level::getMapName() const {
     return mapName;
 }
 
-std::array<Point, 4> Level::getSpawnPoints() const {
-    return spawnPoints;
+std::array<Point, 4> Level::getSpawnPoints(int index) const {
+    return spawnPoints[index];
 }
 
 std::vector<Polygon> Level::getZones(zoneType type) const {
@@ -154,12 +154,15 @@ void Level::loadMapProperties(const std::string& mapFileName) {
 
         mapID = j["id"];
         mapName = j["name"];
-        spawnPoints = {
-            Point(j["spawnPoints"][0][0], j["spawnPoints"][0][1]),
-            Point(j["spawnPoints"][1][0], j["spawnPoints"][1][1]),
-            Point(j["spawnPoints"][2][0], j["spawnPoints"][2][1]),
-            Point(j["spawnPoints"][3][0], j["spawnPoints"][3][1])
-        };
+
+        for (const auto& spawnPoint : j["spawnPoints"]) {
+            spawnPoints.push_back({
+                   Point(spawnPoint[0][0], spawnPoint[0][1]),
+                   Point(spawnPoint[1][0], spawnPoint[1][1]),
+                   Point(spawnPoint[2][0], spawnPoint[2][1]),
+                   Point(spawnPoint[3][0], spawnPoint[3][1])
+            });
+        }
         std::cout << "Level: Loaded map properties." << std::endl;
     } else {
         std::cerr << "Level: Unable to open the properties file. Please check the file path." << std::endl;

@@ -49,6 +49,10 @@ bool MovingPlatform1D::getAxis() const {
     return axis;
 }
 
+bool MovingPlatform1D::getIsMoving() const {
+    return isMoving;
+}
+
 
 /** SPECIFIC ACCESSORS **/
 
@@ -66,13 +70,10 @@ void MovingPlatform1D::setIsMoving(bool state) {
 
 /** METHODS **/
 
-void MovingPlatform1D::applyXaxisMovement() {
-    move = 1; // Apply movement
+void MovingPlatform1D::applyXaxisMovement(float deltaTime) {
+    move = 150; // Add basic movement
 
-    float nearestPoint = std::abs(x - min) > std::abs((x + w) - max) ? max - w : min; // Calculate the nearest end to the platform
-    float smoothing = (std::abs(x - nearestPoint) * PLATFORM_LERP_SMOOTHING_FACTOR); // Calculate smoothing
-
-    move += smoothing > smoothingLimit ? smoothingLimit : smoothing; // Apply smoothing with limit
+    move *= deltaTime; // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -90,13 +91,10 @@ void MovingPlatform1D::applyXaxisMovement() {
     }
 }
 
-void MovingPlatform1D::applyYaxisMovement() {
-    move = 1; // Apply movement
+void MovingPlatform1D::applyYaxisMovement(float deltaTime) {
+    move = 150; // Add basic movement
 
-    float nearestPoint = std::abs(y - min) > std::abs((y + h) - max) ? max - h : min; // Calculate the nearest end to the platform
-    float smoothing = (std::abs(y - nearestPoint) * PLATFORM_LERP_SMOOTHING_FACTOR); // Calculate smoothing
-
-    move += smoothing > smoothingLimit ? smoothingLimit : smoothing; // Apply smoothing with limit
+    move *= deltaTime; // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -114,6 +112,6 @@ void MovingPlatform1D::applyYaxisMovement() {
     }
 }
 
-void MovingPlatform1D::applyMovement() {
-    axis ? applyYaxisMovement() : applyXaxisMovement();
+void MovingPlatform1D::applyMovement(float deltaTime) {
+    axis ? applyYaxisMovement(deltaTime) : applyXaxisMovement(deltaTime);
 }

@@ -29,10 +29,6 @@ float Camera::getH() const {
     return h;
 }
 
-SDL_FRect Camera::getArea() const {
-    return area;
-}
-
 
 /** MODIFIERS **/
 
@@ -61,44 +57,51 @@ void Camera::initializeCameraPosition(Point camera_point) {
     y = camera_point.y - 2 * (h / 3);
 
     // The point is on the right of the area
-    if (camera_point.x > x + (w - (w / 2))) {
-        x += camera_point.x - (x + (w - (w / 2)));
+    if (camera_point.x > x + area.x + area.w) {
+        x += camera_point.x - (x + area.x + area.w);
     }
-        // The point is on the left of the area
-    else if (camera_point.x < x + (w / 5)) {
-        x -= (x + (w / 5)) - camera_point.x;
+    // The point is on the left of the area
+    else if (camera_point.x < x + area.x) {
+        x -= (x + area.x) - camera_point.x;
     }
     // The point is on the bottom of the area
-    if (camera_point.y > y + (h - (h / 5))) {
-        y += camera_point.y - (y + (h - (h / 5)));
+    if (camera_point.y > y + area.y + area.h) {
+        y += camera_point.y - (y + area.y + area.h);
     }
-        // The point is on the top of the area
-    else if (camera_point.y < y + (h / 5)) {
-        y -= (y + (h / 5)) - camera_point.y;
+    // The point is on the top of the area
+    else if (camera_point.y < y + area.y) {
+        y -= (y + area.y) - camera_point.y;
     }
 }
 
-void Camera::applyCameraMovement(Point camera_point) {
+void Camera::applyCameraMovement(Point camera_point, float deltaTime) {
+    float blend = 1 - std::pow(0.5F, deltaTime * lerpSmoothingFactor);
+
+    float area_left = x + area.x;
+    float area_right = x + area.x + area.w;
+    float area_top = y + area.y;
+    float area_bottom = y + area.y + area.h;
+
+    // "+ 0.1F" to stop infinite lerp smoothing !
+
     // The point is on the right of the area
-    if (camera_point.x > x + w - (w / 2)) {
-        x += (camera_point.x - (x + (w - (w / 2)))) * LERP_SMOOTHING_FACTOR;
+    if (camera_point.x > area_right) {
+        x += std::lerp(area_right, camera_point.x, blend) - area_right;
     }
-        // The point is on the left of the area
-    else if (camera_point.x < x + (w / 5)) {
-        x -= ((x + (w / 5)) - camera_point.x) * LERP_SMOOTHING_FACTOR;
+    // The point is on the left of the area
+    else if (camera_point.x < area_left) {
+        x += std::lerp(area_left, camera_point.x, blend) - area_left ;
     }
     // The point is on the bottom of the area
-    if (camera_point.y > y + (h - (h / 5))) {
-        y += (camera_point.y - (y + (h - (h / 5)))) * LERP_SMOOTHING_FACTOR;
+    if (camera_point.y > area_bottom) {
+        y += std::lerp(area_bottom, camera_point.y, blend) - area_bottom + 0.1F;
     }
-        // The point is on the top of the area
-    else if (camera_point.y < y + (h / 5)) {
-        y -= ((y + (h / 5)) - camera_point.y) * LERP_SMOOTHING_FACTOR;
+    // The point is on the top of the area
+    else if (camera_point.y < area_top) {
+        y += std::lerp(area_top, camera_point.y, blend) - area_top + 0.1F;
     }
 
-    if (isShaking) {
-        makeCameraShake();
-    }
+    if (isShaking) makeCameraShake();
 }
 
 void Camera::makeCameraShake() {

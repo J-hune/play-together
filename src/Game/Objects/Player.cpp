@@ -5,6 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+// Initialize texture pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
 SDL_Texture *Player::spriteTexture2Ptr = nullptr;
@@ -12,10 +13,10 @@ SDL_Texture *Player::spriteTexture3Ptr = nullptr;
 SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 
-/** CONSTRUCTOR **/
+/** CONSTRUCTORS **/
 
-Player::Player(float startX, float startY, float playerSpeed,float speedMax, float playerWidth, float playerHeight)
-        : x(startX), y(startY), speed(playerSpeed), speedMax(speedMax), width(playerWidth), height(playerHeight) {
+Player::Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight)
+        : x(startX), y(startY), speed(playerSpeed), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }
@@ -55,16 +56,8 @@ float Player::getMoveY() const {
     return moveY;
 }
 
-float Player::getTimeAfterFall() const {
-    return timeAfterFall;
-}
-
-int Player::getCurrentDirection() const {
-    return currentDirection;
-}
-
-int Player::getDesiredDirection() const {
-    return desiredDirection;
+int Player::getDirectionX() const {
+    return (int)directionX;
 }
 
 bool Player::getCanMove() const {
@@ -79,16 +72,24 @@ bool Player::getWantToMoveLeft() const {
     return wantToMoveLeft;
 }
 
+float Player::getMavity() const {
+    return mavity;
+}
+
+bool Player::getWantToJump() const {
+    return wantToJump;
+}
+
+int Player::getDirectionY() const {
+    return (int)directionY;
+}
+
 bool Player::getIsOnPlatform() const {
     return isOnPlatform;
 }
 
 bool Player::getIsJumping() const {
     return isJumping;
-}
-
-bool Player::getWantToJump() const {
-    return wantToJump;
 }
 
 
@@ -104,74 +105,82 @@ std::vector<Point> Player::getVertices() const {
     };
 }
 
-std::vector<Point> Player::getVerticesHorizontal() const {
-    return currentDirection == PLAYER_LEFT ? getVerticesLeft() : getVerticesRight();
-}
-
-std::vector<Point> Player::getVerticesLeft() const {
-    // Return the vertices of the player's bounding box, with added margin to capture left wall within the area.
+std::vector<Point> Player::getVerticesNextFrame() const {
+    // Return the vertices of the player's bounding box.
     return {
-            {x + (- 2),         y + 2},
-            {x + ( 2), y + 2},
-            {x + ( 2), y + height - 2},
-            {x + (- 2),         y + height - 2}
+            {x + moveX, y + moveY},
+            {x + moveX + width, y + moveY},
+            {x + moveX + width, y + moveY + height},
+            {x + moveX, y + moveY + height}
     };
 }
 
-std::vector<Point> Player::getVerticesRight() const {
-    // Return the vertices of the player's bounding box, with added margin to capture right wall within the area.
+std::vector<Point> Player::getHorizontalColliderVertices() const {
+    return directionX == PLAYER_LEFT ? getLeftColliderVertices() : getRightColliderVertices();
+}
+
+std::vector<Point> Player::getLeftColliderVertices() const {
     return {
-            {width + x + (2),         y + 2},
-            {width + x + (-2), y + 2},
-            {width + x + (-2), y + height - 2},
-            {width + x + (2),         y + height - 2}
+            {x - 1,y},
+            {x, y},
+            {x, y + height},
+            {x - 1,y + height}
     };
 }
-std::vector<Point> Player::getVerticesGround() const {
-    // Return the vertices of the player's bounding box, with added margin to capture ground within the area.
+
+std::vector<Point> Player::getRightColliderVertices() const {
     return {
-            {x + 2,         y + height},
-            {x + width - 2, y + height},
-            {x + width - 2, y + height + 2},
-            {x + 2,         y + height + 2}
+            {x + width + 1, y},
+            {x + width, y},
+            {x + width, y + height},
+            {x + width + 1, y + height}
     };
 }
-std::vector<Point> Player::getVerticesRoof() const {
-    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
+std::vector<Point> Player::getGroundColliderVertices() const {
     return {
-            {x + 2,         y + 2},
-            {x + width - 2, y + 2},
-            {x + width - 2,  y },
-            {x + 2,         y }
+            {x, y + height},
+            {x + width, y + height},
+            {x + width, y + height + 1},
+            {x, y + height + 1}
+    };
+}
+std::vector<Point> Player::getRoofColliderVertices() const {
+    return {
+            {x, y - 1},
+            {x + width, y - 1},
+            {x + width, y},
+            {x, y}
     };
 }
 
 SDL_FRect Player::getHorizontalColliderBoundingBox() const {
-    return currentDirection == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
+    return directionX == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
 }
 
 SDL_FRect Player::getLeftColliderBoundingBox() const {
-    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x - 2, y, 2, height};
+    return {x - 1, y, 1, height};
 }
 
 SDL_FRect Player::getRightColliderBoundingBox() const {
-    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x + width, y, 2, height};
+    return {x + width, y, 1, height};
 }
 
 SDL_FRect Player::getGroundColliderBoundingBox() const {
-    // Return the vertices of the player's bounding box, with added margin to capture roof within the area.
-    return {x, y + height, width, 2};
+    return {x, y + height, width, 1};
 }
 
 SDL_FRect Player::getRoofColliderBoundingBox() const {
-    return {x, y - 2 , width, 2};
+    return {x, y - 1 , width, 1};
 }
 
 SDL_FRect Player::getBoundingBox() const {
     // Return the bounding box of the player.
     return {x, y, width, height};
+}
+
+SDL_FRect Player::getBoundingBoxNextFrame() const {
+    // Return the bounding box of the player.
+    return {x + moveX, y + moveY, width, height};
 }
 
 
@@ -201,19 +210,6 @@ void Player::setMoveY(float val){
     moveY = val;
 }
 
-
-void Player::setFinishTheMovement(bool state){
-    finishTheMovement = state;
-}
-
-void Player::setTimeSpeed(float val){
-    timeSpeed = val;
-}
-
-void Player::setDesiredDirection(int val) {
-    desiredDirection = val;
-}
-
 void Player::setCanMove(bool state) {
     canMove = state;
 }
@@ -226,16 +222,20 @@ void Player::setWantToMoveLeft(bool state) {
     wantToMoveLeft = state;
 }
 
-void Player::setTimeSpentJumping(float val) {
-    timeSpentJumping = val;
-}
-
 void Player::setIsOnPlatform(bool state) {
     isOnPlatform = state;
 }
 
 void Player::setWantToJump(bool state) {
     wantToJump = state;
+}
+
+void Player::setTimeSpentJumping(float val) {
+    timeSpentJumping = val;
+}
+
+void Player::toggleMavity() {
+    mavity *= -1;
 }
 
 
@@ -270,62 +270,95 @@ void Player::teleportPlayer(float newX, float newY) {
     y = newY;
 }
 
-void Player::calculateMovement() {
-    // Determine the movement direction
-    int movementDirection = 0;
+bool Player::canJump() {
+    return isOnPlatform || ((float)SDL_GetTicks() - (float)lastTimeOnPlatform < coyoteTime * 1000);
+}
+
+void Player::calculateXaxisMovement(float deltaTime) {
+    // Determine the direction
+    float wantedDirection = 0;
     if (wantToMoveLeft && !wantToMoveRight) {
-        movementDirection = -1;
+        wantedDirection = -1;
     } else if (!wantToMoveLeft && wantToMoveRight) {
-        movementDirection = 1;
+        wantedDirection = 1;
     }
 
-    // Apply movement based on current speed and direction
-    if (movementDirection != 0) {
-        // If the movement direction has changed, reset the speed
-        if (movementDirection != currentDirection) {
-            currentDirection = movementDirection;
-            timeSpeed = 0.1F; // Start with a small speed to smooth the transition
+    // The player want to move
+    if (wantedDirection != 0) {
+        directionX = wantedDirection;
+
+        if (speedCurve >= 1) {
+            speedCurve = 1;
         } else {
-            // Gradually accelerate if the movement direction remains the same
-            timeSpeed += 0.1F;
-            if (timeSpeed > maxSpeedReachWithThisTime)
-                timeSpeed = maxSpeedReachWithThisTime;
+            speedCurve += (((float)SDL_GetTicks() - (float)moveStartTime) / 1000) * speedCurveLerp;
+            if (speedCurve > 1) speedCurve = 1;
         }
-        moveX = speedMax * speed * timeSpeed * (float)movementDirection;
-        finishTheMovement = true; // Indicate that the player is moving
-    } else {
-        // If no movement key is pressed, gradually reduce the speed
-        if (timeSpeed > 0) {
-            timeSpeed -= 0.055F;
-            if (timeSpeed < 0)
-                timeSpeed = 0;
-            moveX = speedMax * speed * timeSpeed * (float)currentDirection; // Apply movement with current speed
-        } else {
-            moveX = 0;
-            finishTheMovement = true; // Indicate that movement is finished
-        }
+
+        moveStopTime = SDL_GetTicks();
     }
 
-    // Handle jump logic
+    // The player doesn't want to move
+    else {
+        // The player doesn't move
+        if (speedCurve <= speedCurveMin) {
+            speedCurve = speedCurveMin;
+            directionX = 0;
+        }
+        // The player is in his deceleration curve
+        else {
+            speedCurve -= (((float)SDL_GetTicks() - (float)moveStopTime) / 1000) * speedCurveLerp;
+            if (speedCurve < speedCurveMin) speedCurve = speedCurveMin;
+        }
+
+        moveStartTime = SDL_GetTicks();
+    }
+
+    moveX = 350; // Add basic movement
+    moveX *= deltaTime; // Apply movement per second
+    moveX *= speed; // Apply speed
+    moveX *= speedCurve; // Apply the speed curve
+    moveX *= directionX; // Apply direction
+}
+
+void Player::calculateYaxisMovement(float deltaTime) {
+
+    // The player is in the first jump phase
     if (wantToJump && timeSpentJumping < PRESSURE_JUMP_MAX) {
         isJumping = true;
-        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
-        timeSpentJumping += 0.1F;
-    } else if (timeSpentJumping > 0 && timeSpentJumping < PRESSURE_JUMP_MIN) {
-        moveY = -(float)(2 * timeSpentJumping - 0.3 * (timeSpentJumping * timeSpentJumping));
-        timeSpentJumping += 0.1F;
-    } else {
+        moveY = -(400 * timeSpentJumping - 0.3F * (timeSpentJumping * timeSpentJumping)) * deltaTime * mavity;
+        timeSpentJumping = ((float)SDL_GetTicks() - (float)lastTimeOnPlatform) / 1000;
+    }
+    // The player is in the second jump phase
+    else if (timeSpentJumping > 0 && timeSpentJumping < PRESSURE_JUMP_MIN) {
+        moveY = -(400 * timeSpentJumping - 0.3F * (timeSpentJumping * timeSpentJumping)) * deltaTime * mavity;
+        timeSpentJumping = ((float)SDL_GetTicks() - (float)lastTimeOnPlatform) / 1000;
+    }
+    // The player is not jumping
+    else {
         timeSpentJumping = 0;
         wantToJump = false;
+        // The player is on a platform
         if (isOnPlatform) {
             moveY = 0;
             isJumping = false;
-            timeAfterFall = COYOTE_TIME;
-        } else {
-            moveY = (timeAfterFall > 0) ? 2 - timeAfterFall : 2;
-            timeAfterFall -= 0.1F;
+            lastTimeOnPlatform = SDL_GetTicks();
+        }
+        // The player is falling
+        else {
+            moveY = 400; // Add basic movement
+            moveY *= deltaTime; // Apply movement per second
+            moveY *= mavity; // Apply gravity
         }
     }
+
+    // Calculate y-axis direction (used for collision correction)
+    if (moveY == 0) directionY = 0;
+    else directionY = moveY < 0 ? -1 : 1;
+}
+
+void Player::calculateMovement(float deltaTime) {
+    calculateXaxisMovement(deltaTime);
+    calculateYaxisMovement(deltaTime);
 }
 
 void Player::render(SDL_Renderer *renderer, Point camera) {
@@ -337,6 +370,7 @@ void Player::render(SDL_Renderer *renderer, Point camera) {
 
 void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    //printf("PLAYERY = %f\n", y - camera.y);
     SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
     SDL_RenderFillRectF(renderer, &playerRect);
 }
@@ -344,7 +378,7 @@ void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     //Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = getVerticesRight();
+    std::vector<Point> vertexRight = getRightColliderVertices();
     for (size_t i = 0; i < vertexRight.size(); ++i) {
         const auto &vertex1 = vertexRight[i];
         const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
@@ -352,7 +386,7 @@ void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     }
     //Draw the left collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = getVerticesLeft();
+    std::vector<Point> vertexLeft = getLeftColliderVertices();
     for (size_t i = 0; i < vertexLeft.size(); ++i) {
         const auto &vertex1 = vertexLeft[i];
         const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
@@ -360,7 +394,7 @@ void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     }
     //Draw the roof collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = getVerticesRoof();
+    std::vector<Point> vertex = getRoofColliderVertices();
     for (size_t i = 0; i < vertex.size(); ++i) {
         const auto &vertex1 = vertex[i];
         const auto &vertex2 = vertex[(i + 1) % vertex.size()];
@@ -368,7 +402,7 @@ void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
     }
     //Draw the ground collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = getVerticesGround();
+    std::vector<Point> vertexGround = getGroundColliderVertices();
     for (size_t i = 0; i < vertexGround.size(); ++i) {
         const auto &vertex1 = vertexGround[i];
         const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];

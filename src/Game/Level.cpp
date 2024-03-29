@@ -45,20 +45,20 @@ void Level::renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::applyPlatformsMovement() {
+void Level::applyPlatformsMovement(float deltaTime) {
     // Apply movement for 1D platforms
     for (MovingPlatform1D &platform: movingPlatforms1D) {
-        platform.applyMovement();
+        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
     }
 
     // Apply movement for 2D platforms
     for (MovingPlatform2D &platform: movingPlatforms2D) {
-        platform.applyMovement();
+        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
     }
 
     // Apply movement for switching platforms
     for (SwitchingPlatform &platform: switchingPlatforms) {
-        platform.applyMovement();
+        if(platform.getIsMoving()) platform.applyMovement();
     }
 }
 

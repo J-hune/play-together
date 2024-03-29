@@ -15,7 +15,6 @@
  * @class MovingPlatform2D
  * @brief Represents a moving platform on two axis in a 2D game.
  */
-
 class MovingPlatform2D {
 public:
     /** CONSTRUCTOR **/
@@ -61,6 +60,12 @@ public:
      */
     [[nodiscard]] float getMoveY() const;
 
+    /**
+     * @brief Return the isMoving attribute.
+     * @return The value of the isMoving attribute.
+     */
+    [[nodiscard]] bool getIsMoving() const;
+
 
     /** SPECIFIC ACCESSORS **/
 
@@ -84,8 +89,9 @@ public:
 
     /**
      * @brief Calculate the new position of the platform on x-axis and y-axis.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyMovement();
+    void applyMovement(float deltaTime);
 
 private:
     /** ATTRIBUTES **/
@@ -104,7 +110,7 @@ private:
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
     float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom */
     float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom */
-    bool isMoving = true;
+    bool isMoving = false;
 
     float smoothingLimit = 3; /**< The smoothing limit of the platform movement */
 };

@@ -16,12 +16,11 @@ constexpr float PLATFORM_LERP_SMOOTHING_FACTOR = 0.05F;
  * @class MovingPlatform1D
  * @brief Represents a moving platform on an axis in a 2D game.
  */
-
 class MovingPlatform1D {
 public:
     /** CONSTRUCTOR **/
 
-    MovingPlatform1D(float x, float y, float w, float h, float speed, float minX, float maxX, bool start, bool axis);
+    MovingPlatform1D(float x, float y, float w, float h, float speed, float min, float max, bool start, bool axis);
 
 
     /** BASIC ACCESSORS **/
@@ -62,6 +61,12 @@ public:
      */
     [[nodiscard]] bool getAxis() const;
 
+    /**
+     * @brief Return the isMoving attribute.
+     * @return The value of the isMoving attribute.
+     */
+    [[nodiscard]] bool getIsMoving() const;
+
 
     /** SPECIFIC ACCESSORS **/
 
@@ -85,9 +90,10 @@ public:
 
     /**
      * @brief Selects whether to calculate x- or y-axis movement.
-     * @see applyXaxisMovement() and applyYaxisMovement() for applying movement.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @see applyXaxisMovement() and applyYaxisMovement() for sub-functions.
      */
-    void applyMovement();
+    void applyMovement(float deltaTime);
 
 private:
     /** ATTRIBUTES **/
@@ -104,7 +110,7 @@ private:
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
-    bool isMoving = true;
+    bool isMoving = false;
 
     float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
 
@@ -113,13 +119,15 @@ private:
 
     /**
      * @brief Calculate the new position of the platform on x-axis.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyXaxisMovement();
+    void applyXaxisMovement(float deltaTime);
 
     /**
      * @brief Calculate the new position of the platform on y-axis.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyYaxisMovement();
+    void applyYaxisMovement(float deltaTime);
 
 };
 

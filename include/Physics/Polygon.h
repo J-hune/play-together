@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cmath>
-#include "Point.h"
+#include "../Game/Point.h"
 
 /**
  * @file Polygon.h

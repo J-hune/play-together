@@ -76,13 +76,7 @@ void Game::toggleRenderTextures() {
 /** FUNCTIONS **/
 
 // Function to check AABB collision between two rectangles
-bool checkAABBCollision(const SDL_FRect &a, const SDL_FRect &b) {
-    // Check for AABB collision
-    return (a.x < b.x + b.w &&
-            a.x + a.w > b.x &&
-            a.y < b.y + b.h &&
-            a.y + a.h > b.y);
-}
+
 
 
 /** METHODS **/
@@ -113,26 +107,24 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDLK_z:
         case SDLK_SPACE:
             // If the coyote time is passed and the player is not already in a jump
-            if (player->getTimeAfterFall() > 0 && !player->getIsJumping()) {
+            if (!player->getIsJumping()) {
                 player->setWantToJump(true);
             }
             break;
         case SDLK_LEFT:
         case SDLK_q:
-            player->setDesiredDirection(PLAYER_LEFT);
             player->setWantToMoveLeft(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             break;
         case SDLK_RIGHT:
         case SDLK_d:
-            player->setDesiredDirection(PLAYER_RIGHT);
             player->setWantToMoveRight(true);
             player->getSprite()->setAnimation(Player::walk);
             player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             break;
         case SDLK_g:
-            switchGravity = !switchGravity;
+            switchMavity();
             player->setIsOnPlatform(false);
             player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
             player->getSprite()->toggleFlipVertical();
@@ -171,7 +163,6 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             player->setWantToMoveLeft(false); // Disable left movement
             // Trigger idle animation if not moving right
             if (!player->getWantToMoveRight()) {
-                player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
             }
             break;
@@ -184,7 +175,6 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             player->setWantToMoveRight(false); // Disable right movement
             // Trigger idle animation if not moving left
             if (!player->getWantToMoveLeft()) {
-                player->setFinishTheMovement(false);
                 player->getSprite()->setAnimation(Player::idle);
             }
             break;
@@ -213,7 +203,7 @@ void Game::handleEvents(Player *player) {
             handleKeyDownEvent(player, e.key);
         }
 
-            // Handle SDL_MOUSEBUTTONDOWN events
+        // Handle SDL_MOUSEBUTTONDOWN events
         else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
             printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
@@ -221,12 +211,7 @@ void Game::handleEvents(Player *player) {
 }
 
 
-void Game::applyPlayerMovement(Player *player) {
-    // If the gravity is switched change the direction of the y-axis move
-    if (switchGravity) {
-        player->setMoveY(player->getMoveY()* -1);
-    }
-
+void Game::applyPlayerMovement(Player *player) const {
     // If the player can't move on x-axis, don't apply the movement
     if(!player->getCanMove()){
         player->setMoveX(0);
@@ -253,363 +238,58 @@ void Game::applyAllPlayerMovement() {
 }
 
 void Game::calculateAllPlayerMovement() {
-    initialPlayer.calculateMovement(); // Calculate movement for the initial player
+    initialPlayer.calculateMovement(deltaTime); // Calculate movement for the initial player
 
     // Apply movement for other players
     for (Player &character : characters) {
-        character.calculateMovement();
+        character.calculateMovement(deltaTime);
     }
 }
 
-
-/** HANDLE COLLISIONS **/
-
-void Game::handleCollisionsWithObstacles(Player *player) {
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getObstacles()) {
-        // If collision detected with the roof, the player can't jump anymore
-        if (checkCollision(player->getVerticesRoof(), obstacle)) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the ground, the player is on a platform
-        if (!player->getIsOnPlatform() && checkCollision(player->getVerticesGround(), obstacle)) {
-            player->setIsOnPlatform(true);
-        }
-        // If collision detected with the wall, the player can't move
-        if (player->getCanMove() && checkCollision(player->getVerticesHorizontal(), obstacle)) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-}
-
-void Game::handleCollisionsWithPlatforms(Player *player) {
-    // Check for collisions with each 1D moving platforms
-    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        // If collision detected with the roof, the player can't jump anymore
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the ground, the player is on the platform
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-            // Add platform velocity to the player by checking on which axis it moves
-            platform.getAxis() ? player->setY(player->getY() + platform.getMove()) : player->setX(player->getX() + platform.getMove());
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-
-    // Check for collisions with each 2D moving platforms
-    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        // If collision detected with the roof, the player can't jump anymore
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the ground, the player is on the platform
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-            // Add platform velocity to the player
-            player->setX(player->getX() + platform.getMoveX());
-            player->setY(player->getY() + platform.getMoveY());
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-
-    // Check for collisions with each switching platforms
-    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        // If collision detected with the roof, the player can't jump anymore
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the ground, the player is on the platform
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-}
-
-void Game::handleCollisionsWithOtherPlayers(Player *player) {
-    // Get others players in a vector
-    std::vector<Player*> otherCharacters;
-    if (*player != initialPlayer) otherCharacters.push_back(&initialPlayer);
+void Game::switchMavity() {
+    initialPlayer.toggleMavity();
     for (Player &character : characters) {
-        if (*player != character) otherCharacters.push_back(&character);
-    }
-
-    // Check for collisions with other characters
-    for (Player *character : otherCharacters) {
-        if (checkAABBCollision(player->getBoundingBox(), character->getBoundingBox())) {
-
-            //The player move to the right
-            if (player->getMoveX() > 0) {
-                //  The player's right is to the right of the detected player's left
-                if (player->getX()+player->getW() <= character->getX() + 2) {
-                    // Slow down the player's speed
-                    player->setMoveX(player->getMoveX() / 5);
-                    character->setMoveX(player->getMoveX());
-                }
-            }
-                //The player move to the left
-            else if (player->getMoveX() < 0) {
-                if (player->getX() + 2 > character->getX()+character->getW()) {
-                    player->setMoveX(player->getMoveX() / 5);
-                    character->setMoveX(player->getMoveX());
-                }
-            }
-
-            // If above the detected player
-            if (!player->getIsOnPlatform()
-               //The player's bottom is below the detected player's head
-               && player->getY()+player->getH()>character->getY()
-               // The player's head is above the detected player's head
-               && player->getY()<character->getY()
-               // The player's body is well within the x range of the detected player's body
-               && player->getX()+player->getW()>character->getX()+2 // The player's right is to the right of the detected player's left
-               && player->getX()+2<character->getX()+character->getW()) { // The player's left is to the left of the detected player's right
-                player->setIsOnPlatform(true);
-            }
-
-            // If below the detected player
-            //The player's head is above the detected player's bottom
-            if (player->getY()<character->getY()+character->getH() &&
-               // The player's head is below the detected player's head
-               player->getY() > character->getY()
-               // The player's body is well within the x range of the detected player's body
-               && player->getX()+player->getW()>character->getX()+2 // The player's right is to the right of the detected player's left
-               && player->getX()+2<character->getX()+character->getW()) { // The player's left is to the left of the detected player's right
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
-
-        }
+        character.toggleMavity();
     }
 }
 
-void Game::handleCollisionsWithCameraBorders(Player *player) {
-    // Get others players in a vector
-    std::vector<Player> otherCharacters;
-    if (*player != initialPlayer) otherCharacters.push_back(initialPlayer);
-    for (const Player &character : characters) {
-        if (*player != character) otherCharacters.push_back(character);
+void Game::handleCollisionsNormalMavity(Player &player) const {
+    player.setCanMove(true);
+
+    // Check obstacles collisions only if the player has moved
+    if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
+        player.setIsOnPlatform(false);
+        handleCollisionsWithObstacles(&player, level.getObstacles());
     }
 
-    // Check for collisions with down camera borders
-    if (player->getY() > camera.getY() + camera.getH() - player->getH() + DISTANCE_OUT_MAP_BEFORE_DEATH){
-        printf("WASTED\n");
-
-        //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
-        player->setX(50);
-        player->setY(50);
-    }
-
-    /*// Check for collisions with down camera borders
-        * if (player.y < camera.y){
-         *
-         * }
-    */
-
-    // Check for collisions with up camera borders
-    if (player->getY() < camera.getY() - DISTANCE_OUT_MAP_BEFORE_DEATH){
-        printf("WASTED\n");
-
-        //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
-        player->setX(camera.getX());
-        player->setY(camera.getY());
-    }
-
-
-    // Check for collisions with right camera borders
-    if (player->getX() > camera.getX() + camera.getW() - player->getW()) {
-
-        // Divide the velocity of the player
-        player->setMoveX(player->getMoveX() / 5);
-
-        camera.setX(camera.getX() + player->getMoveX());
-
-        // Check if others players touch the left camera borders
-        for (Player &character : otherCharacters){
-            if(character.getX() < camera.getX()){
-                    character.setMoveX(player->getMoveX());
-            }
-        }
-
-    }
-    // Check for collisions with left camera borders
-    else if (player->getX() < camera.getX()) {
-
-        // Divide the velocity of the player
-        player->setMoveX(player->getMoveX() / 5);
-
-        camera.setX(camera.getX() + player->getMoveX());
-
-        // Check if others players touch the right camera borders
-        for (Player &character: otherCharacters) {
-            if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
-                    character.setX(player->getMoveX());
-            }
-        }
-    }
+    handleCollisionsWithMovingPlatform1D(&player, level.getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
+    handleCollisionsWithMovingPlatform2D(&player, level.getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
+    handleCollisionsWithSwitchingPlatform(&player, level.getSwitchingPlatforms()); // Handle collisions with switching platforms
 }
 
+void Game::handleCollisionsReversedMavity(Player &player) const {
+    player.setCanMove(true);
+
+    // Check obstacles collisions only if the player has moved
+    if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
+        player.setIsOnPlatform(false);
+        handleCollisionsSelcatsbOhtiw(&player, level.getObstacles());
+    }
+
+    handleCollisionsD1mroftalPgnivoMhtiw(&player, level.getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
+    handleCollisionsD2mroftalPgnivoMhtiw(&player, level.getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
+    handleCollisionsMroftalPgnihctiwShtiw(&player, level.getSwitchingPlatforms()); // Handle collisions with switching platforms
+}
 
 void Game::handleCollisions() {
+    // Handle collisions for the initial player
+    if (initialPlayer.getMavity() > 0) handleCollisionsNormalMavity(initialPlayer);
+    else handleCollisionsReversedMavity(initialPlayer);
 
-    // Check collisions for the initial player
-    this->initialPlayer.setCanMove(true);
-
-    // Check obstacles collisions only if the player has moved
-    if (this->initialPlayer.getMoveY() != 0 || this->initialPlayer.getCurrentDirection() != 0) {
-        this->initialPlayer.setIsOnPlatform(false);
-        handleCollisionsWithObstacles(&this->initialPlayer);
-    }
-
-    handleCollisionsWithOtherPlayers(&this->initialPlayer); // Check collisions with other players
-    handleCollisionsWithPlatforms(&this->initialPlayer); // Check collisions with platforms
-    handleCollisionsWithCameraBorders(&this->initialPlayer); // Check collisions with camera borders
-
-    // Check collisions for other players
+    // Handle collisions for other players
     for (Player &character : characters) {
-        character.setCanMove(true);
-
-        // Check obstacles collisions only if the player has moved
-        if (character.getMoveY() != 0 || character.getCurrentDirection() != 0) {
-            character.setIsOnPlatform(false);
-            handleCollisionsWithObstacles(&character);
-        }
-
-        handleCollisionsWithOtherPlayers(&character); // Check collisions with other players
-        handleCollisionsWithPlatforms(&character); // Check collisions with platforms
-        handleCollisionsWithCameraBorders(&character); // Check collisions with camera borders
-    }
-}
-
-
-/** HANDLE COLLISIONS REVERSED MAVITY **/
-void Game::handleCollisionsWithObstaclesReverseMavity(Player *player) {
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getObstacles()) {
-        // If collision detected with the roof, the player is on a platform
-        if (checkCollision(player->getVerticesRoof(), obstacle)) {
-            player->setIsOnPlatform(true);
-        }
-        // If collision detected with the ground, the player can't jump anymore
-        if (!player->getIsOnPlatform() && checkCollision(player->getVerticesGround(), obstacle)) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the wall, the player can't move
-        if (player->getCanMove() && checkCollision(player->getVerticesHorizontal(), obstacle)) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-}
-
-void Game::handleCollisionsWithPlatformsReversedMavity(Player *player) {
-    // Check for collisions with each 1D moving platforms
-    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        // If collision detected with the roof, the player is on the platform
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-            // Add platform velocity to the player by checking on which axis it moves
-            platform.getAxis() ? player->setY(player->getY() + platform.getMove()) : player->setX(player->getX() + platform.getMove());
-        }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-
-    // Check for collisions with each 2D moving platforms
-    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        // If collision detected with the roof, the player is on the platform
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-            // Add platform velocity to the player
-            player->setX(player->getX() + platform.getMoveX());
-            player->setY(player->getY() + platform.getMoveY());
-        }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-
-    // Check for collisions with each switching platforms
-    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        // If collision detected with the roof, the player is on the platform
-        if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setIsOnPlatform(true);
-        }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
-        // If collision detected with the wall, the player can't move
-        if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setCanMove(false);
-            player->setTimeSpeed(0);
-        }
-    }
-}
-
-void Game::handleCollisionsWithOtherPlayersReversedMavity(Player *player) {
-    // Not implemented yet
-}
-
-void Game::handleCollisionsWithCameraBordersReversedMavity(Player *player) {
-    // Not implemented yet
-}
-
-void Game::handleCollisionsReversedMavity() {
-
-    // Check collisions for the initial player
-    this->initialPlayer.setCanMove(true);
-
-    // Check obstacles collisions only if the player has moved
-    if (this->initialPlayer.getMoveY() != 0 || this->initialPlayer.getCurrentDirection() != 0) {
-        this->initialPlayer.setIsOnPlatform(false);
-        handleCollisionsWithObstaclesReverseMavity(&this->initialPlayer);
-    }
-
-    handleCollisionsWithOtherPlayersReversedMavity(&this->initialPlayer); // Check collisions with other players
-    handleCollisionsWithPlatformsReversedMavity(&this->initialPlayer); // Check collisions with platforms
-    handleCollisionsWithCameraBordersReversedMavity(&this->initialPlayer); // Check collisions with camera borders
-
-    // Check collisions for other players
-    for (Player &character : characters) {
-        character.setCanMove(true);
-
-        // Check obstacles collisions only if the player has moved
-        if (character.getMoveY() != 0 || character.getCurrentDirection() != 0) {
-            character.setIsOnPlatform(false);
-            handleCollisionsWithObstaclesReverseMavity(&character);
-
-        handleCollisionsWithOtherPlayersReversedMavity(&character); // Check collisions with other players
-        handleCollisionsWithPlatformsReversedMavity(&character); // Check collisions with platforms
-        handleCollisionsWithCameraBordersReversedMavity(&character); // Check collisions with camera borders
-        }
+        if (initialPlayer.getMavity() > 0) handleCollisionsNormalMavity(character);
+        else handleCollisionsReversedMavity(character);
     }
 }
 
@@ -622,7 +302,7 @@ void Game::render() {
 
     // Render textures
     if (render_textures) {
-        initialPlayer.render(renderer, cam); // Draw the initial player
+        initialPlayer.renderDebug(renderer, cam); // Draw the initial player
 
         // Draw the characters
         for (Player &character: characters) {
@@ -658,76 +338,36 @@ void Game::render() {
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
-    SDL_Delay(4);
-}
-
-bool Game::checkCollision(const std::vector<Point> &playerVertices, const Polygon &obstacle) {
-    // Check for convexity of the obstacle
-    if (!obstacle.isConvex()) {
-        printf("The obstacle is not convex\n");
-        return false;
-    }
-
-    // Potential separation axes (normals to the sides of the rectangle)
-    std::vector<Point> axes = {
-            {1, 0},
-            {0, 1}
-    };
-
-    // Add axes perpendicular to the sides of the polygon
-    for (size_t i = 0; i < obstacle.getVertices().size(); ++i) {
-        std::vector<Point> vertices = obstacle.getVertices();
-        const Point &vertex1 = vertices[i];
-        const Point &vertex2 = vertices[(i + 1) % vertices.size()];
-
-        Point edge = {vertex2.x - vertex1.x, vertex2.y - vertex1.y};
-        Point axis = {-edge.y, edge.x};
-        axes.push_back(axis);
-    }
-
-    for (Point axis: axes) {
-        // Project the rectangle and the polygon onto the axis
-        auto playerProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
-        auto playerProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
-
-        for (const Point &vertex: playerVertices) {
-            float projection = vertex.x * axis.x + vertex.y * axis.y;
-            playerProjectionMin = std::min(playerProjectionMin, projection);
-            playerProjectionMax = std::max(playerProjectionMax, projection);
-        }
-
-        auto obstacleProjectionMin = static_cast<float>(std::numeric_limits<int>::max());
-        auto obstacleProjectionMax = static_cast<float>(std::numeric_limits<int>::min());
-
-        for (const Point &vertex: obstacle.getVertices()) {
-            float projection = vertex.x * axis.x + vertex.y * axis.y;
-            obstacleProjectionMin = std::min(obstacleProjectionMin, projection);
-            obstacleProjectionMax = std::max(obstacleProjectionMax, projection);
-        }
-
-        // Check for separation on the axis
-        if (playerProjectionMax < obstacleProjectionMin || obstacleProjectionMax < playerProjectionMin) {
-            return false; // No collision detected
-        }
-    }
-
-    return true; // Collision detected
 }
 
 void Game::run() {
     gameState = GameState::RUNNING;
+    Uint32 lastTime = SDL_GetTicks();
 
     // Game loop
     while (gameState == GameState::RUNNING) {
-        // Handle events, calculate player movement, check collisions, apply player movement, apply camera movement and render
+        Uint32 start = SDL_GetTicks(); // Get time before execution
+
+        // MAIN EVENTS
         handleEvents(&initialPlayer);
         for (Player &character : characters) handleEvents(&character);
-        if (enable_platforms_movement) level.applyPlatformsMovement();
+        if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
         calculateAllPlayerMovement();
-        switchGravity ? handleCollisionsReversedMavity() : handleCollisions();
+        handleCollisions();
         applyAllPlayerMovement();
-        camera.applyCameraMovement(getAveragePlayersPositions());
+        camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
         render();
+
+        // FRAME RATE LIMITATION
+        Uint32 end = SDL_GetTicks(); // Get time after execution
+        deltaTime = (float)(end - lastTime) / 1000; // Get delta time
+        lastTime = end; // Last time delta time was calculated
+        Uint32 elapsedTime = end - start; // Get execution time
+
+        // If execution time is less than a frame, wait until a frame has passed
+        if (1000 / fps > elapsedTime) {
+            SDL_Delay(1000 / fps - elapsedTime);
+        }
     }
 }
 

@@ -6,15 +6,15 @@
 #include <SDL_image.h>
 #include <map>
 #include "../Point.h"
+#include "../../Physics/RigidBody.h"
 #include "../../Graphics/Animation.h"
 #include "../../Graphics/Sprite.h"
 
-const int PLAYER_RIGHT = 1; /**< Constant to the direction of the player here right. */
-const int PLAYER_LEFT = -1; /**< Constant to the direction of the player here left. */
+const int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
+const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
 
-const float PRESSURE_JUMP_MIN = 4; /**< Constant for the jump time limit minimum. */
-const float PRESSURE_JUMP_MAX = 7; /**< Constant for jump time limit. */
-constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
+const float PRESSURE_JUMP_MIN = 0.25F; /**< Constant for the jump time limit minimum. */
+const float PRESSURE_JUMP_MAX = 0.90F; /**< Constant for jump time limit. */
 
 /**
  * @file Player.h
@@ -25,7 +25,6 @@ constexpr float COYOTE_TIME = 2; /**< Time allowed for jumping after a fall. */
  * @class Player
  * @brief Represents a player in a 2D game with position, speed, and dimensions.
  */
-
 class Player {
 public:
     /** PUBLIC STATIC ATTRIBUTES **/
@@ -37,7 +36,7 @@ public:
     static constexpr Animation run = {4, 7, 100}; /**< Run animation */
 
 
-    /** CONSTRUCTOR **/
+    /** CONSTRUCTORS **/
 
     Player() = default; // Used for the useless empty Game constructor of Athena
 
@@ -50,7 +49,7 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(float startX, float startY, float playerSpeed, float speedMax, float playerWidth, float playerHeight);
+    Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight);
 
 
     /** BASIC ACCESSORS **/
@@ -104,22 +103,10 @@ public:
     [[nodiscard]] float getMoveY() const;
 
     /**
-     * @brief Return the timeAfterFall attribute.
-     * @return The value of the timeAfterFall attribute
-     */
-    [[nodiscard]] float getTimeAfterFall() const;
-
-    /**
      * @brief Return the currentDirection attribute.
      * @return The value of the currentDirection attribute (-1 for left, 1 for right)
      */
-    [[nodiscard]] int getCurrentDirection() const;
-
-    /**
-     * @brief Return the desiredDirection attribute.
-     * @return The value of the desiredDirection attribute (-1 for left, 1 for right)
-     */
-    [[nodiscard]] int getDesiredDirection() const;
+    [[nodiscard]] int getDirectionX() const;
 
     /**
      * @brief Return the canMove attribute.
@@ -140,6 +127,24 @@ public:
     [[nodiscard]] bool getWantToMoveLeft() const;
 
     /**
+     * @brief Return the mavity attribute.
+     * @return The value of the mavity attribute
+     */
+    [[nodiscard]] float getMavity() const;
+
+    /**
+     * @brief Return the wantToJump attribute.
+     * @return The value of the wantToJump attribute
+     */
+    [[nodiscard]] bool getWantToJump() const;
+
+    /**
+     * @brief Return the currentDirection attribute.
+     * @return The value of the currentDirection attribute (-1 for left, 1 for right)
+     */
+    [[nodiscard]] int getDirectionY() const;
+
+    /**
      * @brief Return the isOnPlatform attribute.
      * @return The value of the isOnPlatform attribute
      */
@@ -151,63 +156,76 @@ public:
      */
     [[nodiscard]] bool getIsJumping() const;
 
-    /**
-     * @brief Return the wantToJump attribute.
-     * @return The value of the wantToJump attribute
-     */
-    [[nodiscard]] bool getWantToJump() const;
-
 
     /** SPECIFIC ACCESSORS **/
 
     /**
-     * @brief Get the vertices of the player's bounding box.
+     * @brief Gets the vertices of the player's bounding box.
      * @return A vector of Point representing the vertices.
      */
     [[nodiscard]] std::vector<Point> getVertices() const;
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the wall.
-     * @return A vector of Point representing vertices, with added margin to capture wall within the area.
+     * @brief Gets the vertices of the player's bounding box of the next frame.
+     * @return A vector of Point representing the vertices of the next frame.
      */
-    [[nodiscard]] std::vector<Point> getVerticesHorizontal() const;
+    [[nodiscard]] std::vector<Point> getVerticesNextFrame() const;
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the ground.
-     * @return A vector of Point representing vertices, with added margin to capture ground within the area.
+     * @brief Gets the vertices of the player's horizontal collider, based on its current direction.
+     * @return A vector of Point representing the vertices.
+     * @see getLeftColliderVertices() and getRightColliderVertices() for detailed usage.
      */
-    [[nodiscard]] std::vector<Point> getVerticesGround() const;
+    [[nodiscard]] std::vector<Point> getHorizontalColliderVertices() const;
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the roof.
-     * @return A vector of Point representing vertices, with added margin to capture roof within the area.
+     * @brief Gets the vertices of the player's ground collider.
+     * @return A vector of Point representing the vertices.
+     * @see getGroundColliderBoundingBox() to get the bounding box of the ground collider.
      */
-    [[nodiscard]] std::vector<Point> getVerticesRoof() const;
+    [[nodiscard]] std::vector<Point> getGroundColliderVertices() const;
 
     /**
-     * @brief Gets the horizontal collider bounding box of the player's, according to its current direction.
-     * @param direction The direction in which the player intends to move.
+     * @brief Gets the vertices of the player's roof collider.
+     * @return A vector of Point representing the vertices.
+     * @see getRoofColliderBoundingBox() to get the bounding box of the roof collider.
+     */
+    [[nodiscard]] std::vector<Point> getRoofColliderVertices() const;
+
+    /**
+     * @brief Gets the horizontal collider bounding box of the player's, based on its current direction.
      * @return SDL_Rect representing the bounding box.
+     * @see getLeftColliderBoundingBox() and getRightColliderBoundingBox() for detailed usage.
      */
     [[nodiscard]] SDL_FRect getHorizontalColliderBoundingBox() const;
 
     /**
-     * @brief Get the bounding box of the player's ground collider.
+     * @brief Gets the bounding box of the player's ground collider.
      * @return SDL_Rect representing the bounding box.
+     * @see getGroundColliderVertices() to get the vertices of the ground collider.
      */
     [[nodiscard]] SDL_FRect getGroundColliderBoundingBox() const;
 
     /**
-     * @brief Get the bounding box of the player's roof collider.
+     * @brief Gets the bounding box of the player's roof collider.
      * @return SDL_Rect representing the bounding box.
+     * @see getRoofColliderVertices() to get the vertices of the roof collider.
      */
     [[nodiscard]] SDL_FRect getRoofColliderBoundingBox() const;
 
     /**
-     * @brief Get the bounding box of the player.
+     * @brief Gets the bounding box of the player.
      * @return SDL_Rect representing the bounding box.
+     * @see getVertices() to get the vertices of the player.
      */
     [[nodiscard]] SDL_FRect getBoundingBox() const;
+
+    /**
+     * @brief Gets the bounding box of the player of the next frame.
+     * @return SDL_Rect representing the bounding box of the next frame.
+     * @see getVertices() to get the vertices of the player this frame.
+     */
+    [[nodiscard]] SDL_FRect getBoundingBoxNextFrame() const;
 
     // Equality operator for comparing two players
     bool operator==(const Player &other) const {
@@ -218,94 +236,81 @@ public:
     /** MODIFIERS **/
 
     /**
-     * @brief Set the x attribute.
+     * @brief Sets the x attribute.
      * @param val The new value of the x attribute.
      */
     void setX(float val);
 
     /**
-     * @brief Set the y attribute.
+     * @brief Sets the y attribute.
      * @param val The new value of the y attribute.
      */
     void setY(float val);
 
     /**
-     * @brief Set the width attribute.
+     * @brief Sets the width attribute.
      * @param val The new value of the width attribute.
      */
     void setW(float val);
 
     /**
-     * @brief Set the height attribute.
+     * @brief Sets the height attribute.
      * @param val The new value of the height attribute.
      */
     void setH(float val);
 
     /**
-     * @brief Set the moveX attribute.
+     * @brief Sets the moveX attribute.
      * @param val The new value of the moveX attribute.
      */
     void setMoveX(float val);
 
     /**
-     * @brief Set the moveY attribute.
+     * @brief Sets the moveY attribute.
      * @param val The new value of the moveY attribute.
      */
     void setMoveY(float val);
 
     /**
-     * @brief Set the finishTheMovement attribute.
-     * @param state The new value of the finishTheMovement attribute.
-     */
-    void setFinishTheMovement(bool state);
-
-    /**
-     * @brief Set the timeSpeed attribute.
-     * @param state The new value of the timeSpeed attribute.
-     */
-    void setTimeSpeed(float val);
-
-    /**
-     * @brief Set the desiredDirection attribute.
-     * @param val The new value of the desiredDirection attribute.
-     */
-    void setDesiredDirection(int val);
-
-    /**
-     * @brief Set the canMove attribute.
+     * @brief Sets the canMove attribute.
      * @param state The new value of the canMove attribute.
      */
     void setCanMove(bool state);
 
     /**
-     * @brief Set the wantToMoveRight attribute.
+     * @brief Sets the wantToMoveRight attribute.
      * @param state The new value of the wantToMoveRight attribute.
      */
     void setWantToMoveRight(bool state);
 
     /**
-     * @brief Set the wantToMoveLeft attribute.
+     * @brief Sets the wantToMoveLeft attribute.
      * @param state The new value of the wantToMoveLeft attribute.
      */
     void setWantToMoveLeft(bool state);
 
     /**
-     * @brief Set the timeSpentJumping attribute.
-     * @param state The new value of the timeSpentJumping attribute.
-     */
-    void setTimeSpentJumping(float val);
-
-    /**
-     * @brief Set the isOnPlatform attribute.
+     * @brief Sets the isOnPlatform attribute.
      * @param state The new value of the isOnPlatform attribute.
      */
     void setIsOnPlatform(bool state);
 
     /**
-     * @brief Set the wantToJump attribute.
+     * @brief Sets the wantToJump attribute.
      * @param state The new value of the wantToJump attribute.
      */
     void setWantToJump(bool state);
+
+    /**
+     * @brief Toggle the gravity to positive or negative (normal or reversed).
+     */
+    void toggleMavity();
+
+    /**
+     * @brief Sets the timeSpentJumping attribute.
+     * @param val The new value of timeSpentJumping.
+     */
+    void setTimeSpentJumping(float val);
 
 
     /** PUBLIC METHODS **/
@@ -332,8 +337,10 @@ public:
 
     /**
      * @brief Calculate the new position of the player.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
      */
-    void calculateMovement();
+    void calculateMovement(float deltaTime);
 
     /**
      * @brief Renders the player's sprite.
@@ -357,36 +364,42 @@ public:
     void renderColliders(SDL_Renderer *renderer, Point camera) const;
 
 
-
 private:
     /** ATTRIBUTES **/
 
+    // CHARACTERISTIC ATTRIBUTES
     float x; /**< The x-coordinate of the player's position. (in pixels) */
     float y; /**< The y-coordinate of the player's position. */
     float speed; /**< The speed of the player. */
-    float speedMax; /**< The maximum speed of the player. */
-    float moveX = 0;/**< The actual speed of the player into the x axis. */
-    float moveY = 0;/**< The actual speed of the player into the y axis. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     Sprite sprite; /**< The sprite of the player. */
 
-    float timeAfterFall = COYOTE_TIME; /**< The time that has elapsed since the player started to fall */
-
-    bool finishTheMovement = true; /**< If the player has finish the movement and can change direction */
-    int desiredDirection = 0; /**< The direction the player wants to go (-1 for left, 1 for right) */
-    int currentDirection = 0; /**< The current direction of the player (-1 for left, 1 for right) */
-    float timeSpeed = 0; /**< The time that has elapsed since the player started running */
-    float maxSpeedReachWithThisTime = 5.2F; /**< the speed max is reach at this time */
+    // X-AXIS MOVEMENT ATTRIBUTES
+    float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
+    bool wantToMoveRight = false; /**< If the player pressed a key to move right */
+    bool wantToMoveLeft = false; /**< If the player pressed a key to move left */
+    float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right) */
     bool canMove = true; /**< If the player can move */
-    bool wantToMoveRight = false; /**< If the player try to move right */
-    bool wantToMoveLeft = false; /**< If the player try to move left */
+    Uint32 moveStartTime = SDL_GetTicks(); /**< The time when the player started to move */
+    Uint32 moveStopTime = SDL_GetTicks(); /**< The time when the player stopped to move */
+    float speedCurve = speedCurveMin; /**< The speed curve attribute that is multiplied to player's x-axis movement */
+    float speedCurveMin = 1; /**< The minimum value of the curve, the bigger it is, the smaller the curve is */
+    float speedCurveLerp = 1; /**< Lerp factor of the speed curve, the bigger it is, the faster the curve will rise */
 
-    float timeSpentJumping = 0.; /**< The time that has elapsed since the player started jumping */
+    // Y-AXIS MOVEMENT ATTRIBUTES
+    float moveY = 0; /**< player movement on y-axis during 'this' frame. */
+    float mavity = 1;
+    bool wantToJump = false; /**< If the player pressed a key to jump */
+    float directionY = 0; /**< The current direction of the player (-1 for up, 1 for down) */
     bool isOnPlatform = false; /**< If the player is on a platform */
     bool isJumping = false; /**< If the player is jumping */
-    bool wantToJump = false; /**< If the player try to jump */
+    Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< The last time the player was on a platform (also the time when he started jumping). */
+    float coyoteTime = 2; /**< The time in seconds the player can jump after starting falling. */
+    float timeSpentJumping = 0;
 
+
+    // LOADED TEXTURES IN STATIC ATTRIBUTES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
     static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
     static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
@@ -397,28 +410,54 @@ private:
     /** PRIVATE METHODS **/
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the left wall.
-     * @return A vector of Point representing vertices, with added margin to capture left wall within the area.
+     * @brief Gets the vertices of the player's left collider.
+     * @return A vector of Point representing the vertices.
+     * @see getHorizontalColliderVertices() for main use.
      */
-    [[nodiscard]] std::vector<Point> getVerticesLeft() const;
+    [[nodiscard]] std::vector<Point> getLeftColliderVertices() const;
 
     /**
-     * @brief Gets the vertices of the player's bounding box, adjusted to capture the right wall.
-     * @return A vector of Point representing vertices, with added margin to capture the right wall within the area.
+     * @brief Gets the vertices of the player's right collider.
+     * @return A vector of Point representing the vertices.
+     * @see getHorizontalColliderVertices() for main use.
      */
-    [[nodiscard]] std::vector<Point> getVerticesRight() const;
+    [[nodiscard]] std::vector<Point> getRightColliderVertices() const;
 
     /**
-     * @brief Get the bounding box of the player's left collider.
+     * @brief Gets the bounding box of the player's left collider.
      * @return SDL_Rect representing the bounding box.
+     * @see getHorizontalColliderBoundingBox() for main use.
      */
     [[nodiscard]] SDL_FRect getLeftColliderBoundingBox() const;
 
     /**
-     * @brief Get the bounding box of the player's right collider.
+     * @brief Gets the bounding box of the player's right collider.
      * @return SDL_Rect representing the bounding box.
+     * @see getHorizontalColliderBoundingBox() for main use.
      */
     [[nodiscard]] SDL_FRect getRightColliderBoundingBox() const;
+
+    /**
+     * @brief Checks if the player can jump by checking coyote time and if he is on a platform.
+     * @return Returns true if the player can jump, false otherwise.
+     */
+    bool canJump();
+
+    /**
+     * @brief To be written.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @see calculateMovement() for main use.
+     * TODO: correct the speed curve issue (linked to the fps limitation)
+     */
+    void calculateXaxisMovement(float deltaTime);
+
+    /**
+     * @brief To be written.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @see calculateMovement() for main use.
+     * TODO: correct the jump
+     */
+    void calculateYaxisMovement(float deltaTime);
 
 };
 

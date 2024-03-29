@@ -7,10 +7,7 @@
 #include <string>
 #include <ranges>
 #include <cmath>
-#include "Polygon.h"
-#include "Camera.h"
-#include "Level.h"
-#include "Objects/Player.h"
+#include "../Physics/CollisionHandler.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
 
@@ -158,7 +155,9 @@ private:
     Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     bool isRunning = true; /**< Flag indicating if the game is running. */
-    bool switchGravity = false;
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
+    float deltaTime = 0; /**< The time elapsed. */
+    static constexpr int fps = 60; /**< The game's fps limit. */
 
     // Debug variables used for the application console
     bool render_textures = true;
@@ -166,8 +165,6 @@ private:
     bool render_camera_area = false;
     bool render_player_colliders = false;
     bool enable_platforms_movement = true;
-
-    GameState gameState = GameState::STOPPED; /**< The current game state. */
 
 
     /** PRIVATE METHODS **/
@@ -181,7 +178,7 @@ private:
      * @brief Handles SDL Key up events, updating the movement variables accordingly.
      * @param keyEvent Reference to the key who was release.
      */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    static void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) ;
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
@@ -193,7 +190,7 @@ private:
      * @brief Applies player movement based on the current movement variables.
      * @param player The player to whom the movement will be applied.
      */
-    void applyPlayerMovement(Player *player);
+    void applyPlayerMovement(Player *player) const;
 
     /**
      * @brief Applies the movement to all players in the game.
@@ -208,64 +205,26 @@ private:
     void calculateAllPlayerMovement();
 
     /**
-     * @brief Checks for collision between the player and a polygon obstacle.
-     * @param playerVertices The vector of Point representing the vertices of the player object.
-     * @param obstacle The polygon obstacle.
-     * @return True if a collision is detected, false otherwise.
+     * @brief Switch mavity between normal and reversed.
      */
-    static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
+    void switchMavity();
 
     /**
-     * @brief Handles collisions between the player and platform.
+     * @brief Handles collisions between a player and every object.
      */
-    void handleCollisionsWithObstacles(Player *player);
+    void handleCollisionsNormalMavity(Player &player) const;
 
     /**
-     * @brief Handles collisions between the player and platforms.
+     * @brief Handles collisions between a player and every object when the mavity is reversed.
      */
-    void handleCollisionsWithPlatforms(Player *player);
+    void handleCollisionsReversedMavity(Player &player) const;
 
     /**
-     * @brief Handles collisions between the player and other players.
-     */
-    void handleCollisionsWithOtherPlayers(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and camera borders.
-     */
-    void handleCollisionsWithCameraBorders(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and every object.
-     * @see handleCollisionsReversedMavity() for handling collisions with reversed mavity.
+     * @brief Main method that handle collisions for every player according to their mavity.
+     * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
+     * TODO: add collision behavior for moving objects
      */
     void handleCollisions();
-
-    /**
-     * @brief Handles collisions between the player and platform when mavity is reversed.
-     */
-    void handleCollisionsWithObstaclesReverseMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and platforms when the mavity is reversed.
-     */
-    void handleCollisionsWithPlatformsReversedMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and other players when mavity is reversed.
-     */
-    void handleCollisionsWithCameraBordersReversedMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and camera borders when mavity is reversed.
-     */
-    void handleCollisionsWithOtherPlayersReversedMavity(Player *player);
-
-    /**
-     * @brief Main method that handle every collision when the mavity is reversed.
-     * @see handleCollisions() for handling collisions with normal mavity.
-     */
-    void handleCollisionsReversedMavity();
 
     /**
      * @brief Renders the game by drawing all the game textures and sprites.

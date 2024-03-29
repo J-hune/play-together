@@ -7,7 +7,6 @@
 
 constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
-constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
 
 
 /**
@@ -16,10 +15,10 @@ constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
  */
 
 /**
- * @class Level
+ * @class Camera
  * @brief Represents the camera logic including movement and shaking.
+ * TODO: correct the rendering issue (probably due to a conversion loss or delta time calculations, doesn't happen without smoothing)
  */
-
 class Camera {
 public:
     /** CONSTRUCTORS **/
@@ -55,12 +54,6 @@ public:
      */
     [[nodiscard]] float getH() const;
 
-    /**
-     * @brief Return the area attribute.
-     * @return A rectangle representing the area.
-     */
-    [[nodiscard]] SDL_FRect getArea() const;
-
 
     /** MODIFIERS **/
 
@@ -85,7 +78,7 @@ public:
 
     /**
      * @brief Toggle the isShaking attribute.
-     * @see setIsShaking for a similar operation.
+     * @see setIsShaking() for a similar operation.
      */
     void toggleIsShaking();
 
@@ -101,8 +94,9 @@ public:
     /**
      * @brief Applies camera movement based on the positions of all players.
      * @param camera_point A point representing the camera point position.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyCameraMovement(Point camera_point);
+    void applyCameraMovement(Point camera_point, float deltaTime);
 
     /**
      * @brief Renders the collisions by drawing obstacles.
@@ -146,6 +140,7 @@ private:
                       w - (w / 2.f) - w / 5.f,
                       h - (h / 5.f) - h / 5.f};
 
+    float lerpSmoothingFactor = 5;
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
 

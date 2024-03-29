@@ -56,7 +56,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Camera camera = Camera();
     Level level("diversity");
     Player::loadTextures(*renderer);
-    Player initialPlayer(50, 50, 0.2F, 2, 48, 36);
+    Player initialPlayer(50, 50, 1, 48, 36);
     Game game(window, renderer, camera, level, initialPlayer);
     mediator.setGamePtr(&game);
 
@@ -100,11 +100,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 1, 2, 48, 36);
-            Player character2(150, 50, 1, 2, 48, 36);
-            Player character3(200, 50, 1, 2, 48, 36);
+            Player character1(100, 50, 1, 48, 36);
+            Player character2(150, 50, 1, 48, 36);
+            Player character3(200, 50, 1, 48, 36);
 
-            game.addCharacter(character1);
+            //game.addCharacter(character1);
             //game.addCharacter(character2);
             game.addCharacter(character3);
 

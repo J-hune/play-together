@@ -1,4 +1,4 @@
-#include "../../include/Game/Polygon.h"
+#include "../../include/Physics/Polygon.h"
 
 /**
  * @file Polygon.cpp

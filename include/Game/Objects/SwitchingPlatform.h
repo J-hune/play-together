@@ -16,12 +16,11 @@
  * @class SwitchingPlatform
  * @brief Represents a switching platform in a 2D game.
  */
-
 class SwitchingPlatform {
 public:
     /** CONSTRUCTOR **/
 
-    SwitchingPlatform(float x, float y, float w, float h, Uint32 bpm, std::vector<Point> points);
+    SwitchingPlatform(float x, float y, float w, float h, Uint32 bpm, std::vector<Point> steps);
 
 
     /** BASIC ACCESSORS **/
@@ -49,6 +48,12 @@ public:
      * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const;
+
+    /**
+     * @brief Return the isMoving attribute.
+     * @return The value of the isMoving attribute.
+     */
+    [[nodiscard]] bool getIsMoving() const;
 
 
     /** SPECIFIC ACCESSORS **/
@@ -84,7 +89,7 @@ private:
     double bpm; /**< The beat per minute of the platform. */
     Uint32 startTime; /**< The time set at the beginning of every beat */
     int actualPoint = 0; /**< The current point the platform's position. */
-    std::vector<Point> points; /** Collection of Point representing every possible position of the platform. */
+    std::vector<Point> steps; /** Collection of Point representing every possible position of the platform. */
     bool isMoving = true;
 
 };

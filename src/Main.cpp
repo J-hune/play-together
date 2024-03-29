@@ -84,7 +84,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
             // If the escape key is pressed, stop the game
             else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                menu.setDisplayMenu(true);
+                if (game.getGameState() == GameState::PAUSED) {
+                    game.run();
+                } else {
+                    menu.setDisplayMenu(true);
+                }
             }
 
             else {

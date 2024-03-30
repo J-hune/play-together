@@ -12,8 +12,8 @@
 const int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
 const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
 
-const float PRESSURE_JUMP_MIN = 0.25F; /**< Constant for the jump time limit minimum. */
-const float PRESSURE_JUMP_MAX = 0.90F; /**< Constant for jump time limit. */
+const float PRESSURE_JUMP_MIN = 0.084F; /**< Constant for the jump time limit minimum. */
+const float PRESSURE_JUMP_MAX = 0.100F; /**< Constant for jump time limit. */
 
 /**
  * @file Player.h
@@ -393,15 +393,21 @@ private:
     float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
 
     // Y-AXIS MOVEMENT ATTRIBUTES
-    float moveY = 0; /**< player movement on y-axis during 'this' frame. */
-    float mavity = 1;
-    bool wantToJump = false; /**< If the player pressed a key to jump */
-    float directionY = 0; /**< The current direction of the player (-1 for up, 1 for down) */
-    bool isOnPlatform = false; /**< If the player is on a platform */
-    bool isJumping = false; /**< If the player is jumping */
-    Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< The last time the player was on a platform (also the time when he started jumping). */
-    float coyoteTime = 2; /**< The time in seconds the player can jump after starting falling. */
-    float timeSpentJumping = 0;
+    float moveY = 0; /**< Vertical movement of the player during this frame. */
+    float mavity = 35.f; /**< Gravity acceleration. */
+    bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
+    float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
+    bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
+    bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
+    Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
+    float initialJumpVelocity = 10.0f; /**< Initial velocity of the player's jump. */
+    float jumpVelocityFactor = 90.f; /**< Factor to adjust the player's jump velocity. */
+    float maxJumpTime = 0.1f; /**< Maximum duration of the player's jump. */
+    float maxFallSpeed = 1200.f; /**< Maximum falling speed of the player. */
+    float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
+    float coyoteTime = 0.6f; /**< Time window in seconds during which the player can still jump after starting to fall. */
+    Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
+    float jumpVelocity = 0.0f; /**< Current velocity of the player's jump. */
 
 
     // LOADED TEXTURES IN STATIC ATTRIBUTES

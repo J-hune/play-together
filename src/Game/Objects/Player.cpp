@@ -230,10 +230,6 @@ void Player::setWantToJump(bool state) {
     wantToJump = state;
 }
 
-void Player::setTimeSpentJumping(float val) {
-    timeSpentJumping = val;
-}
-
 void Player::toggleMavity() {
     mavity *= -1;
 }
@@ -271,7 +267,7 @@ void Player::teleportPlayer(float newX, float newY) {
 }
 
 bool Player::canJump() {
-    return isOnPlatform || ((float)SDL_GetTicks() - (float)lastTimeOnPlatform < coyoteTime * 1000);
+    return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
 }
 
 void Player::calculateXaxisMovement(float deltaTime) {
@@ -307,37 +303,40 @@ void Player::calculateXaxisMovement(float deltaTime) {
 }
 
 void Player::calculateYaxisMovement(float deltaTime) {
-
-    // The player is in the first jump phase
-    if (wantToJump && timeSpentJumping < PRESSURE_JUMP_MAX) {
+    // If the player wants to jump and can jump, start the jump
+    if (wantToJump && canJump() && !isJumping) {
         isJumping = true;
-        moveY = -(400 * timeSpentJumping - 0.3F * (timeSpentJumping * timeSpentJumping)) * deltaTime * mavity;
-        timeSpentJumping = ((float)SDL_GetTicks() - (float)lastTimeOnPlatform) / 1000;
+        jumpStartTime = SDL_GetPerformanceFrequency(); // Record the time at the beginning of the jump
+        jumpVelocity = initialJumpVelocity; // Initialize jump velocity
+        wantToJump = false; // Reset the jump flag
     }
-    // The player is in the second jump phase
-    else if (timeSpentJumping > 0 && timeSpentJumping < PRESSURE_JUMP_MIN) {
-        moveY = -(400 * timeSpentJumping - 0.3F * (timeSpentJumping * timeSpentJumping)) * deltaTime * mavity;
-        timeSpentJumping = ((float)SDL_GetTicks() - (float)lastTimeOnPlatform) / 1000;
+
+    // If the player is jumping, calculate the jump movement for this frame
+    if (isJumping) {
+        // Calculate the time elapsed since the beginning of the jump
+        float jumpTime = static_cast<float>(SDL_GetPerformanceFrequency() - jumpStartTime);
+        // Calculate jump velocity based on jump time (pressure jump)
+        jumpVelocity = jumpVelocityFactor * initialJumpVelocity * (1 - jumpTime / maxJumpTime) * (mavity < 0 ? 1.f : -1.f);
+        moveY = jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime;
+
+        // Check if the player has finished the jump
+        if (jumpTime >= maxJumpTime || jumpVelocity <= 0 || !wantToJump) {
+            isJumping = false;
+            jumpStartTime = 0;
+            jumpVelocity = 0;
+        }
     }
-    // The player is not jumping
     else {
-        timeSpentJumping = 0;
-        wantToJump = false;
-        // The player is on a platform
+        // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
         if (isOnPlatform) {
             moveY = 0;
-            isJumping = false;
-            lastTimeOnPlatform = SDL_GetTicks();
-        }
-        // The player is falling
-        else {
-            moveY = 400; // Add basic movement
-            moveY *= deltaTime; // Apply movement per second
-            moveY *= mavity; // Apply gravity
+        } else {
+            moveY += (fallSpeedFactor * mavity) * deltaTime * deltaTime;
+            moveY = std::max(std::min(moveY, maxFallSpeed * deltaTime), -maxFallSpeed * deltaTime);
         }
     }
 
-    // Calculate y-axis direction (used for collision correction)
+    // Update the Y direction for collision correction
     if (moveY == 0) directionY = 0;
     else directionY = moveY < 0 ? -1 : 1;
 }

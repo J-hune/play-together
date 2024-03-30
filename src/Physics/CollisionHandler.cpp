@@ -15,10 +15,6 @@ void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &o
 
             correctSATCollisions(player, obstacle); // Correct the collision
 
-            // If the collision is with the roof, then the player can't jump anymore
-            if (checkSATCollision(player->getRoofColliderVertices(), obstacle)) {
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
             // If the collision is with the ground, the player is on a platform
             if (!player->getIsOnPlatform() && checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
                 player->setIsOnPlatform(true);
@@ -39,10 +35,6 @@ void handleCollisionsWithMovingPlatform1D(Player *player, const std::vector<Movi
 
             correctAABBCollisions(player, platform.getBoundingBox()); // Correct the collision
 
-            // If the collision is with the roof, then the player can't jump anymore
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
@@ -66,10 +58,6 @@ void handleCollisionsWithMovingPlatform2D(Player *player, const std::vector<Movi
 
             correctAABBCollisions(player, platform.getBoundingBox()); // Correct the collision
 
-            // If the collision is with the roof, then the player can't jump anymore
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
@@ -93,10 +81,6 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
 
             correctAABBCollisions(player, platform.getBoundingBox()); // Correct the collision
 
-            // If the collision is with the roof, then the player can't jump anymore
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
@@ -255,10 +239,6 @@ void handleCollisionsSelcatsbOhtiw(Player *player, const std::vector<Polygon> &o
             if (checkSATCollision(player->getRoofColliderVertices(), obstacle)) {
                 player->setIsOnPlatform(true);
             }
-            // If the collision is with the ground, the player can't jump anymore
-            if (!player->getIsOnPlatform() && checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
-                player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-            }
             // If the collision is with the wall, the player can't move
             if (player->getCanMove() && checkSATCollision(player->getHorizontalColliderVertices(), obstacle)) {
                 player->setCanMove(false);
@@ -277,10 +257,6 @@ void handleCollisionsD1mroftalPgnivoMhtiw(Player *player, const std::vector<Movi
             platform.getAxis() ? player->setY(player->getY() + platform.getMove()) : player->setX(
                     player->getX() + platform.getMove());
         }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
         // If collision detected with the wall, the player can't move
         if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
             player->setCanMove(false);
@@ -298,10 +274,6 @@ void handleCollisionsD2mroftalPgnivoMhtiw(Player *player, const std::vector<Movi
             player->setX(player->getX() + platform.getMoveX());
             player->setY(player->getY() + platform.getMoveY());
         }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
-        }
         // If collision detected with the wall, the player can't move
         if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
             player->setCanMove(false);
@@ -315,10 +287,6 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
         // If collision detected with the roof, the player is on the platform
         if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
             player->setIsOnPlatform(true);
-        }
-        // If collision detected with the ground, the player can't jump anymore
-        if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
         }
         // If collision detected with the wall, the player can't move
         if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {

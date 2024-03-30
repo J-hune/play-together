@@ -121,7 +121,6 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDLK_g:
             switchMavity();
             player->setIsOnPlatform(false);
-            player->setTimeSpentJumping(PRESSURE_JUMP_MAX);
             player->getSprite()->toggleFlipVertical();
             break;
         case SDLK_m:

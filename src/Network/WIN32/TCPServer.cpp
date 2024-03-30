@@ -117,6 +117,7 @@ SOCKET TCPServer::waitForConnection() {
 
     // Notify the mediator of the new client connection
     Mediator::handleClientConnect((int)clientSocket);
+    sendGameProperties(clientSocket);
     sendPlayerList(clientSocket);
     relayClientConnection(clientSocket);
 
@@ -256,6 +257,17 @@ std::string TCPServer::receive(SOCKET clientSocket) const {
     }
 
     return receivedData;
+}
+
+bool TCPServer::sendGameProperties(SOCKET clientSocket) const {
+    using json = nlohmann::json;
+
+    // Create JSON message
+    json message;
+    message["messageType"] = "gameProperties";
+    Mediator::getGameProperties(message);
+
+    return send(clientSocket, message.dump());
 }
 
 bool TCPServer::sendPlayerList(SOCKET clientSocket) const {

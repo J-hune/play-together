@@ -6,6 +6,7 @@
 #include <array>
 #include <unordered_map>
 #include "../Game/Objects/Player.h"
+#include "../../dependencies/json.hpp"
 
 // Forward declarations
 class Game;
@@ -74,7 +75,7 @@ public:
     static void initializeGame(int slot);
     static void stop();
     static void save();
-
+    static void getGameProperties(nlohmann::json &properties);
 
     // Other methods
     /**

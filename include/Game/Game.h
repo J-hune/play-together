@@ -233,7 +233,7 @@ private:
     /**
      * @brief Updates the camera position based on the player's position.
      */
-    void killPlayer(Player *player);
+    void killPlayer(const Player *player);
 
     /**
      * @brief Checks for collision between the player and a polygon obstacle.
@@ -256,7 +256,7 @@ private:
     /**
      * @brief Handles collisions between the player and save zones.
      */
-    void handleCollisionsWithSaveZone(Player *player);
+    void handleCollisionsWithSaveZone(const Player *player);
 
     /**
      * @brief Handles collisions between the player and platforms.

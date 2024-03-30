@@ -314,8 +314,10 @@ void Game::handleEvents() {
         }
     }
 
-    // Send the keyboard state to the network after handling all events
-    sendKeyboardStateToNetwork(&lastKeyboardStateMask);
+    // If the player is alive, send the keyboard state to the network after handling all events
+    if (findPlayerById(-1) != nullptr) {
+        sendKeyboardStateToNetwork(&lastKeyboardStateMask);
+    }
 }
 
 
@@ -349,15 +351,10 @@ void Game::calculateAllPlayerMovement() {
     }
 }
 
-void Game::killPlayer(Player *player) {
-    Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[findPlayerIndexById(player->getPlayerID())];
-
+void Game::killPlayer(const Player *player) {
     // Add the player to the dead characters list
     deadCharacters.push_back(*player);
     characters.erase(characters.begin() + findPlayerIndexById(player->getPlayerID()));
-
-    // Teleport the player to the spawn point
-    player->teleportPlayer(spawnPoint.x, spawnPoint.y);
 }
 
 
@@ -392,13 +389,14 @@ void Game::handleCollisionsWithDeathZone(Player *player) {
     }
 }
 
-void Game::handleCollisionsWithSaveZone(Player *player) {
+void Game::handleCollisionsWithSaveZone(const Player *player) {
+
     // Check collisions with each save zone
     const auto &saveZones = level.getZones(zoneType::SAVE);
     for (size_t i = 0; i < saveZones.size(); ++i) {
         const Polygon &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
         auto savePointID = static_cast<short>(i + 1);
-        if (checkCollision(player->getVertices(), saveZone) && !Mediator::isClientRunning() && level.getLastCheckpoint() < savePointID) {
+        if (checkCollision(player->getVertices(), saveZone) && level.getLastCheckpoint() < savePointID) {
             level.setLastCheckpoint(savePointID);
             std::cout << "Checkpoint reached: " << savePointID << std::endl;
         }

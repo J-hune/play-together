@@ -255,7 +255,8 @@ void Menu::handleJoinHostedGameButton(Button &button) {
 
     try {
         Mediator::startClients();
-        setMenuAction(MenuAction::JOIN_GAME);
+        displayMenu = false;
+        setMenuAction(MenuAction::MAIN);
     } catch (const TCPError& e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
     } catch (const UDPError& e) {

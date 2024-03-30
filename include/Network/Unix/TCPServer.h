@@ -79,6 +79,13 @@ public:
     [[nodiscard]] std::string receive(int clientSocket) const;
 
     /**
+     * @brief Sends the game properties to the specified client.
+     * @param clientSocket The client socket file descriptor.
+     * @return
+     */
+    bool sendGameProperties(int clientSocket) const;
+
+    /**
      * @brief Sends the list of players to the specified client.
      * @param clientSocket The client socket file descriptor.
      * @return

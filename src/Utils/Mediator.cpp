@@ -84,6 +84,11 @@ void Mediator::save() {
     gamePtr->saveGame();
 }
 
+void Mediator::getGameProperties(nlohmann::json &properties) {
+    properties["mapName"] = gamePtr->getLevel().getMapName();
+    properties["lastCheckpoint"] = gamePtr->getLevel().getLastCheckpoint();
+}
+
 int Mediator::handleClientConnect(int playerID) {
     // Check if the player ID is not already taken by another character.
     for (const auto &character : gamePtr->getCharacters()) {
@@ -162,6 +167,12 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         int playerSocketID = message["playerID"];
         gamePtr->removeCharacter(gamePtr->findPlayerById(playerSocketID));
         std::cout << "Mediator: Player " << playerSocketID << " removed from the game" << std::endl;
+    }
+
+    else if (messageType == "gameProperties") {
+        std::cout << "Mediator: Game properties received: " << message << std::endl;
+        gamePtr->setLevel(message["mapName"]);
+        gamePtr->getLevel().setLastCheckpoint(message["lastCheckpoint"]);
     }
 
     else if (messageType == "playerList") {

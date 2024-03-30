@@ -384,12 +384,13 @@ private:
     bool wantToMoveRight = false; /**< If the player pressed a key to move right */
     bool wantToMoveLeft = false; /**< If the player pressed a key to move left */
     float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right) */
+    float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
     bool canMove = true; /**< If the player can move */
-    Uint32 moveStartTime = SDL_GetTicks(); /**< The time when the player started to move */
-    Uint32 moveStopTime = SDL_GetTicks(); /**< The time when the player stopped to move */
-    float speedCurve = speedCurveMin; /**< The speed curve attribute that is multiplied to player's x-axis movement */
-    float speedCurveMin = 1; /**< The minimum value of the curve, the bigger it is, the smaller the curve is */
-    float speedCurveLerp = 1; /**< Lerp factor of the speed curve, the bigger it is, the faster the curve will rise */
+    float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
+    float initialSpeedCurveX = 0.3f; /**< The initial speed curve factor used for acceleration when the player starts moving. A lower value results in slower initial acceleration. */
+    float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
+    float decelerationFactorX = 3.0f; /**< The deceleration factor controlling how quickly the player's speed curve decreases when not moving. A higher value results in faster deceleration. */
+    float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
 
     // Y-AXIS MOVEMENT ATTRIBUTES
     float moveY = 0; /**< player movement on y-axis during 'this' frame. */

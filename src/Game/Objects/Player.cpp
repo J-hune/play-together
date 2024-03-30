@@ -275,7 +275,8 @@ bool Player::canJump() {
 }
 
 void Player::calculateXaxisMovement(float deltaTime) {
-    // Determine the direction
+
+    // Determine the desired direction
     float wantedDirection = 0;
     if (wantToMoveLeft && !wantToMoveRight) {
         wantedDirection = -1;
@@ -283,41 +284,26 @@ void Player::calculateXaxisMovement(float deltaTime) {
         wantedDirection = 1;
     }
 
-    // The player want to move
+    // Update direction and speed curve
     if (wantedDirection != 0) {
         directionX = wantedDirection;
-
-        if (speedCurve >= 1) {
-            speedCurve = 1;
+        if (directionX != previousDirectionX && speedCurveX != 0) {
+            // If direction changed, reset speed curve
+            speedCurveX = initialSpeedCurveX;
         } else {
-            speedCurve += (((float)SDL_GetTicks() - (float)moveStartTime) / 1000) * speedCurveLerp;
-            if (speedCurve > 1) speedCurve = 1;
+            // Gradually increase speed curve for smooth acceleration
+            speedCurveX = std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0f);
         }
-
-        moveStopTime = SDL_GetTicks();
+    } else {
+        // If no input, gradually decrease speed curve for smooth deceleration
+        speedCurveX = std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0f);
     }
 
-    // The player doesn't want to move
-    else {
-        // The player doesn't move
-        if (speedCurve <= speedCurveMin) {
-            speedCurve = speedCurveMin;
-            directionX = 0;
-        }
-        // The player is in his deceleration curve
-        else {
-            speedCurve -= (((float)SDL_GetTicks() - (float)moveStopTime) / 1000) * speedCurveLerp;
-            if (speedCurve < speedCurveMin) speedCurve = speedCurveMin;
-        }
+    // Calculate movement based on speed curve and direction
+    moveX = baseMovementX * deltaTime * speed * speedCurveX * directionX;
 
-        moveStartTime = SDL_GetTicks();
-    }
-
-    moveX = 350; // Add basic movement
-    moveX *= deltaTime; // Apply movement per second
-    moveX *= speed; // Apply speed
-    moveX *= speedCurve; // Apply the speed curve
-    moveX *= directionX; // Apply direction
+    // Remember previous direction
+    previousDirectionX = directionX;
 }
 
 void Player::calculateYaxisMovement(float deltaTime) {

@@ -331,16 +331,22 @@ void Game::run() {
     gameState = GameState::RUNNING;
 
     // Variables for controlling FPS and calculating delta time
-    Uint32 lastFrameTime = SDL_GetTicks(); // Time at the start of the frame
+    Uint64 lastFrameTime = SDL_GetPerformanceCounter(); // Time at the start of the frame
+    Uint64 frequency = SDL_GetPerformanceFrequency();
+    double accumulatedTime = 0.0; // Accumulated time since last effective FPS update
     int frameCounter = 0;
-    Uint32 fpsTimer = 0;
 
     // Game loop
     while (gameState == GameState::RUNNING) {
         // Calculate delta time
-        Uint32 currentFrameTime = SDL_GetTicks();
-        deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / 1000.0f; // Delta time in seconds
+        Uint64 currentFrameTime = SDL_GetPerformanceCounter();
+        Uint64 frameTicks = currentFrameTime - lastFrameTime;
+        deltaTime = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds
         lastFrameTime = currentFrameTime;
+
+        // Accumulate time and frame counter
+        accumulatedTime += deltaTime;
+        frameCounter++;
 
         // MAIN EVENTS
         handleEvents(&initialPlayer);
@@ -352,19 +358,20 @@ void Game::run() {
         camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
         render();
 
-        // Calculating FPS
-        frameCounter++;
-        Uint32 elapsedTime = currentFrameTime - fpsTimer;
-        if (elapsedTime >= 500) {
-            effectiveFps = static_cast<int>(round(static_cast<float>(frameCounter) / (static_cast<float>(elapsedTime) / 1000.0f)));
-            frameCounter = 0;
-            fpsTimer = currentFrameTime;
+        // Waiting to maintain FPS
+        Uint64 desiredTicksPerFrame = frequency / targetFPS;
+        Uint64 elapsedTicks = SDL_GetPerformanceCounter() - currentFrameTime;
+        Uint64 ticksToWait = desiredTicksPerFrame > elapsedTicks ? desiredTicksPerFrame - elapsedTicks : 0;
+        double secondsToWait = static_cast<double>(ticksToWait) / static_cast<double>(frequency);
+        if (secondsToWait > 0) {
+            SDL_Delay(static_cast<Uint32>(secondsToWait * 1000)); // Convert seconds to milliseconds
         }
 
-        // Waiting to maintain FPS
-        Uint32 timeToWait = (1000 / targetFPS) - (SDL_GetTicks() - currentFrameTime);
-        if (timeToWait > 0) {
-            SDL_Delay(timeToWait);
+        // Update effective FPS every 500ms
+        if (accumulatedTime >= 0.5) {
+            effectiveFps = static_cast<int>(frameCounter / accumulatedTime);
+            accumulatedTime = 0.0; // Reset accumulated time
+            frameCounter = 0; // Reset frame counter
         }
     }
 }

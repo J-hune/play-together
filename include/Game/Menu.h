@@ -40,11 +40,11 @@ public:
     /**
      * @brief Constructor for the Menu class.
      * @param renderer The SDL_Renderer to render the menu.
-     * @param font The TTF_Font to render the text on the menu.
+     * @param fonts A vector of TTF_Font objects for rendering text.
      * @param game The game object.
      * @param quit A pointer to a boolean to control the game loop.
      */
-    Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator);
+    Menu(SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, Game *game, bool *quit, Mediator *mediator);
 
 
     /** ACCESSORS **/
@@ -104,7 +104,7 @@ private:
     /** ATTRIBUTES **/
 
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    TTF_Font *font; /**< TTF font for rendering text. */
+    std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
     Game *gamePtr; /**< Pointer to the game object. */
     bool *quit; /**< Pointer to a boolean controlling the game loop. */

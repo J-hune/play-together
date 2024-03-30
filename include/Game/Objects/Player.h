@@ -6,7 +6,6 @@
 #include <SDL_image.h>
 #include <map>
 #include "../Point.h"
-#include "../../Physics/RigidBody.h"
 #include "../../Graphics/Animation.h"
 #include "../../Graphics/Sprite.h"
 

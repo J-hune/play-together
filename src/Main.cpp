@@ -41,10 +41,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     }
 
     // Load font from a TrueType (TTF) file
-    TTF_Font *font = TTF_OpenFont("../assets/font/arial.ttf", 24);
-    if (font == nullptr) {
-        std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
-        return 1;
+    std::vector<TTF_Font*> fonts;
+    TTF_Font *font16 = TTF_OpenFont("../assets/font/arial.ttf", 16);
+    TTF_Font *font24 = TTF_OpenFont("../assets/font/arial.ttf", 24);
+    fonts.push_back(font16);
+    fonts.push_back(font24);
+
+    for (TTF_Font const* font : fonts) {
+        if (font == nullptr) {
+            std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
+            return 1;
+        }
     }
 
     // Define a boolean to control the game loop
@@ -57,11 +64,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Level level("diversity");
     Player::loadTextures(*renderer);
     Player initialPlayer(50, 50, 1, 48, 36);
-    Game game(window, renderer, camera, level, initialPlayer);
+    Game game(window, renderer, fonts, camera, level, initialPlayer);
     mediator.setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, font, &game, &quit, &mediator);
+    Menu menu(renderer, fonts, &game, &quit, &mediator);
     mediator.setMenuPtr(&menu);
     menu.render();
 
@@ -128,7 +135,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Clean up resources
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    TTF_CloseFont(font);
+
+    for (TTF_Font* font : fonts) {
+        TTF_CloseFont(font);
+    }
+
     TTF_Quit();
     SDL_Quit();
 

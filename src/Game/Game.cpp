@@ -1,3 +1,4 @@
+#include <SDL_ttf.h>
 #include "../../include/Game/Game.h"
 
 /**
@@ -7,14 +8,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
-
-Game::Game() :
-            window(SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                    (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN)),
-            renderer(SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)),
-            level("experimentation") {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
 
 
 /** ACCESSORS **/
@@ -282,6 +277,16 @@ void Game::render() {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
+    // Render fps counter
+    SDL_Color color = {160, 160, 160, 255};
+    SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFps).c_str(), color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_Rect rect = {10, 10, surface->w, surface->h};
+    SDL_RenderCopy(renderer, texture, nullptr, &rect);
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
+
+
     // Render textures
     if (render_textures) {
         initialPlayer.renderDebug(renderer, cam); // Draw the initial player
@@ -324,11 +329,18 @@ void Game::render() {
 
 void Game::run() {
     gameState = GameState::RUNNING;
-    Uint32 lastTime = SDL_GetTicks();
+
+    // Variables for controlling FPS and calculating delta time
+    Uint32 lastFrameTime = SDL_GetTicks(); // Time at the start of the frame
+    int frameCounter = 0;
+    Uint32 fpsTimer = 0;
 
     // Game loop
     while (gameState == GameState::RUNNING) {
-        Uint32 start = SDL_GetTicks(); // Get time before execution
+        // Calculate delta time
+        Uint32 currentFrameTime = SDL_GetTicks();
+        deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / 1000.0f; // Delta time in seconds
+        lastFrameTime = currentFrameTime;
 
         // MAIN EVENTS
         handleEvents(&initialPlayer);
@@ -340,15 +352,19 @@ void Game::run() {
         camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
         render();
 
-        // FRAME RATE LIMITATION
-        Uint32 end = SDL_GetTicks(); // Get time after execution
-        deltaTime = (float)(end - lastTime) / 1000; // Get delta time
-        lastTime = end; // Last time delta time was calculated
-        Uint32 elapsedTime = end - start; // Get execution time
+        // Calculating FPS
+        frameCounter++;
+        Uint32 elapsedTime = currentFrameTime - fpsTimer;
+        if (elapsedTime >= 500) {
+            effectiveFps = static_cast<int>(round(static_cast<float>(frameCounter) / (static_cast<float>(elapsedTime) / 1000.0f)));
+            frameCounter = 0;
+            fpsTimer = currentFrameTime;
+        }
 
-        // If execution time is less than a frame, wait until a frame has passed
-        if (1000 / fps > elapsedTime) {
-            SDL_Delay(1000 / fps - elapsedTime);
+        // Waiting to maintain FPS
+        Uint32 timeToWait = (1000 / targetFPS) - (SDL_GetTicks() - currentFrameTime);
+        if (timeToWait > 0) {
+            SDL_Delay(timeToWait);
         }
     }
 }

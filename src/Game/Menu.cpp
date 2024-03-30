@@ -19,7 +19,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Mediator *mediator) : renderer(renderer), font(font), gamePtr(game), quit(quit), mediatorPtr(mediator) {
+Menu::Menu(SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, Game *game, bool *quit, Mediator *mediator) : renderer(renderer), fonts(fonts), gamePtr(game), quit(quit), mediatorPtr(mediator) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -34,10 +34,10 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Media
     ButtonPosition options_button_position = {200, 180, 400, 100};
     ButtonPosition credits_button_position = {200, 300, 400, 100};
     ButtonPosition quit_button_position = {200, 420, 400, 100};
-    auto play_button = Button(renderer, font, play_button_position, "Jouer", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color, text_color,10);
-    auto options_button = Button(renderer, font, options_button_position, "Options", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color,text_color, 10);
-    auto credits_button = Button(renderer, font, credits_button_position, "Credits", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color,text_color, 10);
-    auto quit_button = Button(renderer, font, quit_button_position, "Quitter", ButtonAction::QUIT, quit_color, quit_hover_color,quit_text_color, 10);
+    auto play_button = Button(renderer, fonts[1], play_button_position, "Play", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color,text_color, 10);
+    auto options_button = Button(renderer, fonts[1], options_button_position, "Options", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color,text_color, 10);
+    auto credits_button = Button(renderer, fonts[1], credits_button_position, "Credits", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color,text_color, 10);
+    auto quit_button = Button(renderer, fonts[1], quit_button_position, "Quitter", ButtonAction::QUIT, quit_color, quit_hover_color,quit_text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(play_button);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(options_button);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(credits_button);
@@ -49,10 +49,10 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Media
     ButtonPosition join_game_button_position = {200, 180, 400, 100};
     ButtonPosition start_new_game_button_position = {200, 300, 400, 100};
     ButtonPosition main_menu_button_position = {200, 420, 400, 100};
-    auto host_game_button = Button(renderer, font, host_game_button_position, "Host Game", ButtonAction::HOST_GAME, normal_color,hover_color, text_color, 10);
-    auto join_game_button = Button(renderer, font, join_game_button_position, "Join Hosted Game", ButtonAction::JOIN_GAME, normal_color,hover_color, text_color, 10);
-    auto start_new_game_button = Button(renderer, font, start_new_game_button_position, "Start New Game", ButtonAction::START, normal_color, hover_color,text_color, 10);
-    auto main_menu_button = Button(renderer, font, main_menu_button_position, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
+    auto host_game_button = Button(renderer, fonts[1], host_game_button_position, "Host Game", ButtonAction::HOST_GAME, normal_color,hover_color, text_color, 10);
+    auto join_game_button = Button(renderer, fonts[1], join_game_button_position, "Join Hosted Game", ButtonAction::JOIN_GAME, normal_color,hover_color, text_color, 10);
+    auto start_new_game_button = Button(renderer, fonts[1], start_new_game_button_position, "Start New Game", ButtonAction::START, normal_color, hover_color,text_color, 10);
+    auto main_menu_button = Button(renderer, fonts[1], main_menu_button_position, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(host_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(join_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(start_new_game_button);
@@ -62,16 +62,16 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Media
     // Add buttons to the host game menu
     ButtonPosition main_menu_button_position2 = {200, 420, 400, 100};
     ButtonPosition send_message_button_position = {200, 60, 400, 100};
-    auto main_menu_button2 = Button(renderer, font, main_menu_button_position2, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
-    auto send_message_button = Button(renderer, font, send_message_button_position, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
+    auto main_menu_button2 = Button(renderer, fonts[1], main_menu_button_position2, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
+    auto send_message_button = Button(renderer, fonts[1], send_message_button_position, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(main_menu_button2);
     buttons[{GameState::STOPPED, MenuAction::HOST_GAME}].push_back(send_message_button);
 
     // Add buttons to the join game menu
     ButtonPosition main_menu_button_position3 = {200, 420, 400, 100};
     ButtonPosition send_message_button_position2 = {200, 60, 400, 100};
-    auto main_menu_button3 = Button(renderer, font, main_menu_button_position3, "Main Précédent", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
-    auto send_message_button2 = Button(renderer, font, send_message_button_position2, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
+    auto main_menu_button3 = Button(renderer, fonts[1], main_menu_button_position3, "Main Précédent", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color,hover_color, text_color, 10);
+    auto send_message_button2 = Button(renderer, fonts[1], send_message_button_position2, "Send Message", ButtonAction::SEND_MESSAGE, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(main_menu_button3);
     buttons[{GameState::STOPPED, MenuAction::JOIN_GAME}].push_back(send_message_button2);
 
@@ -79,8 +79,8 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, Game *game, bool *quit, Media
     // Add buttons to stop the game
     ButtonPosition resume_button_position = {200, 200, 400, 100};
     ButtonPosition stop_button_position = {200, 330, 400, 100};
-    auto resume_button = Button(renderer, font, resume_button_position, "Resume", ButtonAction::RESUME, normal_color, hover_color,text_color, 10);
-    auto stop_button = Button(renderer, font, stop_button_position, "Stop the Game!", ButtonAction::STOP, normal_color, hover_color,text_color, 10);
+    auto resume_button = Button(renderer, fonts[1], resume_button_position, "Resume", ButtonAction::RESUME, normal_color, hover_color,text_color, 10);
+    auto stop_button = Button(renderer, fonts[1], stop_button_position, "Stop the Game!", ButtonAction::STOP, normal_color, hover_color,text_color, 10);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(resume_button);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(stop_button);
 }

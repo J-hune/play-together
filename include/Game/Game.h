@@ -7,6 +7,7 @@
 #include <string>
 #include <ranges>
 #include <cmath>
+#include <SDL_ttf.h>
 #include "../Physics/CollisionHandler.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
@@ -30,10 +31,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, const Player &initialPlayer);
-
-    Game();
-
+    Game(SDL_Window *window, SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer);
 
     /** ACCESSORS **/
 
@@ -150,6 +148,7 @@ private:
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
     Player initialPlayer; /**< The player object. */
@@ -157,7 +156,8 @@ private:
     bool isRunning = true; /**< Flag indicating if the game is running. */
     GameState gameState = GameState::STOPPED; /**< The current game state. */
     float deltaTime = 0; /**< The time elapsed. */
-    static constexpr int fps = 60; /**< The game's fps limit. */
+    static constexpr int targetFPS = 60; /**< The game's fps limit. */
+    int effectiveFps = 0; /**< The effective fps. */
 
     // Debug variables used for the application console
     bool render_textures = true;

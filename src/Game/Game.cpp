@@ -113,14 +113,12 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDLK_LEFT:
         case SDLK_q:
             player->setWantToMoveLeft(true);
-            player->getSprite()->setAnimation(Player::walk);
-            player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
+            player->updateSprite(PLAYER_LEFT);
             break;
         case SDLK_RIGHT:
         case SDLK_d:
             player->setWantToMoveRight(true);
-            player->getSprite()->setAnimation(Player::walk);
-            player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
+            player->updateSprite(PLAYER_RIGHT);
             break;
         case SDLK_g:
             switchMavity();
@@ -139,6 +137,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             break;
         case SDLK_LSHIFT:
             player->setSprint(true);
+            player->updateSprite(0);
             break;
         default:
             break;
@@ -164,7 +163,7 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             player->setWantToMoveLeft(false); // Disable left movement
             // Trigger idle animation if not moving right
             if (!player->getWantToMoveRight()) {
-                player->getSprite()->setAnimation(Player::idle);
+                player->updateSprite(0);
             }
             break;
         case SDLK_RIGHT:
@@ -176,11 +175,12 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             player->setWantToMoveRight(false); // Disable right movement
             // Trigger idle animation if not moving left
             if (!player->getWantToMoveLeft()) {
-                player->getSprite()->setAnimation(Player::idle);
+                player->updateSprite(0);
             }
             break;
         case SDLK_LSHIFT:
             player->setSprint(false);
+            player->updateSprite(0);
             break;
         default:
             break;
@@ -299,7 +299,7 @@ void Game::render() {
 
     // Render textures
     if (render_textures) {
-        initialPlayer.renderDebug(renderer, cam); // Draw the initial player
+        initialPlayer.render(renderer, cam); // Draw the initial player
 
         // Draw the characters
         for (Player &character: characters) {

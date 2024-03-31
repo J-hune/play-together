@@ -23,14 +23,6 @@ const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
  */
 class Player {
 public:
-    /** PUBLIC STATIC ATTRIBUTES **/
-
-    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
-    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
-    static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
-    static constexpr Animation run = {4, 7, 100}; /**< Run animation */
-
 
     /** CONSTRUCTORS **/
 
@@ -278,8 +270,8 @@ public:
     void setWantToMoveLeft(bool state);
 
     /**
-     * @brief Sets the directionX attribute.
-     * @param val The new value of the directionX attribute.
+     * @brief Sets player attributes according to sprint state.
+     * @param state The state of the sprint, true for sprint, false for walk.
      */
     void setSprint(bool state);
 
@@ -336,6 +328,12 @@ public:
     void applyMovement();
 
     /**
+     * @brief Update the sprite animation of the player.
+     * @param direction The current x-axis direction of the player.
+     */
+    void updateSprite(int direction);
+
+    /**
      * @brief Renders the player's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -372,7 +370,7 @@ private:
     float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
     bool wantToMoveRight = false; /**< If the player pressed a key to move right */
     bool wantToMoveLeft = false; /**< If the player pressed a key to move left */
-    float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right) */
+    float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right, 0 for not moving) */
     float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
     bool canMove = true; /**< If the player can move */
     float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
@@ -398,13 +396,19 @@ private:
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
     float jumpVelocity = 0.0f; /**< Current velocity of the player's jump. */
 
-
     // LOADED TEXTURES IN STATIC ATTRIBUTES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
     static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
     static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
     static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
     static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
+
+    // SPRITE ANIMATIONS
+    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
+    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
+    static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
+    static constexpr Animation run = {4, 7, 100}; /**< Run animation */
 
 
     /** PRIVATE METHODS **/

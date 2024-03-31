@@ -220,9 +220,11 @@ void Player::setSprint(bool state) {
     if (state) {
         sprintMultiplier = 1.3f;
         jumpVelocityFactor = 92;
+        sprite.setAnimation(run);
     } else {
         sprintMultiplier = 1.0;
         jumpVelocityFactor = 92;
+        sprite.setAnimation(walk);
     }
 }
 
@@ -357,6 +359,27 @@ void Player::calculateMovement(float deltaTime) {
 void Player::applyMovement() {
     x += moveX;
     y += moveY;
+}
+
+void Player::updateSprite(int direction) {
+    // Update animation
+    if (direction == 0) {
+        sprite.setAnimation(idle);
+    }
+    else {
+        if (sprintMultiplier == 1) {
+            sprite.setAnimation(walk);
+        } else {
+            sprite.setAnimation(run);
+        }
+
+        // Update orientation
+        if (direction == PLAYER_LEFT) {
+            sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
+        } else {
+            sprite.setFlipHorizontal(SDL_FLIP_NONE);
+        }
+    }
 }
 
 void Player::render(SDL_Renderer *renderer, Point camera) {

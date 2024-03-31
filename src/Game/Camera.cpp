@@ -86,19 +86,19 @@ void Camera::applyCameraMovement(Point camera_point, float deltaTime) {
 
     // The point is on the right of the area
     if (camera_point.x > area_right) {
-        x += std::lerp(area_right, camera_point.x, blend) - area_right;
+        x += (camera_point.x - area_right) * blend + 0.1F;
     }
     // The point is on the left of the area
     else if (camera_point.x < area_left) {
-        x += std::lerp(area_left, camera_point.x, blend) - area_left ;
+        x += (camera_point.x - area_left) * blend - 0.1F;
     }
     // The point is on the bottom of the area
     if (camera_point.y > area_bottom) {
-        y += std::lerp(area_bottom, camera_point.y, blend) - area_bottom + 0.1F;
+        y += (camera_point.y - area_bottom) * blend + 0.1F;
     }
     // The point is on the top of the area
     else if (camera_point.y < area_top) {
-        y += std::lerp(area_top, camera_point.y, blend) - area_top + 0.1F;
+        y += (camera_point.y - area_top) * blend - 0.1F;
     }
 
     if (isShaking) makeCameraShake();

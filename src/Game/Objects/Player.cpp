@@ -170,12 +170,10 @@ SDL_FRect Player::getRoofColliderBoundingBox() const {
 }
 
 SDL_FRect Player::getBoundingBox() const {
-    // Return the bounding box of the player.
     return {x, y, width, height};
 }
 
 SDL_FRect Player::getBoundingBoxNextFrame() const {
-    // Return the bounding box of the player.
     return {x + moveX, y + moveY, width, height};
 }
 
@@ -220,7 +218,7 @@ void Player::setWantToMoveLeft(bool state) {
 
 void Player::setSprint(bool state) {
     if (state) {
-        sprintMultiplier = 1.3;
+        sprintMultiplier = 1.3f;
         jumpVelocityFactor = 92;
     } else {
         sprintMultiplier = 1.0;
@@ -272,7 +270,7 @@ void Player::teleportPlayer(float newX, float newY) {
     y = newY;
 }
 
-bool Player::canJump() {
+bool Player::canJump() const {
     return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
 }
 
@@ -370,7 +368,6 @@ void Player::render(SDL_Renderer *renderer, Point camera) {
 
 void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    //printf("PLAYERY = %f\n", y - camera.y);
     SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
     SDL_RenderFillRectF(renderer, &playerRect);
 }

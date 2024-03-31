@@ -17,7 +17,6 @@ constexpr float SCREEN_HEIGHT = 600;
 /**
  * @class Camera
  * @brief Represents the camera logic including movement and shaking.
- * TODO: correct the rendering issue (probably due to a conversion loss or delta time calculations, doesn't happen without smoothing)
  */
 class Camera {
 public:
@@ -140,7 +139,7 @@ private:
                       w - (w / 2.f) - w / 5.f,
                       h - (h / 5.f) - h / 5.f};
 
-    float lerpSmoothingFactor = 5;
+    float lerpSmoothingFactor = 11;
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
 

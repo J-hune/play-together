@@ -73,12 +73,6 @@ public:
     [[nodiscard]] float getH() const;
 
     /**
-     * @brief Return the speed attribute.
-     * @return The value of the speed attribute
-     */
-    [[nodiscard]] float getSpeed() const;
-
-    /**
      * @brief Return the sprite attribute.
      * @return A pointer of a sprite object representing the sprite of the player.
      */
@@ -306,12 +300,6 @@ public:
      */
     void toggleMavity();
 
-    /**
-     * @brief Sets the timeSpentJumping attribute.
-     * @param val The new value of timeSpentJumping.
-     */
-    void setTimeSpentJumping(float val);
-
 
     /** PUBLIC METHODS **/
 
@@ -453,13 +441,12 @@ private:
      * @brief Checks if the player can jump by checking coyote time and if he is on a platform.
      * @return Returns true if the player can jump, false otherwise.
      */
-    bool canJump();
+    [[nodiscard]] bool canJump() const;
 
     /**
      * @brief To be written.
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
-     * TODO: correct the speed curve issue (linked to the fps limitation)
      */
     void calculateXaxisMovement(float deltaTime);
 
@@ -467,7 +454,6 @@ private:
      * @brief To be written.
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
-     * TODO: correct the jump
      */
     void calculateYaxisMovement(float deltaTime);
 

@@ -367,9 +367,9 @@ void Game::run() {
         Uint64 desiredTicksPerFrame = frequency / targetFPS;
         Uint64 elapsedTicks = SDL_GetPerformanceCounter() - currentFrameTime;
         Uint64 ticksToWait = desiredTicksPerFrame > elapsedTicks ? desiredTicksPerFrame - elapsedTicks : 0;
-        double secondsToWait = static_cast<double>(ticksToWait) / static_cast<double>(frequency);
-        if (secondsToWait > 0) {
-            SDL_Delay(static_cast<Uint32>(secondsToWait * 1000)); // Convert seconds to milliseconds
+        Uint64 endWaitTime = currentFrameTime + ticksToWait;
+        while (SDL_GetPerformanceCounter() < endWaitTime) {
+            // Do nothing, just wait
         }
 
         // Update effective FPS every 500ms

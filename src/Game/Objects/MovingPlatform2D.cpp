@@ -75,7 +75,7 @@ void MovingPlatform2D::setIsMoving(bool state) {
 
 /** METHODS **/
 
-void MovingPlatform2D::applyMovement(float deltaTime) {
+void MovingPlatform2D::applyMovement(double deltaTime) {
     // Add basic movement
     moveX = 150;
     moveY = 150;

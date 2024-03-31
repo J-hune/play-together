@@ -107,7 +107,7 @@ public:
      * @param camera_point A point representing the camera point position.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyCameraMovement(Point camera_point, float deltaTime);
+    void applyCameraMovement(Point camera_point, double deltaTime);
 
     /**
      * @brief Renders the collisions by drawing obstacles.

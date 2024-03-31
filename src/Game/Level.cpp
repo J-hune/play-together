@@ -45,7 +45,7 @@ void Level::renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::applyPlatformsMovement(float deltaTime) {
+void Level::applyPlatformsMovement(double deltaTime) {
     // Apply movement for 1D platforms
     for (MovingPlatform1D &platform: movingPlatforms1D) {
         if(platform.getIsMoving()) platform.applyMovement(deltaTime);

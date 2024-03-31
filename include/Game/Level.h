@@ -66,7 +66,7 @@ public:
      * @brief Applies the movement of every platforms in the level.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyPlatformsMovement(float deltaTime);
+    void applyPlatformsMovement(double deltaTime);
 
     /**
      * @brief Renders the collisions by drawing obstacles.

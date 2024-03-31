@@ -87,7 +87,7 @@ void Camera::initializeCameraPosition(Point camera_point) {
     }
 }
 
-void Camera::applyCameraMovement(Point camera_point, float deltaTime) {
+void Camera::applyCameraMovement(Point camera_point, double deltaTime) {
     float blend = 1 - std::pow(0.5F, deltaTime * lerpSmoothingFactor);
 
     float area_left = x + area.x;

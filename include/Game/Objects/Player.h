@@ -320,7 +320,7 @@ public:
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
      */
-    void calculateMovement(float deltaTime);
+    void calculateMovement(double deltaTime);
 
     /**
      * @brief Checks if the player has moved by checking moveX and moveY attributes.
@@ -330,8 +330,9 @@ public:
 
     /**
      * @brief Apply the movement by adding moveX and moveY to the player position.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyMovement();
+    void applyMovement(float deltaTime);
 
     /**
      * @brief Update the sprite animation of the player.
@@ -387,20 +388,19 @@ private:
 
     // Y-AXIS MOVEMENT ATTRIBUTES
     float moveY = 0; /**< Vertical movement of the player during this frame. */
-    float mavity = 35.f; /**< Gravity acceleration. */
+    float mavity = 30.f; /**< Gravity acceleration. */
     bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
     float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
     bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
     bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
     Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
-    float initialJumpVelocity = 10.0f; /**< Initial velocity of the player's jump. */
-    float jumpVelocityFactor = 90.f; /**< Factor to adjust the player's jump velocity. */
-    float maxJumpTime = 0.1f; /**< Maximum duration of the player's jump. */
+    float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
+    float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
     float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
     float coyoteTime = 0.6f; /**< Time window in seconds during which the player can still jump after starting to fall. */
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
-    float jumpVelocity = 0.0f; /**< Current velocity of the player's jump. */
+    float jumpVelocity = 0; /**< Current velocity of the player's jump. */
 
     // LOADED TEXTURES IN STATIC ATTRIBUTES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
@@ -454,18 +454,18 @@ private:
     [[nodiscard]] bool canJump() const;
 
     /**
-     * @brief To be written.
+     * @brief Calculates the horizontal movement of the player for the current frame.
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
      */
-    void calculateXaxisMovement(float deltaTime);
+    void calculateXaxisMovement(double deltaTime);
 
     /**
-     * @brief To be written.
+     * @brief Calculates the vertical movement of the player for the current frame.
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
      */
-    void calculateYaxisMovement(float deltaTime);
+    void calculateYaxisMovement(double deltaTime);
 
 };
 

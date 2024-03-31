@@ -219,10 +219,10 @@ void Player::setWantToMoveLeft(bool state) {
 void Player::setSprint(bool state) {
     if (state) {
         sprintMultiplier = 1.3f;
-        jumpVelocityFactor = 92;
+        sprite.setAnimation(run);
     } else {
         sprintMultiplier = 1.0;
-        jumpVelocityFactor = 92;
+        sprite.setAnimation(walk);
     }
 }
 
@@ -274,7 +274,7 @@ bool Player::canJump() const {
     return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
 }
 
-void Player::calculateXaxisMovement(float deltaTime) {
+void Player::calculateXaxisMovement(double deltaTime) {
 
     // Determine the desired direction
     float wantedDirection = 0;
@@ -292,55 +292,62 @@ void Player::calculateXaxisMovement(float deltaTime) {
             speedCurveX = initialSpeedCurveX;
         } else {
             // Gradually increase speed curve for smooth acceleration
-            speedCurveX = std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0f);
+            speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0));
         }
     } else {
         // If no input, gradually decrease speed curve for smooth deceleration
-        speedCurveX = std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0f);
+        speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0));
     }
 
     // Calculate movement based on speed curve and direction
-    moveX = baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX;
+    moveX = static_cast<float>(baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX);
 
     // Remember previous direction
     previousDirectionX = directionX;
 }
 
-void Player::calculateYaxisMovement(float deltaTime) {
+void Player::calculateYaxisMovement(double deltaTime) {
+
     // If the player wants to jump and can jump, start the jump
     if (wantToJump && canJump() && !isJumping) {
         isJumping = true;
-        jumpStartTime = SDL_GetPerformanceFrequency(); // Record the time at the beginning of the jump
-        jumpVelocity = initialJumpVelocity; // Initialize jump velocity
-        wantToJump = false; // Reset the jump flag
+        jumpStartTime = SDL_GetPerformanceCounter(); // Record the time at the beginning of the jump
+        jumpVelocity = jumpInitialVelocity; // Set the initial jump velocity
     }
 
     // If the player is jumping, calculate the jump movement for this frame
-    if (isJumping) {
-        // Calculate the time elapsed since the beginning of the jump
-        float jumpTime = static_cast<float>(SDL_GetPerformanceFrequency() - jumpStartTime);
-        // Calculate jump velocity based on jump time (pressure jump)
-        jumpVelocity = jumpVelocityFactor * initialJumpVelocity * (1 - jumpTime / maxJumpTime) * (mavity < 0 ? 1.f : -1.f);
-        moveY = jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime;
+    else if (isJumping) {
+        // Calculate the time since the beginning of the jump in seconds
+        Uint64 now = SDL_GetPerformanceCounter();
+        float jumpTime = static_cast<float>(now - jumpStartTime) / static_cast<float>(SDL_GetPerformanceFrequency());
 
-        // Check if the player has finished the jump
-        if (jumpTime >= maxJumpTime || jumpVelocity <= 0 || !wantToJump) {
+        // Check if the player has finished the jump (with a very very very small margin of error)
+        if (jumpTime - 0.00755 >= jumpMaxDuration || jumpVelocity <= 0 || !wantToJump) {
             isJumping = false;
             jumpStartTime = 0;
             jumpVelocity = 0;
+            wantToJump = false;
+        }
+
+        // The player is still jumping, calculate the jump movement for this frame
+        else {
+            jumpVelocity = jumpInitialVelocity - mavity * jumpTime;
+
+            // Calculate vertical movement based on jump velocity and time
+            moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime)  * (mavity < 0 ? 1 : -1));
+
+            // Update jump velocity for the next frame
+            jumpVelocity -= mavity * static_cast<float>(deltaTime);
         }
     }
-    else {
-        // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
-        if (isOnPlatform) {
-            moveY = 0;
+
+    // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
+    else if (!isOnPlatform)  {
+        moveY += static_cast<float>(fallSpeedFactor * mavity * deltaTime * deltaTime);
+        if (mavity > 0) {
+            moveY = std::min(moveY, static_cast<float>(maxFallSpeed * deltaTime));
         } else {
-            moveY += (fallSpeedFactor * mavity) * deltaTime * deltaTime;
-            if (mavity > 0) {
-                moveY = std::min(moveY, maxFallSpeed * deltaTime);
-            } else {
-                moveY = std::max(moveY, -maxFallSpeed * deltaTime);
-            }
+            moveY = std::max(moveY, static_cast<float>(-maxFallSpeed * deltaTime));
         }
     }
 
@@ -349,7 +356,7 @@ void Player::calculateYaxisMovement(float deltaTime) {
     else directionY = moveY < 0 ? -1 : 1;
 }
 
-void Player::calculateMovement(float deltaTime) {
+void Player::calculateMovement(double deltaTime) {
     calculateXaxisMovement(deltaTime);
     calculateYaxisMovement(deltaTime);
 }
@@ -358,9 +365,9 @@ bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
 
-void Player::applyMovement() {
-    x += moveX;
-    y += moveY;
+void Player::applyMovement(float deltaTime) {
+    x += moveX * deltaTime;
+    y += moveY * deltaTime;
 }
 
 void Player::updateSprite(int direction) {

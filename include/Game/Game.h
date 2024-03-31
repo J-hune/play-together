@@ -153,7 +153,8 @@ private:
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    const int refreshRate; /**< The refresh rate of the game. */
+    const int frameRate; /**< The refresh rate of the game. */
+    const int tickRate = 30; /**< The tick rate of the game. */
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
@@ -161,8 +162,7 @@ private:
     std::vector<Player> characters; /**< Collection of characters in the game. */
     bool isRunning = true; /**< Flag indicating if the game is running. */
     GameState gameState = GameState::STOPPED; /**< The current game state. */
-    float deltaTime = 0; /**< The time elapsed. */
-    int effectiveFps = 0; /**< The effective fps. */
+    int effectiveFrameFps = frameRate; /**< The effective fps. */
 
     // Broad phase attributes
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
@@ -200,13 +200,15 @@ private:
 
     /**
      * @brief Applies the movement to all players in the game.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyPlayersMovement();
+    void applyPlayersMovement(float deltaTime);
 
     /**
      * @brief Calculates the movement of all players in the game.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void calculatePlayersMovement();
+    void calculatePlayersMovement(double deltaTime);
 
     /**
      * @brief Switch mavity between normal and reversed.

@@ -8,8 +8,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), refreshRate(refreshRate), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
 
 
 /** ACCESSORS **/
@@ -214,7 +214,7 @@ void Game::handleEvents(Player *player) {
     }
 }
 
-void Game::calculatePlayersMovement() {
+void Game::calculatePlayersMovement(double deltaTime) {
     initialPlayer.calculateMovement(deltaTime); // Calculate movement for the initial player
 
     // Apply movement for other players
@@ -223,12 +223,12 @@ void Game::calculatePlayersMovement() {
     }
 }
 
-void Game::applyPlayersMovement() {
-    initialPlayer.applyMovement(); // Apply movement for the initial player
+void Game::applyPlayersMovement(float deltaTime) {
+    initialPlayer.applyMovement(deltaTime); // Apply movement for the initial player
 
     // Apply movement for other players
     for (Player &character : characters) {
-        character.applyMovement();
+        character.applyMovement(deltaTime);
     }
 }
 
@@ -328,7 +328,7 @@ void Game::render() {
     // Render fps counter
     if (render_fps) {
         SDL_Color color = {160, 160, 160, 255};
-        SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFps).c_str(), color);
+        SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFrameFps).c_str(), color);
         SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
         SDL_Rect rect = {10, 10, surface->w, surface->h};
         SDL_RenderCopy(renderer, texture, nullptr, &rect);
@@ -380,49 +380,64 @@ void Game::run() {
     gameState = GameState::RUNNING;
 
     // Variables for controlling FPS and calculating delta time
-    Uint64 lastFrameTime = SDL_GetPerformanceCounter(); // Time at the start of the frame
+    Uint64 lastFrameTime = SDL_GetPerformanceCounter(); // Time at the start of the game frame
     Uint64 frequency = SDL_GetPerformanceFrequency();
-    double accumulatedTime = 0.0; // Accumulated time since last effective FPS update
+    double accumulatedTime = 0.0; // Accumulated time since last effective game FPS update
+    double accumulatedTickRateTime = 0.0; // Accumulated time since last game physics update
     int frameCounter = 0;
+
+    double elapsedTimeSinceLastReset = 0.0; // Time elapsed since last reset
 
     // Game loop
     while (gameState == GameState::RUNNING) {
-        // Calculate delta time
+        // Calculate delta time for game logic
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
         Uint64 frameTicks = currentFrameTime - lastFrameTime;
-        deltaTime = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds
+        float deltaTime = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds for game logic
         lastFrameTime = currentFrameTime;
 
-        // Accumulate time and frame counter
+        // Accumulate time for game logic and rendering
         accumulatedTime += deltaTime;
-        frameCounter++;
+        accumulatedTickRateTime += deltaTime;
+        elapsedTimeSinceLastReset += deltaTime;
 
-        // MAIN EVENTS
-        handleEvents(&initialPlayer);
-        for (Player &character : characters) handleEvents(&character);
-        if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-        calculatePlayersMovement();
-        broadPhase();
-        narrowPhase();
-        applyPlayersMovement();
-        camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
-        render();
+        // Calculate game physics at the specified rate (tickRate)
+        if (accumulatedTickRateTime >= 1.0 / tickRate) {
+            handleEvents(&initialPlayer);
+            for (Player &character: characters) handleEvents(&character);
+            calculatePlayersMovement(1.0 / tickRate);
+            broadPhase();
+            narrowPhase();
 
-        // Waiting to maintain FPS
-        Uint64 desiredTicksPerFrame = frequency / refreshRate;
-        Uint64 elapsedTicks = SDL_GetPerformanceCounter() - currentFrameTime;
-        Uint64 ticksToWait = desiredTicksPerFrame > elapsedTicks ? desiredTicksPerFrame - elapsedTicks : 0;
-        Uint64 endWaitTime = currentFrameTime + ticksToWait;
-        while (SDL_GetPerformanceCounter() < endWaitTime) {
-            // Do nothing, just wait
+            // Reset accumulated time for game physics
+            accumulatedTickRateTime -= 1.0 / tickRate;
         }
 
-        // Update effective FPS every 500ms
-        if (render_fps && accumulatedTime >= 0.5) {
-            effectiveFps = static_cast<int>(frameCounter / accumulatedTime);
-            accumulatedTime = 0.0; // Reset accumulated time
-            frameCounter = 0; // Reset frame counter
+        // Calculate game rendering at the specified rate (frameRate)
+        if (accumulatedTime >= 1.0 / frameRate) {
+            frameCounter++;
+
+            if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
+            applyPlayersMovement(static_cast<float>(tickRate)/static_cast<float>(frameRate));
+            camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
+            render();
+
+            // Reset accumulated time for rendering
+            accumulatedTime -= 1.0 / frameRate;
+
+            // Check if one second has passed since the last reset, and if so, reset frame counters and elapsed time
+            if (elapsedTimeSinceLastReset >= 1.0) {
+                effectiveFrameFps = frameCounter;
+                frameCounter = 0;
+                elapsedTimeSinceLastReset -= 1.0;
+            }
         }
+
+        // Waiting to maintain the desired game FPS
+        Uint64 desiredTicksPerFrame = frequency / (std::max(tickRate, frameRate));
+        Uint64 elapsedGameTicks = SDL_GetPerformanceCounter() - currentFrameTime;
+        Uint64 ticksToWait = desiredTicksPerFrame > elapsedGameTicks ? desiredTicksPerFrame - elapsedGameTicks : 0;
+        SDL_Delay((Uint32)(ticksToWait * 1000 / frequency));
     }
 }
 

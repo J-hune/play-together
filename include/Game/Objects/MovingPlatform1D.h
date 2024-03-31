@@ -93,7 +93,7 @@ public:
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see applyXaxisMovement() and applyYaxisMovement() for sub-functions.
      */
-    void applyMovement(float deltaTime);
+    void applyMovement(double deltaTime);
 
 private:
     /** ATTRIBUTES **/
@@ -121,13 +121,13 @@ private:
      * @brief Calculate the new position of the platform on x-axis.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyXaxisMovement(float deltaTime);
+    void applyXaxisMovement(double deltaTime);
 
     /**
      * @brief Calculate the new position of the platform on y-axis.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyYaxisMovement(float deltaTime);
+    void applyYaxisMovement(double deltaTime);
 
 };
 

@@ -323,6 +323,12 @@ public:
     void calculateMovement(float deltaTime);
 
     /**
+     * @brief Checks if the player has moved by checking moveX and moveY attributes.
+     * @return True if the player has moved, false otherwise.
+     */
+    [[nodiscard]] bool hasMoved() const;
+
+    /**
      * @brief Apply the movement by adding moveX and moveY to the player position.
      */
     void applyMovement();

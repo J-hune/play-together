@@ -220,11 +220,9 @@ void Player::setSprint(bool state) {
     if (state) {
         sprintMultiplier = 1.3f;
         jumpVelocityFactor = 92;
-        sprite.setAnimation(run);
     } else {
         sprintMultiplier = 1.0;
         jumpVelocityFactor = 92;
-        sprite.setAnimation(walk);
     }
 }
 
@@ -354,6 +352,10 @@ void Player::calculateYaxisMovement(float deltaTime) {
 void Player::calculateMovement(float deltaTime) {
     calculateXaxisMovement(deltaTime);
     calculateYaxisMovement(deltaTime);
+}
+
+bool Player::hasMoved() const {
+    return moveX != 0 || moveY != 0;
 }
 
 void Player::applyMovement() {

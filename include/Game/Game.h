@@ -31,7 +31,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer);
 
     /** ACCESSORS **/
 
@@ -99,6 +99,11 @@ public:
      */
     void toggleRenderTextures();
 
+    /**
+     * @brief Toggle the render_camera_point attribute, used for the application console.
+     */
+    void toggleRenderFps();
+
 
     /** PUBLIC METHODS **/
 
@@ -148,6 +153,7 @@ private:
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    const int refreshRate; /**< The refresh rate of the game. */
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
@@ -156,7 +162,6 @@ private:
     bool isRunning = true; /**< Flag indicating if the game is running. */
     GameState gameState = GameState::STOPPED; /**< The current game state. */
     float deltaTime = 0; /**< The time elapsed. */
-    static constexpr int targetFPS = 60; /**< The game's fps limit. */
     int effectiveFps = 0; /**< The effective fps. */
 
     // Debug variables used for the application console
@@ -164,6 +169,7 @@ private:
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;
+    bool render_fps = false;
     bool enable_platforms_movement = true;
 
 

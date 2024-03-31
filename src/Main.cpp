@@ -28,16 +28,42 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     }
 
     SDL_Window *window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN);
-
     if (window == nullptr) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
+        SDL_Quit();
         return 1;
     }
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         fprintf(stderr, "Could not create renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
+    }
+
+    int numDisplays = SDL_GetNumVideoDisplays();
+    if (numDisplays < 1) {
+        fprintf(stderr, "Could not get number of displays: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Get the maximum refresh rate of the display list (in Hz)
+    int maxRefreshRate = 0;
+    for (int i = 0; i < numDisplays; i++) {
+        SDL_DisplayMode displayMode;
+        if (SDL_GetCurrentDisplayMode(i, &displayMode) == 0) {
+            maxRefreshRate = std::max(maxRefreshRate, displayMode.refresh_rate);
+        } else {
+            fprintf(stderr, "Could not get display mode: %s\n", SDL_GetError());
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 1;
+        }
     }
 
     // Load font from a TrueType (TTF) file
@@ -64,7 +90,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Level level("diversity");
     Player::loadTextures(*renderer);
     Player initialPlayer(50, 50, 48, 36);
-    Game game(window, renderer, fonts, camera, level, initialPlayer);
+    Game game(window, renderer, maxRefreshRate, fonts, camera, level, initialPlayer);
     mediator.setGamePtr(&game);
 
     // Initialize Menu

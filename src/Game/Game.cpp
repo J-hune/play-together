@@ -8,8 +8,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
+        : window(window), renderer(renderer), refreshRate(refreshRate), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
 
 
 /** ACCESSORS **/
@@ -65,6 +65,10 @@ void Game::setEnablePlatformsMovement(bool state) {
 
 void Game::toggleRenderTextures() {
     render_textures = !render_textures;
+}
+
+void Game::toggleRenderFps() {
+    render_fps = !render_fps;
 }
 
 
@@ -283,14 +287,15 @@ void Game::render() {
     SDL_RenderClear(renderer);
 
     // Render fps counter
-    SDL_Color color = {160, 160, 160, 255};
-    SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFps).c_str(), color);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_Rect rect = {10, 10, surface->w, surface->h};
-    SDL_RenderCopy(renderer, texture, nullptr, &rect);
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
-
+    if (render_fps) {
+        SDL_Color color = {160, 160, 160, 255};
+        SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFps).c_str(), color);
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Rect rect = {10, 10, surface->w, surface->h};
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+    }
 
     // Render textures
     if (render_textures) {
@@ -364,7 +369,7 @@ void Game::run() {
         render();
 
         // Waiting to maintain FPS
-        Uint64 desiredTicksPerFrame = frequency / targetFPS;
+        Uint64 desiredTicksPerFrame = frequency / refreshRate;
         Uint64 elapsedTicks = SDL_GetPerformanceCounter() - currentFrameTime;
         Uint64 ticksToWait = desiredTicksPerFrame > elapsedTicks ? desiredTicksPerFrame - elapsedTicks : 0;
         Uint64 endWaitTime = currentFrameTime + ticksToWait;
@@ -373,7 +378,7 @@ void Game::run() {
         }
 
         // Update effective FPS every 500ms
-        if (accumulatedTime >= 0.5) {
+        if (render_fps && accumulatedTime >= 0.5) {
             effectiveFps = static_cast<int>(frameCounter / accumulatedTime);
             accumulatedTime = 0.0; // Reset accumulated time
             frameCounter = 0; // Reset frame counter

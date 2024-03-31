@@ -34,7 +34,7 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
         if (command == "help") {
             std::cout << "List of available commands: \n";
             std::cout << "help - Display help\n";
-            std::cout << "exit - Exit the console\n";
+            std::cout << "fps - Toggle FPS display\n";
             std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
             std::cout << "show [all | camera_point | camera_area | player_colliders] - Show debug information\n";
             std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
@@ -189,6 +189,12 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
         else if (command.find("render") != std::string::npos) {
             gamePtr->toggleRenderTextures();
             std::cout << "Rendering toggled.\n";
+        }
+
+        // Toggle FPS rendering
+        else if (command.find("fps") != std::string::npos) {
+            gamePtr->toggleRenderFps();
+            std::cout << "FPS rendering toggled.\n";
         }
 
         // Else display an error message

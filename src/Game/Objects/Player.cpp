@@ -15,8 +15,8 @@ SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 /** CONSTRUCTORS **/
 
-Player::Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight)
-        : x(startX), y(startY), speed(playerSpeed), width(playerWidth), height(playerHeight) {
+Player::Player(float startX, float startY, float playerWidth, float playerHeight)
+        : x(startX), y(startY), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }
@@ -38,10 +38,6 @@ float Player::getW() const {
 
 float Player::getH() const {
     return height;
-}
-
-float Player::getSpeed() const {
-    return speed;
 }
 
 Sprite* Player::getSprite() {
@@ -222,6 +218,16 @@ void Player::setWantToMoveLeft(bool state) {
     wantToMoveLeft = state;
 }
 
+void Player::setSprint(bool state) {
+    if (state) {
+        sprintMultiplier = 1.3;
+        jumpVelocityFactor = 92;
+    } else {
+        sprintMultiplier = 1.0;
+        jumpVelocityFactor = 92;
+    }
+}
+
 void Player::setIsOnPlatform(bool state) {
     isOnPlatform = state;
 }
@@ -296,7 +302,7 @@ void Player::calculateXaxisMovement(float deltaTime) {
     }
 
     // Calculate movement based on speed curve and direction
-    moveX = baseMovementX * deltaTime * speed * speedCurveX * directionX;
+    moveX = baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX;
 
     // Remember previous direction
     previousDirectionX = directionX;
@@ -332,7 +338,11 @@ void Player::calculateYaxisMovement(float deltaTime) {
             moveY = 0;
         } else {
             moveY += (fallSpeedFactor * mavity) * deltaTime * deltaTime;
-            moveY = std::max(std::min(moveY, maxFallSpeed * deltaTime), -maxFallSpeed * deltaTime);
+            if (mavity > 0) {
+                moveY = std::min(moveY, maxFallSpeed * deltaTime);
+            } else {
+                moveY = std::max(moveY, -maxFallSpeed * deltaTime);
+            }
         }
     }
 

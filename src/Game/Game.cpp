@@ -133,6 +133,9 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDLK_DELETE:
             stop();
             break;
+        case SDLK_LSHIFT:
+            player->setSprint(true);
+            break;
         default:
             break;
     }
@@ -171,6 +174,9 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             if (!player->getWantToMoveLeft()) {
                 player->getSprite()->setAnimation(Player::idle);
             }
+            break;
+        case SDLK_LSHIFT:
+            player->setSprint(false);
             break;
         default:
             break;

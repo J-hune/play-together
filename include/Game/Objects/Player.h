@@ -12,9 +12,6 @@
 const int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
 const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
 
-const float PRESSURE_JUMP_MIN = 0.084F; /**< Constant for the jump time limit minimum. */
-const float PRESSURE_JUMP_MAX = 0.100F; /**< Constant for jump time limit. */
-
 /**
  * @file Player.h
  * @brief Defines the Player class representing a player in a 2D game.
@@ -43,12 +40,10 @@ public:
      * @brief Constructor for the Player class.
      * @param startX Initial x-coordinate of the player.
      * @param startY Initial y-coordinate of the player.
-     * @param playerSpeed Speed of the player.
-     * @param speedMax Maximum player speed.
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(float startX, float startY, float playerSpeed, float playerWidth, float playerHeight);
+    Player(float startX, float startY, float playerWidth, float playerHeight);
 
 
     /** BASIC ACCESSORS **/
@@ -289,6 +284,12 @@ public:
     void setWantToMoveLeft(bool state);
 
     /**
+     * @brief Sets the directionX attribute.
+     * @param val The new value of the directionX attribute.
+     */
+    void setSprint(bool state);
+
+    /**
      * @brief Sets the isOnPlatform attribute.
      * @param state The new value of the isOnPlatform attribute.
      */
@@ -374,10 +375,10 @@ private:
     // CHARACTERISTIC ATTRIBUTES
     float x; /**< The x-coordinate of the player's position. (in pixels) */
     float y; /**< The y-coordinate of the player's position. */
-    float speed; /**< The speed of the player. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     Sprite sprite; /**< The sprite of the player. */
+    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // X-AXIS MOVEMENT ATTRIBUTES
     float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
@@ -403,7 +404,7 @@ private:
     float initialJumpVelocity = 10.0f; /**< Initial velocity of the player's jump. */
     float jumpVelocityFactor = 90.f; /**< Factor to adjust the player's jump velocity. */
     float maxJumpTime = 0.1f; /**< Maximum duration of the player's jump. */
-    float maxFallSpeed = 1200.f; /**< Maximum falling speed of the player. */
+    float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
     float coyoteTime = 0.6f; /**< Time window in seconds during which the player can still jump after starting to fall. */
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */

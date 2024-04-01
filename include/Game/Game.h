@@ -163,6 +163,12 @@ public:
     void addCharacter(const Player &character);
 
     /**
+     * @brief Updates the camera position based on the player's position.
+     * @param player The player to kill.
+     */
+    void killPlayer(const Player *player);
+
+    /**
      * @brief Removes a character from the game.
      * @param characterPtr Pointer to the character to remove.
      */
@@ -172,10 +178,11 @@ public:
     * @brief Handles SDL Key up events, updating the movement variables accordingly.
     * @param keyEvent Reference to the key who was release.
     */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
+    static void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) ;
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
      * @param keyEvent Reference to the key who was press.
      */
     void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
@@ -183,7 +190,7 @@ public:
     /**
      * @brief Saves the game state to a json file.
      */
-    void saveGame();
+    void saveGame() const;
 
 private:
     /** ATTRIBUTES **/
@@ -198,11 +205,13 @@ private:
     std::vector<Player> characters; /**< Collection of characters in the game. */
     std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
-    bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
     int saveSlot = 0; /**< The save slot to use when saving the game. */
     int effectiveFrameFps = frameRate; /**< The effective fps. */
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
 
     // Broad phase attributes
+    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
@@ -229,16 +238,6 @@ private:
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
     void applyPlayersMovement(float deltaTime);
-
-    /**
-     * @brief Updates the camera position based on the player's position.
-     */
-    void killPlayer(const Player *player);
-
-    /**
-     * @brief Handles collisions between the player and platform.
-     */
-    void handleCollisionsWithObstacles(Player *player);
 
     /**
      * @brief Calculates the movement of all players in the game.

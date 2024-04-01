@@ -203,10 +203,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
             player->updateSprite(PLAYER_RIGHT);
             break;
         case SDL_SCANCODE_G:
-            switchMavity();
-            if (player == nullptr) break;
-            player->setIsOnPlatform(false);
-            player->getSprite()->toggleFlipVertical();
+            switchMavity(); // Switch mavity for all players
             break;
         case SDL_SCANCODE_M:
             if (level.getMapID() == 1) setLevel("assurance");
@@ -218,7 +215,8 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
         case SDL_SCANCODE_DELETE:
             stop();
             break;
-        case SDLK_LSHIFT:
+        case SDL_SCANCODE_LSHIFT:
+            if (player == nullptr) break;
             player->setSprint(true);
             player->updateSprite(0);
             break;
@@ -227,7 +225,7 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
     }
 }
 
-void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
+void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) {
     switch (keyEvent.keysym.scancode) {
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
@@ -341,12 +339,16 @@ void Game::killPlayer(const Player *player) {
 void Game::switchMavity() {
     // Change mavity for all player
     for (Player &character : characters) {
+        character.setIsOnPlatform(false);
+        character.getSprite()->toggleFlipVertical();
         character.toggleMavity();
     }
 }
 
 void Game::broadPhase() {
     // Empty old broad phase elements
+    saveZones.clear();
+    deathZones.clear();
     obstacles.clear();
     movingPlatforms1D.clear();
     movingPlatforms2D.clear();
@@ -354,6 +356,20 @@ void Game::broadPhase() {
 
     std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
     SDL_FRect broadPhaseBoundingBox = camera.getBroadPhaseArea();
+
+    // Check collisions with each save zone
+    for (const Polygon &zone: level.getZones(zoneType::SAVE)) {
+        if (checkSATCollision(broadPhaseAreaVertices, zone)){
+            saveZones.push_back(zone);
+        }
+    }
+
+    // Check collisions with each death zone
+    for (const Polygon &zone: level.getZones(zoneType::DEATH)) {
+        if (checkSATCollision(broadPhaseAreaVertices, zone)){
+            deathZones.push_back(zone);
+        }
+    }
 
     // Check collisions with each obstacle
     for (const Polygon &obstacle: level.getZones(zoneType::COLLISION)) {
@@ -385,11 +401,8 @@ void Game::broadPhase() {
 }
 
 void Game::handleCollisionsNormalMavity(Player &player) const {
-    player.setCanMove(true);
-
     // Check obstacles collisions only if the player has moved
-    if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
-        player.setIsOnPlatform(false);
+    if (player.hasMoved()) {
         handleCollisionsWithObstacles(&player, obstacles);
     }
 
@@ -399,11 +412,8 @@ void Game::handleCollisionsNormalMavity(Player &player) const {
 }
 
 void Game::handleCollisionsReversedMavity(Player &player) const {
-    player.setCanMove(true);
-
     // Check obstacles collisions only if the player has moved
-    if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
-        player.setIsOnPlatform(false);
+    if (player.hasMoved()) {
         handleCollisionsSelcatsbOhtiw(&player, obstacles);
     }
 
@@ -415,6 +425,16 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
 void Game::narrowPhase() {
     // Handle collisions for all players
     for (Player &character : characters) {
+        character.setCanMove(true);
+        character.setIsOnPlatform(false);
+
+        handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
+        // Handle collisions with death zones
+        if (handleCollisionsWithDeathZones(character, deathZones)) {
+            killPlayer(&character);
+        }
+
+        // Handle collisions according to player's mavity
         if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
         else handleCollisionsReversedMavity(character);
     }
@@ -548,11 +568,10 @@ void Game::pause() {
 void Game::stop() {
     gameState = GameState::STOPPED;
     characters.clear();
-    switchGravity = false;
     saveSlot = -1;
 }
 
-void Game::saveGame() {
+void Game::saveGame() const {
 
     // Create a JSON object to store the game state
     using json = nlohmann::json;

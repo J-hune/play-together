@@ -11,7 +11,7 @@ void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &o
     // Check collisions with each obstacle
     for (const Polygon &obstacle: obstacles) {
         // Check if a collision is detected
-        if (player->hasMoved() && checkSATCollisionTunneling(player, obstacle)) {
+        if (checkSATCollisionTunneling(player, obstacle)) {
 
             correctSATCollision(player, obstacle); // Correct the collision
 
@@ -86,17 +86,6 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
                 player->setIsOnPlatform(true);
             }
             // If the collision is with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-        // Else, check if the environment around the player changed
-        else {
-            // If no collision detected with the ground, the player is not on a platform anymore (platform teleported)
-            if (!checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(false);
-            }
-            // If collision detected with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setCanMove(false);
             }
@@ -223,6 +212,28 @@ void handleCollisionsWithCameraBorders(Player *player) {
 
 */
 
+bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &deathZones) {
+    size_t i = 0;
+
+    // Check collisions with each death zone until the player is dead
+    while (i < deathZones.size() && !checkSATCollision(player.getVertices(), deathZones[i])) {
+        i++;
+    }
+
+    return i != deathZones.size();
+}
+
+void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<Polygon> &saveZones) {
+    // Check collisions with each save zone
+    for (size_t i = 0; i < saveZones.size(); ++i) {
+        const Polygon &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
+        auto savePointID = static_cast<short>(i + 1);
+        if (checkSATCollision(player.getVertices(), saveZone) && level.getLastCheckpoint() < savePointID) {
+            level.setLastCheckpoint(savePointID);
+            std::cout << "Checkpoint reached: " << savePointID << std::endl;
+        }
+    }
+}
 
 
 /* PLAYER REVERSED MAVITY */
@@ -231,7 +242,7 @@ void handleCollisionsSelcatsbOhtiw(Player *player, const std::vector<Polygon> &o
     // Check collisions with each obstacle
     for (const Polygon &obstacle: obstacles) {
         // Check if a collision is detected
-        if (player->hasMoved() && checkSATCollisionTunneling(player, obstacle)) {
+        if (checkSATCollisionTunneling(player, obstacle)) {
 
             correctSATCollision(player, obstacle); // Correct the collision
 
@@ -304,17 +315,6 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
                 player->setIsOnPlatform(true);
             }
             // If the collision is with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-        // Else, check if the environment around the player changed
-        else {
-            // If no collision detected with the ground, the player is not on a platform anymore (platform teleported)
-            if (!checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(false);
-            }
-            // If collision detected with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setCanMove(false);
             }

@@ -9,7 +9,11 @@
 /** CONSTRUCTORS **/
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {}
+        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {
+
+    // Round the frame rate to the nearest multiple of 30
+    this->frameRate = std::max(30, (frameRate / 30) * 30);
+}
 
 
 /** ACCESSORS **/

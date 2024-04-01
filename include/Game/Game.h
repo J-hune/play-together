@@ -153,7 +153,7 @@ private:
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    const int frameRate; /**< The refresh rate of the game. */
+    int frameRate = 30; /**< The refresh rate of the game. */
     const int tickRate = 30; /**< The tick rate of the game. */
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */

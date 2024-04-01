@@ -164,6 +164,12 @@ private:
     float deltaTime = 0; /**< The time elapsed. */
     int effectiveFps = 0; /**< The effective fps. */
 
+    // Broad phase attributes
+    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+
     // Debug variables used for the application console
     bool render_textures = true;
     bool render_camera_point = false;
@@ -208,6 +214,11 @@ private:
     void switchMavity();
 
     /**
+     * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
+     */
+    void broadPhase();
+
+    /**
      * @brief Handles collisions between a player and every object.
      */
     void handleCollisionsNormalMavity(Player &player) const;
@@ -222,7 +233,7 @@ private:
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
      * TODO: add collision behavior for moving objects
      */
-    void handleCollisions();
+    void narrowPhase();
 
     /**
      * @brief Renders the game by drawing all the game textures and sprites.

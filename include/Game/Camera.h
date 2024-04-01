@@ -53,6 +53,18 @@ public:
      */
     [[nodiscard]] float getH() const;
 
+    /**
+     * @brief Gets the broad phase area (bounding box).
+     * @return SDL_Rect representing the broad phase area.
+     */
+    [[nodiscard]] SDL_FRect getBroadPhaseArea() const;
+
+    /**
+     * @brief Gets the vertices of the broad phase area.
+     * @return A vector of Point representing the vertices.
+     */
+    [[nodiscard]] std::vector<Point> getBroadPhaseAreaVertices() const;
+
 
     /** MODIFIERS **/
 
@@ -138,6 +150,8 @@ private:
                       h / 5.f,
                       w - (w / 2.f) - w / 5.f,
                       h - (h / 5.f) - h / 5.f};
+
+    SDL_FRect broadPhaseArea = {x - 500, y - 500, w + 1000, h + 1000};
 
     float lerpSmoothingFactor = 11;
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */

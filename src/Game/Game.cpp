@@ -239,18 +239,57 @@ void Game::switchMavity() {
     }
 }
 
+void Game::broadPhase() {
+    // Empty old broad phase elements
+    obstacles.clear();
+    movingPlatforms1D.clear();
+    movingPlatforms2D.clear();
+    switchingPlatforms.clear();
+
+    std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
+    SDL_FRect broadPhaseBoundingBox = camera.getBroadPhaseArea();
+
+    // Check collisions with each obstacle
+    for (const Polygon &obstacle: level.getObstacles()) {
+        if (checkSATCollision(broadPhaseAreaVertices, obstacle)){
+            obstacles.push_back(obstacle);
+        }
+    }
+
+    // Check for collisions with each 1D moving platforms
+    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
+        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+            movingPlatforms1D.push_back(platform);
+        }
+    }
+
+    // Check for collisions with each 2D moving platforms
+    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
+        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+            movingPlatforms2D.push_back(platform);
+        }
+    }
+
+    // Check for collisions with each switching platforms
+    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
+        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+            switchingPlatforms.push_back(platform);
+        }
+    }
+}
+
 void Game::handleCollisionsNormalMavity(Player &player) const {
     player.setCanMove(true);
 
     // Check obstacles collisions only if the player has moved
     if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
         player.setIsOnPlatform(false);
-        handleCollisionsWithObstacles(&player, level.getObstacles());
+        handleCollisionsWithObstacles(&player, obstacles);
     }
 
-    handleCollisionsWithMovingPlatform1D(&player, level.getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
-    handleCollisionsWithMovingPlatform2D(&player, level.getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
-    handleCollisionsWithSwitchingPlatform(&player, level.getSwitchingPlatforms()); // Handle collisions with switching platforms
+    handleCollisionsWithMovingPlatform1D(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
+    handleCollisionsWithMovingPlatform2D(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
+    handleCollisionsWithSwitchingPlatform(&player, switchingPlatforms); // Handle collisions with switching platforms
 }
 
 void Game::handleCollisionsReversedMavity(Player &player) const {
@@ -259,15 +298,15 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
     // Check obstacles collisions only if the player has moved
     if (player.getMoveY() != 0 || player.getDirectionX() != 0) {
         player.setIsOnPlatform(false);
-        handleCollisionsSelcatsbOhtiw(&player, level.getObstacles());
+        handleCollisionsSelcatsbOhtiw(&player, obstacles);
     }
 
-    handleCollisionsD1mroftalPgnivoMhtiw(&player, level.getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
-    handleCollisionsD2mroftalPgnivoMhtiw(&player, level.getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
-    handleCollisionsMroftalPgnihctiwShtiw(&player, level.getSwitchingPlatforms()); // Handle collisions with switching platforms
+    handleCollisionsD1mroftalPgnivoMhtiw(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
+    handleCollisionsD2mroftalPgnivoMhtiw(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
+    handleCollisionsMroftalPgnihctiwShtiw(&player, switchingPlatforms); // Handle collisions with switching platforms
 }
 
-void Game::handleCollisions() {
+void Game::narrowPhase() {
     // Handle collisions for the initial player
     if (initialPlayer.getMavity() > 0) handleCollisionsNormalMavity(initialPlayer);
     else handleCollisionsReversedMavity(initialPlayer);
@@ -363,7 +402,8 @@ void Game::run() {
         for (Player &character : characters) handleEvents(&character);
         if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
         calculatePlayersMovement();
-        handleCollisions();
+        broadPhase();
+        narrowPhase();
         applyPlayersMovement();
         camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
         render();

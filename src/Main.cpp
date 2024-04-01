@@ -68,8 +68,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Load font from a TrueType (TTF) file
     std::vector<TTF_Font*> fonts;
-    TTF_Font *font16 = TTF_OpenFont("../assets/font/arial.ttf", 16);
-    TTF_Font *font24 = TTF_OpenFont("../assets/font/arial.ttf", 24);
+    TTF_Font *font16 = TTF_OpenFont("assets/font/arial.ttf", 16);
+    TTF_Font *font24 = TTF_OpenFont("assets/font/arial.ttf", 24);
     fonts.push_back(font16);
     fonts.push_back(font24);
 
@@ -83,25 +83,24 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Define a boolean to control the game loop
     bool quit = false;
 
-    Mediator mediator;
 
     // Initialize Game
     Camera camera = Camera();
     Level level("diversity");
     Player::loadTextures(*renderer);
-    Player initialPlayer(50, 50, 48, 36);
 
-    Game game(window, renderer, maxFrameRate, fonts, camera, level, initialPlayer);
-    mediator.setGamePtr(&game);
+    // Some players have a special id. The initial player has id -1 and the server has id 0.
+    Game game(window, renderer, maxFrameRate, fonts, camera, level, &quit);
+    Mediator::setGamePtr(&game);
 
     // Initialize Menu
-    Menu menu(renderer, fonts, &game, &quit, &mediator);
-    mediator.setMenuPtr(&menu);
+    Menu menu(renderer, fonts, &quit);
+    Mediator::setMenuPtr(&menu);
     menu.render();
 
     // Initialize NetworkManager
-    NetworkManager networkManager(&mediator);
-    mediator.setNetworkManagerPtr(&networkManager);
+    NetworkManager networkManager;
+    Mediator::setNetworkManagerPtr(&networkManager);
 
     // Initialize Application Console
     ApplicationConsole console(&game);
@@ -118,7 +117,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
             // If the escape key is pressed, stop the game
             else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                menu.setDisplayMenu(true);
+                if (game.getGameState() == GameState::PAUSED) {
+                    game.run();
+                } else {
+                    menu.setDisplayMenu(true);
+                }
             }
 
             else {
@@ -134,15 +137,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // If the game should start
         if (!menu.isDisplayingMenu()) {
             // Create and start the game
-            Player character1(100, 50, 48, 36);
-            Player character2(150, 50, 48, 36);
-            Player character3(200, 50, 48, 36);
-
-            //game.addCharacter(character1);
-            //game.addCharacter(character2);
-            game.addCharacter(character3);
-
-            game.removeCharacter(character3);
             camera.initializeCameraPosition(game.getAveragePlayersPositions());
 
             // Block the main thread until the game is finished
@@ -153,11 +147,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         } else {
             // Render the menu
             menu.render();
+            SDL_RenderPresent(renderer);
+            SDL_Delay(4);
         }
-
-        SDL_RenderPresent(renderer);
-        SDL_Delay(4);
     }
+
+    networkManager.stopServers();
+    networkManager.stopClients();
 
     // Clean up resources
     SDL_DestroyRenderer(renderer);

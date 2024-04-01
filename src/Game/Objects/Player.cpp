@@ -15,14 +15,22 @@ SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 /** CONSTRUCTORS **/
 
-Player::Player(float startX, float startY, float playerWidth, float playerHeight)
-        : x(startX), y(startY), width(playerWidth), height(playerHeight) {
+Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
 }
 
 
 /** BASIC ACCESSORS **/
+
+int Player::getPlayerID() const {
+    return playerID;
+}
+
+short Player::getSpriteID() const {
+    return SpriteID;
+}
 
 float Player::getX() const {
     return x;
@@ -238,16 +246,24 @@ void Player::toggleMavity() {
     mavity *= -1;
 }
 
+void Player::setPlayerID(int id) {
+    playerID = id;
+}
+
+void Player::setSpriteID(short id) {
+    SpriteID = id;
+}
+
 
 /** METHODS **/
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture
-    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player.png");
-    spriteTexture1Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player1.png");
-    spriteTexture2Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player2.png");
-    spriteTexture3Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player3.png");
-    spriteTexture4Ptr = IMG_LoadTexture(&renderer, "../assets/sprites/players/player4.png");
+    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player.png");
+    spriteTexture1Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1.png");
+    spriteTexture2Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2.png");
+    spriteTexture3Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3.png");
+    spriteTexture4Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4.png");
 
     // Check errors
     if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {

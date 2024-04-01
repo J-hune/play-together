@@ -10,11 +10,10 @@
 #include "Objects/MovingPlatform1D.h"
 #include "Objects/MovingPlatform2D.h"
 #include "Objects/SwitchingPlatform.h"
-
+#include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
-constexpr char MAPS_DIRECTORY[] = "../assets/maps/";
-constexpr char POLYGONS_FILE[] = "polygons.txt";
+constexpr char MAPS_DIRECTORY[] = "assets/maps/";
 
 
 /**
@@ -30,34 +29,68 @@ class Level {
 public:
     /** CONSTRUCTOR **/
 
-    Level(const std::string &map_name);
+    explicit Level(const std::string &map_name);
 
 
     /** ACCESSORS **/
 
     /**
-     * @brief Returns the obstacles attribute.
-     * @return A vector of Polygon.
+     * @brief Return the ID of the map.
+     * @return An integer representing the ID of the map.
      */
-    [[nodiscard]] std::vector<Polygon> getObstacles() const;
+    [[nodiscard]] int getMapID() const;
 
     /**
-     * @brief Returns the movingPlatform attribute.
+     * @brief Return the name of the map.
+     * @return A string representing the name of the map.
+     */
+    [[nodiscard]] std::string getMapName() const;
+
+    /**
+     * @brief Return the spawn points of the map.
+     * @return A vector of Point representing the spawn points of the map.
+     */
+    [[nodiscard]] std::array<Point, 4> getSpawnPoints(int index) const;
+
+    /**
+     * @brief Return the zones of a specific type.
+     * @param type Represents the type of zone.
+     * @return A vector of Polygon.
+     */
+    [[nodiscard]] std::vector<Polygon> getZones(zoneType type) const;
+
+    /**
+     * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
     [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
 
     /**
-     * @brief Returns the movingPlatform2D attribute.
+     * @brief Return the movingPlatform2D attribute.
      * @return A vector of MovingPlatform2D.
      */
     [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
 
     /**
-     * @brief Returns the switchingPlatforms attribute.
+     * @brief Return the switchingPlatforms attribute.
      * @return A vector of SwitchingPlatform.
      */
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
+
+    /**
+     * @brief Return the last checkpoint reached by the player.
+     * @return A short representing the last checkpoint reached by the player.
+     */
+    [[nodiscard]] short getLastCheckpoint() const;
+
+
+    /** MODIFIERS **/
+
+    /**
+     * @brief Set the last checkpoint reached by the player.
+     * @param checkpoint Represents the last checkpoint reached by the player.
+     */
+    void setLastCheckpoint(short checkpoint);
 
 
     /** PUBLIC METHODS **/
@@ -73,7 +106,7 @@ public:
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
-    void renderObstaclesDebug(SDL_Renderer *renderer, Point camera) const;
+    void renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
      * @brief Renders the game by drawing the player and obstacles.
@@ -86,20 +119,50 @@ public:
 private:
     /** ATTRIBUTES **/
 
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    int mapID = 0; /**< Represents the ID of the map. */
+    std::string mapName; /**< Represents the name of the map. */
+    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
+    std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
+    std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
+    std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
+    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
+    std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
+    std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
+    std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
+    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-
+    short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
     /** PRIVATE METHODS **/
 
     /**
-     * @brief Loads obstacles from a map file.
-     * @param mapName The name of the map file.
+     * @brief Load the properties of the map.
+     * @param mapName Represents the name of the map file.
+     */
+    void loadMapProperties(const std::string &mapName);
+
+    /**
+     * @brief Load the polygons from a JSON file.
+     * @param jsonData Represents the JSON data.
+     * @param zoneName Represents the name of the zone.
+     * @param[out] zones Represents the collection of polygons.
+     * @return The number of polygons loaded.
+     */
+    int loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string& zoneName, std::vector<Polygon> &zones, zoneType type);
+
+    /**
+     * @brief Load the polygons from a map.
+     * @param mapName Represents the name of the map.
      */
     void loadPolygonsFromMap(const std::string &mapName);
 
+    /**
+     * @brief Load the platforms from a map. (1D, 2D and switching platforms)
+     * @param mapName Represents the name of the map.
+     */
+    void loadPlatformsFromMap(const std::string &mapName);
 };
 
 #endif //PLAY_TOGETHER_LEVEL_H

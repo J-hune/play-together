@@ -7,16 +7,12 @@
 #include <string>
 #include <ranges>
 #include <cmath>
+#include <algorithm>
 #include <SDL_ttf.h>
 #include "../Physics/CollisionHandler.h"
+#include "../Utils/Mediator.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
-
-enum class GameState {
-    RUNNING,
-    PAUSED,
-    STOPPED
-};
 
 /**
  * @file Game.h
@@ -31,7 +27,8 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, bool *quitFlag);
+
 
     /** ACCESSORS **/
 
@@ -54,15 +51,40 @@ public:
      */
     [[nodiscard]] Point getAveragePlayersPositions() const;
 
+    /**
+     * @brief Get the characters vector.
+     * @return The characters vector.
+     */
+    [[nodiscard]] std::vector<Player> &getCharacters();
+
+    /**
+     * @brief Get the level object.
+     * @return The level object.
+     */
+    [[nodiscard]] Level &getLevel();
+
+    /**
+     * @brief Get the save slot.
+     * @return The save slot.
+     */
+    [[nodiscard]] int getSaveSlot() const;
+
 
     /** MODIFIERS **/
 
     /**
-     * @brief Teleports the player to a specific location.
-     * @param newX The X-coordinate of the location.
-     * @param newY The Y-coordinate of the location.
+     * @brief Find and return a player by its id.
+     * @param id The id of the player to find (0 for the main player).
+     * @return A pointer to the player object if found, nullptr otherwise.
      */
-    void teleportPlayer(float newX, float newY);
+    Player* findPlayerById(int id);
+
+    /**
+     * @brief Find and return a player by its id.
+     * @param id The id of the player to find (0 for the main player).
+     * @return The index of the player object if found, -1 otherwise.
+     */
+    int findPlayerIndexById(int id);
 
     /**
      * @brief Set the level attribute.
@@ -95,6 +117,12 @@ public:
     void setEnablePlatformsMovement(bool state);
 
     /**
+     * @brief Set the save slot.
+     * @param slot The save slot.
+     */
+    void setSaveSlot(int slot);
+
+    /**
      * @brief Toggle the render_textures attribute, used for the application console.
      */
     void toggleRenderTextures();
@@ -106,6 +134,12 @@ public:
 
 
     /** PUBLIC METHODS **/
+
+    /**
+     * @brief Initializes the game.
+     * @param slot The save slot to use when saving the game.
+     */
+    void initialize(int slot=0);
 
     /**
      * @brief Runs the game loop.
@@ -130,23 +164,26 @@ public:
 
     /**
      * @brief Removes a character from the game.
-     * @param character The character to remove.
+     * @param characterPtr Pointer to the character to remove.
      */
-    void removeCharacter(const Player &character);
+    void removeCharacter(const Player *characterPtr);
 
     /**
-     * @brief Serialize the game object
-     * @tparam Archive
-     * @param ar
-     * @param version
-     */
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int version){
-        ar & initialPlayer;
-        ar & characters;
-        ar & camera;
-    }
+    * @brief Handles SDL Key up events, updating the movement variables accordingly.
+    * @param keyEvent Reference to the key who was release.
+    */
+    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
 
+    /**
+     * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param keyEvent Reference to the key who was press.
+     */
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+
+    /**
+     * @brief Saves the game state to a json file.
+     */
+    void saveGame();
 
 private:
     /** ATTRIBUTES **/
@@ -158,10 +195,11 @@ private:
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
-    Player initialPlayer; /**< The player object. */
     std::vector<Player> characters; /**< Collection of characters in the game. */
-    bool isRunning = true; /**< Flag indicating if the game is running. */
-    GameState gameState = GameState::STOPPED; /**< The current game state. */
+    std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
+    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
+    int saveSlot = 0; /**< The save slot to use when saving the game. */
     int effectiveFrameFps = frameRate; /**< The effective fps. */
 
     // Broad phase attributes
@@ -184,25 +222,23 @@ private:
     /**
      * @brief Handles SDL events, updating the movement variables accordingly.
      */
-    void handleEvents(Player *player);
-
-    /**
-     * @brief Handles SDL Key up events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was release.
-     */
-    static void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) ;
-
-    /**
-     * @brief Handles SDL Key down events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was press.
-     */
-    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    void handleEvents();
 
     /**
      * @brief Applies the movement to all players in the game.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
     void applyPlayersMovement(float deltaTime);
+
+    /**
+     * @brief Updates the camera position based on the player's position.
+     */
+    void killPlayer(const Player *player);
+
+    /**
+     * @brief Handles collisions between the player and platform.
+     */
+    void handleCollisionsWithObstacles(Player *player);
 
     /**
      * @brief Calculates the movement of all players in the game.
@@ -242,6 +278,13 @@ private:
      */
     void render();
 
+
+    /** STATIC METHODS **/
+
+    /**
+     * @brief Sends the keyboard state to the network.
+     */
+    static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
 };
 
 #endif //PLAY_TOGETHER_GAME_H

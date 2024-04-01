@@ -7,13 +7,17 @@
 
 /** CONSTRUCTOR **/
 
-Polygon::Polygon(const std::vector<Point> &vertices) : vertices(vertices) {}
+Polygon::Polygon(const std::vector<Point> &vertices, zoneType type) : vertices(vertices), type(type) {}
 
 
 /** ACCESSORS **/
 
 std::vector<Point> Polygon::getVertices() const {
     return vertices;
+}
+
+zoneType Polygon::getType() const {
+    return type;
 }
 
 

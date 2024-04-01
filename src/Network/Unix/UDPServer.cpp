@@ -53,11 +53,12 @@ bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &messag
     return true;
 }
 
-bool UDPServer::broadcast(const std::string &message) const {
+bool UDPServer::broadcast(const std::string &message, int socketIgnored) const {
     std::cout << "UDPServer: Broadcasting message: " << message << " (" << message.length() << " bytes)" << std::endl;
 
     clientAddressesMutexPtr->lock();
     for (const auto& [id, address] : *clientAddressesPtr) {
+        if (id == socketIgnored) continue;
         if (!send(address, message)) {
             clientAddressesMutexPtr->unlock();
 
@@ -125,7 +126,8 @@ void UDPServer::handleMessage() {
             clientAddressesMutexPtr->unlock();
 
             if (clientID != -1) {
-                std::cout << "UDPServer: Received message: " << message << " from " << clientID << std::endl;
+                // Handle received message
+                Mediator::handleMessages(1, message, clientID);
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
             }

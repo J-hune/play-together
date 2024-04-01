@@ -14,6 +14,7 @@
 #include <mutex>
 
 #include "../UDPError.h"
+#include "../../Utils/Mediator.h"
 
 /**
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
@@ -51,7 +52,7 @@ public:
     /**
      * @brief Handles incoming messages from the server.
      */
-    void handleMessages();
+    void handleMessages() const;
 
     /**
      * @brief Sends a message to the server.

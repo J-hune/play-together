@@ -18,20 +18,17 @@ struct ButtonPosition {
 };
 
 enum class ButtonAction {
-    NONE,
-    QUIT,
-    START,
+    VIEW_GAME,
     RESUME,
     STOP,
-    HOST_GAME,
-    JOIN_GAME,
+    SAVE,
+    NONE,
+    QUIT,
+    CREATE_OR_LOAD_GAME,
+    DELETE_SAVE,
+    JOIN_HOSTED_GAME,
     NAVIGATE_TO_MENU_MAIN,
     NAVIGATE_TO_MENU_PLAY,
-    NAVIGATE_TO_MENU_HOST_GAME,
-    NAVIGATE_TO_MENU_JOIN_GAME,
-    NAVIGATE_TO_MENU_LOAD_SAVE,
-    NAVIGATE_TO_MENU_START_NEW_GAME,
-    SEND_MESSAGE,
 };
 
 /**
@@ -45,19 +42,21 @@ public:
      * @param renderer The SDL_Renderer to render the button.
      * @param font The TTF_Font to render the text on the button.
      * @param position The position of the button.
+     * @param value The value associated with the button.
      * @param buttonText The text to be displayed on the button.
      * @param buttonAction The action associated with the button.
      * @param normalColor The color of the button when not hovered.
      * @param hoverColor The color of the button when hovered.
      * @param textColor The color of the text on the button.
      */
-    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, int value, std::string buttonText,
            ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor);
 
     /**
      * @brief Constructor for the Button class with border radius.
      * @param renderer The SDL_Renderer to render the button.
      * @param font The TTF_Font to render the text on the button.
+     * @param value The value associated with the button.
      * @param position The position of the button.
      * @param buttonText The text to be displayed on the button.
      * @param buttonAction The action associated with the button.
@@ -66,19 +65,11 @@ public:
      * @param textColor The color of the text on the button.
      * @param borderRadius The border radius of the button.
      */
-    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, std::string buttonText,
+    Button(SDL_Renderer *renderer, TTF_Font *font, ButtonPosition position, int value, std::string buttonText,
            ButtonAction buttonAction, SDL_Color normalColor, SDL_Color hoverColor, SDL_Color textColor, short borderRadius);
 
-    /**
-     * @brief Render the button on the screen.
-     */
-    void render();
 
-    /**
-     * @brief Handle mouse events for the button.
-     * @param e The SDL_Event to handle.
-     */
-    void handleEvent(SDL_Event const &e);
+    /** ACCESSORS **/
 
     /**
      * @brief Check if the button is hovered.
@@ -99,6 +90,15 @@ public:
      * @return The action of the button.
      */
     [[nodiscard]] ButtonAction getButtonAction() const;
+
+    /**
+     * @brief Get the value associated with the button.
+     * @return The value of the button.
+     */
+    [[nodiscard]] int getValue() const;
+
+
+    /** MODIFIERS **/
 
     /**
      * @brief Set the color of the button when hovered.
@@ -125,6 +125,25 @@ public:
     void setBorderRadius(short radius);
 
     /**
+     * @brief Set the value associated with the button.
+     */
+    void setValue(int value);
+
+
+    /** PUBLIC METHODS **/
+
+    /**
+    * @brief Render the button on the screen.
+    */
+    void render();
+
+    /**
+     * @brief Handle mouse events for the button.
+     * @param e The SDL_Event to handle.
+     */
+    void handleEvent(SDL_Event const &e);
+
+    /**
      * @brief Reset the button to its initial state.
      */
     void reset();
@@ -134,6 +153,7 @@ private:
     TTF_Font *font;
     std::string buttonText;
     ButtonPosition position;
+    int value;
     short borderRadius = 0;
     ButtonAction buttonAction = ButtonAction::NONE;
     SDL_Color normalColor = {0, 255, 0, 255};

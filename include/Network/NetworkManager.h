@@ -7,6 +7,7 @@
 
 #include "../Game/Game.h"
 #include "../Utils/Mediator.h"
+#include "../../dependencies/json.hpp"
 
 #ifdef _WIN32
 #include "../Network/WIN32/TCPServer.h"
@@ -28,28 +29,59 @@ class NetworkManager {
 public:
     /** CONSTRUCTORS **/
 
-    explicit NetworkManager(Mediator *mediator);
+    NetworkManager();
 
 
-    /** DESTRUCTORS **/
-    
-    ~NetworkManager();
+    /** ACCESSORS **/
+
+    /**
+     * @brief Checks if the server is running.
+     * @return
+     */
+    [[nodiscard]] bool isServerRunning() const;
+
+    /**
+     * @brief Checks if the client is running.
+     * @return
+     */
+    [[nodiscard]] bool isClientRunning() const;
 
 
     /** PUBLIC METHODS **/
 
+    /**
+     * @brief Starts the TCP and UDP servers.
+     */
     void startServers();
+
+    /**
+     * @brief Starts the TCP and UDP clients.
+     */
     void startClients();
 
+    /**
+     * @brief Stops the TCP and UDP servers.
+     */
     void stopServers();
+
+    /**
+     * @brief Stops the TCP and UDP clients.
+     */
     void stopClients();
 
-    void temporarySendMethod(const std::string &message) const;
+    /**
+     * @brief Sends a message to all clients (TCP and UDP) except the one specified.
+     * @param protocol The protocol to use (0 for TCP, 1 for UDP).
+     * @param message The message to send.
+     * @param playerIgnored The player to ignore. (0 for no player ignored)
+     */
+    void broadcastMessage(int protocol, const std::string &message, int socketIgnored) const;
+
+     void sendPlayerUpdate(uint16_t keyboardStateMask) const;
 
 private:
     /** ATTRIBUTES **/
 
-    Mediator *mediatorPtr; /**< Pointer to the network manager mediator. */
     TCPServer tcpServer; /**< TCP server instance for network communication. */
     TCPClient tcpClient; /**< TCP client instance for network communication. */
     UDPServer udpServer; /**< UDP server instance for network communication. */

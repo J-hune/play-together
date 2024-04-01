@@ -1,4 +1,3 @@
-#include <SDL_ttf.h>
 #include "../../include/Game/Game.h"
 
 /**
@@ -8,8 +7,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, const Player &initialPlayer)
-        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), initialPlayer(initialPlayer) {
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, bool *quitFlag)
+        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
 
     // Round the frame rate to the nearest multiple of 30
     this->frameRate = std::max(30, (frameRate / 30) * 30);
@@ -27,21 +26,38 @@ Camera* Game::getCamera() {
 }
 
 Point Game::getAveragePlayersPositions() const {
-    float i = 1;  // Number of player in the game (at least one)
-    float x = initialPlayer.getX(); // Initialization of the point on the initial player
-    float y = initialPlayer.getY();
+    // Initialize sum variables
+    float totalX = 0.0f;
+    float totalY = 0.0f;
 
-    // Add x and y position of all players
+    // Calculate sum of x and y positions of all players
     for (const Player &character : characters) {
-        x += character.getX();
-        y += character.getY();
-        i++;
+        totalX += character.getX();
+        totalY += character.getY();
     }
 
-    // Average x and y position of all players
-    x /= i; y /= i;
+    // Calculate the average by dividing by the total number of players
+    size_t numPlayers = characters.size();
+    if (numPlayers > 0) {
+        float averageX = totalX / static_cast<float>(numPlayers);
+        float averageY = totalY / static_cast<float>(numPlayers);
+        return Point(averageX, averageY);
+    } else {
+        // If no players are present, return the origin point
+        return Point(0.0f, 0.0f);
+    }
+}
 
-    return {x, y};
+std::vector<Player> &Game::getCharacters() {
+    return characters;
+}
+
+Level &Game::getLevel() {
+    return level;
+}
+
+int Game::getSaveSlot() const {
+    return saveSlot;
 }
 
 
@@ -51,11 +67,11 @@ void Game::setLevel(std::string const &map_name) {
     level = Level(map_name);
 }
 
-void Game::setRenderCameraPoint(bool state){
+void Game::setRenderCameraPoint(bool state) {
     render_camera_point = state;
 }
 
-void Game::setRenderCameraArea(bool state){
+void Game::setRenderCameraArea(bool state) {
     render_camera_area = state;
 }
 
@@ -67,6 +83,11 @@ void Game::setEnablePlatformsMovement(bool state) {
     enable_platforms_movement = state;
 }
 
+void Game::setSaveSlot(int slot) {
+    saveSlot = slot;
+    std::cout << "Game: Save slot set to " << slot << std::endl;
+}
+
 void Game::toggleRenderTextures() {
     render_textures = !render_textures;
 }
@@ -76,25 +97,78 @@ void Game::toggleRenderFps() {
 }
 
 
-/** FUNCTIONS **/
-
-// Function to check AABB collision between two rectangles
-
-
-
 /** METHODS **/
 
-void Game::teleportPlayer(float newX, float newY) {
-    initialPlayer.teleportPlayer(newX, newY);
+void Game::initialize(int slot) {
+
+    // If the player starts the server or is playing alone
+    if (!Mediator::isClientRunning()) {
+        saveSlot = slot;
+
+        // Prepare the level
+        using json = nlohmann::json;
+        std::string slotFile = "saves/slot_" + std::to_string(saveSlot) + ".json";
+        Point spawnPoint;
+
+        // If a save file exists in the slot, load the game from the save file
+        if (std::filesystem::exists(slotFile)) {
+            std::ifstream file(slotFile);
+            json saveData;
+            file >> saveData;
+
+            level = Level(saveData["level"]);
+            level.setLastCheckpoint(saveData["lastCheckpoint"]);
+            spawnPoint = level.getSpawnPoints(saveData["lastCheckpoint"])[0];
+
+            std::cout << "Game: Loaded save file from slot " << saveSlot << ", level: " << level.getMapName() << " at checkpoint " << level.getLastCheckpoint() << std::endl;
+        }
+
+        // If no save file exists in the slot, start a new game
+        else {
+            level = Level("diversity");
+            spawnPoint = level.getSpawnPoints(0)[0];
+            std::cout << "Game: No save file found in slot " << saveSlot << ", starting new game at level: " << level.getMapName() << std::endl;
+        }
+
+        // Add the initial player to the game
+        Player initialPlayer(-1, spawnPoint, 48, 36);
+        initialPlayer.setSpriteTextureByID(2);
+        addCharacter(initialPlayer);
+    }
+}
+
+Player* Game::findPlayerById (int id) {
+    for (Player &character : characters) {
+        if (character.getPlayerID() == id) {
+            return &character;
+        }
+    }
+    return nullptr;
+}
+
+int Game::findPlayerIndexById(int id) {
+    for (size_t i = 0; i < characters.size(); ++i) {
+        if (characters[i].getPlayerID() == id) {
+            return static_cast<int>(i);
+        }
+    }
+    return -1;
 }
 
 void Game::addCharacter(const Player &character) {
     characters.push_back(character);
 }
 
-void Game::removeCharacter(const Player &character) {
+void Game::removeCharacter(const Player *characterPtr) {
+    // Check if the pointer is valid
+    if (characterPtr == nullptr) {
+        return; // Exit if the pointer is null
+    }
+
     // Find the iterator corresponding to the character in the vector
-    std::input_iterator auto it = std::ranges::find(characters.begin(), characters.end(), character);
+    auto it = std::find_if(characters.begin(), characters.end(), [characterPtr](const Player& currentPlayer) {
+        return &currentPlayer == characterPtr;
+    });
 
     // Check if the character was found
     if (it != characters.end()) {
@@ -103,40 +177,45 @@ void Game::removeCharacter(const Player &character) {
     }
 }
 
-
 void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
+            // If the player is dead ignore
+            if (player == nullptr) break;
+
             // If the coyote time is passed and the player is not already in a jump
             if (!player->getIsJumping()) {
                 player->setWantToJump(true);
             }
             break;
-        case SDLK_LEFT:
-        case SDLK_q:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
+            if (player == nullptr) break;
             player->setWantToMoveLeft(true);
             player->updateSprite(PLAYER_LEFT);
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
+            if (player == nullptr) break;
             player->setWantToMoveRight(true);
             player->updateSprite(PLAYER_RIGHT);
             break;
-        case SDLK_g:
+        case SDL_SCANCODE_G:
             switchMavity();
+            if (player == nullptr) break;
             player->setIsOnPlatform(false);
             player->getSprite()->toggleFlipVertical();
             break;
-        case SDLK_m:
-            printf("Loading map 'diversity'\n");
-            setLevel("diversity");
+        case SDL_SCANCODE_M:
+            if (level.getMapID() == 1) setLevel("assurance");
+            else setLevel("diversity");
             break;
-        case SDLK_ESCAPE:
+        case SDL_SCANCODE_ESCAPE:
             pause();
             break;
-        case SDLK_DELETE:
+        case SDL_SCANCODE_DELETE:
             stop();
             break;
         case SDLK_LSHIFT:
@@ -148,30 +227,40 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent)
     }
 }
 
-void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
-    switch (keyEvent.keysym.sym) {
-        case SDLK_UP:
-        case SDLK_z:
-        case SDLK_SPACE:
+void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
+    switch (keyEvent.keysym.scancode) {
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+        case SDL_SCANCODE_SPACE:
+            if (player == nullptr) break;
+
             // Reset vertical movement if moving upwards
             if (player->getMoveY() < 0) player->setMoveY(0);
             player->setWantToJump(false); // Disable jumping
             break;
-        case SDLK_DOWN:
+        case SDL_SCANCODE_DOWN:
+            if (player == nullptr) break;
+
             // Reset vertical movement if moving downwards
             if (player->getMoveY() > 0) player->setMoveY(0);
-        case SDLK_q:
-        case SDLK_LEFT:
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
+            if (player == nullptr) break;
+
             // Reset horizontal movement if moving left
             if (player->getMoveX() < 0) player->setMoveX(0);
             player->setWantToMoveLeft(false); // Disable left movement
             // Trigger idle animation if not moving right
             if (!player->getWantToMoveRight()) {
                 player->updateSprite(0);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
             }
             break;
-        case SDLK_RIGHT:
-        case SDLK_d:
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
+            if (player == nullptr) break;
+
             // Reset horizontal movement if moving right
             if (player->getMoveX() > 0) {
                 player->setMoveX(0);
@@ -180,9 +269,12 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
             // Trigger idle animation if not moving left
             if (!player->getWantToMoveLeft()) {
                 player->updateSprite(0);
+            } else {
+                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
             }
             break;
-        case SDLK_LSHIFT:
+        case SDL_SCANCODE_LSHIFT:
+            if (player == nullptr) break;
             player->setSprint(false);
             player->updateSprite(0);
             break;
@@ -191,24 +283,27 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
     }
 }
 
-void Game::handleEvents(Player *player) {
+void Game::handleEvents() {
     SDL_Event e;
+    static uint16_t lastKeyboardStateMask = 0;
+    Player *playerPtr = findPlayerById(-1);
 
     // Main loop handling every event one by one
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
             printf("Quit event detected\n");
+
+            *quitFlagPtr = true;
             stop();
-            exit(0);
         }
 
         // Handle key events
         if (e.type == SDL_KEYUP) {
-            handleKeyUpEvent(player, e.key);
+            handleKeyUpEvent(playerPtr, e.key);
         }
         if (e.type == SDL_KEYDOWN) {
-            handleKeyDownEvent(player, e.key);
+            handleKeyDownEvent(playerPtr, e.key);
         }
 
         // Handle SDL_MOUSEBUTTONDOWN events
@@ -216,28 +311,35 @@ void Game::handleEvents(Player *player) {
             printf("Mouse clicked at (%f, %f)\n", (float)e.button.x + camera.getX(), (float)e.button.y + camera.getY());
         }
     }
+
+    // If the player is alive, send the keyboard state to the network after handling all events
+    if (findPlayerById(-1) != nullptr) {
+        sendKeyboardStateToNetwork(&lastKeyboardStateMask);
+    }
 }
 
 void Game::calculatePlayersMovement(double deltaTime) {
-    initialPlayer.calculateMovement(deltaTime); // Calculate movement for the initial player
-
-    // Apply movement for other players
+    // Apply movement to all players
     for (Player &character : characters) {
         character.calculateMovement(deltaTime);
     }
 }
 
 void Game::applyPlayersMovement(float deltaTime) {
-    initialPlayer.applyMovement(deltaTime); // Apply movement for the initial player
-
-    // Apply movement for other players
+    // Apply movement for all players
     for (Player &character : characters) {
         character.applyMovement(deltaTime);
     }
 }
 
+void Game::killPlayer(const Player *player) {
+    // Add the player to the dead characters list
+    deadCharacters.push_back(*player);
+    characters.erase(characters.begin() + findPlayerIndexById(player->getPlayerID()));
+}
+
 void Game::switchMavity() {
-    initialPlayer.toggleMavity();
+    // Change mavity for all player
     for (Player &character : characters) {
         character.toggleMavity();
     }
@@ -254,7 +356,7 @@ void Game::broadPhase() {
     SDL_FRect broadPhaseBoundingBox = camera.getBroadPhaseArea();
 
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getObstacles()) {
+    for (const Polygon &obstacle: level.getZones(zoneType::COLLISION)) {
         if (checkSATCollision(broadPhaseAreaVertices, obstacle)){
             obstacles.push_back(obstacle);
         }
@@ -311,13 +413,9 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
 }
 
 void Game::narrowPhase() {
-    // Handle collisions for the initial player
-    if (initialPlayer.getMavity() > 0) handleCollisionsNormalMavity(initialPlayer);
-    else handleCollisionsReversedMavity(initialPlayer);
-
-    // Handle collisions for other players
+    // Handle collisions for all players
     for (Player &character : characters) {
-        if (initialPlayer.getMavity() > 0) handleCollisionsNormalMavity(character);
+        if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
         else handleCollisionsReversedMavity(character);
     }
 }
@@ -342,26 +440,22 @@ void Game::render() {
 
     // Render textures
     if (render_textures) {
-        initialPlayer.render(renderer, cam); // Draw the initial player
-
         // Draw the characters
         for (Player &character: characters) {
             character.render(renderer, cam);
         }
 
-        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
     // Render collisions box
     else {
-        initialPlayer.renderDebug(renderer, cam); // Draw the initial player
-
         // Draw the characters
         for (Player const &character: characters) {
             character.renderDebug(renderer, cam);
         }
 
-        level.renderObstaclesDebug(renderer, cam); // Draw the obstacles
+        level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
 
@@ -374,7 +468,10 @@ void Game::render() {
     if (render_camera_area) camera.renderCameraArea(renderer);
 
     // Draw the player's colliders if enabled
-    if (render_player_colliders) initialPlayer.renderColliders(renderer, cam);
+    if (render_player_colliders) {
+        Player initialPlayer = *findPlayerById(-1);
+        initialPlayer.renderColliders(renderer, cam);
+    }
 
     // Present the renderer and introduce a slight delay
     SDL_RenderPresent(renderer);
@@ -407,8 +504,7 @@ void Game::run() {
 
         // Calculate game physics at the specified rate (tickRate)
         if (accumulatedTickRateTime >= 1.0 / tickRate) {
-            handleEvents(&initialPlayer);
-            for (Player &character: characters) handleEvents(&character);
+            handleEvents();
             calculatePlayersMovement(1.0 / tickRate);
             broadPhase();
             narrowPhase();
@@ -451,8 +547,52 @@ void Game::pause() {
 
 void Game::stop() {
     gameState = GameState::STOPPED;
+    characters.clear();
+    switchGravity = false;
+    saveSlot = -1;
+}
 
-    // Reset the player position
-    initialPlayer.setX(50);
-    initialPlayer.setY(50);
+void Game::saveGame() {
+
+    // Create a JSON object to store the game state
+    using json = nlohmann::json;
+    json gameStateJSON;
+
+    // Store the game state
+
+    // Save date to format YYYY-MM-DD (local time) using the C++ standard library
+    auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::tm const *localTime = std::localtime(&currentTime);
+    std::stringstream ss;
+    ss << std::put_time(localTime, "%Y-%m-%d");
+
+    gameStateJSON["date"] = ss.str();
+    gameStateJSON["level"] = level.getMapName();
+    gameStateJSON["lastCheckpoint"] = level.getLastCheckpoint();
+
+    // Write the game state to a file in the "saves" directory
+    std::ofstream file("saves/slot_" + std::to_string(saveSlot) + ".json");
+    file << gameStateJSON.dump(4);
+    file.close();
+
+    std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
+}
+
+
+/** STATIC METHODS **/
+
+void Game::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) {
+
+    // Get the current keyboard state mask
+    const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+    uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
+
+    // If the keyboard state has changed since the last message was sent
+    if (currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+        // Send the new keyboard state mask to the server
+        Mediator::sendPlayerUpdate(currentKeyboardStateMask);
+
+        // Update the last keyboard state mask and the last send time
+        *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
+    }
 }

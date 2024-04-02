@@ -135,8 +135,6 @@ private:
                       w - (w / 2.f) - w / 5.f,
                       h - (h / 5.f) - h / 5.f};
 
-    SDL_FRect broadPhaseArea = {x - 500, y - 500, w + 1000, h + 1000};
-
     float lerpSmoothingFactor = 11;
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */

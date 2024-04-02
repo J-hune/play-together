@@ -355,7 +355,7 @@ void Game::broadPhase() {
     switchingPlatforms.clear();
 
     std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
-    SDL_FRect broadPhaseBoundingBox = camera.getBroadPhaseArea();
+    SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
 
     // Check collisions with each save zone
     for (const Polygon &zone: level.getZones(zoneType::SAVE)) {
@@ -380,21 +380,21 @@ void Game::broadPhase() {
 
     // Check for collisions with each 1D moving platforms
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
             movingPlatforms1D.push_back(platform);
         }
     }
 
     // Check for collisions with each 2D moving platforms
     for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
             movingPlatforms2D.push_back(platform);
         }
     }
 
     // Check for collisions with each switching platforms
     for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        if (checkAABBCollision(broadPhaseBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
             switchingPlatforms.push_back(platform);
         }
     }

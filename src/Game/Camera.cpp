@@ -29,15 +29,15 @@ float Camera::getH() const {
 }
 
 SDL_FRect Camera::getBroadPhaseArea() const {
-    return broadPhaseArea;
+    return {x - 500, y - 500, w + 1000, h + 1000};
 }
 
 std::vector<Point> Camera::getBroadPhaseAreaVertices() const {
     return {
-            {x, y},
-            {x + w, y},
-            {x + w, y + h},
-            {x, y + h}
+            {x - 500, y - 500},
+            {x + w + 1000, y - 500},
+            {x + w + 1000, y + h + 1000},
+            {x - 500, y + h + 1000}
     };
 }
 

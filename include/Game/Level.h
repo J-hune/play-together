@@ -15,7 +15,6 @@
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
-constexpr char BOXES_FILE[] = "boxes.txt";
 
 /**
  * @file Level.h
@@ -177,16 +176,8 @@ private:
      */
     void loadPlatformsFromMap(const std::string &mapName);
 
-    /**
-     * @brief Loads obstacles from a map file.
-     * @param mapName The name of the map file.
-     * @param obstacles The type of obstacles that we want to load
-     * @param filename The name of the obstacles file
-     */
-    void loadPolygonsFromMap(const std::string &mapName,std::vector<Polygon> &obstacles, const char *filename);
-
     //TODO: doc
-    void loadSpecialBoxesFroMap(const std::string &mapName,std::vector<SpecialBoxes> &boxes, const char *filename);
+    void loadSpecialBoxesFroMap(const std::string &mapName,std::vector<SpecialBoxes> &boxes);
 
 
 };

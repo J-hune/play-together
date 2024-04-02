@@ -13,6 +13,8 @@
 #include "../Utils/Mediator.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
+constexpr int MINHIGHT = 20;
+constexpr int MINWHIDTH = 30;
 
 /**
  * @file Game.h
@@ -256,6 +258,11 @@ private:
     void broadPhase();
 
     /**
+     * @brief Handles collisions between the player and special boxes.
+     */
+    void handleCollisionsWithSpecialBox(Player *player);
+
+    /**
      * @brief Handles collisions between a player and every object.
      */
     void handleCollisionsNormalMavity(Player &player) const;
@@ -276,23 +283,6 @@ private:
      * @brief Renders the game by drawing all the game textures and sprites.
      */
     void render();
-
-    /**
-    * @brief for the type of obstacles that are in contact applies
-     * the function passes in parameter
-    *TODO : not done yet
-    */
-    void checks(const std::vector<SpecialBoxes>& polygons,void (Game::*func)(float,float),void (Game::*func2)(SpecialBoxes obs),Game& game,float h,float w);
-
-    /**
-     * @brief changes the image of the player and redraw him with his new dimensions
-     * @param h the new height of the player
-     * @param w the new width of the player
-     * */
-    void playerChange(float h,float w);
-
-    //TODO : commet
-    void playerSpecial(float h,float w,const SpecialBoxes& obs);
 
 
     /** STATIC METHODS **/

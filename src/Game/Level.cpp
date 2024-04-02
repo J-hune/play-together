@@ -13,7 +13,7 @@ Level::Level(const std::string &map_name) {
     loadMapProperties(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
-    loadSpecialBoxesFroMap(map_name, specialBoxes, BOXES_FILE);
+    loadSpecialBoxesFroMap(map_name, specialBoxes);
 }
 
 
@@ -272,11 +272,11 @@ void Level::loadPlatformsFromMap(const std::string& mapFileName) {
     }
 }
 
-void Level ::loadSpecialBoxesFroMap(const std::string &mapName, std::vector<SpecialBoxes> &boxes, const char *filename) {
+void Level::loadSpecialBoxesFroMap(const std::string &mapName, std::vector<SpecialBoxes> &boxes) {
     boxes.clear();
 
     // Define the file path for the polygon data
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/" + filename;//POLYGONS_FILE;
+    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/boxes.txt";
 
     std::ifstream file(filePath);
 
@@ -303,7 +303,7 @@ void Level ::loadSpecialBoxesFroMap(const std::string &mapName, std::vector<Spec
         }
 
         file.close();
-        std::cout << "Loaded " << boxes.size() << " polygons from the map " << mapName << "." << std::endl;
+        std::cout << "Loaded " << boxes.size() << " special boxes from the map " << mapName << "." << std::endl;
     } else {
         std::cerr << "Unable to open the file." << std::endl;
     }

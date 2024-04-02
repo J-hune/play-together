@@ -397,6 +397,32 @@ void Game::broadPhase() {
     }
 }
 
+void Game::handleCollisionsWithSpecialBox(Player *player) {
+    for (SpecialBoxes &box : level.getSpecialBoxes()) {
+
+        if (player->getX() > box.getX()
+            && player->getX() < box.getX()+box.getWidth()
+            && player->getY() > box.getY()
+            && player->getY() < box.getY()+box.getHight()){
+
+            int err = SDL_RenderClear(renderer);
+            if(err != 0) {
+                std::cout<< SDL_GetError()<<std::endl;
+                exit(1);
+            }
+            float nSizeH = player->getH() > MINHIGHT ? player->getH()/2 : player->getH()*2;
+            float nSizeW = player->getW() > MINWHIDTH ? player->getW()/2 : player->getW()*2;
+
+            player->setH(nSizeH);
+            player->setW(nSizeW);
+
+            std::cout<<"chercks for collision"<<std::endl;
+
+            level.removeSpecialBoxe(box);
+        }
+    }
+}
+
 void Game::handleCollisionsNormalMavity(Player &player) const {
     // Check obstacles collisions only if the player has moved
     if (player.hasMoved()) {
@@ -425,29 +451,7 @@ void Game::narrowPhase() {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
-        for (SpecialBoxes &box : level.getSpecialBoxes()) {
-
-            if (character.getX() > box.getX()
-                && character.getX() < box.getX()+box.getWidth()
-                && character.getY() > box.getY()
-                && character.getY() < box.getY()+box.getHight()){
-
-                int err = SDL_RenderClear(renderer);
-                if(err != 0) {
-                    std::cout<< SDL_GetError()<<std::endl;
-                    exit(1);
-                }
-                float nSizeH = character.getH() > 20 ? character.getH()/2 : character.getH()*2;
-                float nSizeW = character.getW() > 10 ? character.getW()/2 : character.getW()*2;
-
-                character.setH(nSizeH);
-                character.setW(nSizeW);
-
-                level.removeSpecialBoxe(box);
-
-                render();
-            }
-        }
+        handleCollisionsWithSpecialBox(&character);
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         // Handle collisions with death zones
         if (handleCollisionsWithDeathZones(character, deathZones)) {
@@ -499,8 +503,6 @@ void Game::render() {
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
     }
 
-    /*SDL_FRect boxRec = {vertex1.x - camera.getX(), vertex1.y - camera.getY(), vertex2.x - camera.getX(), vertex2.y - camera.getY()};
-            SDL_RenderFillRectF(renderer, &boxRec);*/
     SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
     for (SpecialBoxes obstacle: level.getSpecialBoxes()) {
         SDL_FRect objRect = {obstacle.getX() - camera.getX(), obstacle.getY() - camera.getY(),

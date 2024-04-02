@@ -209,9 +209,24 @@ void ApplicationConsole::executeCommand(const std::string& command) const {
             std::cout << "List of available commands: \n";
             std::cout << "help - Display help\n";
             std::cout << "ping - Test the console\n";
-        } else if (command == "ping") {
+        }
+
+        // change the max frame rate
+        else if (command.find("fps") != std::string::npos) {
+            int fps;
+            if (sscanf(command.c_str(), "fps %d", &fps) == 1) {
+                gamePtr->setFrameRate(fps);
+                std::cout << "Max frame rate set to " << fps << ".\n";
+            } else {
+                std::cout << "Invalid syntax. Usage: fps [fps]\n";
+            }
+        }
+
+        else if (command == "ping") {
             std::cout << "Pong!\n";
-        } else {
+        }
+
+        else {
             std::cout << "Unknown command. Type 'help' to display help.\n";
         }
     }

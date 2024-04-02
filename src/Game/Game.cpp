@@ -85,6 +85,10 @@ void Game::setSaveSlot(int slot) {
     std::cout << "Game: Save slot set to " << slot << std::endl;
 }
 
+void Game::setFrameRate(int fps) {
+    this->frameRate = fps;
+}
+
 void Game::toggleRenderTextures() {
     render_textures = !render_textures;
 }

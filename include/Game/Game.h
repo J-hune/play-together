@@ -123,6 +123,12 @@ public:
     void setSaveSlot(int slot);
 
     /**
+     * @brief Set the frame rate of the game.
+     * @param frameRate The frame rate to set.
+     */
+    void setFrameRate(int frameRate);
+
+    /**
      * @brief Toggle the render_textures attribute, used for the application console.
      */
     void toggleRenderTextures();
@@ -234,7 +240,7 @@ private:
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;
-    bool render_fps = true;
+    bool render_fps = false;
     bool enable_platforms_movement = true;
 
 

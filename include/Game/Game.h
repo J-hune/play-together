@@ -142,6 +142,18 @@ public:
     void initialize(int slot=0);
 
     /**
+     * @brief Updates the game logic in a fixed time step.
+     */
+    void fixedUpdate();
+
+    /**
+     * @brief Updates the game logic.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param ratio The ratio of the movement to apply.
+     */
+    void update(double deltaTime, double ratio);
+
+    /**
      * @brief Runs the game loop.
      */
     void run();
@@ -197,7 +209,7 @@ private:
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    int frameRate = 30; /**< The refresh rate of the game. */
+    int frameRate = 60; /**< The refresh rate of the game. */
     const int tickRate = 30; /**< The tick rate of the game. */
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
@@ -222,7 +234,7 @@ private:
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;
-    bool render_fps = false;
+    bool render_fps = true;
     bool enable_platforms_movement = true;
 
 
@@ -235,9 +247,9 @@ private:
 
     /**
      * @brief Applies the movement to all players in the game.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param ratio The ratio of the movement to apply.
      */
-    void applyPlayersMovement(float deltaTime);
+    void applyPlayersMovement(double ratio);
 
     /**
      * @brief Calculates the movement of all players in the game.

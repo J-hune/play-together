@@ -384,9 +384,9 @@ bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
 
-void Player::applyMovement(float deltaTime) {
-    x += moveX * deltaTime;
-    y += moveY * deltaTime;
+void Player::applyMovement(double ratio) {
+    x += static_cast<float>(moveX * ratio);
+    y += static_cast<float>(moveY * ratio);
 }
 
 void Player::updateSprite(int direction) {

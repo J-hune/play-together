@@ -353,9 +353,9 @@ public:
 
     /**
      * @brief Apply the movement by adding moveX and moveY to the player position.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param ratio The ratio of the movement to apply.
      */
-    void applyMovement(float deltaTime);
+    void applyMovement(double ratio);
 
     /**
      * @brief Update the sprite animation of the player.

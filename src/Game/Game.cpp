@@ -8,10 +8,7 @@
 /** CONSTRUCTORS **/
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, bool *quitFlag)
-        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
-
-    // Round the frame rate to the nearest multiple of 30
-    this->frameRate = std::max(30, (frameRate / 30) * 30);
+        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
 }
 
 
@@ -320,10 +317,10 @@ void Game::calculatePlayersMovement(double deltaTime) {
     }
 }
 
-void Game::applyPlayersMovement(float deltaTime) {
+void Game::applyPlayersMovement(double ratio) {
     // Apply movement for all players
     for (Player &character : characters) {
-        character.applyMovement(deltaTime);
+        character.applyMovement(ratio);
     }
 }
 
@@ -494,6 +491,24 @@ void Game::render() {
     SDL_RenderPresent(renderer);
 }
 
+void Game::fixedUpdate() {
+    handleEvents();
+    broadPhase();
+    calculatePlayersMovement(1.0 / tickRate);
+
+}
+
+void Game::update(double deltaTime, double ratio) {
+    narrowPhase();
+    if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
+
+    // Apply players movement directly with the calculated ratio
+    applyPlayersMovement(ratio);
+
+    camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
+    render();
+}
+
 void Game::run() {
     gameState = GameState::RUNNING;
 
@@ -521,10 +536,7 @@ void Game::run() {
 
         // Calculate game physics at the specified rate (tickRate)
         if (accumulatedTickRateTime >= 1.0 / tickRate) {
-            handleEvents();
-            calculatePlayersMovement(1.0 / tickRate);
-            broadPhase();
-            narrowPhase();
+            fixedUpdate();
 
             // Reset accumulated time for game physics
             accumulatedTickRateTime -= 1.0 / tickRate;
@@ -534,10 +546,9 @@ void Game::run() {
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
 
-            if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-            applyPlayersMovement(static_cast<float>(tickRate)/static_cast<float>(frameRate));
-            camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
-            render();
+            // Calculate the ratio for applying players movement
+            double ratio = static_cast<double>(frameTicks) / (static_cast<double>(frequency) / static_cast<double>(tickRate));
+            update(deltaTime, ratio);
 
             // Reset accumulated time for rendering
             accumulatedTime -= 1.0 / frameRate;

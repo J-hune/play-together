@@ -590,12 +590,26 @@ void Game::saveGame() const {
     gameStateJSON["level"] = level.getMapName();
     gameStateJSON["lastCheckpoint"] = level.getLastCheckpoint();
 
-    // Write the game state to a file in the "saves" directory
-    std::ofstream file("saves/slot_" + std::to_string(saveSlot) + ".json");
-    file << gameStateJSON.dump(4);
-    file.close();
+    // Save the player state
+    std::string saveFileName = "saves/slot_" + std::to_string(saveSlot) + ".json";
 
-    std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
+    // If the "saves" directory does not exist, create it
+    if (!std::filesystem::exists(saveFileName)) {
+        std::cout << "Game: Creating missing saves directory" << std::endl;
+        std::filesystem::create_directory("saves");
+    }
+
+    // Open the file for writing
+    std::ofstream file(saveFileName);
+
+    // If the file was successfully created, write the game state to the file
+    if (file.is_open()) {
+        file << gameStateJSON.dump(4);
+        file.close();
+        std::cout << "Game: Saved game to slot " << saveSlot << std::endl;
+    } else {
+        std::cerr << "Game: Error saving game to slot " << saveSlot << std::endl;
+    }
 }
 
 

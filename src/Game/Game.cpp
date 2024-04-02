@@ -231,9 +231,6 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) {
         case SDL_SCANCODE_W:
         case SDL_SCANCODE_SPACE:
             if (player == nullptr) break;
-
-            // Reset vertical movement if moving upwards
-            if (player->getMoveY() < 0) player->setMoveY(0);
             player->setWantToJump(false); // Disable jumping
             break;
         case SDL_SCANCODE_DOWN:
@@ -580,10 +577,14 @@ void Game::saveGame() const {
     // Store the game state
 
     // Save date to format YYYY-MM-DD (local time) using the C++ standard library
-    auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::tm const *localTime = std::localtime(&currentTime);
+    auto now = std::chrono::system_clock::now();
+    auto currentTime = std::chrono::system_clock::to_time_t(now);
+
+    std::tm localTime = {};
+    localtime_r(&currentTime, &localTime);
+
     std::stringstream ss;
-    ss << std::put_time(localTime, "%Y-%m-%d");
+    ss << std::put_time(&localTime, "%Y-%m-%d");
 
     gameStateJSON["date"] = ss.str();
     gameStateJSON["level"] = level.getMapName();

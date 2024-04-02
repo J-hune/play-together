@@ -423,7 +423,7 @@ private:
     float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
     float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
-    float coyoteTime = 0.6f; /**< Time window in seconds during which the player can still jump after starting to fall. */
+    float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
 

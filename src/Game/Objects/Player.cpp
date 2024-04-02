@@ -236,6 +236,9 @@ void Player::setSprint(bool state) {
 
 void Player::setIsOnPlatform(bool state) {
     isOnPlatform = state;
+    if (state) {
+        lastTimeOnPlatform = SDL_GetTicks();
+    }
 }
 
 void Player::setWantToJump(bool state) {

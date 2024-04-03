@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <numeric>
 #include "Polygon.h"
-#include "../Game/Objects/Player.h"
+#include "../Game/Player.h"
 
 /**
  * @file CollisionManager.h

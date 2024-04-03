@@ -1,4 +1,4 @@
-#include "../../../include/Game/Objects/MovingPlatform2D.h"
+#include "../../../include/Game/Platforms/MovingPlatform2D.h"
 
 
 /**

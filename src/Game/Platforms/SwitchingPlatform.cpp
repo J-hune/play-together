@@ -1,4 +1,4 @@
-#include "../../../include/Game/Objects/SwitchingPlatform.h"
+#include "../../../include/Game/Platforms/SwitchingPlatform.h"
 
 /**
  * @file SwitchingPlatform.cpp

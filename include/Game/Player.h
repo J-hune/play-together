@@ -5,9 +5,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <map>
-#include "../Point.h"
-#include "../../Graphics/Animation.h"
-#include "../../Graphics/Sprite.h"
+#include "Point.h"
+#include "../Graphics/Animation.h"
+#include "../Graphics/Sprite.h"
 
 const int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
 const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
@@ -339,6 +339,12 @@ public:
     void teleportPlayer(float newX, float newY);
 
     /**
+     * @brief Increase or decrease the score by adding a value.
+     * @param val The value to add to the score.
+     */
+    void addToScore(int val);
+
+    /**
      * @brief Calculate the new position of the player.
      * @param deltaTime The time elapsed since the last frame in seconds.
      * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
@@ -396,6 +402,7 @@ private:
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     Sprite sprite; /**< The sprite of the player. */
+    int score = 0;
     float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // X-AXIS MOVEMENT ATTRIBUTES

@@ -7,10 +7,10 @@
 #include <iostream>
 #include "../Physics/Polygon.h"
 #include "Camera.h"
-#include "Objects/MovingPlatform1D.h"
-#include "Objects/MovingPlatform2D.h"
-#include "Objects/SwitchingPlatform.h"
-#include "SpecialBoxes.h"
+#include "Platforms/MovingPlatform1D.h"
+#include "Platforms/MovingPlatform2D.h"
+#include "Platforms/SwitchingPlatform.h"
+#include "Items/SizePowerUp.h"
 #include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
@@ -78,15 +78,19 @@ public:
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
 
     /**
-    * @brief Return the specialBoxes attribute.
-    * @return A vector of Polygon.
+    * @brief Return an item attribute of generic type.
+    * @tparam T The type of items to return.
+    * @param type The type of items to retrieve.
+    * @return The item attribute of generic type.
     */
-    [[nodiscard]] std::vector<SpecialBoxes> getSpecialBoxes() const;
-
-    /**
-     * @brief Removes the polygon
-     * */
-    void removeSpecialBoxe(const SpecialBoxes &box);
+    template<typename T>
+    [[nodiscard]] std::vector<T> getItems(ItemTypes type) const {
+        switch(type) {
+            using enum ItemTypes;
+            case SIZE_POWER_UP: return sizePowerUp;
+            default: return {};
+        }
+    }
 
     /**
      * @brief Return the last checkpoint reached by the player.
@@ -102,6 +106,17 @@ public:
      * @param checkpoint Represents the last checkpoint reached by the player.
      */
     void setLastCheckpoint(short checkpoint);
+
+    /**
+    * @brief Set an item attribute of generic type.
+    * @tparam T The type of item to set.
+    * @param type The type of item to modify.
+    */
+    template<typename T>
+    void setItem(std::vector<T> item, ItemTypes type) {
+        using enum ItemTypes;
+        if (type == SIZE_POWER_UP) sizePowerUp = item;
+    }
 
 
     /** PUBLIC METHODS **/
@@ -126,6 +141,12 @@ public:
      */
     void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
 
+    /**
+     * @brief Renders the items by drawing rectangles.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderItemsDebug(SDL_Renderer *renderer, Point camera) const;
 
 private:
     /** ATTRIBUTES **/
@@ -144,7 +165,7 @@ private:
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<SpecialBoxes> specialBoxes;/**< Collection of SpecialBoxes representing special Boxes with power. */
+    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
     /** PRIVATE METHODS **/
@@ -176,8 +197,11 @@ private:
      */
     void loadPlatformsFromMap(const std::string &mapName);
 
-    //TODO: doc
-    void loadSpecialBoxesFroMap(const std::string &mapName,std::vector<SpecialBoxes> &boxes);
+    /**
+     * @brief Load the items from a map.
+     * @param mapName Represents the name of the map.
+     */
+    void loadItemsFromMap(const std::string &mapName);
 
 
 };

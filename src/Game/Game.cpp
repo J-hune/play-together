@@ -350,6 +350,7 @@ void Game::broadPhase() {
     movingPlatforms1D.clear();
     movingPlatforms2D.clear();
     switchingPlatforms.clear();
+    sizePowerUp.clear();
 
     std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
     SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
@@ -395,30 +396,11 @@ void Game::broadPhase() {
             switchingPlatforms.push_back(platform);
         }
     }
-}
 
-void Game::handleCollisionsWithSpecialBox(Player *player) {
-    for (SpecialBoxes &box : level.getSpecialBoxes()) {
-
-        if (player->getX() > box.getX()
-            && player->getX() < box.getX()+box.getWidth()
-            && player->getY() > box.getY()
-            && player->getY() < box.getY()+box.getHight()){
-
-            int err = SDL_RenderClear(renderer);
-            if(err != 0) {
-                std::cout<< SDL_GetError()<<std::endl;
-                exit(1);
-            }
-            float nSizeH = player->getH() > MINHIGHT ? player->getH()/2 : player->getH()*2;
-            float nSizeW = player->getW() > MINWHIDTH ? player->getW()/2 : player->getW()*2;
-
-            player->setH(nSizeH);
-            player->setW(nSizeW);
-
-            std::cout<<"chercks for collision"<<std::endl;
-
-            level.removeSpecialBoxe(box);
+    // Check for collisions with size power-up
+    for (const SizePowerUp &item: level.getItems<SizePowerUp>(ItemTypes::SIZE_POWER_UP)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())){
+            sizePowerUp.push_back(item);
         }
     }
 }
@@ -451,12 +433,12 @@ void Game::narrowPhase() {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
-        handleCollisionsWithSpecialBox(&character);
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         // Handle collisions with death zones
         if (handleCollisionsWithDeathZones(character, deathZones)) {
             killPlayer(&character);
         }
+        handleCollisionsWithItems(&character, &level, sizePowerUp, ItemTypes::SIZE_POWER_UP);
 
         // Handle collisions according to player's mavity
         if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
@@ -491,6 +473,7 @@ void Game::render() {
 
         level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
+        level.renderItemsDebug(renderer, cam); // Draw the items
     }
     // Render collisions box
     else {
@@ -501,14 +484,9 @@ void Game::render() {
 
         level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
+        level.renderItemsDebug(renderer, cam); // Draw the items
     }
 
-    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
-    for (SpecialBoxes obstacle: level.getSpecialBoxes()) {
-        SDL_FRect objRect = {obstacle.getX() - camera.getX(), obstacle.getY() - camera.getY(),
-                             obstacle.getWidth(), obstacle.getHight()};
-        SDL_RenderFillRectF(renderer, &objRect);
-    }
 
     // DEBUG DRAWING OF APPLICATION CONSOLE :
 

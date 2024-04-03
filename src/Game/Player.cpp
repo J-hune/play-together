@@ -1,4 +1,4 @@
-#include "../../../include/Game/Objects/Player.h"
+#include "../../include/Game/Player.h"
 
 /**
  * @file Player.cpp
@@ -287,6 +287,10 @@ void Player::setSpriteTextureByID(int id) {
 void Player::teleportPlayer(float newX, float newY) {
     x = newX;
     y = newY;
+}
+
+void Player::addToScore(int val) {
+    score += val;
 }
 
 bool Player::canJump() const {

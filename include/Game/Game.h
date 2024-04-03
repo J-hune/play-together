@@ -218,6 +218,7 @@ private:
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+    std::vector<SizePowerUp> sizePowerUp;/**< Collection of SpecialBoxes representing special Boxes with power. */
 
     // Debug variables used for the application console
     bool render_textures = true;
@@ -256,11 +257,6 @@ private:
      * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
      */
     void broadPhase();
-
-    /**
-     * @brief Handles collisions between the player and special boxes.
-     */
-    void handleCollisionsWithSpecialBox(Player *player);
 
     /**
      * @brief Handles collisions between a player and every object.

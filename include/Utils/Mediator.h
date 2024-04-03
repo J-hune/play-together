@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <array>
 #include <unordered_map>
-#include "../Game/Objects/Player.h"
+#include "../Game/Player.h"
 #include "../../dependencies/json.hpp"
 
 // Forward declarations

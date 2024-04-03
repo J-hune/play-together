@@ -13,7 +13,7 @@ Level::Level(const std::string &map_name) {
     loadMapProperties(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
-    loadSpecialBoxesFroMap(map_name, specialBoxes);
+    loadItemsFromMap(map_name);
 }
 
 
@@ -56,10 +56,6 @@ std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
 
 std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
-}
-
-std::vector<SpecialBoxes> Level::getSpecialBoxes() const {
-    return specialBoxes;
 }
 
 short Level::getLastCheckpoint() const {
@@ -105,6 +101,15 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
             const auto &vertex2 = vertices[(i + 1) % vertices.size()];
             SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
         }
+    }
+}
+
+void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
+
+    // Draw the size power-ups
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    for (const SizePowerUp &item : sizePowerUp) {
+        item.renderDebug(renderer, camera);
     }
 }
 
@@ -186,7 +191,7 @@ int Level::loadPolygonsFromJson(const nlohmann::json& jsonData, const std::strin
     return (int)jsonData[zoneName].size();
 }
 
-void Level::loadPolygonsFromMap(const std::string& mapFileName) {
+void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     collisionZones.clear();
     iceZones.clear();
     sandZones.clear();
@@ -272,49 +277,29 @@ void Level::loadPlatformsFromMap(const std::string& mapFileName) {
     }
 }
 
-void Level::loadSpecialBoxesFroMap(const std::string &mapName, std::vector<SpecialBoxes> &boxes) {
-    boxes.clear();
+void Level::loadItemsFromMap(const std::string &mapFileName) {
+    sizePowerUp.clear();
 
-    // Define the file path for the polygon data
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapName + "/boxes.txt";
-
+    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
     std::ifstream file(filePath);
 
     if (file.is_open()) {
-        std::string line;
+        nlohmann::json j;
+        file >> j;
+        file.close();
 
-        // Read each line from the file
-        while (std::getline(file, line)) {
-            std::istringstream iss(line);
-            char dummy;
-            SpecialBoxes box;
-            // Extract points from each line
-            while (iss >> dummy >> std::ws && dummy == '(') {
-                float x;
-                float y;
-                float h;
-                float w;
-                iss >> x >> dummy >> y >> dummy>> h >> dummy>> w >> dummy;
-                box = SpecialBoxes(x,y,h,w);
-                iss >> dummy;
-            }
-            // Add the completed polygon to the obstacles vector
-            boxes.emplace_back(box);
+        // Load all SizePowerUp items
+        for (const auto &item : j["sizePowerUp"]) {
+            float x = item["x"];
+            float y = item["y"];
+            float w = item["w"];
+            float h = item["h"];
+            bool grow = item["grow"];
+            sizePowerUp.emplace_back(x, y, w, h, grow);
         }
 
-        file.close();
-        std::cout << "Loaded " << boxes.size() << " special boxes from the map " << mapName << "." << std::endl;
+        std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up." << std::endl;
     } else {
-        std::cerr << "Unable to open the file." << std::endl;
-    }
-
-
-}
-
-void Level::removeSpecialBoxe(const SpecialBoxes &box){
-    auto it = std::find(specialBoxes.begin(), specialBoxes.end(), box);
-    // If an element is found, erase it
-    if (it != specialBoxes.end()) {
-        specialBoxes.erase(it);
+        std::cerr << "Level: Unable to open the items file. Please check the file path." << std::endl;
     }
 }

@@ -5,7 +5,8 @@
  * @brief Implements functions for handling collisions behavior.
  */
 
-/* PLAYER NORMAL MAVITY */
+/* COLLISIONS RELATED TO MAVITY */
+/* NORMAL MAVITY */
 
 void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &obstacles) {
     // Check collisions with each obstacle
@@ -236,7 +237,7 @@ void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vect
 }
 
 
-/* PLAYER REVERSED MAVITY */
+/* REVERSED MAVITY */
 
 void handleCollisionsSelcatsbOhtiw(Player *player, const std::vector<Polygon> &obstacles) {
     // Check collisions with each obstacle

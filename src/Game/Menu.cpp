@@ -237,9 +237,9 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
 
         try {
             Mediator::startServers();
-        } catch (const TCPError& e) {
+        } catch (const TCPError &e) {
             std::cerr << "(TCPError) " << e.what() << std::endl;
-        } catch (const UDPError& e) {
+        } catch (const UDPError &e) {
             std::cerr << "(UDPError) " << e.what() << std::endl;
         }
     } else {
@@ -257,9 +257,9 @@ void Menu::handleJoinHostedGameButton(Button &button) {
         Mediator::startClients();
         displayMenu = false;
         setMenuAction(MenuAction::MAIN);
-    } catch (const TCPError& e) {
+    } catch (const TCPError &e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
-    } catch (const UDPError& e) {
+    } catch (const UDPError &e) {
         std::cerr << "(UDPError) " << e.what() << std::endl;
     }
 

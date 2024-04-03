@@ -1,6 +1,6 @@
 {
   "sizePowerUp": [
-    {"x": 270, "y": 60, "w": 25, "h": 25, "grow": true},
-    {"x": 430, "y": 60, "w": 25, "h": 25, "grow": false}
+    {"x": 270, "y": 60, "width": 25, "height": 25, "grow": true},
+    {"x": 430, "y": 60, "width": 25, "height": 25, "grow": false}
   ]
 }

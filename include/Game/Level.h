@@ -57,7 +57,7 @@ public:
      * @param type Represents the type of zone.
      * @return A vector of Polygon.
      */
-    [[nodiscard]] std::vector<Polygon> getZones(zoneType type) const;
+    [[nodiscard]] std::vector<Polygon> getZones(ZoneType type) const;
 
     /**
      * @brief Return the movingPlatform attribute.
@@ -183,11 +183,12 @@ private:
      * @param[out] zones Represents the collection of polygons.
      * @return The number of polygons loaded.
      */
-    int loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string& zoneName, std::vector<Polygon> &zones, zoneType type);
+    static int loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type);
 
     /**
      * @brief Load the polygons from a map.
      * @param mapName Represents the name of the map.
+     * @see loadPolygonsFromJson() for sub-function.
      */
     void loadPolygonsFromMap(const std::string &mapName);
 

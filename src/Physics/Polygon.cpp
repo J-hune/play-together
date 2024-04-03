@@ -7,7 +7,7 @@
 
 /** CONSTRUCTOR **/
 
-Polygon::Polygon(const std::vector<Point> &vertices, zoneType type) : vertices(vertices), type(type) {}
+Polygon::Polygon(const std::vector<Point> &vertices, ZoneType type) : vertices(vertices), type(type) {}
 
 
 /** ACCESSORS **/
@@ -16,18 +16,18 @@ std::vector<Point> Polygon::getVertices() const {
     return vertices;
 }
 
-zoneType Polygon::getType() const {
+ZoneType Polygon::getType() const {
     return type;
 }
 
 
 /** METHODS **/
 
-double Polygon::distance(const Point& a, const Point& b) {
+double Polygon::distance(const Point &a, const Point &b) {
     return std::hypot(b.x - a.x, b.y - a.y);
 }
 
-double Polygon::calculateAngle(const Point& a, const Point& b, const Point& c) {
+double Polygon::calculateAngle(const Point &a, const Point &b, const Point &c) {
     // Using the Law of Cosines to calculate the angle between three points.
 
     // Calculate the distances between points a, b, and c.
@@ -48,9 +48,9 @@ double Polygon::totalAngles() const {
     double sumAngles = 0;
 
     for (size_t i = 0; i < vertices.size(); ++i) {
-        const Point& a = vertices[i];
-        const Point& b = vertices[(i + 1) % vertices.size()];
-        const Point& c = vertices[(i + 2) % vertices.size()];
+        const Point &a = vertices[i];
+        const Point &b = vertices[(i + 1) % vertices.size()];
+        const Point &c = vertices[(i + 2) % vertices.size()];
 
         // Calculate the angle in radians using the Law of Cosines.
         double angleInRadians = calculateAngle(a, b, c);

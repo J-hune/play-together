@@ -95,7 +95,7 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
 }
 
 /*
-void handleCollisionsWithPlayers(Player *player, const std::vector<Player>& players) {
+void handleCollisionsWithPlayers(Player *player, const std::vector<Player> &players) {
     // Get others players in a vector
     std::vector<Player*> otherCharacters;
     if (*player != initialPlayer) otherCharacters.push_back(&initialPlayer);

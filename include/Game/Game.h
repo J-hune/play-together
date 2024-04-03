@@ -205,7 +205,7 @@ public:
      * @param keyEvent Reference to the key who was press.
      * @param keyEvent Reference to the key who was press.
      */
-    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &keyEvent);
 
     /**
      * @brief Saves the game state to a json file.

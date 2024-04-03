@@ -109,7 +109,7 @@ void Game::initialize(int slot) {
         // Prepare the level
         using json = nlohmann::json;
         std::string slotFile = "saves/slot_" + std::to_string(saveSlot) + ".json";
-        Point spawnPoint;
+        Point spawnPoint{};
 
         // If a save file exists in the slot, load the game from the save file
         if (std::filesystem::exists(slotFile)) {
@@ -167,7 +167,7 @@ void Game::removeCharacter(const Player *characterPtr) {
     }
 
     // Find the iterator corresponding to the character in the vector
-    auto it = std::find_if(characters.begin(), characters.end(), [characterPtr](const Player& currentPlayer) {
+    auto it = std::find_if(characters.begin(), characters.end(), [characterPtr](const Player &currentPlayer) {
         return &currentPlayer == characterPtr;
     });
 
@@ -178,7 +178,7 @@ void Game::removeCharacter(const Player *characterPtr) {
     }
 }
 
-void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent) {
+void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &keyEvent) {
     switch (keyEvent.keysym.scancode) {
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
@@ -357,21 +357,21 @@ void Game::broadPhase() {
     SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
 
     // Check collisions with each save zone
-    for (const Polygon &zone: level.getZones(zoneType::SAVE)) {
+    for (const Polygon &zone: level.getZones(ZoneType::SAVE)) {
         if (checkSATCollision(broadPhaseAreaVertices, zone)){
             saveZones.push_back(zone);
         }
     }
 
     // Check collisions with each death zone
-    for (const Polygon &zone: level.getZones(zoneType::DEATH)) {
+    for (const Polygon &zone: level.getZones(ZoneType::DEATH)) {
         if (checkSATCollision(broadPhaseAreaVertices, zone)){
             deathZones.push_back(zone);
         }
     }
 
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getZones(zoneType::COLLISION)) {
+    for (const Polygon &obstacle: level.getZones(ZoneType::COLLISION)) {
         if (checkSATCollision(broadPhaseAreaVertices, obstacle)){
             obstacles.push_back(obstacle);
         }

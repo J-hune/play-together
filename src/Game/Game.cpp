@@ -509,12 +509,11 @@ void Game::render() {
 
 void Game::fixedUpdate() {
     handleEvents();
-    broadPhase();
     calculatePlayersMovement(1.0 / tickRate);
-
 }
 
 void Game::update(double deltaTime, double ratio) {
+    broadPhase();
     narrowPhase();
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
 

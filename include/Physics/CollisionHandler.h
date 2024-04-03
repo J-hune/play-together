@@ -113,21 +113,14 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
  */
 template<typename T>
 void handleCollisionsWithItems(Player *player, Level *level, std::vector<T> &items, ItemTypes type) {
-    std::vector<T> uncollidedItems;
-
     // Check for collisions with each item
     for (T item : items) {
         // If a collision is detected, apply item's effect to the player
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);
-        }
-        // If no collision is detected, keep item in the level
-        else {
-            uncollidedItems.push_back(item);
+            level->removeItem(item, type);
         }
     }
-
-    level->setItem(uncollidedItems, type); // Set the uncollided items as the level's items
 }
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

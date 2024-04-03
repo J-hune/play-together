@@ -78,10 +78,10 @@ public:
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
 
     /**
-    * @brief Return an item attribute of generic type.
+    * @brief Return an items vector attribute of generic type.
     * @tparam T The type of items to return.
     * @param type The type of items to retrieve.
-    * @return The item attribute of generic type.
+    * @return The items attribute of generic type.
     */
     template<typename T>
     [[nodiscard]] std::vector<T> getItems(ItemTypes type) const {
@@ -108,14 +108,24 @@ public:
     void setLastCheckpoint(short checkpoint);
 
     /**
-    * @brief Set an item attribute of generic type.
-    * @tparam T The type of item to set.
-    * @param type The type of item to modify.
+    * @brief Return an item from an items vector attribute of generic type.
+    * @tparam T The object type of item to remove.
+    * @param type The type of item to remove.
     */
     template<typename T>
-    void setItem(std::vector<T> item, ItemTypes type) {
+    void removeItem(T item, ItemTypes type) {
         using enum ItemTypes;
-        if (type == SIZE_POWER_UP) sizePowerUp = item;
+        std::vector<T> *itemsPtr = nullptr;
+        if (type == SIZE_POWER_UP) itemsPtr = &sizePowerUp;
+
+        // Search the item and remove it
+        if (itemsPtr != nullptr) {
+            size_t i = 0;
+            while (i < itemsPtr->size() && item != (*itemsPtr)[i]) {
+                i++;
+            }
+            itemsPtr->erase(itemsPtr->begin() + i);
+        }
     }
 
 

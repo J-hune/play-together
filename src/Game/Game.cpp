@@ -8,10 +8,7 @@
 /** CONSTRUCTORS **/
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, bool *quitFlag)
-        : window(window), renderer(renderer), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
-
-    // Round the frame rate to the nearest multiple of 30
-    this->frameRate = std::max(30, (frameRate / 30) * 30);
+        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
 }
 
 
@@ -86,6 +83,10 @@ void Game::setEnablePlatformsMovement(bool state) {
 void Game::setSaveSlot(int slot) {
     saveSlot = slot;
     std::cout << "Game: Save slot set to " << slot << std::endl;
+}
+
+void Game::setFrameRate(int fps) {
+    this->frameRate = fps;
 }
 
 void Game::toggleRenderTextures() {
@@ -320,10 +321,10 @@ void Game::calculatePlayersMovement(double deltaTime) {
     }
 }
 
-void Game::applyPlayersMovement(float deltaTime) {
+void Game::applyPlayersMovement(double ratio) {
     // Apply movement for all players
     for (Player &character : characters) {
-        character.applyMovement(deltaTime);
+        character.applyMovement(ratio);
     }
 }
 
@@ -506,6 +507,24 @@ void Game::render() {
     SDL_RenderPresent(renderer);
 }
 
+void Game::fixedUpdate() {
+    handleEvents();
+    broadPhase();
+    calculatePlayersMovement(1.0 / tickRate);
+
+}
+
+void Game::update(double deltaTime, double ratio) {
+    narrowPhase();
+    if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
+
+    // Apply players movement directly with the calculated ratio
+    applyPlayersMovement(ratio);
+
+    camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
+    render();
+}
+
 void Game::run() {
     gameState = GameState::RUNNING;
 
@@ -533,10 +552,7 @@ void Game::run() {
 
         // Calculate game physics at the specified rate (tickRate)
         if (accumulatedTickRateTime >= 1.0 / tickRate) {
-            handleEvents();
-            calculatePlayersMovement(1.0 / tickRate);
-            broadPhase();
-            narrowPhase();
+            fixedUpdate();
 
             // Reset accumulated time for game physics
             accumulatedTickRateTime -= 1.0 / tickRate;
@@ -546,10 +562,9 @@ void Game::run() {
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
 
-            if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-            applyPlayersMovement(static_cast<float>(tickRate)/static_cast<float>(frameRate));
-            camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
-            render();
+            // Calculate the ratio for applying players movement
+            double ratio = static_cast<double>(frameTicks) / (static_cast<double>(frequency) / static_cast<double>(tickRate));
+            update(deltaTime, ratio);
 
             // Reset accumulated time for rendering
             accumulatedTime -= 1.0 / frameRate;
@@ -602,12 +617,26 @@ void Game::saveGame() const {
     gameStateJSON["level"] = level.getMapName();
     gameStateJSON["lastCheckpoint"] = level.getLastCheckpoint();
 
-    // Write the game state to a file in the "saves" directory
-    std::ofstream file("saves/slot_" + std::to_string(saveSlot) + ".json");
-    file << gameStateJSON.dump(4);
-    file.close();
+    // Save the player state
+    std::string saveFileName = "saves/slot_" + std::to_string(saveSlot) + ".json";
 
-    std::cout << "Game: Saving game to slot " << saveSlot << std::endl;
+    // If the "saves" directory does not exist, create it
+    if (!std::filesystem::exists(saveFileName)) {
+        std::cout << "Game: Creating missing saves directory" << std::endl;
+        std::filesystem::create_directory("saves");
+    }
+
+    // Open the file for writing
+    std::ofstream file(saveFileName);
+
+    // If the file was successfully created, write the game state to the file
+    if (file.is_open()) {
+        file << gameStateJSON.dump(4);
+        file.close();
+        std::cout << "Game: Saved game to slot " << saveSlot << std::endl;
+    } else {
+        std::cerr << "Game: Error saving game to slot " << saveSlot << std::endl;
+    }
 }
 
 

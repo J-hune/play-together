@@ -52,7 +52,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     }
 
     // Get the maximum refresh rate of the display list (in Hz)
-    int maxFrameRate = 0;
+    int maxFrameRate = 30;
     for (int i = 0; i < numDisplays; i++) {
         SDL_DisplayMode displayMode;
         if (SDL_GetCurrentDisplayMode(i, &displayMode) == 0) {

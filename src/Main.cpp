@@ -56,6 +56,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     Level level("diversity");
     Player::loadTextures(*renderer);
 
+    Asteroid::loadTextures(*renderer);
+    Asteroid::generateArrayAngles(200);
+    Asteroid::generateArrayPositions(200,0,camera.getW());
+
     // Some players have a special id. The initial player has id -1 and the server has id 0.
     Game game(window, renderer, camera, level, &quit);
     Mediator::setGamePtr(&game);

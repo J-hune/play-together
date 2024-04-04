@@ -13,6 +13,7 @@
 #include "Level.h"
 #include "Objects/Player.h"
 #include "../Utils/Mediator.h"
+#include "Objects/Asteroid.h"
 
 const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
 
@@ -189,6 +190,7 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
+    std::vector<Asteroid> asteroids;
     std::vector<Player> characters; /**< Collection of characters in the game. */
     std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
@@ -229,6 +231,12 @@ private:
      * @see Player::calculateMovement() for applying movement to one player.
      */
     void calculateAllPlayerMovement();
+
+    /**
+     * @brief Applies the movement to all asteroid in the game.
+     * @see applyAsteroidMovement() for applying movement to one asteroid.
+     */
+    void applyAllAsteroidMovement();
 
     /**
      * @brief Updates the camera position based on the player's position.
@@ -272,6 +280,18 @@ private:
      * @brief Handles collisions between the player and camera borders.
      */
     void handleCollisionsWithCameraBorders(Player *player);
+
+    /**
+     * @brief Handles collisions between the asteroid and obstacles.
+     */
+    void handleCollisionsWithAsteroid();
+
+
+    /**
+     * @brief Generates a specified number of asteroids in the game.
+     * @param nbAsteroid The number of asteroids must have in the game.
+     */
+    void generateAsteroid(int nbAsteroid);
 
     /**
      * @brief Handles collisions between the player and every object.

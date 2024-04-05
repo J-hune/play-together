@@ -76,6 +76,7 @@ public:
     static void stop();
     static void save();
     static void getGameProperties(nlohmann::json &properties);
+    static std::vector<Player> getCharacters();
 
     // Other methods
     /**

@@ -89,6 +89,10 @@ void Mediator::getGameProperties(nlohmann::json &properties) {
     properties["lastCheckpoint"] = gamePtr->getLevel().getLastCheckpoint();
 }
 
+std::vector<Player> Mediator::getCharacters() {
+    return gamePtr->getCharacters();
+}
+
 int Mediator::handleClientConnect(int playerID) {
     // Check if the player ID is not already taken by another character.
     for (const auto &character : gamePtr->getCharacters()) {
@@ -181,13 +185,18 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         json playersArray = message["players"];
         size_t spawnIndex = gamePtr->getCharacters().size();
         for (const auto &player : playersArray) {
+            int receivedPlayerID = player["playerID"];
 
             Level level = gamePtr->getLevel();
             Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
-            Player newPlayer(player, spawnPoint, 48, 36);
+            Player newPlayer(receivedPlayerID, spawnPoint, 48, 36);
+            if (player.contains("x")) newPlayer.setX(player["x"]);
+            if (player.contains("y")) newPlayer.setY(player["y"]);
+            if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
+            if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
 
-            if (player == -1) newPlayer.setSpriteTextureByID(3);
-            else if (player == 0) newPlayer.setSpriteTextureByID(2);
+            if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
+            else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
 
             gamePtr->addCharacter(newPlayer);
             spawnIndex++;
@@ -242,7 +251,7 @@ void Mediator::handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANC
 
         // If the key is released and was pressed before, handle the key up event
         else if (keyStates[scancode] == 0 && playersKeyStates[playerID][keyEvent.keysym.scancode]) {
-            gamePtr->handleKeyUpEvent(player, keyEvent);
+            Game::handleKeyUpEvent(player, keyEvent);
             playersKeyStates[playerID][keyEvent.keysym.scancode] = false;
         }
     }

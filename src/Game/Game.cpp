@@ -615,7 +615,11 @@ void Game::saveGame() const {
     auto currentTime = std::chrono::system_clock::to_time_t(now);
 
     std::tm localTime = {};
+#ifdef _WIN32
+    localtime_s(&localTime, &currentTime);
+#else
     localtime_r(&currentTime, &localTime);
+#endif
 
     std::stringstream ss;
     ss << std::put_time(&localTime, "%Y-%m-%d");

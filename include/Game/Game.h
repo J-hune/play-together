@@ -71,6 +71,12 @@ public:
      */
     [[nodiscard]] int getSaveSlot() const;
 
+    /**
+     * @brief Get the tick rate of the game.
+     * @return The tick rate of the game.
+     */
+    [[nodiscard]] int getTickRate() const;
+
 
     /** MODIFIERS **/
 

@@ -18,7 +18,7 @@ GameState Game::getGameState() const {
     return gameState;
 }
 
-Camera* Game::getCamera() {
+Camera *Game::getCamera() {
     return &camera;
 }
 
@@ -28,7 +28,7 @@ Point Game::getAveragePlayersPositions() const {
     float totalY = 0.0f;
 
     // Calculate sum of x and y positions of all players
-    for (const Player &character : characters) {
+    for (const Player &character: characters) {
         totalX += character.getX();
         totalY += character.getY();
     }
@@ -55,6 +55,10 @@ Level &Game::getLevel() {
 
 int Game::getSaveSlot() const {
     return saveSlot;
+}
+
+int Game::getTickRate() const {
+    return tickRate;
 }
 
 
@@ -138,8 +142,8 @@ void Game::initialize(int slot) {
     }
 }
 
-Player* Game::findPlayerById (int id) {
-    for (Player &character : characters) {
+Player *Game::findPlayerById(int id) {
+    for (Player &character: characters) {
         if (character.getPlayerID() == id) {
             return &character;
         }
@@ -288,7 +292,7 @@ void Game::handleEvents() {
     while (SDL_PollEvent(&e) != 0) {
         // Handle SDL_QUIT event
         if (e.type == SDL_QUIT) {
-            printf("Quit event detected\n");
+            std::cout << "Quit event detected\n" << std::endl;
 
             *quitFlagPtr = true;
             stop();
@@ -316,14 +320,14 @@ void Game::handleEvents() {
 
 void Game::calculatePlayersMovement(double deltaTime) {
     // Apply movement to all players
-    for (Player &character : characters) {
+    for (Player &character: characters) {
         character.calculateMovement(deltaTime);
     }
 }
 
 void Game::applyPlayersMovement(double ratio) {
     // Apply movement for all players
-    for (Player &character : characters) {
+    for (Player &character: characters) {
         character.applyMovement(ratio);
     }
 }
@@ -336,7 +340,7 @@ void Game::killPlayer(const Player *player) {
 
 void Game::switchMavity() {
     // Change mavity for all player
-    for (Player &character : characters) {
+    for (Player &character: characters) {
         character.setIsOnPlatform(false);
         character.getSprite()->toggleFlipVertical();
         character.toggleMavity();
@@ -358,49 +362,49 @@ void Game::broadPhase() {
 
     // Check collisions with each save zone
     for (const Polygon &zone: level.getZones(ZoneType::SAVE)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)){
+        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
             saveZones.push_back(zone);
         }
     }
 
     // Check collisions with each death zone
     for (const Polygon &zone: level.getZones(ZoneType::DEATH)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)){
+        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
             deathZones.push_back(zone);
         }
     }
 
     // Check collisions with each obstacle
     for (const Polygon &obstacle: level.getZones(ZoneType::COLLISION)) {
-        if (checkSATCollision(broadPhaseAreaVertices, obstacle)){
+        if (checkSATCollision(broadPhaseAreaVertices, obstacle)) {
             obstacles.push_back(obstacle);
         }
     }
 
     // Check for collisions with each 1D moving platforms
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             movingPlatforms1D.push_back(platform);
         }
     }
 
     // Check for collisions with each 2D moving platforms
     for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             movingPlatforms2D.push_back(platform);
         }
     }
 
     // Check for collisions with each switching platforms
     for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             switchingPlatforms.push_back(platform);
         }
     }
 
     // Check for collisions with size power-up
     for (const SizePowerUp &item: level.getItems<SizePowerUp>(ItemTypes::SIZE_POWER_UP)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())){
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
             sizePowerUp.push_back(item);
         }
     }
@@ -430,7 +434,7 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
 
 void Game::narrowPhase() {
     // Handle collisions for all players
-    for (Player &character : characters) {
+    for (Player &character: characters) {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
@@ -476,6 +480,7 @@ void Game::render() {
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
         level.renderItemsDebug(renderer, cam); // Draw the items
     }
+
     // Render collisions box
     else {
         // Draw the characters
@@ -577,10 +582,10 @@ void Game::run() {
         }
 
         // Waiting to maintain the desired game FPS
-        Uint64 desiredTicksPerFrame = frequency / (std::max(tickRate, frameRate));
+        Uint64 desiredTicksPerFrame = frequency / std::max(tickRate, frameRate);
         Uint64 elapsedGameTicks = SDL_GetPerformanceCounter() - currentFrameTime;
         Uint64 ticksToWait = desiredTicksPerFrame > elapsedGameTicks ? desiredTicksPerFrame - elapsedGameTicks : 0;
-        SDL_Delay((Uint32)(ticksToWait * 1000 / frequency));
+        SDL_Delay(static_cast<Uint32>(ticksToWait * 1000 / frequency));
     }
 }
 

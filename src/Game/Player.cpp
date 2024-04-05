@@ -48,7 +48,7 @@ float Player::getH() const {
     return height;
 }
 
-Sprite* Player::getSprite() {
+Sprite *Player::getSprite() {
     return &sprite;
 }
 
@@ -140,6 +140,7 @@ std::vector<Point> Player::getRightColliderVertices() const {
             {x + width + 1, y + height}
     };
 }
+
 std::vector<Point> Player::getGroundColliderVertices() const {
     return {
             {x, y + height},
@@ -148,6 +149,7 @@ std::vector<Point> Player::getGroundColliderVertices() const {
             {x, y + height + 1}
     };
 }
+
 std::vector<Point> Player::getRoofColliderVertices() const {
     return {
             {x, y - 1},
@@ -174,7 +176,7 @@ SDL_FRect Player::getGroundColliderBoundingBox() const {
 }
 
 SDL_FRect Player::getRoofColliderBoundingBox() const {
-    return {x, y - 1 , width, 1};
+    return {x, y - 1, width, 1};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -188,27 +190,27 @@ SDL_FRect Player::getBoundingBoxNextFrame() const {
 
 /** MODIFIERS **/
 
-void Player::setX(float val){
+void Player::setX(float val) {
     x = val;
 }
 
-void Player::setY(float val){
+void Player::setY(float val) {
     y = val;
 }
 
-void Player::setW(float val){
+void Player::setW(float val) {
     width = val;
 }
 
-void Player::setH(float val){
+void Player::setH(float val) {
     height = val;
 }
 
-void Player::setMoveX(float val){
+void Player::setMoveX(float val) {
     moveX = val;
 }
 
-void Player::setMoveY(float val){
+void Player::setMoveY(float val) {
     moveY = val;
 }
 
@@ -243,6 +245,10 @@ void Player::setIsOnPlatform(bool state) {
 
 void Player::setWantToJump(bool state) {
     wantToJump = state;
+
+    if (!state) {
+        jumpLock = false;
+    }
 }
 
 void Player::toggleMavity() {
@@ -332,8 +338,9 @@ void Player::calculateXaxisMovement(double deltaTime) {
 void Player::calculateYaxisMovement(double deltaTime) {
 
     // If the player wants to jump and can jump, start the jump
-    if (wantToJump && canJump() && !isJumping) {
+    if (!jumpLock && wantToJump && canJump() && !isJumping) {
         isJumping = true;
+        jumpLock = true;
         jumpStartTime = SDL_GetPerformanceCounter(); // Record the time at the beginning of the jump
         jumpVelocity = jumpInitialVelocity; // Set the initial jump velocity
     }
@@ -357,7 +364,7 @@ void Player::calculateYaxisMovement(double deltaTime) {
             jumpVelocity = jumpInitialVelocity - mavity * jumpTime;
 
             // Calculate vertical movement based on jump velocity and time
-            moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime)  * (mavity < 0 ? 1 : -1));
+            moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime) * (mavity < 0 ? 1 : -1));
 
             // Update jump velocity for the next frame
             jumpVelocity -= mavity * static_cast<float>(deltaTime);

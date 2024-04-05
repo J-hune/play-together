@@ -422,6 +422,7 @@ private:
     float moveY = 0; /**< Vertical movement of the player during this frame. */
     float mavity = 30.f; /**< Gravity acceleration. */
     bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
+    bool jumpLock = false; /**< Flag indicating whether the player has already jumped. */
     float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
     bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
     bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */

@@ -7,8 +7,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, const Camera &camera, Level level, bool *quitFlag)
-        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), camera(camera), level(std::move(level)), quitFlagPtr(quitFlag) {
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, Level level, bool *quitFlag)
+        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), level(std::move(level)), quitFlagPtr(quitFlag) {
 }
 
 
@@ -105,6 +105,7 @@ void Game::toggleRenderFps() {
 /** METHODS **/
 
 void Game::initialize(int slot) {
+    camera = Camera();
 
     // If the player starts the server or is playing alone
     if (!Mediator::isClientRunning()) {
@@ -137,6 +138,8 @@ void Game::initialize(int slot) {
 
         // Add the initial player to the game
         Player initialPlayer(-1, spawnPoint, 48, 36);
+        camera.initializeCameraPosition(spawnPoint);
+
         initialPlayer.setSpriteTextureByID(2);
         addCharacter(initialPlayer);
     }

@@ -85,12 +85,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
 
     // Initialize Game
-    Camera camera = Camera();
     Level level("diversity");
     Player::loadTextures(*renderer);
 
     // Some players have a special id. The initial player has id -1 and the server has id 0.
-    Game game(window, renderer, maxFrameRate, fonts, camera, level, &quit);
+    Game game(window, renderer, maxFrameRate, fonts, level, &quit);
     Mediator::setGamePtr(&game);
 
     // Initialize Menu
@@ -136,9 +135,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
         // If the game should start
         if (!menu.isDisplayingMenu()) {
-            // Create and start the game
-            camera.initializeCameraPosition(game.getAveragePlayersPositions());
-
             // Block the main thread until the game is finished
             game.run();
 

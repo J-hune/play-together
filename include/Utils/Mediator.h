@@ -69,10 +69,14 @@ public:
 
     // Menu methods
     static void handleServerDisconnect();
+    static void renderMenu();
+    static void setDisplayMenu(bool displayMenu);
+    static void handleEventMenu(SDL_Event &event);
 
     // Game methods
     static GameState getGameState();
     static void initializeGame(int slot);
+    static void togglePause();
     static void stop();
     static void save();
     static void getGameProperties(nlohmann::json &properties);

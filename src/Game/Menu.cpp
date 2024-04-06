@@ -210,8 +210,8 @@ void Menu::handleStartButton(Button &button, int slot) {
 }
 
 void Menu::handleResumeButton(Button &button) {
-    displayMenu = false;
     button.reset();
+    Mediator::togglePause();
 }
 
 void Menu::handleSaveButton(Button &button) {

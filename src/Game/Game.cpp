@@ -53,10 +53,6 @@ Level &Game::getLevel() {
     return level;
 }
 
-int Game::getSaveSlot() const {
-    return saveSlot;
-}
-
 int Game::getTickRate() const {
     return tickRate;
 }
@@ -82,11 +78,6 @@ void Game::setRenderPlayerColliders(bool state) {
 
 void Game::setEnablePlatformsMovement(bool state) {
     enable_platforms_movement = state;
-}
-
-void Game::setSaveSlot(int slot) {
-    saveSlot = slot;
-    std::cout << "Game: Save slot set to " << slot << std::endl;
 }
 
 void Game::setFrameRate(int fps) {
@@ -217,12 +208,6 @@ void Game::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &keyEvent)
             if (level.getMapID() == 1) setLevel("assurance");
             else setLevel("diversity");
             break;
-        case SDL_SCANCODE_ESCAPE:
-            pause();
-            break;
-        case SDL_SCANCODE_DELETE:
-            stop();
-            break;
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
             player->setSprint(true);
@@ -299,6 +284,17 @@ void Game::handleEvents() {
 
             *quitFlagPtr = true;
             stop();
+        }
+
+        // Handle SDL_KEYUP event for the escape key
+        if (e.type == SDL_KEYUP && e.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+            togglePause();
+        }
+
+        // If the game is paused, handle menu events and skip the rest
+        if (gameState == GameState::PAUSED) {
+            Mediator::handleEventMenu(e);
+            continue;
         }
 
         // Handle key events
@@ -511,7 +507,19 @@ void Game::render() {
         initialPlayer.renderColliders(renderer, cam);
     }
 
-    // Present the renderer and introduce a slight delay
+    // If the game is paused, render the pause menu
+    if (gameState == GameState::PAUSED) {
+        // Add a transparent gray overlay
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 180);
+        SDL_Rect overlayRect = {0, 0, 1280, 720};
+        SDL_RenderFillRect(renderer, &overlayRect);
+
+        // Render the menu
+        Mediator::renderMenu();
+    }
+
+    // Present the renderer
     SDL_RenderPresent(renderer);
 }
 
@@ -545,7 +553,7 @@ void Game::run() {
     double elapsedTimeSinceLastReset = 0.0; // Time elapsed since last reset
 
     // Game loop
-    while (gameState == GameState::RUNNING) {
+    while (gameState != GameState::STOPPED) {
         // Calculate delta time for game logic
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
         Uint64 frameTicks = currentFrameTime - lastFrameTime;
@@ -592,8 +600,25 @@ void Game::run() {
     }
 }
 
-void Game::pause() {
-    gameState = GameState::PAUSED;
+void Game::togglePause() {
+    using enum GameState;
+    if (gameState == PAUSED) {
+        Mediator::setDisplayMenu(false);
+        gameState = RUNNING;
+    } else {
+        // For each key, if it is pressed, call handleKeyUpEvent
+        const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
+        for (int i = 0; i < SDL_NUM_SCANCODES; i++) {
+            if (keyboardState[i]) {
+                SDL_KeyboardEvent keyEvent;
+                keyEvent.keysym.scancode = static_cast<SDL_Scancode>(i);
+                handleKeyUpEvent(findPlayerById(-1), keyEvent);
+            }
+        }
+
+        gameState = PAUSED;
+        Mediator::setDisplayMenu(true);
+    }
 }
 
 void Game::stop() {

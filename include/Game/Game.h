@@ -12,10 +12,6 @@
 #include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
 
-const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
-constexpr int MINHIGHT = 20;
-constexpr int MINWHIDTH = 30;
-
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
@@ -64,12 +60,6 @@ public:
      * @return The level object.
      */
     [[nodiscard]] Level &getLevel();
-
-    /**
-     * @brief Get the save slot.
-     * @return The save slot.
-     */
-    [[nodiscard]] int getSaveSlot() const;
 
     /**
      * @brief Get the tick rate of the game.
@@ -125,12 +115,6 @@ public:
     void setEnablePlatformsMovement(bool state);
 
     /**
-     * @brief Set the save slot.
-     * @param slot The save slot.
-     */
-    void setSaveSlot(int slot);
-
-    /**
      * @brief Set the frame rate of the game.
      * @param frameRate The frame rate to set.
      */
@@ -173,9 +157,9 @@ public:
     void run();
 
     /**
-     * @brief Pauses the game loop.
+     * @brief Toggles the pause state of the game.
      */
-    void pause();
+    void togglePause();
 
     /**
      * @brief Stops the game loop and exits the game.
@@ -208,7 +192,7 @@ public:
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
-     * @param keyEvent Reference to the key who was press.
+     * @param player The player to update.
      * @param keyEvent Reference to the key who was press.
      */
     void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &keyEvent);
@@ -284,11 +268,13 @@ private:
 
     /**
      * @brief Handles collisions between a player and every object.
+     * @param player The player to handle collisions for.
      */
     void handleCollisionsNormalMavity(Player &player) const;
 
     /**
      * @brief Handles collisions between a player and every object when the mavity is reversed.
+     * @param player The player to handle collisions for.
      */
     void handleCollisionsReversedMavity(Player &player) const;
 
@@ -309,6 +295,7 @@ private:
 
     /**
      * @brief Sends the keyboard state to the network.
+     * @param lastKeyboardStateMask The last keyboard state mask.
      */
     static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
 

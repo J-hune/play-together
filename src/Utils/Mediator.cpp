@@ -35,6 +35,9 @@ void Mediator::setNetworkManagerPtr(NetworkManager *networkManager) {
 
 /** METHODS **/
 
+
+/** NETWORK MANAGER METHODS **/
+
 bool Mediator::isServerRunning() {
     return Mediator::networkManagerPtr->isServerRunning();
 }
@@ -64,9 +67,27 @@ void Mediator::sendPlayerUpdate(uint16_t keyboardStateMask) {
     Mediator::networkManagerPtr->sendPlayerUpdate(keyboardStateMask);
 }
 
+
+/** MENU METHODS **/
+
 void Mediator::handleServerDisconnect() {
     Mediator::menuPtr->onServerDisconnect();
 }
+
+void Mediator::renderMenu() {
+    Mediator::menuPtr->render();
+}
+
+void Mediator::setDisplayMenu(bool displayMenu) {
+    Mediator::menuPtr->setDisplayMenu(displayMenu);
+}
+
+void Mediator::handleEventMenu(SDL_Event &event) {
+    Mediator::menuPtr->handleEvent(event);
+}
+
+
+/** GAME METHODS **/
 
 GameState Mediator::getGameState() {
     return gamePtr->getGameState();
@@ -74,6 +95,10 @@ GameState Mediator::getGameState() {
 
 void Mediator::initializeGame(int slot) {
     gamePtr->initialize(slot);
+}
+
+void Mediator::togglePause() {
+    gamePtr->togglePause();
 }
 
 void Mediator::stop() {
@@ -92,6 +117,9 @@ void Mediator::getGameProperties(nlohmann::json &properties) {
 std::vector<Player> Mediator::getCharacters() {
     return gamePtr->getCharacters();
 }
+
+
+/** OTHER METHODS **/
 
 int Mediator::handleClientConnect(int playerID) {
     // Check if the player ID is not already taken by another character.

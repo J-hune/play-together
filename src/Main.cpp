@@ -85,9 +85,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     // Initialize game objects
     bool quit = false;
-    Level level("diversity");
-    Player::loadTextures(*renderer);
-    Game game(window, renderer, maxFrameRate, fonts, level, &quit);
+    if (!Player::loadTextures(*renderer)) {
+        std::cerr << "Error loading player textures" << std::endl;
+        return 1;
+    }
+
+    Game game(window, renderer, maxFrameRate, fonts, &quit);
     Menu menu(renderer, fonts, &quit);
     NetworkManager networkManager;
     ApplicationConsole console(&game);

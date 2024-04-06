@@ -113,7 +113,6 @@ private:
     bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-    short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
 
     /** ACCESSORS **/
 
@@ -129,8 +128,8 @@ private:
     // Button action handlers
     void handleButtonAction(Button &button);
     void handleStartButton(Button &button, int slot);
-    void handleResumeButton(Button &button);
-    void handleSaveButton(Button &button);
+    void handleResumeButton(Button &button) const;
+    void handleSaveButton(Button &button) const;
     void handleStopButton(Button &button);
     void handleCreateOrLoadGameButton(Button &button);
     void handleJoinHostedGameButton(Button &button);

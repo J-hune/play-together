@@ -157,26 +157,27 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/level.json";
     std::ifstream file(filePath);
 
-    if (file.is_open()) {
-        nlohmann::json j;
-        file >> j;
-        file.close();
-
-        mapID = j["id"];
-        mapName = j["name"];
-
-        for (const auto &spawnPoint : j["spawnPoints"]) {
-            spawnPoints.push_back({
-                   Point(spawnPoint[0][0], spawnPoint[0][1]),
-                   Point(spawnPoint[1][0], spawnPoint[1][1]),
-                   Point(spawnPoint[2][0], spawnPoint[2][1]),
-                   Point(spawnPoint[3][0], spawnPoint[3][1])
-            });
-        }
-        std::cout << "Level: Loaded map properties." << std::endl;
-    } else {
+    if (!file.is_open()) {
         std::cerr << "Level: Unable to open the properties file. Please check the file path." << std::endl;
+        return;
     }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    mapID = j["id"];
+    mapName = j["name"];
+
+    for (const auto &spawnPoint : j["spawnPoints"]) {
+        spawnPoints.emplace_back(std::array<Point, 4>{{
+               Point(spawnPoint[0][0], spawnPoint[0][1]),
+               Point(spawnPoint[1][0], spawnPoint[1][1]),
+               Point(spawnPoint[2][0], spawnPoint[2][1]),
+               Point(spawnPoint[3][0], spawnPoint[3][1])
+        }});
+    }
+    std::cout << "Level: Loaded map properties." << std::endl;
 }
 
 int Level::loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type) {
@@ -204,81 +205,83 @@ void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/polygons.json";
     std::ifstream file(filePath);
 
-    if (file.is_open()) {
-        using enum ZoneType;
-        nlohmann::json j;
-        file >> j;
-        file.close();
-
-        int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
-        int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
-        int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
-        int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
-        int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
-        int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
-        int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
-        int saveZonesSize = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
-
-        std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones and " << saveZonesSize << " save zones." << std::endl;
-    } else {
+    if (!file.is_open()) {
         std::cerr << "Level: Unable to open the polygons file. Please check the file path." << std::endl;
+        return;
     }
+
+    using enum ZoneType;
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
+    int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
+    int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
+    int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
+    int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
+    int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
+    int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
+    int saveZonesSize = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
+
+    std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones and " << saveZonesSize << " save zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
     std::ifstream file(filePath);
 
-    if (file.is_open()) {
-        nlohmann::json j;
-        file >> j;
-        file.close();
-
-        // Load all 1D moving platforms
-        for (const auto &platform : j["movingPlatforms1D"]) {
-            float x = platform["x"];
-            float y = platform["y"];
-            float width = platform["width"];
-            float height = platform["height"];
-            float speed = platform["speed"];
-            float minX = platform["min"];
-            float maxX = platform["max"];
-            bool start = platform["start"];
-            bool axis = platform["axis"];
-            movingPlatforms1D.emplace_back(x, y, width, height, speed, minX, maxX, start, axis);
-        }
-
-        // Load all 2D moving platforms
-        for (const auto &platform : j["movingPlatforms2D"]) {
-            float x = platform["x"];
-            float y = platform["y"];
-            float width = platform["width"];
-            float height = platform["height"];
-            float speed = platform["speed"];
-            Point left(platform["left"][0], platform["left"][1]);
-            Point right(platform["right"][0], platform["right"][1]);
-            bool start = platform["start"];
-            movingPlatforms2D.emplace_back(x, y, width, height, speed, left, right, start);
-        }
-
-        // Load all switching platforms
-        for (const auto &platform : j["switchingPlatforms"]) {
-            float x = platform["x"];
-            float y = platform["y"];
-            float width = platform["width"];
-            float height = platform["height"];
-            Uint32 bpm = platform["bpm"];
-            std::vector<Point> steps;
-            for (const auto &step : platform["steps"]) {
-                steps.emplace_back(step[0], step[1]);
-            }
-            switchingPlatforms.emplace_back(x, y, width, height, bpm, steps);
-        }
-
-        std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;
-    } else {
+    if (!file.is_open()) {
         std::cerr << "Level: Unable to open the platforms file. Please check the file path." << std::endl;
+        return;
     }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    // Load all 1D moving platforms
+    for (const auto &platform : j["movingPlatforms1D"]) {
+        float x = platform["x"];
+        float y = platform["y"];
+        float width = platform["width"];
+        float height = platform["height"];
+        float speed = platform["speed"];
+        float minX = platform["min"];
+        float maxX = platform["max"];
+        bool start = platform["start"];
+        bool axis = platform["axis"];
+        movingPlatforms1D.emplace_back(x, y, width, height, speed, minX, maxX, start, axis);
+    }
+
+    // Load all 2D moving platforms
+    for (const auto &platform : j["movingPlatforms2D"]) {
+        float x = platform["x"];
+        float y = platform["y"];
+        float width = platform["width"];
+        float height = platform["height"];
+        float speed = platform["speed"];
+        Point left(platform["left"][0], platform["left"][1]);
+        Point right(platform["right"][0], platform["right"][1]);
+        bool start = platform["start"];
+        movingPlatforms2D.emplace_back(x, y, width, height, speed, left, right, start);
+    }
+
+    // Load all switching platforms
+    for (const auto &platform : j["switchingPlatforms"]) {
+        float x = platform["x"];
+        float y = platform["y"];
+        float width = platform["width"];
+        float height = platform["height"];
+        Uint32 bpm = platform["bpm"];
+        std::vector<Point> steps;
+        for (const auto &step : platform["steps"]) {
+            steps.emplace_back(step[0], step[1]);
+        }
+        switchingPlatforms.emplace_back(x, y, width, height, bpm, steps);
+    }
+
+    std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {
@@ -287,23 +290,23 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
     std::ifstream file(filePath);
 
-    if (file.is_open()) {
-        nlohmann::json j;
-        file >> j;
-        file.close();
-
-        // Load all SizePowerUp items
-        for (const auto &item : j["sizePowerUp"]) {
-            float x = item["x"];
-            float y = item["y"];
-            float width = item["width"];
-            float height = item["height"];
-            bool grow = item["grow"];
-            sizePowerUp.emplace_back(x, y, width, height, grow);
-        }
-
-        std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up." << std::endl;
-    } else {
+    if (!file.is_open()) {
         std::cerr << "Level: Unable to open the items file. Please check the file path." << std::endl;
     }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    // Load all SizePowerUp items
+    for (const auto &item : j["sizePowerUp"]) {
+        float x = item["x"];
+        float y = item["y"];
+        float width = item["width"];
+        float height = item["height"];
+        bool grow = item["grow"];
+        sizePowerUp.emplace_back(x, y, width, height, grow);
+    }
+
+    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up." << std::endl;
 }

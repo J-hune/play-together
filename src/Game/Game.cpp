@@ -7,8 +7,8 @@
 
 /** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, Level level, bool *quitFlag)
-        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), level(std::move(level)), quitFlagPtr(quitFlag) {
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, std::vector<TTF_Font *> &fonts, bool *quitFlag)
+        : window(window), renderer(renderer), frameRate(frameRate), fonts(fonts), quitFlagPtr(quitFlag) {
 }
 
 

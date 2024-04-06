@@ -209,12 +209,12 @@ void Menu::handleStartButton(Button &button, int slot) {
     setMenuAction(MenuAction::MAIN);
 }
 
-void Menu::handleResumeButton(Button &button) {
+void Menu::handleResumeButton(Button &button) const {
     button.reset();
     Mediator::togglePause();
 }
 
-void Menu::handleSaveButton(Button &button) {
+void Menu::handleSaveButton(Button &button) const {
     button.reset();
     Mediator::save();
 }
@@ -232,21 +232,20 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
     updateSaveSlots();
 
     if (button.getValue() == 1) {
-        gameMode = 1;
         Mediator::stopClients();
 
         try {
             Mediator::startServers();
+            setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
         } catch (const TCPError &e) {
             std::cerr << "(TCPError) " << e.what() << std::endl;
         } catch (const UDPError &e) {
             std::cerr << "(UDPError) " << e.what() << std::endl;
         }
     } else {
-        gameMode = 0;
+        setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
     }
 
-    setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
     button.reset();
 }
 

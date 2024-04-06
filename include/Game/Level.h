@@ -30,7 +30,7 @@ public:
     /** CONSTRUCTOR **/
 
     explicit Level(const std::string &map_name);
-
+    Level() = default;
 
     /** ACCESSORS **/
 

@@ -25,7 +25,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, Level level, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, bool *quitFlag);
 
 
     /** ACCESSORS **/

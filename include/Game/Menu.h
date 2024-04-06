@@ -6,6 +6,7 @@
 #include <map>
 #include <thread>
 
+#include "../Game/TextBox.h"
 #include "../Graphics/Button.h"
 #include "Game.h"
 #include "../Utils/Mediator.h"
@@ -103,6 +104,7 @@ public:
      * @brief Handle the server disconnect event.
      */
     void onServerDisconnect();
+    void createTextBox(MenuAction action);
 
 private:
     /** ATTRIBUTES **/
@@ -113,6 +115,7 @@ private:
     bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
+    TextBox textBox;
     short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
 
     /** ACCESSORS **/
@@ -122,7 +125,7 @@ private:
      * @return Reference to the vector of buttons.
      */
     std::vector<Button>& getCurrentMenuButtons();
-
+    std::map<MenuAction, TextBox> textBoxes;
 
     /** PRIVATE METHODS **/
 
@@ -143,6 +146,7 @@ private:
      * @brief Update the save slots displayed on the menu.
      */
     void updateSaveSlots();
+    void createTextBox();
 };
 
 #endif //PLAY_TOGETHER_MENU_H

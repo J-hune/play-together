@@ -1,6 +1,7 @@
 #include "../../include/Game/Menu.h"
 #include "../../include/Network/TCPError.h"
 #include "../../include/Network/UDPError.h"
+#include "../../include/Game/TextBox.h"
 
 /** FUNCTIONS **/
 
@@ -16,6 +17,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
     }
     return flattenedButtons;
 }
+bool textBoxCreated = false;
 
 /** CONSTRUCTOR **/
 
@@ -95,8 +97,23 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(save_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(remove_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(main_menu_button4);
-}
 
+    for (auto action : {MenuAction::HOST_GAME, MenuAction::JOIN_GAME}) {
+        createTextBox(action);
+    }
+
+}
+void Menu::createTextBox(MenuAction action){
+    printf("Dans la fonction de création");
+    int textBoxX = 200;
+    int textBoxY = 300;
+    int textBoxWidth = 400;
+    int textBoxHeight = 40;
+    SDL_Color bgColor = {100, 125, 160, 255};
+    SDL_Color textColor = {100,125,160,255};
+
+    textBoxes[action] = TextBox(renderer, fontPtr, textBoxX, textBoxY, textBoxWidth, textBoxHeight, textColor, bgColor);
+}
 /** ACCESSORS **/
 
 bool Menu::isDisplayingMenu() const {
@@ -134,6 +151,9 @@ void Menu::render() {
     for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
+    textBoxes[currentMenuAction].render(renderer);
+
+
 }
 
 void Menu::reset() {
@@ -162,6 +182,8 @@ void Menu::handleEvent(const SDL_Event &event) {
             handleButtonAction(button);
         }
     }
+    textBoxes[currentMenuAction].handleEvent(event);
+
 }
 
 void Menu::handleButtonAction(Button &button) {

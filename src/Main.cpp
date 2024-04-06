@@ -77,6 +77,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Main loop
     while (!quit) {
         SDL_Event event;
+
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 quit = true;
@@ -116,6 +117,24 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             menu.render();
             SDL_RenderPresent(renderer);
             SDL_Delay(4);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+            SDL_RenderClear(renderer);
+
+            // Afficher le texte saisi
+            SDL_Color textColor = { 0, 0, 0 }; // Couleur du texte
+            SDL_Surface* textSurface = TTF_RenderText_Solid(font, inputText.c_str(), textColor);
+            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+            int textWidth, textHeight;
+            SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
+
+            SDL_Rect textRect = { (WINDOW_WIDTH - textWidth) / 2, (WINDOW_HEIGHT - textHeight) / 2, textWidth, textHeight };
+            SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+
+            SDL_DestroyTexture(textTexture);
+            SDL_FreeSurface(textSurface);
+
+            SDL_RenderPresent(renderer);
         }
     }
 
@@ -123,6 +142,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     networkManager.stopClients();
 
     // Clean up resources
+    SDL_StopTextInput();
+    TTF_CloseFont(font);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_CloseFont(font);

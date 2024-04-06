@@ -72,8 +72,7 @@ void MovingPlatform1D::setIsMoving(bool state) {
 
 void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
     move = 150; // Add basic movement
-
-    move *= deltaTime; // Apply movement per second
+    move *= static_cast<float>(deltaTime); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -94,7 +93,7 @@ void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
 void MovingPlatform1D::applyYaxisMovement(double deltaTime) {
     move = 150; // Add basic movement
 
-    move *= deltaTime; // Apply movement per second
+    move *= static_cast<float>(deltaTime); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 

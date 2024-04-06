@@ -129,7 +129,7 @@ void Game::initialize(int slot) {
 
         // Add the initial player to the game
         Player initialPlayer(-1, spawnPoint, 48, 36);
-        camera.initializeCameraPosition(spawnPoint);
+        camera.initializePosition(spawnPoint);
 
         initialPlayer.setSpriteTextureByID(2);
         addCharacter(initialPlayer);
@@ -226,11 +226,6 @@ void Game::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) {
             if (player == nullptr) break;
             player->setWantToJump(false); // Disable jumping
             break;
-        case SDL_SCANCODE_DOWN:
-            if (player == nullptr) break;
-
-            // Reset vertical movement if moving downwards
-            if (player->getMoveY() > 0) player->setMoveY(0);
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
             if (player == nullptr) break;
@@ -437,16 +432,16 @@ void Game::narrowPhase() {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
+        // Handle collisions according to player's mavity
+        if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
+        else handleCollisionsReversedMavity(character);
+
+        handleCollisionsWithItems(&character, &level, sizePowerUp, ItemTypes::SIZE_POWER_UP);
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         // Handle collisions with death zones
         if (handleCollisionsWithDeathZones(character, deathZones)) {
             killPlayer(&character);
         }
-        handleCollisionsWithItems(&character, &level, sizePowerUp, ItemTypes::SIZE_POWER_UP);
-
-        // Handle collisions according to player's mavity
-        if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
-        else handleCollisionsReversedMavity(character);
     }
 }
 
@@ -529,14 +524,16 @@ void Game::fixedUpdate() {
 }
 
 void Game::update(double deltaTime, double ratio) {
-    broadPhase();
-    narrowPhase();
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
 
     // Apply players movement directly with the calculated ratio
     applyPlayersMovement(ratio);
 
-    camera.applyCameraMovement(getAveragePlayersPositions(), deltaTime);
+    // Handle collisions
+    broadPhase();
+    narrowPhase();
+
+    camera.applyMovement(getAveragePlayersPositions(), deltaTime);
     render();
 }
 

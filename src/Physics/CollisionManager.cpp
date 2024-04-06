@@ -423,50 +423,36 @@ void correctAABBCollision(Player *player, const SDL_FRect &obstacle) {
     // COLLISION ANALYSIS
 
     // Check if the x-axis movement is concerned by the collision
-    SDL_FRect playerBoundingBox = {x + moveX, y, player->getW(), player->getH()};
+    SDL_FRect playerBoundingBox = {x, y - moveY, player->getW(), player->getH()};
 
     if (checkAABBCollision(playerBoundingBox, obstacle)) {
         xaxis = true;
     }
 
     // Check if the y-axis movement is concerned by the collision
-    playerBoundingBox.x = x;
-    playerBoundingBox.y = y + moveY;
+    playerBoundingBox.x = x - moveX;
+    playerBoundingBox.y = y;
 
     if (checkAABBCollision(playerBoundingBox, obstacle)) {
         yaxis = true;
     }
 
-    // Add movement according to the analysis
-    playerBoundingBox.x = xaxis ? x + moveX : x;
-    playerBoundingBox.y = yaxis ? y + moveY : y;
-
 
     // COLLISION CORRECTION
 
-    // If the collision is only on x-axis
+    // If the collision is on x-axis
     if (xaxis && !yaxis) {
-        if (player->getDirectionX() == -1) moveX += (obstacle.x + obstacle.w) - playerBoundingBox.x;
-        else moveX -= (playerBoundingBox.x + playerBoundingBox.w) - obstacle.x;
-        player->setMoveX(moveX);
-    }
-        // If the collision is only on y-axis
-    else if (!xaxis && yaxis) {
-        if (player->getDirectionY() == -1) moveY += (obstacle.y + obstacle.h) - playerBoundingBox.y;
-        else moveY -= (playerBoundingBox.y + playerBoundingBox.h) - obstacle.y;
-        player->setMoveY(moveY);
-    }
-        // If the collisions is on the two axis (not supposed to happen)
-    else {
-        // Correct x-axis
-        if (player->getDirectionX() == -1) moveX += (obstacle.x + obstacle.w) - playerBoundingBox.x;
-        else moveX -= (playerBoundingBox.x + playerBoundingBox.w) - obstacle.x;
-        player->setMoveX(moveX);
+        playerBoundingBox.x = x;
 
-        // Correct y-axis
-        if (player->getDirectionY() == -1) moveY += (obstacle.y + obstacle.h) - playerBoundingBox.y;
-        else moveY -= (playerBoundingBox.y + playerBoundingBox.h) - obstacle.y;
-        player->setMoveY(moveY);
+        if (player->getDirectionX() == -1) moveX = (obstacle.x + obstacle.w) - playerBoundingBox.x;
+        else moveX = -((playerBoundingBox.x + playerBoundingBox.w) - obstacle.x);
+        player->setX(player->getX() + moveX);
+    }
+    // If the collision is on y-axis
+    else if (!xaxis && yaxis) {
+        if (player->getDirectionY() == -1) moveY = (obstacle.y + obstacle.h) - playerBoundingBox.y;
+        else moveY = -((playerBoundingBox.y + playerBoundingBox.h) - obstacle.y);
+        player->setY(player->getY() + moveY);
     }
 }
 
@@ -474,34 +460,34 @@ static float correctSATCollisionOnXAxis(const Player *player, const Polygon &obs
 
     // Initialize player positions
     float x = player->getX();
-    float y = player->getY() + player->getMoveY();
+    float y = player->getY();
     float w = player->getW();
     float h = player->getH();
 
     // Binary search variables initialization
     float move;
-    float min = 0;
-    float max = player->getMoveX();
+    float min = x - player->getMoveX();
+    float max = x;
 
     std::vector<Point> playerVertices;
 
     int i = 0;
 
     // Reduce distance between the player and the polygon until the player is within 0.1 pixel of the polygon
-    while ((std::abs(max - min) > 0.001F) && i < 32) {
+    while ((std::abs(max - min) > 0.1F) && i < 32) {
 
         move = std::midpoint(max, min);
 
-        playerVertices = {{x + move, y},
-                          {x + move + w, y},
-                          {x + move + w, y + h},
-                          {x + move, y + h}};
+        playerVertices = {{move, y},
+                          {move + w, y},
+                          {move + w, y + h},
+                          {move, y + h}};
 
         // The point is inside the collision
         if (checkSATCollision(playerVertices, obstacle)) {
             max = move;
         }
-            // The point is outside the collision
+        // The point is outside the collision
         else {
             min = move;
         }
@@ -515,15 +501,15 @@ static float correctSATCollisionOnXAxis(const Player *player, const Polygon &obs
 static float correctSATCollisionOnYAxis(const Player *player, const Polygon &obstacle) {
 
     // Initialize player positions
-    float x = player->getX() + player->getMoveX();
+    float x = player->getX();
     float y = player->getY();
     float w = player->getW();
     float h = player->getH();
 
     // Binary search variables initialization
     float move;
-    float min = 0;
-    float max = player->getMoveY();
+    float min = y - player->getMoveY();
+    float max = y;
 
     std::vector<Point> playerVertices;
 
@@ -534,24 +520,86 @@ static float correctSATCollisionOnYAxis(const Player *player, const Polygon &obs
 
         move = std::midpoint(max, min);
 
-        playerVertices = {{x, y + move},
-                          {x + w, y + move},
-                          {x + w, y + move + h},
-                          {x, y + move + h}};
+        playerVertices = {{x, move},
+                          {x + w, move},
+                          {x + w, move + h},
+                          {x, move + h}};
 
         // The point is inside the collision
         if (checkSATCollision(playerVertices, obstacle)) {
             max = move;
         }
-            // The point is outside the collision
+        // The point is outside the collision
         else {
             min = move;
+        }
+        i++;
+    }
+
+    return min;
+}
+
+static void correctSATCollisionOnBothAxis(Player *player, const Polygon &obstacle) {
+
+    // Initialize player positions
+    float x = player->getX();
+    float y = player->getY();
+    float w = player->getW();
+    float h = player->getH();
+
+    // Binary search variables initialization
+    float moveY;
+    float divideY;
+    float minY = y - 50;
+    float maxY = y;
+
+    float moveX;
+    float divideX;
+    float minX = x - 50;
+    float maxX = x;
+
+    // Create a ratio between moveX and moveY so they increment proportionally
+    float ratio = std::abs(player->getMoveX() / player->getMoveY());
+    if (ratio > 1) {
+        divideX = 2;
+        divideY = 2 / ratio;
+    }
+    else {
+        divideX = 2 * ratio;
+        divideY = 2;
+    }
+
+    std::vector<Point> playerVertices;
+
+    int i = 0;
+
+    // Reduce distance between the player and the polygon until the player is within 0.1 pixel of the polygon
+    while ((std::abs(maxY - minY) > 0.1F) && i < 32) {
+
+        moveX = std::lerp(minX, maxX, divideX);
+        moveY = std::lerp(minY, maxY, divideY);
+
+        playerVertices = {{moveX, moveY},
+                          {moveX + w, moveY},
+                          {moveX + w, moveY + h},
+                          {moveX, moveY + h}};
+
+        // The point is inside the collision
+        if (checkSATCollision(playerVertices, obstacle)) {
+            maxX = moveX;
+            maxY = moveY;
+        }
+        // The point is outside the collision
+        else {
+            minX = moveX;
+            minY = moveY;
         }
 
         i++;
     }
 
-    return min;
+    player->setX(minX);
+    player->setY(minY);
 }
 
 void correctSATCollision(Player *player, const Polygon &obstacle) {
@@ -563,7 +611,6 @@ void correctSATCollision(Player *player, const Polygon &obstacle) {
     float h = player->getH();
     float moveX = player->getMoveX();
     float moveY = player->getMoveY();
-
     bool xaxis = false;
     bool yaxis = false;
 
@@ -571,39 +618,37 @@ void correctSATCollision(Player *player, const Polygon &obstacle) {
     // COLLISION ANALYSIS
 
     // Check if the x-axis movement is concerned by the collision
-    std::vector<Point> playerVertices = {{x + moveX, y},
-                                         {x + moveX + w, y},
-                                         {x + moveX + w, y + h},
-                                         {x + moveX, y + h}};
+    std::vector<Point> playerVertices = {{x, y - moveY},
+                                         {x + w, y - moveY},
+                                         {x + w, y - moveY + h},
+                                         {x, y - moveY + h }};
 
     if (moveX != 0 && checkSATCollision(playerVertices, obstacle)) {
         xaxis = true;
     }
 
     // Check if the y-axis movement is concerned by the collision
-    playerVertices = {{x, y + moveY},
-                      {x + w, y + moveY},
-                      {x + w, y + moveY + h},
-                      {x, y + moveY + h}};
+    playerVertices = {{x - moveX, y},
+                      {x - moveX + w, y},
+                      {x - moveX + w, y + h},
+                      {x - moveX, y + h}};
 
     if (moveY != 0 && checkSATCollision(playerVertices, obstacle)) {
         yaxis = true;
     }
 
-
     // COLLISION CORRECTION
 
     // If the collision is only on x-axis
     if (xaxis && !yaxis) {
-        player->setMoveX(correctSATCollisionOnXAxis(player, obstacle));
+        player->setX( correctSATCollisionOnXAxis(player, obstacle));
     }
-        // If the collision is only on y-axis
-    else if (!xaxis && yaxis) {
-        player->setMoveY(correctSATCollisionOnYAxis(player, obstacle));
+    // If the collision is only on y-axis
+    else if (!xaxis) {
+        player->setY(correctSATCollisionOnYAxis(player, obstacle));
     }
-        // If the collisions is on the two axis (not supposed to happen)
+    // If the collision is on both axis
     else {
-        player->setMoveX(correctSATCollisionOnXAxis(player, obstacle));
-        player->setMoveY(correctSATCollisionOnYAxis(player, obstacle));
+        correctSATCollisionOnBothAxis(player, obstacle);
     }
 }

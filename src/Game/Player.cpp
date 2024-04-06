@@ -80,10 +80,6 @@ float Player::getMavity() const {
     return mavity;
 }
 
-bool Player::getWantToJump() const {
-    return wantToJump;
-}
-
 int Player::getDirectionY() const {
     return (int)directionY;
 }
@@ -249,6 +245,10 @@ void Player::setWantToJump(bool state) {
     if (!state) {
         jumpLock = false;
     }
+}
+
+void Player::setIsJumping(bool state) {
+    isJumping = state;
 }
 
 void Player::toggleMavity() {

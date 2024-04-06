@@ -24,7 +24,6 @@ void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &o
  * @brief Handles collisions between a player and 1D moving platforms.
  * @param player The player object.
  * @param platforms Vector of movingPlatform1D.
- * TODO: correct the collision when the platform move on y-axis
  */
 void handleCollisionsWithMovingPlatform1D(Player *player, const std::vector<MovingPlatform1D> &platforms);
 
@@ -32,7 +31,6 @@ void handleCollisionsWithMovingPlatform1D(Player *player, const std::vector<Movi
  * @brief Handles collisions between a player and 2D moving platforms.
  * @param player The player object.
  * @param platforms Vector of movingPlatform2D.
- * TODO: correct the collision when the platform move on y-axis
  */
 void handleCollisionsWithMovingPlatform2D(Player *player, const std::vector<MovingPlatform2D> &platforms);
 

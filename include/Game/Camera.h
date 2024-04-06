@@ -98,14 +98,14 @@ public:
      * @brief Initialize the camera position according to players positions.
      * @param camera_point A point representing the camera point position.
      */
-    void initializeCameraPosition(Point camera_point);
+    void initializePosition(Point camera_point);
 
     /**
      * @brief Applies camera movement based on the positions of all players.
      * @param camera_point A point representing the camera point position.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyCameraMovement(Point camera_point, double deltaTime);
+    void applyMovement(Point camera_point, double deltaTime);
 
     /**
      * @brief Renders the collisions by drawing obstacles.

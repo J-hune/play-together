@@ -124,12 +124,6 @@ public:
     [[nodiscard]] float getMavity() const;
 
     /**
-     * @brief Return the wantToJump attribute.
-     * @return The value of the wantToJump attribute
-     */
-    [[nodiscard]] bool getWantToJump() const;
-
-    /**
      * @brief Return the currentDirection attribute.
      * @return The value of the currentDirection attribute (-1 for left, 1 for right)
      */
@@ -297,6 +291,12 @@ public:
      * @param state The new value of the wantToJump attribute.
      */
     void setWantToJump(bool state);
+
+    /**
+     * @brief Sets the isJumping attribute.
+     * @param state The new value of the isJumping attribute.
+     */
+    void setIsJumping(bool state);
 
     /**
      * @brief Toggle the gravity to positive or negative (normal or reversed).

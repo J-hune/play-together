@@ -110,7 +110,7 @@ private:
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
-    bool isMoving = false;
+    bool isMoving = true;
 
     float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
 

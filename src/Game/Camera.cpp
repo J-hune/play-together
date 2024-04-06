@@ -63,7 +63,7 @@ void Camera::toggleIsShaking() {
 
 /** METHODS **/
 
-void Camera::initializeCameraPosition(Point camera_point) {
+void Camera::initializePosition(Point camera_point) {
     // Initialize the camera so that players are bottom left
     x = camera_point.x;
     y = camera_point.y - 2 * (h / 3);
@@ -86,7 +86,7 @@ void Camera::initializeCameraPosition(Point camera_point) {
     }
 }
 
-void Camera::applyCameraMovement(Point camera_point, double deltaTime) {
+void Camera::applyMovement(Point camera_point, double deltaTime) {
     float blend = 1 - std::pow(0.5F, deltaTime * lerpSmoothingFactor);
 
     float area_left = x + area.x;

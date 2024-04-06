@@ -1,3 +1,0 @@
-/home/anais/Desktop/play-together/cmake-build-debug/CMakeFiles/play-together.dir
-/home/anais/Desktop/play-together/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/anais/Desktop/play-together/cmake-build-debug/CMakeFiles/rebuild_cache.dir

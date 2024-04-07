@@ -46,6 +46,10 @@ std::vector<Polygon> Level::getZones(ZoneType type) const {
     }
 }
 
+std::vector<Asteroid> Level::getAsteroids() const {
+    return asteroids;
+}
+
 std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
     return movingPlatforms1D;
 }
@@ -77,6 +81,10 @@ void Level::setLastCheckpoint(short checkpoint) {
     lastCheckpoint = checkpoint;
 }
 
+void Level::removeAsteroidFromAsteroids(int index) {
+    asteroids.erase(asteroids.begin() + index);
+}
+
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
     // Search the item and remove it
     size_t i = 0;
@@ -95,7 +103,16 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
     speedPowerUp.erase(speedPowerUp.begin() + i);
 }
 
+
 /** METHODS **/
+
+void Level::generateAsteroid(int nbAsteroid, Point camera) {
+    // Loop to generate asteroids until the desired number is reached
+    for (int i = asteroids.size(); i < nbAsteroid; i++){
+        // Add a new asteroid to the asteroids vector with coordinates based on the camera position
+        asteroids.emplace_back(camera.x, camera.y);
+    }
+}
 
 void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -129,38 +146,6 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
-
-    // Draw the size power-ups
-    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
-    for (const SizePowerUp &item : sizePowerUp) {
-        item.renderDebug(renderer, camera);
-    }
-
-    // Draw the speed power-ups
-    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
-    for (const SpeedPowerUp &item : speedPowerUp) {
-        item.renderDebug(renderer, camera);
-    }
-}
-
-void Level::applyPlatformsMovement(double deltaTime) {
-    // Apply movement for 1D platforms
-    for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
-    }
-
-    // Apply movement for 2D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
-    }
-
-    // Apply movement for switching platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement();
-    }
-}
-
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
@@ -181,6 +166,45 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     for (const SwitchingPlatform &platform: switchingPlatforms) {
         SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
         SDL_RenderFillRectF(renderer, &platformRect);
+    }
+}
+
+void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
+
+    // Draw the size power-ups
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    for (const SizePowerUp &item : sizePowerUp) {
+        item.renderDebug(renderer, camera);
+    }
+
+    // Draw the speed power-ups
+    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
+    for (const SpeedPowerUp &item : speedPowerUp) {
+        item.renderDebug(renderer, camera);
+    }
+}
+
+void Level::applyAsteroidsMovement(double deltaTime) {
+    // Apply movement to all players
+    for (Asteroid &asteroid: asteroids) {
+        asteroid.applyMovement(deltaTime);
+    }
+}
+
+void Level::applyPlatformsMovement(double deltaTime) {
+    // Apply movement for 1D platforms
+    for (MovingPlatform1D &platform: movingPlatforms1D) {
+        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+    }
+
+    // Apply movement for 2D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) {
+        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+    }
+
+    // Apply movement for switching platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) {
+        if(platform.getIsMoving()) platform.applyMovement();
     }
 }
 

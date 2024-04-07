@@ -80,13 +80,21 @@ public :
      */
     [[nodiscard]] Sprite* getSprite();
 
+
     /** SPECIFIC ACCESSORS **/
+
+    /**
+     * @brief Get the bounding box of the asteroid.
+     * @return SDL_Rect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getBoundingBox() const;
 
     /**
      * @brief Get the vertices of the player's bounding box.
      * @return A vector of Point representing the vertices.
      */
     [[nodiscard]] std::vector<Point> getVertices() const;
+
 
     /** MODIFIERS **/
 
@@ -139,16 +147,18 @@ public :
     void render(SDL_Renderer *renderer, Point camera);
 
     /**
-     * @brief Get the bounding box of the asteroid.
-     * @return SDL_Rect representing the bounding box.
+     * @brief Renders the asteroid's collision box.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
      */
-    [[nodiscard]] SDL_FRect getBoundingBox() const;
+    void renderDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
      * @brief Applies the movement of the asteroid based on its speed and angle.
      *        Updates the current position coordinates accordingly.
+     * TODO: correct the movement according to the delta time
      */
-    void applyAsteroidMovement();
+    void applyMovement(double deltaTime);
 
 
     /**
@@ -160,7 +170,6 @@ public :
      * @return The seed used for random number generation.
      */
     static int generateArrayPositions(int nbPosition, float x, float y, int seed = 0);
-
 
     /**
      * @brief Get a random position from the array of possible positions.
@@ -185,37 +194,34 @@ public :
     */
     static float getRandomAngle(int seed=0);
 
-
     /**
       * @brief Triggers the explosion effect for the asteroid.
       *        This typically involves changing the sprite's animation to an explosion animation.
       */
     void explosion();
 
+
 private :
     static std::vector<float> positions; /** Possible position array for the asteroid.*/
     static std::vector<int> positionsLock; /** Array of locked asteroid positions. */
     static std::vector<float> angles; /** Possible angle array for the asteroid.*/
-    static std::vector<int> anglesLock;/** Array of locked asteroid angles. */
+    static std::vector<int> anglesLock; /** Array of locked asteroid angles. */
 
-    float x=0; /**< The x-coordinate of the asteroid's position. (in pixels) */
-    float y=0; /**< The y-coordinate of the asteroid's position. */
-
-    float speed=0; /**< The speed of the asteroid. */
-    float horizontalSpeed=0;/**< The horizontal speed of the asteroid. */
-    float verticalSpeed=0;/**< The vertical speed of the asteroid. */
-
+    float x = 0; /**< The x-coordinate of the asteroid's position. */
+    float y = 0; /**< The y-coordinate of the asteroid's position. */
     float h = 80; /**< The height of the asteroid. */
-    float w = 80;/**< The width of the asteroid.*/
+    float w = 80; /**< The width of the asteroid.*/
 
-    float angle=0; /**< The angle of the asteroid. */
-    float angle_radians=0;  /**< The angle radians of the asteroid. */
+    float speed = 0; /**< The speed of the asteroid. */
+    float horizontalSpeed = 0;/**< The horizontal speed of the asteroid. */
+    float verticalSpeed = 0; /**< The vertical speed of the asteroid. */
+
+    float angle = 0; /**< The angle of the asteroid. */
+    float angle_radians = 0; /**< The angle radians of the asteroid. */
 
     Sprite sprite; /**< The sprite of the player. */
 
-
-
-    static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a asteroid */
+    static SDL_Texture *spriteTexturePtr; /**< The texture of asteroid. */
 
 };
 

@@ -1,9 +1,9 @@
 #include <cmath> // Include math functions
 #include <random> // Include random number generation functions
-#include "../../../include/Game/Objects/Asteroid.h" // Include the Asteroid class header file
+#include "../../../include/Game/Events/Asteroid.h" // Include the Asteroid class header file
 
 // Static member initialization
-SDL_Texture *Asteroid::baseSpriteTexturePtr = nullptr;
+SDL_Texture *Asteroid::spriteTexturePtr = nullptr;
 std::vector<float> Asteroid::angles;
 std::vector<int> Asteroid::anglesLock;
 std::vector<int> Asteroid::positionsLock;
@@ -12,17 +12,17 @@ std::vector<float> Asteroid::positions;
 /** CONSTRUCTORS **/
 
 // Constructor for Asteroid class with default parameters
-Asteroid::Asteroid(float x, float y): x(x + Asteroid::getRandomPosition()), y(y - 60) {
-    speed = 0.6;
+Asteroid::Asteroid(float x, float y): x(x + Asteroid::getRandomPosition()), y(y - 60), speed(0.6f) {
     angle = getRandomAngle();
-    sprite = Sprite(Asteroid::idle, *baseSpriteTexturePtr, 64, 64); // Initialize sprite with default animation
+    sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
 }
 
 // Constructor for Asteroid class with specified parameters
 Asteroid::Asteroid(float x, float y, float speed, float h, float w, float angle)
-        : x(x), y(y), speed(speed), h(h), w(w), angle(angle) {
-    sprite = Sprite(Asteroid::idle, *baseSpriteTexturePtr, 64, 64); // Initialize sprite with default animation
+        : x(x), y(y), h(h), w(w), speed(speed), angle(angle) {
+    sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
 }
+
 
 /** BASIC ACCESSORS **/
 
@@ -61,7 +61,13 @@ float Asteroid::getSpeed() const {
     return speed;
 }
 
+
 /** SPECIFIC ACCESSORS **/
+
+// Return the bounding box of the asteroid
+SDL_FRect Asteroid::getBoundingBox() const {
+    return {x, y, w, h};
+}
 
 // Get the vertices of the asteroid's bounding box
 std::vector<Point> Asteroid::getVertices() const {
@@ -72,6 +78,7 @@ std::vector<Point> Asteroid::getVertices() const {
             {x, y + h}
     };
 }
+
 
 /** MODIFIERS **/
 
@@ -100,15 +107,16 @@ void Asteroid::setAngle(float val) {
     angle = val;
 }
 
+
 /** METHODS **/
 
 // Load textures for the asteroid
 bool Asteroid::loadTextures(SDL_Renderer &renderer) {
     // Load asteroid sprite texture
-    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/asteroid/asteroid.png");
+    spriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/asteroid/asteroid.png");
 
     // Check for errors
-    if (baseSpriteTexturePtr == nullptr) {
+    if (spriteTexturePtr == nullptr) {
         return false; // Return failure
     }
 
@@ -123,8 +131,15 @@ void Asteroid::render(SDL_Renderer *renderer, Point camera) {
     SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &asteroidRect, angle, nullptr, sprite.getFlip());
 }
 
+// Render the asteroid collision box
+void Asteroid::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 173, 79, 9, 255);
+    SDL_FRect asteroidRect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderFillRectF(renderer, &asteroidRect);
+}
+
 // Apply asteroid movement based on speed and angle
-void Asteroid::applyAsteroidMovement() {
+void Asteroid::applyMovement(double deltaTime) {
     angle_radians = static_cast<float>(angle * (M_PI / 180)); // Convert angle to radians
 
     // Calculate horizontal and vertical speeds
@@ -132,8 +147,8 @@ void Asteroid::applyAsteroidMovement() {
     verticalSpeed = - speed * std::sin(angle_radians);
 
     // Update current coordinates based on speed components
-    x = x + horizontalSpeed;
-    y = y + verticalSpeed;
+    x += 100 * horizontalSpeed * static_cast<float>(deltaTime); // '* 100' temporaire (c'est pour qu'il avance plus vite)
+    y += 100 * verticalSpeed * static_cast<float>(deltaTime);
 }
 
 // Generate an array of possible positions for the asteroid
@@ -253,9 +268,4 @@ void Asteroid::explosion() {
     // Placeholder for explosion effect
     // angle = 0;
     // sprite.setAnimation(explosionAnimation);
-}
-
-// Return the bounding box of the asteroid
-SDL_FRect Asteroid::getBoundingBox() const {
-    return {x, y, w, h};
 }

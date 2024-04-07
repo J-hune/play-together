@@ -131,6 +131,10 @@ void Game::initialize(int slot) {
         Player initialPlayer(-1, spawnPoint, 48, 36);
         camera.initializePosition(spawnPoint);
 
+        Asteroid::loadTextures(*renderer);
+        Asteroid::generateArrayAngles(200);
+        Asteroid::generateArrayPositions(200, 0, camera.getW());
+
         initialPlayer.setSpriteTextureByID(2);
         addCharacter(initialPlayer);
     }
@@ -319,13 +323,6 @@ void Game::calculatePlayersMovement(double deltaTime) {
     }
 }
 
-void Game::applyAllAsteroidMovement() {
-    // Apply movement to all players
-    for (Asteroid &asteroid: asteroids) {
-        asteroid.applyAsteroidMovement();
-    }
-}
-
 void Game::applyPlayersMovement(double ratio) {
     // Apply movement for all players
     for (Player &character: characters) {
@@ -348,36 +345,28 @@ void Game::switchMavity() {
     }
 }
 
-void Game::handleCollisionsWithAsteroid() {
+void Game::handleAsteroidsCollisions() {
     bool alreadyExplode = false;
     int asteroidIndex = -1;
 
-    for (int i = 0; i < static_cast<int>(asteroids.size()); ++i) {
+    std::vector<Asteroid> asteroids = level.getAsteroids();
+
+    for (int i = 0; i < static_cast<int>(level.getAsteroids().size()); ++i) {
         const Asteroid &asteroid = asteroids[i];
         alreadyExplode = false;
 
-        if (!alreadyExplode) {
-            for (Player character : characters) {
-                if (!alreadyExplode && checkAABBCollision(character.getBoundingBox(), asteroid.getBoundingBox())) {
-                    asteroidIndex = i;
-                    alreadyExplode = true;
-                    killPlayer(&character);
-                }
+        for (Player character : characters) {
+            if (!alreadyExplode && checkAABBCollision(character.getBoundingBox(), asteroid.getBoundingBox())) {
+                asteroidIndex = i;
+                alreadyExplode = true;
+                killPlayer(&character);
             }
         }
 
-        if (!alreadyExplode) {
-            for (const Polygon &obstacle : level.getZones(zoneType::COLLISION)) {
-                if (!alreadyExplode && checkCollision(asteroid.getVertices(), obstacle)) {
-                    asteroidIndex = i;
-                    alreadyExplode = true;
-                }
-            }
-        }
 
         if (!alreadyExplode) {
-            for (const Polygon &obstacle : level.getZones(zoneType::SAVE)) {
-                if (!alreadyExplode && checkCollision(asteroid.getVertices(), obstacle)) {
+            for (const Polygon &obstacle : level.getZones(ZoneType::COLLISION)) {
+                if (!alreadyExplode && checkSATCollision(asteroid.getVertices(), obstacle)) {
                     asteroidIndex = i;
                     alreadyExplode = true;
                 }
@@ -390,20 +379,10 @@ void Game::handleCollisionsWithAsteroid() {
         }
 
         if (alreadyExplode) {
-            asteroids[asteroidIndex].explosion();
-            asteroids.erase(asteroids.begin() + asteroidIndex);
-
+            asteroids[asteroidIndex].explosion(); // à changer, là ça le fait uniquement sur la copie de l'objet
+            level.removeAsteroidFromAsteroids(asteroidIndex); // C'est pour que j'ai rajouté remove dans level
         }
     }
-}
-
-void Game::generateAsteroid(int nbAsteroid){
-    // Loop to generate asteroids until the desired number is reached
-    for (int i=asteroids.size(); i<nbAsteroid;i++){
-        // Add a new asteroid to the asteroids vector with coordinates based on the camera position
-        asteroids.emplace_back(camera.getX(),camera.getY());
-    }
-
 }
 
 void Game::broadPhase() {
@@ -506,7 +485,7 @@ void Game::narrowPhase() {
         character.setIsOnPlatform(false);
 
         // Check collisions with asteroids
-        handleCollisionsWithAsteroid();
+        handleAsteroidsCollisions();
 
         // Handle collisions according to player's mavity
         if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
@@ -531,17 +510,6 @@ void Game::render() {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
-    // Render fps counter
-    if (render_fps) {
-        SDL_Color color = {160, 160, 160, 255};
-        SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFrameFps).c_str(), color);
-        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_Rect rect = {10, 10, surface->w, surface->h};
-        SDL_RenderCopy(renderer, texture, nullptr, &rect);
-        SDL_FreeSurface(surface);
-        SDL_DestroyTexture(texture);
-    }
-
     // Render textures
     if (render_textures) {
         // Draw the characters
@@ -549,6 +517,7 @@ void Game::render() {
             character.render(renderer, cam);
         }
 
+        for (Asteroid &asteroid: level.getAsteroids()) asteroid.render(renderer, cam); // Draw the asteroids
         level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
         level.renderItemsDebug(renderer, cam); // Draw the items
@@ -561,29 +530,10 @@ void Game::render() {
             character.renderDebug(renderer, cam);
         }
 
+        for (Asteroid const &asteroid: level.getAsteroids()) asteroid.renderDebug(renderer, cam); // Draw the asteroids
         level.renderPolygonsDebug(renderer, cam); // Draw the obstacles
         level.renderPlatformsDebug(renderer, cam); // Draw the platforms
         level.renderItemsDebug(renderer, cam); // Draw the items
-    }
-
-
-    // Render the asteroid
-    for (Asteroid asteroid: asteroids) {
-        asteroid.render(renderer, cam);
-    }
-
-    // DEBUG DRAWING OF APPLICATION CONSOLE :
-
-    // Draw the camera point if enabled
-    if (render_camera_point) camera.renderCameraPoint(renderer, getAveragePlayersPositions());
-
-    // Draw the camera area if enabled
-    if (render_camera_area) camera.renderCameraArea(renderer);
-
-    // Draw the player's colliders if enabled
-    if (render_player_colliders) {
-        Player initialPlayer = *findPlayerById(-1);
-        initialPlayer.renderColliders(renderer, cam);
     }
 
     // If the game is paused, render the pause menu
@@ -598,6 +548,32 @@ void Game::render() {
         Mediator::renderMenu();
     }
 
+
+    // DEBUG DRAWING OF APPLICATION CONSOLE :
+
+    // Render fps counter
+    if (render_fps) {
+        SDL_Color color = {160, 160, 160, 255};
+        SDL_Surface *surface = TTF_RenderUTF8_Blended(fonts[0], std::to_string(effectiveFrameFps).c_str(), color);
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Rect rect = {10, 10, surface->w, surface->h};
+        SDL_RenderCopy(renderer, texture, nullptr, &rect);
+        SDL_FreeSurface(surface);
+        SDL_DestroyTexture(texture);
+    }
+
+    // Draw the camera point if enabled
+    if (render_camera_point) camera.renderCameraPoint(renderer, getAveragePlayersPositions());
+
+    // Draw the camera area if enabled
+    if (render_camera_area) camera.renderCameraArea(renderer);
+
+    // Draw the player's colliders if enabled
+    if (render_player_colliders) {
+        Player initialPlayer = *findPlayerById(-1);
+        initialPlayer.renderColliders(renderer, cam);
+    }
+
     // Present the renderer
     SDL_RenderPresent(renderer);
 }
@@ -610,8 +586,8 @@ void Game::fixedUpdate() {
 void Game::update(double deltaTime, double ratio) {
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
 
-    generateAsteroid(1);
-    applyAllAsteroidMovement();
+    level.generateAsteroid(2, {camera.getX(), camera.getY()});
+    level.applyAsteroidsMovement(deltaTime);
 
     // Apply players movement directly with the calculated ratio
     applyPlayersMovement(ratio);

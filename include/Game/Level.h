@@ -7,6 +7,7 @@
 #include <iostream>
 #include "../Physics/Polygon.h"
 #include "Camera.h"
+#include "Events/Asteroid.h"
 #include "Platforms/MovingPlatform1D.h"
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
@@ -61,6 +62,12 @@ public:
     [[nodiscard]] std::vector<Polygon> getZones(ZoneType type) const;
 
     /**
+     * @brief Return the asteroids attribute.
+     * @return A vector of Asteroid.
+     */
+    [[nodiscard]] std::vector<Asteroid> getAsteroids() const;
+
+    /**
      * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
@@ -106,25 +113,43 @@ public:
     void setLastCheckpoint(short checkpoint);
 
     /**
-    * @brief Remove an item from sizePowerUp attribute.
-    * @param item The item to remove.
-    */
+     * @brief Remove an asteroid from asteroids attribute.
+     * @param item The asteroid to remove.
+     */
+    void removeAsteroidFromAsteroids(int index);
+
+    /**
+     * @brief Remove an item from sizePowerUp attribute.
+     * @param item The item to remove.
+     */
     void removeItemFromSizePowerUp(SizePowerUp const &item);
 
     /**
-    * @brief Remove an item from speedPowerUp attribute.
-    * @param item The item to remove.
-    */
+     * @brief Remove an item from speedPowerUp attribute.
+     * @param item The item to remove.
+     */
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
 
     /** PUBLIC METHODS **/
 
     /**
+     * @brief Applies the movement to all asteroid in the game.
+     * @see applyMovement() for applying movement to one asteroid.
+     */
+    void applyAsteroidsMovement(double deltaTime);
+
+    /**
      * @brief Applies the movement of every platforms in the level.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
     void applyPlatformsMovement(double deltaTime);
+
+    /**
+     * @brief Generates a specified number of asteroids in the game.
+     * @param nbAsteroid The number of asteroids must have in the game.
+     */
+    void generateAsteroid(int nbAsteroid, Point camera);
 
     /**
      * @brief Renders the collisions by drawing obstacles.
@@ -161,12 +186,14 @@ private:
     std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
     std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
     std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
+
 
     /** PRIVATE METHODS **/
 

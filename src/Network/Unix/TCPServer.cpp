@@ -171,7 +171,9 @@ void TCPServer::handleMessage(int clientSocket) {
 
 // Send a message to a client
 bool TCPServer::send(int clientSocket, const std::string &message) const {
+#ifdef DEVELOPMENT_MODE
     std::cout << "TCPServer: Sending message: " << message << " (" << message.length() << " bytes) to client " << clientSocket << std::endl;
+#endif
 
     // First, send the size of the message
     auto messageSize = static_cast<int>(message.length()); // Message size including null terminator
@@ -198,7 +200,9 @@ bool TCPServer::send(int clientSocket, const std::string &message) const {
 // Broadcast a message to all connected clients
 bool TCPServer::broadcast(const std::string &message, int socketIgnored) const {
     clientAddressesMutexPtr->lock();
+#ifdef DEVELOPMENT_MODE
     std::cout << "TCPServer: Broadcasting message: " << message << " (" << message.length() << " bytes) to " << clientAddressesPtr->size() << " clients" << std::endl;
+#endif
 
     auto send_successful = std::ranges::all_of(*clientAddressesPtr, [&](const auto& client) {
         if (client.first == socketIgnored) return true;

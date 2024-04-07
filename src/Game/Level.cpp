@@ -125,7 +125,6 @@ void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
 }
 
 void Level::addAsteroid(Asteroid const &asteroid) {
-    std::cout << "Level: Adding asteroid to the game. " << asteroids.size() << std::endl;
     asteroids.emplace_back(asteroid);
 }
 

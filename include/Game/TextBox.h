@@ -16,8 +16,7 @@ public:
     TextBox(){}
     TextBox(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int width, int height, SDL_Color textColor, SDL_Color bgColor);
 
-    char GetShiftedCharacter(SDL_Keycode keycode);
-    char GetSpecialShiftedCharacter(SDL_Keycode keycode);
+
     void handleEvent(const SDL_Event &e);
     void render(SDL_Renderer* renderer);
 

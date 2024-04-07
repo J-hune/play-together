@@ -60,71 +60,7 @@ void TextBox::render(SDL_Renderer* renderer) {
     //SDL_FreeSurface(textSurface);
     //SDL_DestroyTexture(textTexture);
 }
-/*char TextBox::GetShiftedCharacter(SDL_Keycode keycode) {
-    const Uint8* state = SDL_GetKeyboardState(nullptr);
-    bool shiftPressed = (state[SDL_SCANCODE_LSHIFT] || state[SDL_SCANCODE_RSHIFT]);
 
-    if (shiftPressed) {
-        switch (keycode) {
-            case SDLK_a: return 'A';
-            case SDLK_b: return 'B';
-            case SDLK_c: return 'C';
-            case SDLK_d: return 'D';
-            case SDLK_e: return 'E';
-            case SDLK_f: return 'F';
-            case SDLK_g: return 'G';
-            case SDLK_h: return 'H';
-            case SDLK_i: return 'I';
-            case SDLK_j: return 'J';
-            case SDLK_k: return 'K';
-            case SDLK_l: return 'L';
-            case SDLK_m: return 'M';
-            case SDLK_n: return 'N';
-            case SDLK_o: return 'O';
-            case SDLK_p: return 'P';
-            case SDLK_q: return 'Q';
-            case SDLK_r: return 'R';
-            case SDLK_s: return 'S';
-            case SDLK_t: return 'T';
-            case SDLK_u: return 'U';
-            case SDLK_v: return 'V';
-            case SDLK_w: return 'W';
-            case SDLK_x: return 'X';
-            case SDLK_y: return 'Y';
-            case SDLK_z: return 'Z';
-            default: return GetSpecialShiftedCharacter(keycode);
-        }
-    } else {
-        return GetSpecialShiftedCharacter(keycode);
-    }
-}
-
-char TextBox::GetSpecialShiftedCharacter(SDL_Keycode keycode) {
-    switch (keycode) {
-        case SDLK_1: return '!';
-        case SDLK_2: return '@';
-        case SDLK_3: return '#';
-        case SDLK_4: return '$';
-        case SDLK_5: return '%';
-        case SDLK_6: return '^';
-        case SDLK_7: return '&';
-        case SDLK_8: return '*';
-        case SDLK_9: return '(';
-        case SDLK_0: return ')';
-        case SDLK_MINUS: return '_';
-        case SDLK_EQUALS: return '+';
-        case SDLK_LEFTBRACKET: return '{';
-        case SDLK_RIGHTBRACKET: return '}';
-        case SDLK_BACKSLASH: return '|';
-        case SDLK_SEMICOLON: return '.';
-        case SDLK_QUOTE: return '"';
-        case SDLK_COMMA: return '<';
-        case SDLK_PERIOD: return '>';
-        case SDLK_SLASH: return '?';
-        case SDLK_BACKQUOTE: return '~';
-        default: return static_cast<char>(keycode);
-    }
-}*/
 
 TextBox::TextBox(SDL_Renderer *renderer, TTF_Font *font, int x, int y, int width, int height, SDL_Color textColor,
                  SDL_Color bgColor) {

@@ -448,7 +448,7 @@ private:
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
 
-    // LOADED TEXTURES IN STATIC ATTRIBUTES
+    // LOADED TEXTURES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
     static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
     static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
@@ -456,11 +456,11 @@ private:
     static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
 
     // SPRITE ANIMATIONS
-    static constexpr Animation idle = {0, 4, 100}; /**< Idle animation */
-    static constexpr Animation walk = {1, 6, 70}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 10}; /**< Hit animation */
-    static constexpr Animation hurt = {3, 4, 100}; /**< Hurt animation */
-    static constexpr Animation run = {4, 7, 100}; /**< Run animation */
+    static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
+    static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
+    static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
+    static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
 
 
     /** PRIVATE METHODS **/

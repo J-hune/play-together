@@ -264,8 +264,8 @@ float Asteroid::getRandomAngle(int seed) {
 }
 
 // Trigger the explosion effect for the asteroid
-void Asteroid::explosion() {
+void Asteroid::explode() {
     // Placeholder for explosion effect
     // angle = 0;
-    // sprite.setAnimation(explosionAnimation);
+    // sprite.setAnimation(explosion);
 }

@@ -18,7 +18,7 @@ class Sprite {
 public:
     /** CONSTRUCTORS **/
 
-    Sprite() = default; // Used for the useless empty Game constructor of Athena
+    Sprite() = default;
 
     /**
      * @brief Constructor for the Sprite class.
@@ -60,7 +60,7 @@ public:
      * @brief Set the animation attribute.
      * @param animation The new Animation of the sprite.
      */
-    void setAnimation(Animation newAnimation);
+    void setAnimation(const Animation& newAnimation);
 
     /**
      * @brief Set the texture attribute.
@@ -100,11 +100,22 @@ public:
 private:
     /** ATTRIBUTES **/
 
+    // Animation attributes
     Animation animation; /**< The current animation of the sprite. */
+    int animationIndexX = 0; /**< The current position in the animation of the sprite. */
+    Uint32 lastAnimationUpdate = SDL_GetTicks(); /**< The last time the animation was updated. */
+
+    // Unique animation attributes
+    Animation nextAnimation; /**< The animation that will play after an animation of 'unique' type. */
+    int nbFrameDisplayed = 0; /**< The number of frame that has passed since the current animation was display. */
+    bool uniqueAnimationIsDisplayed = false; /**< Flag indicating if a unique animation is currently displayed. */
+
+    // Texture attributes
     SDL_Texture *texturePtr; /**< The texture of the sprite. */
     SDL_Rect srcRect; /**< The square that will be copied in the texture. */
     SDL_RendererFlip flipHorizontal = SDL_FLIP_NONE; /**< If the sprite is flipped horizontally. */
     SDL_RendererFlip flipVertical = SDL_FLIP_NONE; /**< If the sprite is flipped vertically. */
+
 
 };
 

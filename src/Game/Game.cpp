@@ -379,7 +379,7 @@ void Game::handleAsteroidsCollisions() {
         }
 
         if (alreadyExplode) {
-            asteroids[asteroidIndex].explosion(); // à changer, là ça le fait uniquement sur la copie de l'objet
+            asteroids[asteroidIndex].explode(); // à changer, là ça le fait uniquement sur la copie de l'objet
             level.removeAsteroidFromAsteroids(asteroidIndex); // C'est pour que j'ai rajouté remove dans level
         }
     }

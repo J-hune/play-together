@@ -11,10 +11,6 @@
 
 class Asteroid {
 public :
-    static constexpr Animation idle = {0, 8, 100}; /**< Idle animation */
-    static constexpr Animation explosionAnimation = {6, 6, 70}; /**< Explosion animation */
-
-
     /** CONSTRUCTOR **/
 
     /**
@@ -198,15 +194,10 @@ public :
       * @brief Triggers the explosion effect for the asteroid.
       *        This typically involves changing the sprite's animation to an explosion animation.
       */
-    void explosion();
+    void explode();
 
 
 private :
-    static std::vector<float> positions; /** Possible position array for the asteroid.*/
-    static std::vector<int> positionsLock; /** Array of locked asteroid positions. */
-    static std::vector<float> angles; /** Possible angle array for the asteroid.*/
-    static std::vector<int> anglesLock; /** Array of locked asteroid angles. */
-
     float x = 0; /**< The x-coordinate of the asteroid's position. */
     float y = 0; /**< The y-coordinate of the asteroid's position. */
     float h = 80; /**< The height of the asteroid. */
@@ -221,7 +212,17 @@ private :
 
     Sprite sprite; /**< The sprite of the player. */
 
+    static std::vector<float> positions; /** Possible position array for the asteroid.*/
+    static std::vector<int> positionsLock; /** Array of locked asteroid positions. */
+    static std::vector<float> angles; /** Possible angle array for the asteroid.*/
+    static std::vector<int> anglesLock; /** Array of locked asteroid angles. */
+
+    // LOADED TEXTURE
     static SDL_Texture *spriteTexturePtr; /**< The texture of asteroid. */
+
+    // SPRITE ANIMATIONS
+    static constexpr Animation idle = {0, 8, 100, false}; /**< Idle animation */
+    static constexpr Animation explosion = {6, 6, 70, true}; /**< Explosion animation */
 
 };
 

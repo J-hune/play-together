@@ -63,9 +63,10 @@ void ApplicationConsole::executeGameNotRunningCommand(const std::string& command
 
 // Executes a command based on user input.
 void ApplicationConsole::executeCommand(const std::string &command) const {
+    GameState gameState = gamePtr->getGameState();
 
     // Commands that can be executed while the game is running
-    if (gamePtr->getGameState() == GameState::RUNNING || gamePtr->getGameState() == GameState::PAUSED) {
+    if (gameState == GameState::RUNNING || gameState == GameState::PAUSED) {
         executeGameRunningCommand(command);
     } else {
         executeGameNotRunningCommand(command);
@@ -95,10 +96,9 @@ void ApplicationConsole::displayHelp(int gameState) const {
 /** GAME RUNNING COMMANDS METHODS **/
 
 void ApplicationConsole::teleportPlayer(const std::string &command) const {
-    float x;
-    float y;
+    float x; float y;
     if (sscanf(command.c_str(), "tp %f %f", &x, &y) == 2) {
-        gamePtr->findPlayerById(-1)->teleportPlayer(x, y);
+        gamePtr->getPlayerManager().findPlayerById(-1)->teleportPlayer(x, y);
     } else {
         std::cout << "Invalid syntax. Usage: tp [x] [y]\n";
     }
@@ -117,6 +117,7 @@ void ApplicationConsole::changeMap(const std::string &command) const {
 }
 
 void ApplicationConsole::showDebugInfo(const std::string &command) const {
+    RenderManager renderManager = gamePtr->getRenderManager();
     std::istringstream iss(command);
     std::string command_name;
     std::string option;
@@ -128,21 +129,21 @@ void ApplicationConsole::showDebugInfo(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->setRenderCameraPoint(true);
-        gamePtr->setRenderCameraArea(true);
-        gamePtr->setRenderPlayerColliders(true);
+        renderManager.setRenderCameraPoint(true);
+        renderManager.setRenderCameraArea(true);
+        renderManager.setRenderPlayerColliders(true);
         std::cout << "Showing all information.\n";
     }
     else if (option == "camera_point") {
-        gamePtr->setRenderCameraPoint(true);
+        renderManager.setRenderCameraPoint(true);
         std::cout << "Showing camera point information.\n";
     }
     else if (option == "camera_area") {
-        gamePtr->setRenderCameraArea(true);
+        renderManager.setRenderCameraArea(true);
         std::cout << "Showing camera area information.\n";
     }
     else if (option == "player_colliders") {
-        gamePtr->setRenderPlayerColliders(true);
+        renderManager.setRenderPlayerColliders(true);
         std::cout << "Showing player's colliders area information.\n";
     }
     else {
@@ -151,6 +152,7 @@ void ApplicationConsole::showDebugInfo(const std::string &command) const {
 }
 
 void ApplicationConsole::hideDebugInfo(const std::string &command) const {
+    RenderManager renderManager = gamePtr->getRenderManager();
     std::istringstream iss(command);
     std::string command_name;
     std::string option;
@@ -162,21 +164,21 @@ void ApplicationConsole::hideDebugInfo(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->setRenderCameraPoint(false);
-        gamePtr->setRenderCameraArea(false);
-        gamePtr->setRenderPlayerColliders(false);
+        renderManager.setRenderCameraPoint(false);
+        renderManager.setRenderCameraArea(false);
+        renderManager.setRenderPlayerColliders(false);
         std::cout << "Hiding all information.\n";
     }
     else if (option == "camera_point") {
-        gamePtr->setRenderCameraPoint(false);
+        renderManager.setRenderCameraPoint(false);
         std::cout << "Hiding camera point information.\n";
     }
     else if (option == "camera_area") {
-        gamePtr->setRenderCameraArea(false);
+        renderManager.setRenderCameraArea(false);
         std::cout << "Hiding camera area information.\n";
     }
     else if (option == "player_colliders") {
-        gamePtr->setRenderPlayerColliders(false);
+        renderManager.setRenderPlayerColliders(false);
         std::cout << "Hiding player's colliders information.\n";
     }
     else {
@@ -243,12 +245,12 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
 }
 
 void ApplicationConsole::toggleRendering() const {
-    gamePtr->toggleRenderTextures();
-    std::cout << "Rendering toggled.\n";
+    gamePtr->getRenderManager().toggleRenderTextures();
+    std::cout << "RenderManager toggled.\n";
 }
 
 void ApplicationConsole::toggleFPSRendering() const {
-    gamePtr->toggleRenderFps();
+    gamePtr->getRenderManager().toggleRenderFps();
     std::cout << "FPS rendering toggled.\n";
 }
 

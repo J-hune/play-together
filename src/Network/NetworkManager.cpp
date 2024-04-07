@@ -152,3 +152,19 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
 
     // Otherwise, the game is local only (development mode)
 }
+
+void NetworkManager::sendAsteroidCreation(Asteroid const &asteroid) const {
+    // Create a message with the asteroid properties
+    using json = nlohmann::json;
+    json message;
+
+    message["messageType"] = "asteroidCreation";
+    message["x"] = asteroid.getX();
+    message["y"] = asteroid.getY();
+    message["speed"] = asteroid.getSpeed();
+    message["h"] = asteroid.getH();
+    message["w"] = asteroid.getW();
+    message["angle"] = asteroid.getAngle();
+
+    udpServer.broadcast(message.dump(), 0);
+}

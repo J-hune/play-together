@@ -8,6 +8,7 @@
 #include <SDL_image.h>
 #include <cmath>
 #include <vector>
+#include <random>
 
 class Asteroid {
 public :
@@ -18,7 +19,7 @@ public :
      * @param x The x position of the interval start.
      * @param y The y position of the interval start.
      */
-    Asteroid(float x, float y);
+    Asteroid(float x, float y, size_t seed);
 
     /**
      * @brief Constructor for the Asteroid class.
@@ -74,7 +75,7 @@ public :
      * @brief Return the sprite attribute.
      * @return A pointer of a sprite object representing the sprite of the asteroid.
      */
-    [[nodiscard]] Sprite* getSprite();
+    [[nodiscard]] Sprite *getSprite();
 
 
     /** SPECIFIC ACCESSORS **/
@@ -162,10 +163,9 @@ public :
      * @param nbPosition The number of positions to generate.
      * @param x The lower bound of the position range.
      * @param y The upper bound of the position range.
-     * @param seed The seed for random number generation. If zero, a random seed is generated.
-     * @return The seed used for random number generation.
+     * @param seed The seed for random number generation.
      */
-    static int generateArrayPositions(int nbPosition, float x, float y, int seed = 0);
+    static void generateRandomPositionsArray(int nbPosition, float x, float y, size_t seed);
 
     /**
      * @brief Get a random position from the array of possible positions.
@@ -173,22 +173,21 @@ public :
      * @return A randomly selected position.
      */
 
-    static float getRandomPosition(int seed=0);
+    static float getRandomPosition(size_t seed);
 
     /**
      * @brief Get an array of possible angles for the asteroid.
      * @param nbAngle The number of angles to generate.
-     * @param seed The seed for random number generation. If zero, a random seed is generated.
-     * @return The seed used for random number generation.
+     * @param seed The seed for random number generation.
      */
-    static int generateArrayAngles(int nbAngle, int seed = 0);
+    static void generateRandomAnglesArray(int nbAngle, size_t seed);
 
     /**
     * @brief Generates a random angle from the array of possible angles.
     * @param seed The seed for random number generation. If zero, a random seed is generated.
     * @return A randomly selected angle.
     */
-    static float getRandomAngle(int seed=0);
+    static float getRandomAngle(size_t seed);
 
     /**
       * @brief Triggers the explosion effect for the asteroid.

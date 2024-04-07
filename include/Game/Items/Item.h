@@ -10,6 +10,7 @@
 
 enum class ItemTypes {
     SIZE_POWER_UP,
+    SPEED_POWER_UP,
     COIN
 };
 

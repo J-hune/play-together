@@ -58,6 +58,14 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
 }
 
+std::vector<SizePowerUp> Level::getSizePowerUp() const {
+    return sizePowerUp;
+}
+
+std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
+    return speedPowerUp;
+}
+
 short Level::getLastCheckpoint() const {
     return lastCheckpoint;
 }
@@ -69,6 +77,23 @@ void Level::setLastCheckpoint(short checkpoint) {
     lastCheckpoint = checkpoint;
 }
 
+void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
+    // Search the item and remove it
+    size_t i = 0;
+    while (i < sizePowerUp.size() && item != sizePowerUp[i]) {
+        i++;
+    }
+    sizePowerUp.erase(sizePowerUp.begin() + i);
+}
+
+void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
+    // Search the item and remove it
+    size_t i = 0;
+    while (i < speedPowerUp.size() && item != speedPowerUp[i]) {
+        i++;
+    }
+    speedPowerUp.erase(speedPowerUp.begin() + i);
+}
 
 /** METHODS **/
 
@@ -109,6 +134,12 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the size power-ups
     SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
     for (const SizePowerUp &item : sizePowerUp) {
+        item.renderDebug(renderer, camera);
+    }
+
+    // Draw the speed power-ups
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    for (const SpeedPowerUp &item : speedPowerUp) {
         item.renderDebug(renderer, camera);
     }
 }
@@ -201,6 +232,7 @@ void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     bossZones.clear();
     eventZones.clear();
     saveZones.clear();
+    saveZones.clear();
 
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/polygons.json";
     std::ifstream file(filePath);
@@ -286,6 +318,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {
     sizePowerUp.clear();
+    speedPowerUp.clear();
 
     std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
     std::ifstream file(filePath);
@@ -308,5 +341,15 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         sizePowerUp.emplace_back(x, y, width, height, grow);
     }
 
-    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up." << std::endl;
+    // Load all SizePowerUp items
+    for (const auto &item : j["speedPowerUp"]) {
+        float x = item["x"];
+        float y = item["y"];
+        float width = item["width"];
+        float height = item["height"];
+        bool fast = item["fast"];
+        speedPowerUp.emplace_back(x, y, width, height, fast);
+    }
+
+    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up and " << speedPowerUp.size() << " speed power-up." << std::endl;
 }

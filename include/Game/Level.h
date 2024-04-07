@@ -11,6 +11,7 @@
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
 #include "Items/SizePowerUp.h"
+#include "Items/SpeedPowerUp.h"
 #include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
@@ -78,19 +79,16 @@ public:
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
 
     /**
-    * @brief Return an items vector attribute of generic type.
-    * @tparam T The type of items to return.
-    * @param type The type of items to retrieve.
-    * @return The items attribute of generic type.
-    */
-    template<typename T>
-    [[nodiscard]] std::vector<T> getItems(ItemTypes type) const {
-        switch(type) {
-            using enum ItemTypes;
-            case SIZE_POWER_UP: return sizePowerUp;
-            default: return {};
-        }
-    }
+     * @brief Return the sizePowerUp attribute.
+     * @return A vector of SizePowerUp.
+     */
+    [[nodiscard]] std::vector<SizePowerUp> getSizePowerUp() const;
+
+    /**
+     * @brief Return the speedPowerUp attribute.
+     * @return A vector of SpeedPowerUp.
+     */
+    [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
 
     /**
      * @brief Return the last checkpoint reached by the player.
@@ -99,7 +97,7 @@ public:
     [[nodiscard]] short getLastCheckpoint() const;
 
 
-    /** MODIFIERS **/
+    /** MUTATORS **/
 
     /**
      * @brief Set the last checkpoint reached by the player.
@@ -108,25 +106,16 @@ public:
     void setLastCheckpoint(short checkpoint);
 
     /**
-    * @brief Return an item from an items vector attribute of generic type.
-    * @tparam T The object type of item to remove.
-    * @param type The type of item to remove.
+    * @brief Remove an item from sizePowerUp attribute.
+    * @param item The item to remove.
     */
-    template<typename T>
-    void removeItem(T item, ItemTypes type) {
-        using enum ItemTypes;
-        std::vector<T> *itemsPtr = nullptr;
-        if (type == SIZE_POWER_UP) itemsPtr = &sizePowerUp;
+    void removeItemFromSizePowerUp(SizePowerUp const &item);
 
-        // Search the item and remove it
-        if (itemsPtr != nullptr) {
-            size_t i = 0;
-            while (i < itemsPtr->size() && item != (*itemsPtr)[i]) {
-                i++;
-            }
-            itemsPtr->erase(itemsPtr->begin() + i);
-        }
-    }
+    /**
+    * @brief Remove an item from speedPowerUp attribute.
+    * @param item The item to remove.
+    */
+    void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
 
     /** PUBLIC METHODS **/
@@ -176,6 +165,7 @@ private:
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
     /** PRIVATE METHODS **/

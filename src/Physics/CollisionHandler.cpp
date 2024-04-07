@@ -5,8 +5,7 @@
  * @brief Implements functions for handling collisions behavior.
  */
 
-/* COLLISIONS RELATED TO MAVITY */
-/* NORMAL MAVITY */
+/* PLAYER NORMAL MAVITY */
 
 void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &obstacles) {
     // Check collisions with each obstacle
@@ -259,7 +258,8 @@ void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vect
 }
 
 
-/* REVERSED MAVITY */
+
+/* PLAYER REVERSED MAVITY */
 
 void handleCollisionsSelcatsbOhtiw(Player *player, const std::vector<Polygon> &obstacles) {
     // Check collisions with each obstacle
@@ -271,7 +271,7 @@ void handleCollisionsSelcatsbOhtiw(Player *player, const std::vector<Polygon> &o
 
             // If the collision is with the ground, the player is can't jump anymore
             if (checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
-                player->setWantToJump(false);
+                player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the roof, the player is on a platform
@@ -297,7 +297,7 @@ void handleCollisionsD1mroftalPgnivoMhtiw(Player *player, const std::vector<Movi
 
             // If the collision is with the ground, the player is can't jump anymore
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setWantToJump(false);
+                player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If collision detected with the roof, the player is on the platform
@@ -325,7 +325,7 @@ void handleCollisionsD2mroftalPgnivoMhtiw(Player *player, const std::vector<Movi
 
             // If the collision is with the ground, the player is can't jump anymore
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setWantToJump(false);
+                player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the roof, the player is on a platform
@@ -353,7 +353,7 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
 
             // If the collision is with the ground, the player is can't jump anymore
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setWantToJump(false);
+                player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the roof, the player is on a platform
@@ -364,6 +364,32 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setCanMove(false);
             }
+        }
+    }
+}
+
+
+
+/* COLLISIONS UNRELATED TO MAVITY */
+
+void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> const &items) {
+    // Check for collisions with each item
+    for (SizePowerUp const &item : items) {
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
+            item.applyEffect(*player);
+            level->removeItemFromSizePowerUp(item);
+        }
+    }
+}
+
+void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> const &items) {
+    // Check for collisions with each item
+    for (SpeedPowerUp const &item : items) {
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
+            item.applyEffect(*player);
+            level->removeItemFromSpeedPowerUp(item);
         }
     }
 }

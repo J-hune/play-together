@@ -5,7 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
-// Initialize texture pointers
+// Initialize textures pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
 SDL_Texture *Player::spriteTexture2Ptr = nullptr;
@@ -68,6 +68,10 @@ bool Player::getCanMove() const {
     return canMove;
 }
 
+float Player::getSpeed() const {
+    return speed;
+}
+
 bool Player::getWantToMoveRight() const {
     return wantToMoveRight;
 }
@@ -106,7 +110,6 @@ std::vector<Point> Player::getVertices() const {
 }
 
 std::vector<Point> Player::getVerticesNextFrame() const {
-    // Return the vertices of the player's bounding box.
     return {
             {x + moveX, y + moveY},
             {x + moveX + width, y + moveY},
@@ -212,6 +215,10 @@ void Player::setMoveY(float val) {
 
 void Player::setCanMove(bool state) {
     canMove = state;
+}
+
+void Player::setSpeed(float val) {
+    speed = val;
 }
 
 void Player::setWantToMoveRight(bool state) {
@@ -329,7 +336,7 @@ void Player::calculateXaxisMovement(double deltaTime) {
     }
 
     // Calculate movement based on speed curve and direction
-    moveX = static_cast<float>(baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX);
+    moveX = static_cast<float>(baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX * speed);
 
     // Remember previous direction
     previousDirectionX = directionX;

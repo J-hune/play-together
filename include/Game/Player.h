@@ -53,25 +53,25 @@ public:
 
     /**
      * @brief Return the x attribute.
-     * @return The value of the x attribute
+     * @return The value of the x attribute.
      */
     [[nodiscard]] float getX() const;
 
     /**
      * @brief Return the y attribute.
-     * @return The value of the y attribute
+     * @return The value of the y attribute.
      */
     [[nodiscard]] float getY() const;
 
     /**
      * @brief Return the weight attribute.
-     * @return The value of the weight attribute
+     * @return The value of the weight attribute.
      */
     [[nodiscard]] float getW() const;
 
     /**
      * @brief Return the height attribute.
-     * @return The value of the height attribute
+     * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const;
 
@@ -83,13 +83,13 @@ public:
 
     /**
      * @brief Return the moveX attribute.
-     * @return The value of the moveX attribute
+     * @return The value of the moveX attribute.
      */
     [[nodiscard]] float getMoveX() const;
 
     /**
      * @brief Return the moveY attribute.
-     * @return The value of the moveY attribute
+     * @return The value of the moveY attribute.
      */
     [[nodiscard]] float getMoveY() const;
 
@@ -101,9 +101,15 @@ public:
 
     /**
      * @brief Return the canMove attribute.
-     * @return The value of the canMove attribute
+     * @return The value of the canMove attribute.
      */
     [[nodiscard]] bool getCanMove() const;
+
+    /**
+     * @brief Return the speed attribute.
+     * @return The value of the speed attribute.
+     */
+    [[nodiscard]] float getSpeed() const;
 
     /**
      * @brief Return the wantToMoveRight attribute.
@@ -263,6 +269,12 @@ public:
     void setCanMove(bool state);
 
     /**
+     * @brief Sets the speed attribute.
+     * @param state The new value of the speed attribute.
+     */
+    void setSpeed(float val);
+
+    /**
      * @brief Sets the wantToMoveRight attribute.
      * @param state The new value of the wantToMoveRight attribute.
      */
@@ -412,6 +424,7 @@ private:
     float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right, 0 for not moving) */
     float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
     bool canMove = true; /**< If the player can move */
+    float speed = 1;
     float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
     float initialSpeedCurveX = 0.3f; /**< The initial speed curve factor used for acceleration when the player starts moving. A lower value results in slower initial acceleration. */
     float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */

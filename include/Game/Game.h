@@ -8,13 +8,9 @@
 #include <ranges>
 #include <cmath>
 #include <algorithm>
-#include "Polygon.h"
-#include "Camera.h"
-#include "Level.h"
-#include "Objects/Player.h"
+#include <SDL_ttf.h>
+#include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
-
-const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
 
 /**
  * @file Game.h
@@ -29,7 +25,7 @@ class Game {
 public:
     /** CONSTRUCTORS **/
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, const Camera &camera, Level level, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, std::vector<TTF_Font *> &fonts, bool *quitFlag);
 
 
     /** ACCESSORS **/
@@ -66,10 +62,10 @@ public:
     [[nodiscard]] Level &getLevel();
 
     /**
-     * @brief Get the save slot.
-     * @return The save slot.
+     * @brief Get the tick rate of the game.
+     * @return The tick rate of the game.
      */
-    [[nodiscard]] int getSaveSlot() const;
+    [[nodiscard]] int getTickRate() const;
 
 
     /** MODIFIERS **/
@@ -119,15 +115,20 @@ public:
     void setEnablePlatformsMovement(bool state);
 
     /**
-     * @brief Set the save slot.
-     * @param slot The save slot.
+     * @brief Set the frame rate of the game.
+     * @param frameRate The frame rate to set.
      */
-    void setSaveSlot(int slot);
+    void setFrameRate(int frameRate);
 
     /**
      * @brief Toggle the render_textures attribute, used for the application console.
      */
     void toggleRenderTextures();
+
+    /**
+     * @brief Toggle the render_camera_point attribute, used for the application console.
+     */
+    void toggleRenderFps();
 
 
     /** PUBLIC METHODS **/
@@ -139,14 +140,26 @@ public:
     void initialize(int slot=0);
 
     /**
+     * @brief Updates the game logic in a fixed time step.
+     */
+    void fixedUpdate();
+
+    /**
+     * @brief Updates the game logic.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param ratio The ratio of the movement to apply.
+     */
+    void update(double deltaTime, double ratio);
+
+    /**
      * @brief Runs the game loop.
      */
     void run();
 
     /**
-     * @brief Pauses the game loop.
+     * @brief Toggles the pause state of the game.
      */
-    void pause();
+    void togglePause();
 
     /**
      * @brief Stops the game loop and exits the game.
@@ -160,49 +173,69 @@ public:
     void addCharacter(const Player &character);
 
     /**
+     * @brief Updates the camera position based on the player's position.
+     * @param player The player to kill.
+     */
+    void killPlayer(const Player *player);
+
+    /**
      * @brief Removes a character from the game.
      * @param characterPtr Pointer to the character to remove.
      */
-    void removeCharacter(const Player* characterPtr);
+    void removeCharacter(const Player *characterPtr);
 
     /**
     * @brief Handles SDL Key up events, updating the movement variables accordingly.
     * @param keyEvent Reference to the key who was release.
     */
-    void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
+    static void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) ;
 
     /**
      * @brief Handles SDL Key down events, updating the movement variables accordingly.
+     * @param player The player to update.
      * @param keyEvent Reference to the key who was press.
      */
-    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent& keyEvent);
+    void handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &keyEvent);
 
     /**
      * @brief Saves the game state to a json file.
      */
-    void saveGame();
+    void saveGame() const;
 
 private:
     /** ATTRIBUTES **/
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    int frameRate = 60; /**< The refresh rate of the game. */
+    const int tickRate = 30; /**< The tick rate of the game. */
+    std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
     std::vector<Player> characters; /**< Collection of characters in the game. */
     std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
-    bool switchGravity = false; /**< Flag to indicate if the gravity should be switched. */
     int saveSlot = 0; /**< The save slot to use when saving the game. */
+    int effectiveFrameFps = frameRate; /**< The effective fps. */
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
+
+    // Broad phase attributes
+    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
+    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
 
     // Debug variables used for the application console
     bool render_textures = true;
     bool render_camera_point = false;
     bool render_camera_area = false;
     bool render_player_colliders = false;
+    bool render_fps = false;
     bool enable_platforms_movement = true;
-
-    GameState gameState = GameState::STOPPED; /**< The current game state. */
 
 
     /** PRIVATE METHODS **/
@@ -213,97 +246,51 @@ private:
     void handleEvents();
 
     /**
-     * @brief Applies player movement based on the current movement variables.
-     * @param player The player to whom the movement will be applied.
-     */
-    void applyPlayerMovement(Player *player) const;
-
-    /**
      * @brief Applies the movement to all players in the game.
-     * @see applyPlayerMovement() for applying movement to one player.
+     * @param ratio The ratio of the movement to apply.
      */
-    void applyAllPlayerMovement();
+    void applyPlayersMovement(double ratio);
 
     /**
-     * @brief Calculate the movement of all players in the game.
-     * @see Player::calculateMovement() for applying movement to one player.
+     * @brief Calculates the movement of all players in the game.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void calculateAllPlayerMovement();
+    void calculatePlayersMovement(double deltaTime);
 
     /**
-     * @brief Updates the camera position based on the player's position.
+     * @brief Switch mavity between normal and reversed.
      */
-    void killPlayer(const Player *player);
+    void switchMavity();
 
     /**
-     * @brief Checks for collision between the player and a polygon obstacle.
-     * @param playerVertices The vector of Point representing the vertices of the player object.
-     * @param obstacle The polygon obstacle.
-     * @return True if a collision is detected, false otherwise.
+     * @brief Handles collisions between the asteroid and obstacles.
+     * TODO: correct the collision
      */
-    static bool checkCollision(const std::vector<Point>& playerVertices, const Polygon &obstacle);
+    void handleAsteroidsCollisions();
 
     /**
-     * @brief Handles collisions between the player and obstacles.
+     * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
      */
-    void handleCollisionsWithObstacles(Player *player) const;
+    void broadPhase();
 
     /**
-     * @brief Handles collisions between the player and death zones.
+     * @brief Handles collisions between a player and every object.
+     * @param player The player to handle collisions for.
      */
-    void handleCollisionsWithDeathZone(Player *player);
+    void handleCollisionsNormalMavity(Player &player) const;
 
     /**
-     * @brief Handles collisions between the player and save zones.
+     * @brief Handles collisions between a player and every object when the mavity is reversed.
+     * @param player The player to handle collisions for.
      */
-    void handleCollisionsWithSaveZone(const Player *player);
+    void handleCollisionsReversedMavity(Player &player) const;
 
     /**
-     * @brief Handles collisions between the player and platforms.
+     * @brief Main method that handle collisions for every player according to their mavity.
+     * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
+     * TODO: add collision behavior for moving objects
      */
-    void handleCollisionsWithPlatforms(Player *player) const;
-
-    /**
-     * @brief Handles collisions between the player and other players.
-     */
-    void handleCollisionsWithOtherPlayers(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and camera borders.
-     */
-    void handleCollisionsWithCameraBorders(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and every object.
-     * @see handleCollisionsReversedMavity() for handling collisions with reversed mavity.
-     */
-    void handleCollisions();
-
-    /**
-     * @brief Handles collisions between the player and platform when mavity is reversed.
-     */
-    void handleCollisionsWithObstaclesReverseMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and platforms when the mavity is reversed.
-     */
-    void handleCollisionsWithPlatformsReversedMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and other players when mavity is reversed.
-     */
-    void handleCollisionsWithCameraBordersReversedMavity(Player *player);
-
-    /**
-     * @brief Handles collisions between the player and camera borders when mavity is reversed.
-     */
-    void handleCollisionsWithOtherPlayersReversedMavity(Player *player);
-
-    /**
-     * @brief Main method that handle every collision when the mavity is reversed.
-     * @see handleCollisions() for handling collisions with normal mavity.
-     */
-    void handleCollisionsReversedMavity();
+    void narrowPhase();
 
     /**
      * @brief Renders the game by drawing all the game textures and sprites.
@@ -315,8 +302,10 @@ private:
 
     /**
      * @brief Sends the keyboard state to the network.
+     * @param lastKeyboardStateMask The last keyboard state mask.
      */
     static void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask);
+
 };
 
 #endif //PLAY_TOGETHER_GAME_H

@@ -3,14 +3,14 @@
 
 #include <vector>
 #include <cmath>
-#include "Point.h"
+#include "../Game/Point.h"
 
 /**
  * @file Polygon.h
  * @brief Defines the Polygon class responsible for handling polygons in 2D space.
  */
 
-enum class zoneType {
+enum class ZoneType {
     COLLISION,
     ICE,
     SAND,
@@ -29,10 +29,10 @@ class Polygon {
 public:
     /** CONSTRUCTOR **/
 
-    Polygon(const std::vector<Point> &vertices, zoneType type);
+    Polygon(const std::vector<Point> &vertices, ZoneType type);
 
 
-    /** ACCESSORS **/
+/** ACCESSORS **/
 
     /**
      * @brief Get the vertices of the polygon.
@@ -44,7 +44,7 @@ public:
      * @brief Get the type of the zone.
      * @return The type of the zone.
      */
-    [[nodiscard]] zoneType getType() const;
+    [[nodiscard]] ZoneType getType() const;
 
 
     /** PUBLIC METHODS **/
@@ -60,7 +60,7 @@ private:
     /** ATTRIBUTES **/
 
     std::vector<Point> vertices; /**< The vertices of the polygon. */
-    zoneType type; /**< The type of the zone. */
+    ZoneType type; /**< The type of the zone. */
 
 
     /** PRIVATE METHODS **/

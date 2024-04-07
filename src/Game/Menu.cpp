@@ -19,7 +19,7 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(renderer), fontPtr(font), quitPtr(quit) {
+Menu::Menu(SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, bool *quit) : renderer(renderer), fonts(fonts), quitPtr(quit) {
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -37,10 +37,10 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     ButtonPosition options_button_position = {200, 180, 400, 100};
     ButtonPosition credits_button_position = {200, 300, 400, 100};
     ButtonPosition quit_button_position = {200, 420, 400, 100};
-    auto play_button = Button(renderer, font, play_button_position, 0, "Jouer", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color, text_color,10);
-    auto options_button = Button(renderer, font, options_button_position, 0, "Options", ButtonAction::NONE, normal_color, hover_color,text_color, 10);
-    auto credits_button = Button(renderer, font, credits_button_position, 0, "Credits", ButtonAction::NONE, normal_color, hover_color,text_color, 10);
-    auto quit_button = Button(renderer, font, quit_button_position, 0, "Quitter", ButtonAction::QUIT, quit_color, quit_hover_color,quit_text_color, 10);
+    auto play_button = Button(renderer, fonts[1], play_button_position, 0, "Jouer", ButtonAction::NAVIGATE_TO_MENU_PLAY, normal_color, hover_color, text_color, 10);
+    auto options_button = Button(renderer, fonts[1], options_button_position, 0, "Options", ButtonAction::NONE, normal_color, hover_color,text_color, 10);
+    auto credits_button = Button(renderer, fonts[1], credits_button_position, 0, "Credits", ButtonAction::NONE, normal_color, hover_color,text_color, 10);
+    auto quit_button = Button(renderer, fonts[1], quit_button_position, 0, "Quitter", ButtonAction::QUIT, quit_color, quit_hover_color,quit_text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(play_button);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(options_button);
     buttons[{GameState::STOPPED, MenuAction::MAIN}].push_back(credits_button);
@@ -52,10 +52,10 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     ButtonPosition join_game_button_position = {200, 180, 400, 100};
     ButtonPosition start_new_game_button_position = {200, 300, 400, 100};
     ButtonPosition main_menu_button_position = {200, 420, 400, 100};
-    auto host_game_button = Button(renderer, font, host_game_button_position, 1, "Host Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color,hover_color, text_color, 10);
-    auto join_game_button = Button(renderer, font, join_game_button_position, 0, "Join Hosted Game", ButtonAction::JOIN_HOSTED_GAME, normal_color,hover_color, text_color, 10);
-    auto start_new_game_button = Button(renderer, font, start_new_game_button_position, 0, "Start Local Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color, hover_color,text_color, 10);
-    auto main_menu_button = Button(renderer, font, main_menu_button_position, 0, "Main Menu",  ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
+    auto host_game_button = Button(renderer, fonts[1], host_game_button_position, 1, "Host Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color,hover_color, text_color, 10);
+    auto join_game_button = Button(renderer, fonts[1], join_game_button_position, 0, "Join Hosted Game", ButtonAction::JOIN_HOSTED_GAME, normal_color,hover_color, text_color, 10);
+    auto start_new_game_button = Button(renderer, fonts[1], start_new_game_button_position, 0, "Start Local Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color, hover_color,text_color, 10);
+    auto main_menu_button = Button(renderer, fonts[1], main_menu_button_position, 0, "Main Menu",  ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(host_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(join_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(start_new_game_button);
@@ -66,9 +66,9 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     ButtonPosition resume_button_position = {200, 100, 400, 100};
     ButtonPosition save_button_position = {200, 220, 400, 100};
     ButtonPosition stop_button_position = {200, 340, 400, 100};
-    auto resume_button = Button(renderer, font, resume_button_position, 0, "Resume", ButtonAction::RESUME, normal_color, hover_color,text_color, 10);
-    auto save_button = Button(renderer, font, save_button_position, 0, "Save the Game", ButtonAction::SAVE, normal_color, hover_color,text_color, 10);
-    auto stop_button = Button(renderer, font, stop_button_position, 0, "Stop the Game", ButtonAction::STOP, normal_color, hover_color,text_color, 10);
+    auto resume_button = Button(renderer, fonts[1], resume_button_position, 0, "Resume", ButtonAction::RESUME, normal_color, hover_color,text_color, 10);
+    auto save_button = Button(renderer, fonts[1], save_button_position, 0, "Save the Game", ButtonAction::SAVE, normal_color, hover_color,text_color, 10);
+    auto stop_button = Button(renderer, fonts[1], stop_button_position, 0, "Stop the Game", ButtonAction::STOP, normal_color, hover_color,text_color, 10);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(resume_button);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(save_button);
     buttons[{GameState::PAUSED, MenuAction::MAIN}].push_back(stop_button);
@@ -81,13 +81,13 @@ Menu::Menu(SDL_Renderer *renderer, TTF_Font *font, bool *quit) : renderer(render
     ButtonPosition save_slot3_button_position = {200, 280, 300, 80};
     ButtonPosition remove_slot3_button_position = {510, 280, 90, 80};
     ButtonPosition main_menu_button_position4 = {200, 400, 400, 100};
-    auto save_slot1_button = Button(renderer, font, save_slot1_button_position, 1, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
-    auto remove_slot1_button = Button(renderer, font, remove_slot1_button_position, 1, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
-    auto save_slot2_button = Button(renderer, font, save_slot2_button_position, 2, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
-    auto remove_slot2_button = Button(renderer, font, remove_slot2_button_position, 2, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
-    auto save_slot3_button = Button(renderer, font, save_slot3_button_position, 3, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
-    auto remove_slot3_button = Button(renderer, font, remove_slot3_button_position, 3, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
-    auto main_menu_button4 = Button(renderer, font, main_menu_button_position4, 0, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
+    auto save_slot1_button = Button(renderer, fonts[1], save_slot1_button_position, 1, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
+    auto remove_slot1_button = Button(renderer, fonts[1], remove_slot1_button_position, 1, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
+    auto save_slot2_button = Button(renderer, fonts[1], save_slot2_button_position, 2, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
+    auto remove_slot2_button = Button(renderer, fonts[1], remove_slot2_button_position, 2, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
+    auto save_slot3_button = Button(renderer, fonts[1], save_slot3_button_position, 3, "Empty Slot", ButtonAction::VIEW_GAME, normal_color, hover_color,text_color, 10);
+    auto remove_slot3_button = Button(renderer, fonts[1], remove_slot3_button_position, 3, "R", ButtonAction::DELETE_SAVE, disabled_color, disabled_hover_color,text_color, 10);
+    auto main_menu_button4 = Button(renderer, fonts[1], main_menu_button_position4, 0, "Main Menu", ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(save_slot1_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(remove_slot1_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(save_slot2_button);
@@ -209,12 +209,12 @@ void Menu::handleStartButton(Button &button, int slot) {
     setMenuAction(MenuAction::MAIN);
 }
 
-void Menu::handleResumeButton(Button &button) {
-    displayMenu = false;
+void Menu::handleResumeButton(Button &button) const {
     button.reset();
+    Mediator::togglePause();
 }
 
-void Menu::handleSaveButton(Button &button) {
+void Menu::handleSaveButton(Button &button) const {
     button.reset();
     Mediator::save();
 }
@@ -232,21 +232,20 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
     updateSaveSlots();
 
     if (button.getValue() == 1) {
-        gameMode = 1;
         Mediator::stopClients();
 
         try {
             Mediator::startServers();
-        } catch (const TCPError& e) {
+            setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
+        } catch (const TCPError &e) {
             std::cerr << "(TCPError) " << e.what() << std::endl;
-        } catch (const UDPError& e) {
+        } catch (const UDPError &e) {
             std::cerr << "(UDPError) " << e.what() << std::endl;
         }
     } else {
-        gameMode = 0;
+        setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
     }
 
-    setMenuAction(MenuAction::CREATE_OR_LOAD_GAME);
     button.reset();
 }
 
@@ -257,9 +256,9 @@ void Menu::handleJoinHostedGameButton(Button &button) {
         Mediator::startClients();
         displayMenu = false;
         setMenuAction(MenuAction::MAIN);
-    } catch (const TCPError& e) {
+    } catch (const TCPError &e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
-    } catch (const UDPError& e) {
+    } catch (const UDPError &e) {
         std::cerr << "(UDPError) " << e.what() << std::endl;
     }
 

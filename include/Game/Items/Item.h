@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_ITEM_H
 
 #include "../Player.h"
+#include "../../Sounds/SoundEffect.h"
 
 /**
  * @file Item.h
@@ -27,6 +28,8 @@ private :
     float y; /**< The y-coordinate of the item's position. */
     float width; /**< The width of the item. */
     float height; /**< The height of the item. */
+
+    SoundEffect soundEffect;
 
 public:
 

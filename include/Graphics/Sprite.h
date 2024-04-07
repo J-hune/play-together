@@ -2,7 +2,6 @@
 #define PLAY_TOGETHER_SPRITE_H
 
 #include <SDL.h>
-#include <string>
 #include "Animation.h"
 
 /**

@@ -7,7 +7,7 @@
 
 /* CONSTRUCTORS */
 
-Item ::Item(float X, float Y, float height, float width) : x(X), y(Y), width(width), height(height) {}
+Item::Item(float X, float Y, float height, float width) : x(X), y(Y), width(width), height(height) {}
 
 /* ACCESSORS */
 

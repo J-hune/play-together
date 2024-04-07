@@ -87,8 +87,8 @@ void RenderManager::toggleRenderFps() {
 
 void RenderManager::render() {
     Level const &level = gamePtr->getLevel();
-    PlayerManager playerManager = gamePtr->getPlayerManager();
-    std::vector<Player> const &players = playerManager.getAlivePlayers();
+    PlayerManager &playerManager = gamePtr->getPlayerManager();
+    std::vector<Player> &players = playerManager.getAlivePlayers();
 
     Point cameraPoint {
             gamePtr->getCamera()->getX(),
@@ -101,7 +101,7 @@ void RenderManager::render() {
     // Render textures
     if (render_textures) {
         // Draw the characters
-        for (Player player : players) {
+        for (Player &player : players) {
             player.render(renderer, cameraPoint);
         }
 

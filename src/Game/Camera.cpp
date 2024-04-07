@@ -28,6 +28,10 @@ float Camera::getH() const {
     return h;
 }
 
+SDL_FRect Camera::getBoundingBox() const {
+    return {x, y, w, h};
+}
+
 SDL_FRect Camera::getBroadPhaseArea() const {
     return {x - 500, y - 500, w + 1000, h + 1000};
 }

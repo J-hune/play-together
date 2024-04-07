@@ -7,7 +7,7 @@
 
 constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
-
+const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
 
 /**
  * @file Camera.h
@@ -50,6 +50,12 @@ public:
      * @return The value of the H attribute.
      */
     [[nodiscard]] float getH() const;
+
+    /**
+     * @brief Return the bounding box of the camera.
+     * @return A SDL_FRect representing the bounding box.
+     */
+    [[nodiscard]] SDL_FRect getBoundingBox() const;
 
     /**
      * @brief Gets the broad phase area (bounding box).

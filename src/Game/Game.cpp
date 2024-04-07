@@ -496,8 +496,11 @@ void Game::narrowPhase() {
         handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
-        // Handle collisions with death zones
-        if (handleCollisionsWithDeathZones(character, deathZones)) {
+
+        // Handle collisions with death zones and camera borders
+        if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
+            ||handleCollisionsWithDeathZones(character, deathZones))
+        {
             killPlayer(&character);
         }
     }

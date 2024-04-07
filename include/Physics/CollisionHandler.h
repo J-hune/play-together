@@ -49,14 +49,15 @@ void handleCollisionsWithPlayers(Player *player, const std::vector<Player> &play
 
 /**
  * @brief Handles collisions between the player and camera borders.
- * TODO: correct this method to work with fps limitation
+ * @return True if the player dies, false otherwise.
  */
-void handleCollisionsWithCameraBorders(Player *player, std::vector<Polygon> &deathZones);
+bool handleCollisionsWithCameraBorders(SDL_FRect player, SDL_FRect camera);
 
 /**
  * @brief Handles collisions between the player and death zones.
  * @param player The player object.
  * @param deathZones Vector of polygons representing death zones.
+ * @return True if the player dies, false otherwise.
  */
 bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &deathZones);
 

@@ -170,69 +170,14 @@ void handleCollisionsWithPlayers(Player *player, const std::vector<Player> &play
 
         }
     }
+}*/
+
+bool handleCollisionsWithCameraBorders(const SDL_FRect player, const SDL_FRect camera) {
+    return player.x < camera.x - DISTANCE_OUT_MAP_BEFORE_DEATH
+            || player.x + player.w > camera.x + camera.w + DISTANCE_OUT_MAP_BEFORE_DEATH
+            || player.y < camera.y - DISTANCE_OUT_MAP_BEFORE_DEATH
+            || player.y > camera.y + camera.h + DISTANCE_OUT_MAP_BEFORE_DEATH;
 }
-
-void handleCollisionsWithCameraBorders(Player *player) {
-    // Get others players in a vector
-    std::vector<Player> otherCharacters;
-    if (*player != initialPlayer) otherCharacters.push_back(initialPlayer);
-    for (const Player &character : characters) {
-        if (*player != character) otherCharacters.push_back(character);
-    }
-
-    // Check for collisions with down camera borders
-    if (player->getY() > camera.getY() + camera.getH() - player->getH() + DISTANCE_OUT_MAP_BEFORE_DEATH){
-        printf("WASTED\n");
-
-        //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
-        player->setX(50);
-        player->setY(50);
-    }
-
-    // Check for collisions with up camera borders
-    if (player->getY() < camera.getY() - DISTANCE_OUT_MAP_BEFORE_DEATH){
-        printf("WASTED\n");
-
-        //Temporarily resets the player to x=50 and y=50 being the player's spawn points.
-        player->setX(camera.getX());
-        player->setY(camera.getY());
-    }
-
-
-    // Check for collisions with right camera borders
-    if (player->getX() > camera.getX() + camera.getW() - player->getW()) {
-
-        // Divide the velocity of the player
-        player->setMoveX(player->getMoveX() / 5);
-
-        camera.setX(camera.getX() + player->getMoveX());
-
-        // Check if others players touch the left camera borders
-        for (Player &character : otherCharacters){
-            if(character.getX() < camera.getX()){
-                character.setMoveX(player->getMoveX());
-            }
-        }
-
-    }
-        // Check for collisions with left camera borders
-    else if (player->getX() < camera.getX()) {
-
-        // Divide the velocity of the player
-        player->setMoveX(player->getMoveX() / 5);
-
-        camera.setX(camera.getX() + player->getMoveX());
-
-        // Check if others players touch the right camera borders
-        for (Player &character: otherCharacters) {
-            if (character.getX() > camera.getX() + camera.getW() - character.getW()) {
-                character.setX(player->getMoveX());
-            }
-        }
-    }
-}
-
-*/
 
 bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &deathZones) {
     size_t i = 0;

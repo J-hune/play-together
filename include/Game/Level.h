@@ -13,6 +13,7 @@
 #include "Platforms/SwitchingPlatform.h"
 #include "Items/SizePowerUp.h"
 #include "Items/SpeedPowerUp.h"
+#include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
 
 // Define constants for directories and file names
@@ -113,10 +114,10 @@ public:
     void setLastCheckpoint(short checkpoint);
 
     /**
-     * @brief Remove an asteroid from asteroids attribute.
-     * @param item The asteroid to remove.
+     * @brief Set the asteroids attribute.
+     * @param value Represents the asteroids attribute.
      */
-    void removeAsteroidFromAsteroids(int index);
+    void setAsteroids(const std::vector<Asteroid> &value);
 
     /**
      * @brief Remove an item from sizePowerUp attribute.
@@ -149,7 +150,13 @@ public:
      * @brief Generates a specified number of asteroids in the game.
      * @param nbAsteroid The number of asteroids must have in the game.
      */
-    void generateAsteroid(int nbAsteroid, Point camera);
+    void generateAsteroid(int nbAsteroid, Point camera, size_t seed);
+
+    /**
+     * @brief Add an asteroid received from network to the game.
+     * @param asteroid The asteroid to add.
+     */
+    void addAsteroid(Asteroid const &asteroid);
 
     /**
      * @brief Renders the collisions by drawing obstacles.

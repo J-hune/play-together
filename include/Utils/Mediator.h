@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include "../Game/Player.h"
 #include "../../dependencies/json.hpp"
+#include "../Game/Events/Asteroid.h"
 
 // Forward declarations
 class Game;
@@ -66,16 +67,17 @@ public:
     static void stopServers();
     static void stopClients();
     static void sendPlayerUpdate(uint16_t keyboardStateMask);
+    static void sendAsteroidCreation(Asteroid const &asteroid);
 
     // Menu methods
     static void handleServerDisconnect();
     static void renderMenu();
     static void setDisplayMenu(bool displayMenu);
-    static void handleEventMenu(SDL_Event &event);
+    static void handleEventMenu(const SDL_Event &event);
 
     // Game methods
     static GameState getGameState();
-    static void initializeGame(int slot);
+    static void initializeHostedGame(int slot);
     static void togglePause();
     static void stop();
     static void save();

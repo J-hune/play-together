@@ -70,28 +70,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         maxFrameRate = std::max(maxFrameRate, displayMode.refresh_rate);
     }
 
-    // Load fonts
-    std::vector<TTF_Font*> fonts;
-    TTF_Font *font16 = TTF_OpenFont("assets/font/arial.ttf", 16);
-    TTF_Font *font24 = TTF_OpenFont("assets/font/arial.ttf", 24);
-    fonts.push_back(font16);
-    fonts.push_back(font24);
-    for (TTF_Font const* font : fonts) {
-        if (font == nullptr) {
-            std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
-            return 1;
-        }
-    }
-
     // Initialize game objects
     bool quit = false;
-    if (!Player::loadTextures(*renderer)) {
-        std::cerr << "Error loading player textures" << std::endl;
-        return 1;
-    }
 
-    Game game(window, renderer, maxFrameRate, fonts, &quit);
-    Menu menu(renderer, fonts, &quit);
+    Game game(window, renderer, maxFrameRate, &quit);
+    Menu menu(renderer, &quit);
     NetworkManager networkManager;
     ApplicationConsole console(&game);
 
@@ -148,7 +131,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     networkManager.stopClients();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    for (TTF_Font* font : fonts) {
+    for (TTF_Font* font : RenderManager::getFonts()) {
         TTF_CloseFont(font);
     }
     TTF_Quit();

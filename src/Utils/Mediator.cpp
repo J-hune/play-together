@@ -67,6 +67,9 @@ void Mediator::sendPlayerUpdate(uint16_t keyboardStateMask) {
     Mediator::networkManagerPtr->sendPlayerUpdate(keyboardStateMask);
 }
 
+void Mediator::sendAsteroidCreation(Asteroid const &asteroid) {
+    Mediator::networkManagerPtr->sendAsteroidCreation(asteroid);
+}
 
 /** MENU METHODS **/
 
@@ -82,7 +85,7 @@ void Mediator::setDisplayMenu(bool displayMenu) {
     Mediator::menuPtr->setDisplayMenu(displayMenu);
 }
 
-void Mediator::handleEventMenu(SDL_Event &event) {
+void Mediator::handleEventMenu(const SDL_Event &event) {
     Mediator::menuPtr->handleEvent(event);
 }
 
@@ -93,8 +96,8 @@ GameState Mediator::getGameState() {
     return gamePtr->getGameState();
 }
 
-void Mediator::initializeGame(int slot) {
-    gamePtr->initialize(slot);
+void Mediator::initializeHostedGame(int slot) {
+    gamePtr->initializeHostedGame(slot);
 }
 
 void Mediator::togglePause() {
@@ -106,16 +109,17 @@ void Mediator::stop() {
 }
 
 void Mediator::save() {
-    gamePtr->saveGame();
+    gamePtr->getSaveManager().saveGameState();
 }
 
 void Mediator::getGameProperties(nlohmann::json &properties) {
-    properties["mapName"] = gamePtr->getLevel().getMapName();
-    properties["lastCheckpoint"] = gamePtr->getLevel().getLastCheckpoint();
+    Level level = gamePtr->getLevel();
+    properties["mapName"] = level.getMapName();
+    properties["lastCheckpoint"] = level.getLastCheckpoint();
 }
 
 std::vector<Player> Mediator::getCharacters() {
-    return gamePtr->getCharacters();
+    return gamePtr->getPlayerManager().getAlivePlayers();
 }
 
 
@@ -123,7 +127,7 @@ std::vector<Player> Mediator::getCharacters() {
 
 int Mediator::handleClientConnect(int playerID) {
     // Check if the player ID is not already taken by another character.
-    for (const auto &character : gamePtr->getCharacters()) {
+    for (const auto &character : gamePtr->getPlayerManager().getAlivePlayers()) {
         if (character.getPlayerID() == playerID) {
             return -1; // ID already taken.
         }
@@ -132,20 +136,22 @@ int Mediator::handleClientConnect(int playerID) {
     // If the ID is valid and not taken, create a new character for the new player.
     // Get the player's position id based on his position in the players list
 
-    size_t spawnIndex = gamePtr->getCharacters().size();
+    size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
     Level level = gamePtr->getLevel();
     Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
     Player newPlayer(playerID, spawnPoint,48, 36);
-    gamePtr->addCharacter(newPlayer);
+    gamePtr->getPlayerManager().addPlayer(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
     return 0;
 }
 
 int Mediator::handleClientDisconnect(int playerID) {
+    PlayerManager playerManager = gamePtr->getPlayerManager();
+
     // Find the character with the given player ID and remove it from the game.
-    Player const *characterPtr = gamePtr->findPlayerById(playerID);
-    gamePtr->removeCharacter(characterPtr);
+    Player *playerPtr = playerManager.findPlayerById(playerID);
+    gamePtr->getPlayerManager().removePlayer(*playerPtr);
 
     std::cout << "Mediator: Player " << playerID << " disconnected" << std::endl;
     return 0;
@@ -157,79 +163,92 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
     using json = nlohmann::json;
     try {
 
-    // Parse the received message as JSON
-    json message = json::parse(rawMessage);
+        // Parse the received message as JSON
+        json message = json::parse(rawMessage);
 
-    // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
-    if (networkManagerPtr->isServerRunning()) {
-        message["playerID"] = playerID;
-        Mediator::networkManagerPtr->broadcastMessage(protocol, message.dump(), playerID);
-    }
+        // If the application is a server, broadcast the message to all clients (except the sender) with the protocol used by the sender
+        if (networkManagerPtr->isServerRunning()) {
+            message["playerID"] = playerID;
+            Mediator::networkManagerPtr->broadcastMessage(protocol, message.dump(), playerID);
+        }
 
-    // Check message type and handle it accordingly
-    std::string messageType = message["messageType"];
-    std::cout << "Mediator: Handling " << messageType << " message" << std::endl;
+        // Check message type and handle it accordingly
+        std::string messageType = message["messageType"];
+        std::cout << "Mediator: Handling " << messageType << " message" << std::endl;
 
-    if (messageType == "playerUpdate") {
-        // Get the player ID from the message if it exists, otherwise use the playerID parameter
-        int playerSocketID = (message.contains("playerID") ? (int)message["playerID"] : playerID);
+        if (messageType == "playerUpdate") {
+            // Get the player ID from the message if it exists, otherwise use the playerID parameter
+            int playerSocketID = (message.contains("playerID") ? (int)message["playerID"] : playerID);
 
-        // Decode the keyboard state mask
-        uint16_t keyboardStateMask = message["keyboardStateMask"];
-        std::array<int, SDL_NUM_SCANCODES> keyStates = {0};
-        decodeKeyboardStateMask(keyboardStateMask, keyStates);
+            // Decode the keyboard state mask
+            uint16_t keyboardStateMask = message["keyboardStateMask"];
+            std::array<int, SDL_NUM_SCANCODES> keyStates = {0};
+            decodeKeyboardStateMask(keyboardStateMask, keyStates);
 
-        Player *playerPtr = gamePtr->findPlayerById(playerSocketID);
-        handleKeyboardState(playerPtr, keyStates);
-    }
+            // Find the player with the given player ID and handle the keyboard state only if the player is alive
+            Player *playerPtr = gamePtr->getPlayerManager().findPlayerById(playerSocketID);
+            if (playerPtr != nullptr) handleKeyboardState(playerPtr, keyStates);
+        }
 
-    else if (messageType == "playerConnect") {
-        int playerSocketID = message["playerID"];
+        else if (messageType == "playerConnect") {
+            int playerSocketID = message["playerID"];
 
-        // Get the player's spawn point based on his position in the players list
-        size_t spawnIndex = gamePtr->getCharacters().size();
-        Level level = gamePtr->getLevel();
-        Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
-
-        gamePtr->addCharacter(Player(playerSocketID, spawnPoint, 48, 36));
-        std::cout << "Mediator: Player " << playerSocketID << " added to the game" << std::endl;
-    }
-
-    else if (messageType == "playerDisconnect") {
-        int playerSocketID = message["playerID"];
-        gamePtr->removeCharacter(gamePtr->findPlayerById(playerSocketID));
-        std::cout << "Mediator: Player " << playerSocketID << " removed from the game" << std::endl;
-    }
-
-    else if (messageType == "gameProperties") {
-        std::cout << "Mediator: Game properties received: " << message << std::endl;
-        gamePtr->setLevel(message["mapName"]);
-        gamePtr->getLevel().setLastCheckpoint(message["lastCheckpoint"]);
-    }
-
-    else if (messageType == "playerList") {
-        std::cout << "Mediator: Players list received: " << message["players"] << std::endl;
-
-        json playersArray = message["players"];
-        size_t spawnIndex = gamePtr->getCharacters().size();
-        for (const auto &player : playersArray) {
-            int receivedPlayerID = player["playerID"];
-
+            // Get the player's spawn point based on his position in the players list
+            size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
             Level level = gamePtr->getLevel();
             Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
-            Player newPlayer(receivedPlayerID, spawnPoint, 48, 36);
-            if (player.contains("x")) newPlayer.setX(player["x"]);
-            if (player.contains("y")) newPlayer.setY(player["y"]);
-            if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
-            if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
 
-            if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
-            else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
-
-            gamePtr->addCharacter(newPlayer);
-            spawnIndex++;
+            Player newPlayer(playerSocketID, spawnPoint, 48, 36);
+            gamePtr->getPlayerManager().addPlayer(newPlayer);
+            std::cout << "Mediator: Player " << playerSocketID << " added to the game" << std::endl;
         }
-    }
+
+        else if (messageType == "playerDisconnect") {
+            int playerSocketID = message["playerID"];
+            PlayerManager playerManager = gamePtr->getPlayerManager();
+
+            Player *playerPtr = playerManager.findPlayerById(playerSocketID);
+            playerManager.removePlayer(*playerPtr);
+            std::cout << "Mediator: Player " << playerSocketID << " removed from the game" << std::endl;
+        }
+
+        else if (messageType == "gameProperties") {
+            std::cout << "Mediator: Game properties received: " << message << std::endl;
+            gamePtr->setLevel(message["mapName"]);
+            gamePtr->getLevel().setLastCheckpoint(message["lastCheckpoint"]);
+        }
+
+        else if (messageType == "playerList") {
+            std::cout << "Mediator: Players list received: " << message["players"] << std::endl;
+
+            json playersArray = message["players"];
+            size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
+            for (const auto &player : playersArray) {
+                int receivedPlayerID = player["playerID"];
+
+                Level const &level = gamePtr->getLevel();
+                Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
+                Player newPlayer(receivedPlayerID, spawnPoint, 48, 36);
+                if (player.contains("x")) newPlayer.setX(player["x"]);
+                if (player.contains("y")) newPlayer.setY(player["y"]);
+                if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
+                if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
+
+                if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
+                else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
+
+                gamePtr->getPlayerManager().addPlayer(newPlayer);
+                spawnIndex++;
+            }
+        }
+
+        else if (messageType == "asteroidCreation") {
+            std::cout << "Mediator: Asteroid creation message received: " << message << std::endl;
+
+            // Create a new asteroid with the received properties
+            Asteroid asteroid(message["x"], message["y"], message["speed"], message["h"], message["w"], message["angle"]);
+            gamePtr->getLevel().addAsteroid(asteroid);
+        }
 
     } catch (const json::parse_error &e) {
         std::cerr << "Mediator: Error parsing message: " << e.what() << std::endl;
@@ -265,6 +284,7 @@ void Mediator::decodeKeyboardStateMask(uint16_t mask, std::array<int, SDL_NUM_SC
 void Mediator::handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANCODES> &keyStates) {
     int playerID = player->getPlayerID();
     SDL_KeyboardEvent keyEvent;
+    InputManager inputManager = gamePtr->getInputManager();
 
     // Iterate through the keyStates (using the keyMapping array to reduce the number of iterations)
     for (int scancode : keyMapping) {
@@ -273,13 +293,13 @@ void Mediator::handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANC
 
         // If the key is pressed and was not pressed before, handle the key down event
         if (keyStates[scancode] == 1 && !playersKeyStates[playerID][keyEvent.keysym.scancode]) {
-            gamePtr->handleKeyDownEvent(player, keyEvent);
+            inputManager.handleKeyDownEvent(player, keyEvent);
             playersKeyStates[playerID][keyEvent.keysym.scancode] = true;
         }
 
         // If the key is released and was pressed before, handle the key up event
         else if (keyStates[scancode] == 0 && playersKeyStates[playerID][keyEvent.keysym.scancode]) {
-            Game::handleKeyUpEvent(player, keyEvent);
+            inputManager.handleKeyUpEvent(player, keyEvent);
             playersKeyStates[playerID][keyEvent.keysym.scancode] = false;
         }
     }

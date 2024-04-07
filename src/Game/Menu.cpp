@@ -19,7 +19,9 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, std::vector<TTF_Font *> &fonts, bool *quit) : renderer(renderer), fonts(fonts), quitPtr(quit) {
+Menu::Menu(SDL_Renderer *renderer, bool *quit) : renderer(renderer), quitPtr(quit) {
+    std::vector<TTF_Font *> fonts = RenderManager::getFonts();
+
     // Create menu buttons
     SDL_Color normal_color = {100, 125, 160, 255};
     SDL_Color hover_color = {100, 105, 150, 255};
@@ -204,7 +206,7 @@ void Menu::handleButtonAction(Button &button) {
 
 void Menu::handleStartButton(Button &button, int slot) {
     button.reset();
-    Mediator::initializeGame(slot);
+    Mediator::initializeHostedGame(slot);
     displayMenu = false;
     setMenuAction(MenuAction::MAIN);
 }

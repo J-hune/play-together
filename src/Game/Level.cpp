@@ -81,8 +81,8 @@ void Level::setLastCheckpoint(short checkpoint) {
     lastCheckpoint = checkpoint;
 }
 
-void Level::removeAsteroidFromAsteroids(int index) {
-    asteroids.erase(asteroids.begin() + index);
+void Level::setAsteroids(std::vector<Asteroid> const &value) {
+    this->asteroids = value;
 }
 
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
@@ -106,12 +106,23 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
 
 /** METHODS **/
 
-void Level::generateAsteroid(int nbAsteroid, Point camera) {
+void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
     // Loop to generate asteroids until the desired number is reached
-    for (int i = asteroids.size(); i < nbAsteroid; i++){
+    for (auto i = static_cast<int>(asteroids.size()); i < nbAsteroid; i++){
         // Add a new asteroid to the asteroids vector with coordinates based on the camera position
-        asteroids.emplace_back(camera.x, camera.y);
+        Asteroid newAsteroid(camera.x, camera.y, seed);
+        asteroids.emplace_back(newAsteroid);
+
+        // Send the asteroid throw the network
+        if (Mediator::isServerRunning()) {
+            Mediator::sendAsteroidCreation(newAsteroid);
+        }
     }
+}
+
+void Level::addAsteroid(Asteroid const &asteroid) {
+    std::cout << "Level: Adding asteroid to the game. " << asteroids.size() << std::endl;
+    asteroids.emplace_back(asteroid);
 }
 
 void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {

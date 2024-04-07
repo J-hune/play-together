@@ -90,6 +90,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
+    Asteroid::loadTextures(*renderer);
+    Asteroid::generateArrayAngles(200);
+    Asteroid::generateArrayPositions(200, 0, camera.getW());
+
     Game game(window, renderer, maxFrameRate, fonts, &quit);
     Menu menu(renderer, fonts, &quit);
     NetworkManager networkManager;

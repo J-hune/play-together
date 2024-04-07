@@ -11,6 +11,7 @@
 #include <SDL_ttf.h>
 #include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
+#include "Objects/Asteroid.h"
 
 /**
  * @file Game.h
@@ -212,6 +213,7 @@ private:
     std::vector<TTF_Font *> &fonts; /**< TTF fonts for rendering text. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
+    std::vector<Asteroid> asteroids;
     std::vector<Player> characters; /**< Collection of characters in the game. */
     std::vector<Player> deadCharacters; /**< Collection of dead characters in the game. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
@@ -246,6 +248,12 @@ private:
     void handleEvents();
 
     /**
+     * @brief Applies the movement to all asteroid in the game.
+     * @see applyAsteroidMovement() for applying movement to one asteroid.
+     */
+    void applyAllAsteroidMovement();
+
+    /**
      * @brief Applies the movement to all players in the game.
      * @param ratio The ratio of the movement to apply.
      */
@@ -261,6 +269,18 @@ private:
      * @brief Switch mavity between normal and reversed.
      */
     void switchMavity();
+
+    /**
+     * @brief Handles collisions between the asteroid and obstacles.
+     */
+    void handleCollisionsWithAsteroid();
+
+
+    /**
+     * @brief Generates a specified number of asteroids in the game.
+     * @param nbAsteroid The number of asteroids must have in the game.
+     */
+    void generateAsteroid(int nbAsteroid);
 
     /**
      * @brief Broad phase collision detection, detects objects that could potentially collide with each other.

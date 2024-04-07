@@ -319,6 +319,13 @@ void Game::calculatePlayersMovement(double deltaTime) {
     }
 }
 
+void Game::applyAllAsteroidMovement() {
+    // Apply movement to all players
+    for (Asteroid &asteroid: asteroids) {
+        asteroid.applyAsteroidMovement();
+    }
+}
+
 void Game::applyPlayersMovement(double ratio) {
     // Apply movement for all players
     for (Player &character: characters) {
@@ -339,6 +346,64 @@ void Game::switchMavity() {
         character.getSprite()->toggleFlipVertical();
         character.toggleMavity();
     }
+}
+
+void Game::handleCollisionsWithAsteroid() {
+    bool alreadyExplode = false;
+    int asteroidIndex = -1;
+
+    for (int i = 0; i < static_cast<int>(asteroids.size()); ++i) {
+        const Asteroid &asteroid = asteroids[i];
+        alreadyExplode = false;
+
+        if (!alreadyExplode) {
+            for (Player character : characters) {
+                if (!alreadyExplode && checkAABBCollision(character.getBoundingBox(), asteroid.getBoundingBox())) {
+                    asteroidIndex = i;
+                    alreadyExplode = true;
+                    killPlayer(&character);
+                }
+            }
+        }
+
+        if (!alreadyExplode) {
+            for (const Polygon &obstacle : level.getZones(zoneType::COLLISION)) {
+                if (!alreadyExplode && checkCollision(asteroid.getVertices(), obstacle)) {
+                    asteroidIndex = i;
+                    alreadyExplode = true;
+                }
+            }
+        }
+
+        if (!alreadyExplode) {
+            for (const Polygon &obstacle : level.getZones(zoneType::SAVE)) {
+                if (!alreadyExplode && checkCollision(asteroid.getVertices(), obstacle)) {
+                    asteroidIndex = i;
+                    alreadyExplode = true;
+                }
+            }
+        }
+
+        if (!alreadyExplode && asteroid.getY() > camera.getY() + camera.getH() - asteroid.getH()) {
+            asteroidIndex = i;
+            alreadyExplode = true;
+        }
+
+        if (alreadyExplode) {
+            asteroids[asteroidIndex].explosion();
+            asteroids.erase(asteroids.begin() + asteroidIndex);
+
+        }
+    }
+}
+
+void Game::generateAsteroid(int nbAsteroid){
+    // Loop to generate asteroids until the desired number is reached
+    for (int i=asteroids.size(); i<nbAsteroid;i++){
+        // Add a new asteroid to the asteroids vector with coordinates based on the camera position
+        asteroids.emplace_back(camera.getX(),camera.getY());
+    }
+
 }
 
 void Game::broadPhase() {
@@ -440,6 +505,9 @@ void Game::narrowPhase() {
         character.setCanMove(true);
         character.setIsOnPlatform(false);
 
+        // Check collisions with asteroids
+        handleCollisionsWithAsteroid();
+
         // Handle collisions according to player's mavity
         if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
         else handleCollisionsReversedMavity(character);
@@ -499,6 +567,11 @@ void Game::render() {
     }
 
 
+    // Render the asteroid
+    for (Asteroid asteroid: asteroids) {
+        asteroid.render(renderer, cam);
+    }
+
     // DEBUG DRAWING OF APPLICATION CONSOLE :
 
     // Draw the camera point if enabled
@@ -536,6 +609,9 @@ void Game::fixedUpdate() {
 
 void Game::update(double deltaTime, double ratio) {
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
+
+    generateAsteroid(1);
+    applyAllAsteroidMovement();
 
     // Apply players movement directly with the calculated ratio
     applyPlayersMovement(ratio);

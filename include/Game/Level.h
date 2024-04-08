@@ -174,7 +174,21 @@ public:
     void renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
-     * @brief Renders the game by drawing the player and obstacles.
+     * @brief Renders asteroids by drawing sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroids(SDL_Renderer *renderer, Point camera);
+
+    /**
+     * @brief Renders asteroids by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the platforms by drawing collisions boxes.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */

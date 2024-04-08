@@ -161,6 +161,18 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
+void Level::renderAsteroids(SDL_Renderer *renderer, Point camera) {
+    for (Asteroid &asteroid : asteroids) {
+        asteroid.render(renderer, camera);
+    }
+}
+
+void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
+    for (Asteroid const &asteroid : asteroids) {
+        asteroid.renderDebug(renderer, camera);
+    }
+}
+
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);

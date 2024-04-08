@@ -147,7 +147,7 @@ int Mediator::handleClientConnect(int playerID) {
 }
 
 int Mediator::handleClientDisconnect(int playerID) {
-    PlayerManager playerManager = gamePtr->getPlayerManager();
+    PlayerManager &playerManager = gamePtr->getPlayerManager();
 
     // Find the character with the given player ID and remove it from the game.
     Player const *playerPtr = playerManager.findPlayerById(playerID);
@@ -205,7 +205,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
 
         else if (messageType == "playerDisconnect") {
             int playerSocketID = message["playerID"];
-            PlayerManager playerManager = gamePtr->getPlayerManager();
+            PlayerManager &playerManager = gamePtr->getPlayerManager();
 
             Player const *playerPtr = playerManager.findPlayerById(playerSocketID);
             playerManager.removePlayer(*playerPtr);
@@ -278,7 +278,7 @@ void Mediator::decodeKeyboardStateMask(uint16_t mask, std::array<int, SDL_NUM_SC
 void Mediator::handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANCODES> &keyStates) {
     int playerID = player->getPlayerID();
     SDL_KeyboardEvent keyEvent;
-    InputManager inputManager = gamePtr->getInputManager();
+    InputManager &inputManager = gamePtr->getInputManager();
 
     // Iterate through the keyStates (using the keyMapping array to reduce the number of iterations)
     for (int scancode : keyMapping) {

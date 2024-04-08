@@ -50,25 +50,25 @@ public:
      * @brief Returns the input manager of the game.
      * @return A pointer of InputManager object representing the input manager of the game.
      */
-    [[nodiscard]] InputManager &getInputManager() const;
+    [[nodiscard]] InputManager &getInputManager();
 
     /**
      * @brief Returns the render object of the game.
      * @return A pointer of Renderer object representing the render object of the game.
      */
-    [[nodiscard]] RenderManager &getRenderManager() const;
+    [[nodiscard]] RenderManager &getRenderManager();
 
     /**
      * @brief Returns the save manager of the game.
      * @return A pointer of SaveManager object representing the save manager of the game.
      */
-    [[nodiscard]] SaveManager &getSaveManager() const;
+    [[nodiscard]] SaveManager &getSaveManager();
 
     /**
      * @brief Returns the player manager of the game.
      * @return A pointer of PlayerManager object representing the player manager of the game.
      */
-    [[nodiscard]] PlayerManager &getPlayerManager() const;
+    [[nodiscard]] PlayerManager &getPlayerManager();
 
     /**
      * @brief Returns the camera of the game.

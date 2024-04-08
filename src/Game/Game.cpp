@@ -27,19 +27,19 @@ GameState Game::getGameState() const {
     return gameState;
 }
 
-InputManager &Game::getInputManager() const {
+InputManager &Game::getInputManager() {
     return *inputManager;
 }
 
-RenderManager &Game::getRenderManager() const {
+RenderManager &Game::getRenderManager() {
     return *renderManager;
 }
 
-SaveManager &Game::getSaveManager() const {
+SaveManager &Game::getSaveManager() {
     return *saveManager;
 }
 
-PlayerManager &Game::getPlayerManager() const {
+PlayerManager &Game::getPlayerManager() {
     return *playerManager;
 }
 

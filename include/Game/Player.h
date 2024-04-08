@@ -376,12 +376,6 @@ public:
     void applyMovement(double ratio);
 
     /**
-     * @brief Update the sprite animation of the player.
-     * @param direction The current x-axis direction of the player.
-     */
-    void updateSprite(int direction);
-
-    /**
      * @brief Renders the player's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -415,7 +409,6 @@ private:
     float height; /**< The height of the player. */
     Sprite sprite; /**< The sprite of the player. */
     int score = 0;
-    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // X-AXIS MOVEMENT ATTRIBUTES
     float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
@@ -430,6 +423,7 @@ private:
     float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
     float decelerationFactorX = 3.0f; /**< The deceleration factor controlling how quickly the player's speed curve decreases when not moving. A higher value results in faster deceleration. */
     float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
+    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // Y-AXIS MOVEMENT ATTRIBUTES
     float moveY = 0; /**< Vertical movement of the player during this frame. */
@@ -457,10 +451,12 @@ private:
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
+    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
     static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
+
 
 
     /** PRIVATE METHODS **/
@@ -512,6 +508,17 @@ private:
      * @see calculateMovement() for main use.
      */
     void calculateYaxisMovement(double deltaTime);
+
+    /**
+     * @brief Update the sprite animation of the player.
+     */
+    void updateSpriteAnimation();
+
+    /**
+     * @brief Update the sprite orientation of the player.
+     * @param direction The current x-axis direction of the player.
+     */
+    void updateSpriteOrientation();
 
 };
 

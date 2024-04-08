@@ -32,6 +32,12 @@ public:
     /** BASIC ACCESSORS **/
 
     /**
+     * @brief Return the animation attribute.
+     * @return An Animation representing the animation.
+     */
+    [[nodiscard]] Animation getAnimation() const;
+
+    /**
      * @brief Return the texture attribute.
      * @return A SDL_Texture representing the sprite texture.
      */
@@ -60,6 +66,12 @@ public:
      * @param animation The new Animation of the sprite.
      */
     void setAnimation(const Animation& newAnimation);
+
+    /**
+     * @brief Set the animationIndexX attribute.
+     * @param texture The new index of the animationIndexX.
+     */
+    void setAnimationIndexX(int index);
 
     /**
      * @brief Set the texture attribute.

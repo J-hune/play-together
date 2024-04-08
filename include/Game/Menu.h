@@ -9,6 +9,7 @@
 #include "../Graphics/Button.h"
 #include "Game.h"
 #include "../Utils/Mediator.h"
+#include "TextBox.h"
 
 constexpr unsigned int MAX_JSON_SIZE = 1024;
 
@@ -113,6 +114,7 @@ private:
     bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
+    std::map<GameStateKey, std::vector<TextBox>> textInputs;
     short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
 
     /** ACCESSORS **/

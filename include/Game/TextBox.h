@@ -14,26 +14,28 @@
 class TextBox {
 public:
     TextBox(){}
-    TextBox(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int width, int height, SDL_Color textColor, SDL_Color bgColor);
-
+    TextBox(SDL_Renderer* renderer, int x, int y, int width, int height);
 
     void handleEvent(const SDL_Event &e);
-    void render(SDL_Renderer* renderer);
+    void render();
 
     void updateTextTexture(SDL_Renderer *renderer, SDL_Texture *textTexture, std::string text);
 
     std::string getText() const { return text; }
+    void setText(std::string t);
 
 private:
-    SDL_Rect box;
+    SDL_Rect box = {200,500,400,50};
     std::string text;
-    TTF_Font* font = NULL;
-    SDL_Color textColor  ;
-    SDL_Color bgColor ;
-    bool active;
+    TTF_Font* font = TTF_OpenFont("assets/font/arial.ttf", 24);
+    SDL_Color textColor = {255,255,255,255};
+    SDL_Color bgColor  = {210, 204, 207, 0};
+    bool cursorVisible = true;
+    bool clicked = false;
     SDL_Event *event;
     SDL_Texture* textTexture;
     SDL_Renderer* renderer;
+
 };
 
 

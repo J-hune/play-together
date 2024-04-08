@@ -1,4 +1,4 @@
-#include "../../../include/Game/Objects/MovingPlatform2D.h"
+#include "../../../include/Game/Platforms/MovingPlatform2D.h"
 
 
 /**
@@ -55,6 +55,9 @@ float MovingPlatform2D::getMoveY() const {
     return moveY;
 }
 
+bool MovingPlatform2D::getIsMoving() const {
+    return isMoving;
+}
 
 /** SPECIFIC ACCESSORS **/
 
@@ -72,30 +75,18 @@ void MovingPlatform2D::setIsMoving(bool state) {
 
 /** METHODS **/
 
-void MovingPlatform2D::applyMovement() {
-    // Apply movement
-    moveX = 1;
-    moveY = 1;
-
-    // Calculate distances between the platform and the two points
-    float distancePoint1 = ((x - left.x) * (x - left.x) + (y - left.y) * (y - left.y));
-    float distancePoint2 = ((x - right.x) * (x - right.x) + (y - right.y) * (y - right.y));
-
-    // Calculate the nearest point to the platform
-    float smoothingX = distancePoint1 > distancePoint2 ? right.x - w : left.x;
-    float smoothingY = distancePoint1 > distancePoint2 ? right.y - h : left.y;
-
-    // Calculate smoothing
-    smoothingX = (std::abs(x - smoothingX) * 0.5F);
-    smoothingY = (std::abs(y - smoothingY) * 0.5F);
+void MovingPlatform2D::applyMovement(double deltaTime) {
+    // Add basic movement
+    moveX = 150;
+    moveY = 150;
 
     // Calculate x-axis movement
-    moveX += smoothingX > smoothingLimit ? smoothingLimit : smoothingX; // Apply smoothing with limit
+    moveX *= static_cast<float>(deltaTime); // Apply movement per second
     moveX *= speed; // Apply speed
     moveX *= directionX; // Apply direction
 
     // Calculate y-axis movement
-    moveY += smoothingY > smoothingLimit ? smoothingLimit : smoothingY; // Apply smoothing with limit
+    moveY *= static_cast<float>(deltaTime); // Apply movement per second
     moveY *= speed; // Apply speed
     moveY *= directionY; // Apply direction
 

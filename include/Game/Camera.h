@@ -7,8 +7,7 @@
 
 constexpr float SCREEN_WIDTH = 800;
 constexpr float SCREEN_HEIGHT = 600;
-constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
-
+const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
 
 /**
  * @file Camera.h
@@ -16,10 +15,9 @@ constexpr float LERP_SMOOTHING_FACTOR = 0.05f;
  */
 
 /**
- * @class Level
+ * @class Camera
  * @brief Represents the camera logic including movement and shaking.
  */
-
 class Camera {
 public:
     /** CONSTRUCTORS **/
@@ -54,10 +52,22 @@ public:
     [[nodiscard]] float getH() const;
 
     /**
-     * @brief Return the area attribute.
-     * @return A rectangle representing the area.
+     * @brief Return the bounding box of the camera.
+     * @return A SDL_FRect representing the bounding box.
      */
-    [[nodiscard]] SDL_FRect getArea() const;
+    [[nodiscard]] SDL_FRect getBoundingBox() const;
+
+    /**
+     * @brief Gets the broad phase area (bounding box).
+     * @return SDL_Rect representing the broad phase area.
+     */
+    [[nodiscard]] SDL_FRect getBroadPhaseArea() const;
+
+    /**
+     * @brief Gets the vertices of the broad phase area.
+     * @return A vector of Point representing the vertices.
+     */
+    [[nodiscard]] std::vector<Point> getBroadPhaseAreaVertices() const;
 
 
     /** MODIFIERS **/
@@ -83,7 +93,7 @@ public:
 
     /**
      * @brief Toggle the isShaking attribute.
-     * @see setIsShaking for a similar operation.
+     * @see setIsShaking() for a similar operation.
      */
     void toggleIsShaking();
 
@@ -94,13 +104,14 @@ public:
      * @brief Initialize the camera position according to players positions.
      * @param camera_point A point representing the camera point position.
      */
-    void initializeCameraPosition(Point camera_point);
+    void initializePosition(Point camera_point);
 
     /**
      * @brief Applies camera movement based on the positions of all players.
      * @param camera_point A point representing the camera point position.
+     * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyCameraMovement(Point camera_point);
+    void applyMovement(Point camera_point, double deltaTime);
 
     /**
      * @brief Renders the collisions by drawing obstacles.
@@ -130,6 +141,7 @@ private:
                       w - (w / 2.f) - w / 5.f,
                       h - (h / 5.f) - h / 5.f};
 
+    float lerpSmoothingFactor = 11;
     bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
 

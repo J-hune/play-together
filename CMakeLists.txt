@@ -50,7 +50,8 @@ file(GLOB_RECURSE HEADERS include/*.h)
 file(GLOB_RECURSE DEPENDENCIES ${DEPENDENCIES_DIR}/*)
 
 # Create the executable
-add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
+add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES}
+        src/Game/TextBox.cpp)
 
 # Link libraries
 target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARY})

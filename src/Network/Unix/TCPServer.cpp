@@ -269,20 +269,22 @@ bool TCPServer::sendPlayerList(int clientSocket) const {
     message["messageType"] = "playerList";
     message["players"] = json::array();
 
-    // Add the server to the player list (ID 0)
-    message["players"].push_back(0);
-
-    // Lock the mutex to safely access client addresses
-    clientAddressesMutexPtr->lock();
-
     // Add all connected clients to the player list
-    for (const auto& [socket, _]: *clientAddressesPtr) {
-        // Replace the client socket with -1 for the client itself
-        message["players"].push_back((socket == clientSocket) ? -1 : socket);
-    }
+    for (std::vector<Player> players = Mediator::getCharacters(); const auto &player : players) {
+        int playerID = player.getPlayerID();
+        if (playerID == -1) playerID = 0; // The server player has ID 0
+        if (playerID == clientSocket) playerID = -1; // The client itself has ID -1
 
-    // Unlock the mutex after accessing client addresses
-    clientAddressesMutexPtr->unlock();
+        // Replace the client socket with -1 for the client itself
+        json playerInfo;
+        playerInfo["playerID"] = playerID;
+        playerInfo["x"] = player.getX();
+        playerInfo["y"] = player.getY();
+        playerInfo["moveX"] = player.getMoveX();
+        playerInfo["moveY"] = player.getMoveY();
+
+        message["players"].push_back(playerInfo);
+    }
 
     return send(clientSocket, message.dump());
 }

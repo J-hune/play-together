@@ -127,7 +127,7 @@ void UDPServer::handleMessage() {
 
             if (clientID != INVALID_SOCKET) {
                 // Handle received message
-                Mediator::handleMessages(1, message, (int)clientID);
+                Mediator::handleMessages(1, message, static_cast<int>(clientID));
             } else {
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
             }

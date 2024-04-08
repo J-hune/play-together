@@ -28,8 +28,30 @@ SDL_RendererFlip Sprite::getFlip() const {
 
 /** MODIFIERS **/
 
-void Sprite::setAnimation(Animation newAnimation) {
-    animation = newAnimation;
+void Sprite::setAnimation(const Animation& newAnimation) {
+    // Change animation only if it's different
+    if (animation.indexY != newAnimation.indexY) {
+        // Change animation only if the current is not unique or if the unique animation is ended
+        if (!animation.unique || (animation.unique && nbFrameDisplayed == animation.frames)) {
+
+            // If the new animation is 'unique'
+            if (newAnimation.unique) {
+                nextAnimation = animation; // Store the current animation to display it after the unique animation ends
+                uniqueAnimationIsDisplayed = true;
+            }
+
+            // Change animation
+            animation = newAnimation;
+            animationIndexX = 0;
+            nbFrameDisplayed = 0;
+            lastAnimationUpdate = SDL_GetTicks();
+
+        }
+        // Else, the current animation is unique, store the new animation to display it after the unique animation ends
+        else {
+            nextAnimation = newAnimation;
+        }
+    }
 }
 
 void Sprite::setTexture(SDL_Texture &newTexture) {
@@ -52,6 +74,20 @@ void Sprite::toggleFlipVertical() {
 /** METHODS **/
 
 void Sprite::updateAnimation() {
-    srcRect.x = srcRect.w * (((int)SDL_GetTicks() / animation.speed) % animation.frames);
-    srcRect.y = srcRect.h * animation.index;
+    // If the animation was unique and is ended, switch to next animation
+    if (animation.unique && nbFrameDisplayed == animation.frames) {
+        uniqueAnimationIsDisplayed = false;
+        setAnimation(nextAnimation);
+    }
+
+    // Update x position animation
+    if (SDL_GetTicks() - lastAnimationUpdate > animation.speed) {
+        lastAnimationUpdate = SDL_GetTicks() ;
+        animationIndexX = (animationIndexX + 1) % animation.frames;
+        nbFrameDisplayed++;
+    }
+
+    // Apply animation
+    srcRect.x = srcRect.w * animationIndexX;
+    srcRect.y = srcRect.h * animation.indexY;
 }

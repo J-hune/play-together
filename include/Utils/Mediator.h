@@ -5,8 +5,9 @@
 #include <SDL.h>
 #include <array>
 #include <unordered_map>
-#include "../Game/Objects/Player.h"
+#include "../Game/Player.h"
 #include "../../dependencies/json.hpp"
+#include "../Game/Events/Asteroid.h"
 
 // Forward declarations
 class Game;
@@ -66,16 +67,22 @@ public:
     static void stopServers();
     static void stopClients();
     static void sendPlayerUpdate(uint16_t keyboardStateMask);
+    static void sendAsteroidCreation(Asteroid const &asteroid);
 
     // Menu methods
     static void handleServerDisconnect();
+    static void renderMenu();
+    static void setDisplayMenu(bool displayMenu);
+    static void handleEventMenu(const SDL_Event &event);
 
     // Game methods
     static GameState getGameState();
-    static void initializeGame(int slot);
+    static void initializeHostedGame(int slot);
+    static void togglePause();
     static void stop();
     static void save();
     static void getGameProperties(nlohmann::json &properties);
+    static std::vector<Player> getCharacters();
 
     // Other methods
     /**

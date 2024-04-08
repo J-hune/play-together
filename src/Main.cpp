@@ -6,6 +6,8 @@
 #include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+
+// Initialize Winsock on Windows
 #ifdef _WIN32
     WSADATA wsaData;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -27,52 +29,65 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         return 1;
     }
 
+    // Create SDL window
     SDL_Window *window = SDL_CreateWindow("Play Together", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, (int)SCREEN_WIDTH, (int)SCREEN_HEIGHT,SDL_WINDOW_SHOWN);
-
     if (window == nullptr) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
+        SDL_Quit();
         return 1;
     }
 
+    // Create SDL renderer
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) {
         fprintf(stderr, "Could not create renderer: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
-    // Load font from a TrueType (TTF) file
-    TTF_Font *font = TTF_OpenFont("assets/font/arial.ttf", 24);
-    if (font == nullptr) {
-        std::cerr << "Error loading font: " << TTF_GetError() << std::endl;
+    // Get the maximum refresh rate of the display list (in Hz)
+    int maxFrameRate = 30;
+    int numDisplays = SDL_GetNumVideoDisplays();
+    if (numDisplays < 1) {
+        fprintf(stderr, "Could not get number of displays: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
         return 1;
     }
 
-    // Define a boolean to control the game loop
+    for (int i = 0; i < numDisplays; i++) {
+        SDL_DisplayMode displayMode;
+        if (SDL_GetCurrentDisplayMode(i, &displayMode) != 0) {
+            fprintf(stderr, "Could not get display mode: %s\n", SDL_GetError());
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 1;
+        }
+
+        maxFrameRate = std::max(maxFrameRate, displayMode.refresh_rate);
+    }
+
+    // Initialize game objects
     bool quit = false;
 
-
-    // Initialize Game
-    Camera camera = Camera();
-    Level level("diversity");
-    Player::loadTextures(*renderer);
-
-    // Some players have a special id. The initial player has id -1 and the server has id 0.
-    Game game(window, renderer, camera, level, &quit);
-    Mediator::setGamePtr(&game);
-
-    // Initialize Menu
-    Menu menu(renderer, font, &quit);
-    Mediator::setMenuPtr(&menu);
-    menu.render();
-
-    // Initialize NetworkManager
+    Game game(window, renderer, maxFrameRate, &quit);
+    Menu menu(renderer, &quit);
     NetworkManager networkManager;
+    ApplicationConsole console(&game);
+
+    // Initialize pointers for communication between objects
+    Mediator::setGamePtr(&game);
+    Mediator::setMenuPtr(&menu);
     Mediator::setNetworkManagerPtr(&networkManager);
 
-    // Initialize Application Console
-    ApplicationConsole console(&game);
+    // Start console thread
     std::jthread consoleThread(&ApplicationConsole::run, &console);
     consoleThread.detach();
+
+    Uint64 lastFrameTime = SDL_GetPerformanceCounter();
 
     // Main loop
     while (!quit) {
@@ -80,21 +95,20 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 quit = true;
+                continue;
             }
 
-                // If the escape key is pressed, stop the game
-            else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                if (game.getGameState() == GameState::PAUSED) {
-                    game.run();
-                } else {
-                    menu.setDisplayMenu(true);
-                }
-            }
+            // Handle menu events
+            menu.handleEvent(event);
+        }
 
-            else {
-                // Handle menu events
-                menu.handleEvent(event);
-            }
+        Uint64 currentFrameTime = SDL_GetPerformanceCounter();
+        float deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(SDL_GetPerformanceFrequency());
+        lastFrameTime = currentFrameTime;
+
+        // Limit the frame rate
+        if (deltaTime < 1000.0f / static_cast<float>(maxFrameRate)) {
+            SDL_Delay(static_cast<Uint32>((1000.0f / static_cast<float>(maxFrameRate)) - deltaTime));
         }
 
         // Clear the screen
@@ -103,29 +117,23 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
         // If the game should start
         if (!menu.isDisplayingMenu()) {
-            // Create and start the game
-            camera.initializeCameraPosition(game.getAveragePlayersPositions());
-
-            // Block the main thread until the game is finished
-            game.run();
-
-            // Reset the menu after exiting the game
-            menu.reset();
+            game.run(); // Block the main thread until the game is finished
+            menu.reset(); // Reset the menu after exiting the game
         } else {
             // Render the menu
             menu.render();
             SDL_RenderPresent(renderer);
-            SDL_Delay(4);
         }
     }
 
+    /* Clean up resources */
     networkManager.stopServers();
     networkManager.stopClients();
-
-    // Clean up resources
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    TTF_CloseFont(font);
+    for (TTF_Font* font : RenderManager::getFonts()) {
+        TTF_CloseFont(font);
+    }
     TTF_Quit();
     SDL_Quit();
 

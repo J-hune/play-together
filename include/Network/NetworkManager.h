@@ -77,7 +77,17 @@ public:
      */
     void broadcastMessage(int protocol, const std::string &message, int socketIgnored) const;
 
-     void sendPlayerUpdate(uint16_t keyboardStateMask) const;
+    /**
+     * @brief Sends the keyboard state to all clients (UDP).
+     * @param keyboardStateMask The mask of the keyboard state.
+     */
+    void sendPlayerUpdate(uint16_t keyboardStateMask) const;
+
+    /**
+     * @brief Sends the creation of an asteroid to all clients (UDP).
+     * @param asteroid The asteroid to create.
+     */
+    void sendAsteroidCreation(Asteroid const &asteroid) const;
 
 private:
     /** ATTRIBUTES **/

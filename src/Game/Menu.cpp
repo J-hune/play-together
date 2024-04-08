@@ -17,9 +17,10 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
     return flattenedButtons;
 }
 
+
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, bool *quit) : renderer(renderer), quitPtr(quit) {
+Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name) : renderer(renderer), quitPtr(quit), music(music_file_name) {
     std::vector<TTF_Font *> fonts = RenderManager::getFonts();
 
     // Create menu buttons
@@ -99,6 +100,7 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit) : renderer(renderer), quitPtr(qui
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(main_menu_button4);
 }
 
+
 /** ACCESSORS **/
 
 bool Menu::isDisplayingMenu() const {
@@ -131,6 +133,10 @@ void Menu::setQuit(bool quit_value) {
 
 /** METHODS **/
 
+void Menu::playMusic() {
+    music.play(-1);
+}
+
 void Menu::render() {
     // Render buttons
     for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
@@ -140,6 +146,7 @@ void Menu::render() {
 
 void Menu::reset() {
     displayMenu = true;
+    music.play(-1);
 
     // Reset all buttons
     for (Button &button: aggregateButtons(buttons)) {
@@ -170,33 +177,42 @@ void Menu::handleButtonAction(Button &button) {
     switch (button.getButtonAction()) {
         using enum ButtonAction;
         case VIEW_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleStartButton(button, button.getValue());
             break;
         case RESUME:
+            backSound.play(0, backSound.getVolume());
             handleResumeButton(button);
             break;
         case STOP:
+            backSound.play(0, backSound.getVolume());
             handleStopButton(button);
             break;
         case SAVE:
+            forwardSound.play(0, forwardSound.getVolume());
             handleSaveButton(button);
             break;
         case QUIT:
             handleQuitButton(button);
             break;
         case CREATE_OR_LOAD_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleCreateOrLoadGameButton(button);
             break;
         case DELETE_SAVE:
+            backSound.play(0, backSound.getVolume());
             handleDeleteSaveButton(button);
             break;
         case JOIN_HOSTED_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleJoinHostedGameButton(button);
             break;
         case NAVIGATE_TO_MENU_MAIN:
+            backSound.play(0, backSound.getVolume());
             handleNavigateToMainMenuButton(button);
             break;
         case NAVIGATE_TO_MENU_PLAY:
+            forwardSound.play(0, forwardSound.getVolume());
             handleNavigateToPlayMenuButton(button);
             break;
         default:
@@ -206,6 +222,7 @@ void Menu::handleButtonAction(Button &button) {
 
 void Menu::handleStartButton(Button &button, int slot) {
     button.reset();
+    Music::stop();
     Mediator::initializeHostedGame(slot);
     displayMenu = false;
     setMenuAction(MenuAction::MAIN);

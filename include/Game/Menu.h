@@ -40,8 +40,9 @@ public:
      * @brief Constructor for the Menu class.
      * @param renderer The SDL_Renderer to render the menu.
      * @param quit A pointer to a boolean to control the game loop.
+     * @param music_file_name Menu music file name.
      */
-    Menu(SDL_Renderer *renderer, bool *quit);
+    Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name);
 
 
     /** ACCESSORS **/
@@ -83,6 +84,11 @@ public:
     /** METHODS **/
 
     /**
+     * @brief Start playing the menu music.
+     */
+    void playMusic();
+
+    /**
      * @brief Render the menu on the screen.
      */
     void render();
@@ -111,6 +117,9 @@ private:
     bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
     MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
+    Music music; /**< The music played when the menu is displayed. */
+    SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
+    SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
 
     /** ACCESSORS **/
 

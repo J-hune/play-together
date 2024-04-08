@@ -122,7 +122,9 @@ void Button::handleEvent(SDL_Event const &event) {
         int mouseX;
         int mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
+        bool previously_hovered = hovered;
         hovered = isHovered(mouseX, mouseY);
+        if (hovered && !previously_hovered) hoverSound.play(0, hoverSound.getVolume());
         if (event.type == SDL_MOUSEBUTTONDOWN && hovered && event.button.button == SDL_BUTTON_LEFT) {
             clicked = true;
         }

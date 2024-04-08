@@ -1,12 +1,12 @@
 #ifndef PLAY_TOGETHER_MUSIC_H
 #define PLAY_TOGETHER_MUSIC_H
 
-#include <SDL.h>
 #include <SDL_mixer.h>
 #include <string>
+#include <iostream>
 
 // Define constants for directories and file names
-constexpr char MAPS_DIRECTORY[] = "assets/musics/";
+constexpr char MUSICS_DIRECTORY[] = "assets/musics/";
 
 /**
  * @file Music.h
@@ -19,16 +19,35 @@ constexpr char MAPS_DIRECTORY[] = "assets/musics/";
  */
 class Music {
 private:
-    Mix_Music* music;
+    /* ATTRIBUTES */
+
+    Mix_Music* music; /**< The music file to be played. */
 
 public:
+    /* ATTRIBUTES */
+
+    static int volume; /**< The music volume. */
+
+
     /* CONSTRUCTORS */
 
-    explicit Music(const char* fileName);
+    Music() = default;
+    explicit Music(const std::string& file_name);
     ~Music();
 
 
     /* METHODS */
+
+    /**
+     * @brief Stop playing the music.
+     */
+    static void stop();
+
+    /**
+     * @brief Set a new volume to the music.
+     * @param volume An int value between 0 and 128.
+     */
+    static void setVolume(int new_volume);
 
     /**
      * @brief Start playing the music.
@@ -37,20 +56,9 @@ public:
     void play(int loop);
 
     /**
-     * @brief Pause the music.
+     * @brief Pause or play the music.
      */
-    void pause();
-
-    /**
-     * @brief Stop playing the music.
-     */
-    void stop();
-
-    /**
-     * @brief Set a new volume to the music.
-     * @param volume An int value between 0 and 128.
-     */
-    void setVolume(int volume);
+    void togglePause();
 
 
 };

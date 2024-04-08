@@ -74,6 +74,7 @@ void Game::setFrameRate(int fps) {
     this->frameRate = fps;
 }
 
+
 /** METHODS **/
 
 void Game::initializeHostedGame(int slot) {
@@ -90,6 +91,8 @@ void Game::initializeHostedGame(int slot) {
 
     Player initialPlayer(-1, spawnPoint, 48, 36);
     camera.initializePosition(spawnPoint);
+    music = level.getMusicById(0);
+    music.play(-1);
 
     Asteroid::generateRandomAnglesArray(200, seed);
     Asteroid::generateRandomPositionsArray(200, 0, camera.getW(), seed);
@@ -107,7 +110,7 @@ void Game::update(double deltaTime, double ratio) {
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
 
     if (!Mediator::isClientRunning()) {
-        level.generateAsteroid(3, {camera.getX(), camera.getY()}, seed);
+        level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
     }
 
     level.applyAsteroidsMovement(deltaTime);
@@ -386,6 +389,8 @@ void Game::togglePause() {
     if (gameState == PAUSED) {
         Mediator::setDisplayMenu(false);
         gameState = RUNNING;
+        Music::setVolume(Music::volume);
+        SoundEffect::masterVolume = 20;
     } else {
         // For each key, if it is pressed, call handleKeyUpEvent
         const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
@@ -397,6 +402,8 @@ void Game::togglePause() {
             }
         }
 
+        Music::setVolume(1);
+        SoundEffect::masterVolume = 1;
         gameState = PAUSED;
         Mediator::setDisplayMenu(true);
     }
@@ -406,6 +413,12 @@ void Game::stop() {
     gameState = GameState::STOPPED;
     playerManager->clearPlayers();
     saveManager->setSlot(-1);
+
+    // Reset music
+    Music::stop();
+    SoundEffect::stop();
+    Music::setVolume(Music::volume);
+    SoundEffect::masterVolume = 20;
 }
 
 void Game::exitGame() {

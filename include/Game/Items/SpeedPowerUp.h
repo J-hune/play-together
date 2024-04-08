@@ -33,7 +33,7 @@ public:
      * @brief Apply the item's effect to a player.
      * @param player The player the effect will be applied to.
      */
-    void applyEffect(Player &player) const override;
+    void applyEffect(Player &player) override;
 };
 
 

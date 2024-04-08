@@ -5,14 +5,16 @@
  * @brief Implements the SizePowerUp class responsible for SizePowerUp object.
  */
 
+
 /* CONSTRUCTORS */
 
-SizePowerUp::SizePowerUp(float x, float y, float w, float h, bool grow) : Item(x, y, w, h), grow(grow) {}
+SizePowerUp::SizePowerUp(float x, float y, float w, float h, bool grow) :
+            Item(x, y, w, h, "powerUp.wav"), grow(grow) {}
 
 
 /* METHODS */
 
-void SizePowerUp::applyEffect(Player &player) const {
+void SizePowerUp::applyEffect(Player &player) {
     Item::applyEffect(player);
 
     // The item is a growth power-up

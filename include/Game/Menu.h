@@ -5,12 +5,11 @@
 #include <SDL_ttf.h>
 #include <map>
 #include <thread>
+#include <format>
 
 #include "../Graphics/Button.h"
 #include "Game.h"
 #include "../Utils/Mediator.h"
-
-constexpr unsigned int MAX_JSON_SIZE = 1024;
 
 enum class MenuAction {
     MAIN,
@@ -64,15 +63,15 @@ public:
 
     /**
      * @brief Set whether the menu should be displayed or not.
-     * @param displayMenu True to display the menu, false to hide it.
+     * @param display_menu True to display the menu, false to hide it.
      */
-    void setDisplayMenu(bool displayMenu);
+    void setDisplayMenu(bool display_menu);
 
     /**
      * @brief Set the current menu action.
-     * @param menuAction The menu action to set.
+     * @param menu_action The menu action to set.
      */
-    void setMenuAction(MenuAction menuAction);
+    void setMenuAction(MenuAction menu_action);
 
     /**
      * @brief Set whether the game loop should quit or not.

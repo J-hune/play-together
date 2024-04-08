@@ -91,20 +91,18 @@ void Level::setAsteroids(std::vector<Asteroid> const &value) {
 
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < sizePowerUp.size() && item != sizePowerUp[i]) {
-        i++;
+    auto it = std::ranges::find(sizePowerUp, item);
+    if (it != sizePowerUp.end()) {
+        sizePowerUp.erase(it);
     }
-    sizePowerUp.erase(sizePowerUp.begin() + i);
 }
 
 void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < speedPowerUp.size() && item != speedPowerUp[i]) {
-        i++;
+    auto it = std::ranges::find(speedPowerUp, item);
+    if (it != speedPowerUp.end()) {
+        speedPowerUp.erase(it);
     }
-    speedPowerUp.erase(speedPowerUp.begin() + i);
 }
 
 
@@ -114,12 +112,12 @@ void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
     // Loop to generate asteroids until the desired number is reached
     for (auto i = static_cast<int>(asteroids.size()); i < nbAsteroid; i++){
         // Add a new asteroid to the asteroids vector with coordinates based on the camera position
-        Asteroid newAsteroid(camera.x, camera.y, seed);
-        asteroids.emplace_back(newAsteroid);
+        Asteroid new_asteroid(camera.x, camera.y, seed);
+        asteroids.emplace_back(new_asteroid);
 
         // Send the asteroid throw the network
         if (Mediator::isServerRunning()) {
-            Mediator::sendAsteroidCreation(newAsteroid);
+            Mediator::sendAsteroidCreation(new_asteroid);
         }
     }
 }
@@ -150,9 +148,9 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 
     SDL_SetRenderDrawColor(renderer, 144, 238, 144, 255);
-    for (const Polygon &saveZone: saveZones) {
-        for (size_t i = 0; i < saveZone.getVertices().size(); ++i) {
-            std::vector<Point> vertices = saveZone.getVertices();
+    for (const Polygon &save_zone: saveZones) {
+        for (size_t i = 0; i < save_zone.getVertices().size(); ++i) {
+            std::vector<Point> vertices = save_zone.getVertices();
             const auto &vertex1 = vertices[i];
             const auto &vertex2 = vertices[(i + 1) % vertices.size()];
             SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
@@ -176,22 +174,22 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
     for (const MovingPlatform1D &platform: movingPlatforms1D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 
     // Draw the 2D moving platforms
     SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
     for (const MovingPlatform2D &platform: movingPlatforms2D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 
     // Draw the switching platforms
     SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
     for (const SwitchingPlatform &platform: switchingPlatforms) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 }
 
@@ -210,22 +208,22 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::applyAsteroidsMovement(double deltaTime) {
+void Level::applyAsteroidsMovement(double delta_time) {
     // Apply movement to all players
     for (Asteroid &asteroid: asteroids) {
-        asteroid.applyMovement(deltaTime);
+        asteroid.applyMovement(delta_time);
     }
 }
 
-void Level::applyPlatformsMovement(double deltaTime) {
+void Level::applyPlatformsMovement(double delta_time) {
     // Apply movement for 1D platforms
     for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 
     // Apply movement for 2D platforms
     for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 
     // Apply movement for switching platforms
@@ -234,9 +232,9 @@ void Level::applyPlatformsMovement(double deltaTime) {
     }
 }
 
-void Level::loadMapProperties(const std::string &mapFileName) {
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/level.json";
-    std::ifstream file(filePath);
+void Level::loadMapProperties(const std::string &map_file_name) {
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/level.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the properties file. Please check the file path." << std::endl;
@@ -251,12 +249,12 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     mapName = j["name"];
 
     // Load spawn points
-    for (const auto &spawnPoint : j["spawnPoints"]) {
+    for (const auto &spawn_point : j["spawnPoints"]) {
         spawnPoints.emplace_back(std::array<Point, 4>{{
-               Point(spawnPoint[0][0], spawnPoint[0][1]),
-               Point(spawnPoint[1][0], spawnPoint[1][1]),
-               Point(spawnPoint[2][0], spawnPoint[2][1]),
-               Point(spawnPoint[3][0], spawnPoint[3][1])
+               Point(spawn_point[0][0], spawn_point[0][1]),
+               Point(spawn_point[1][0], spawn_point[1][1]),
+               Point(spawn_point[2][0], spawn_point[2][1]),
+               Point(spawn_point[3][0], spawn_point[3][1])
         }});
     }
 
@@ -268,8 +266,8 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     std::cout << "Level: Loaded map properties." << std::endl;
 }
 
-int Level::loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type) {
-    for (const auto &polygon : jsonData[zoneName]) {
+int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, ZoneType type) {
+    for (const auto &polygon : json_data[zone_name]) {
         std::vector<Point> vertices;
         for (const auto &vertex : polygon) {
             vertices.emplace_back(vertex[0], vertex[1]);
@@ -277,10 +275,10 @@ int Level::loadPolygonsFromJson(const nlohmann::json &jsonData, const std::strin
         zones.emplace_back(vertices, type);
     }
 
-    return (int)jsonData[zoneName].size();
+    return (int)json_data[zone_name].size();
 }
 
-void Level::loadPolygonsFromMap(const std::string &mapFileName) {
+void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     collisionZones.clear();
     iceZones.clear();
     sandZones.clear();
@@ -291,8 +289,8 @@ void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     saveZones.clear();
     saveZones.clear();
 
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/polygons.json";
-    std::ifstream file(filePath);
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/polygons.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the polygons file. Please check the file path." << std::endl;
@@ -304,21 +302,21 @@ void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     file >> j;
     file.close();
 
-    int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
-    int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
-    int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
-    int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
-    int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
-    int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
-    int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
-    int saveZonesSize = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
+    int collision_zones_size = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
+    int ice_zones_size = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
+    int sand_zones_size = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
+    int death_zones_size = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
+    int cinematic_zones_size = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
+    int boss_zones_size = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
+    int event_zones_size = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
+    int save_zones_size = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
 
-    std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones and " << saveZonesSize << " save zones." << std::endl;
+    std::cout << "Level: Loaded " << collision_zones_size << " collision zones, " << ice_zones_size << " ice zones, " << sand_zones_size << " sand zones, " << death_zones_size << " death zones, " << cinematic_zones_size << " cinematic zones, " << boss_zones_size << " boss zones, " << event_zones_size << " event zones and " << save_zones_size << " save zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
-    std::ifstream file(filePath);
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the platforms file. Please check the file path." << std::endl;
@@ -377,8 +375,8 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
     sizePowerUp.clear();
     speedPowerUp.clear();
 
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
-    std::ifstream file(filePath);
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the items file. Please check the file path." << std::endl;

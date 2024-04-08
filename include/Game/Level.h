@@ -144,15 +144,16 @@ public:
 
     /**
      * @brief Applies the movement to all asteroid in the game.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see applyMovement() for applying movement to one asteroid.
      */
-    void applyAsteroidsMovement(double deltaTime);
+    void applyAsteroidsMovement(double delta_time);
 
     /**
      * @brief Applies the movement of every platforms in the level.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyPlatformsMovement(double deltaTime);
+    void applyPlatformsMovement(double delta_time);
 
     /**
      * @brief Generates a specified number of asteroids in the game.
@@ -230,37 +231,37 @@ private:
 
     /**
      * @brief Load the properties of the map.
-     * @param mapName Represents the name of the map file.
+     * @param map_file_name Represents the name of the map file.
      */
-    void loadMapProperties(const std::string &mapName);
+    void loadMapProperties(const std::string &map_file_name);
 
     /**
      * @brief Load the polygons from a JSON file.
-     * @param jsonData Represents the JSON data.
-     * @param zoneName Represents the name of the zone.
+     * @param json_data Represents the JSON data.
+     * @param zone_name Represents the name of the zone.
      * @param[out] zones Represents the collection of polygons.
      * @return The number of polygons loaded.
      */
-    static int loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type);
+    static int loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, ZoneType type);
 
     /**
      * @brief Load the polygons from a map.
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      * @see loadPolygonsFromJson() for sub-function.
      */
-    void loadPolygonsFromMap(const std::string &mapName);
+    void loadPolygonsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the platforms from a map. (1D, 2D and switching platforms)
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      */
-    void loadPlatformsFromMap(const std::string &mapName);
+    void loadPlatformsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the items from a map.
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      */
-    void loadItemsFromMap(const std::string &mapName);
+    void loadItemsFromMap(const std::string &map_file_name);
 
 
 };

@@ -90,8 +90,8 @@ void Camera::initializePosition(Point camera_point) {
     }
 }
 
-void Camera::applyMovement(Point camera_point, double deltaTime) {
-    float blend = 1 - std::pow(0.5F, deltaTime * lerpSmoothingFactor);
+void Camera::applyMovement(Point camera_point, double delta_time) {
+    auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
 
     float area_left = x + area.x;
     float area_right = x + area.x + area.w;
@@ -126,27 +126,27 @@ void Camera::makeCameraShake() {
     std::minstd_rand gen(rd()); // Using the Linear Congruential Generator
 
     // Defining uniform distributions for generating random boolean and float values
-    std::uniform_int_distribution randBool(0, 1);
-    std::uniform_real_distribution<float> randFloat(0.0, 1.0);
+    std::uniform_int_distribution rand_bool(0, 1);
+    std::uniform_real_distribution<float> rand_float(0.0, 1.0);
 
     // Calculating target offsets for camera shake
-    float targetX = randFloat(gen) * shakeAmplitude;
-    float targetY = randFloat(gen) * shakeAmplitude;
+    float targetX = rand_float(gen) * shakeAmplitude;
+    float targetY = rand_float(gen) * shakeAmplitude;
 
     // Applying camera shake by randomly adding or subtracting target offsets
-    randBool(gen) ? x += targetX : x -= targetX;
-    randBool(gen) ? y += targetY : y -= targetY;
+    rand_bool(gen) ? x += targetX : x -= targetX;
+    rand_bool(gen) ? y += targetY : y -= targetY;
 }
 
 void Camera::renderCameraPoint(SDL_Renderer *renderer, Point camera_point) const {
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-    SDL_FRect cameraPointRect = {camera_point.x - x, camera_point.y - y, 20, 20};
-    SDL_RenderFillRectF(renderer, &cameraPointRect);
-    SDL_RenderDrawRectF(renderer, &cameraPointRect);
+    SDL_FRect camera_point_rect = {camera_point.x - x, camera_point.y - y, 20, 20};
+    SDL_RenderFillRectF(renderer, &camera_point_rect);
+    SDL_RenderDrawRectF(renderer, &camera_point_rect);
 }
 
 void Camera::renderCameraArea(SDL_Renderer *renderer) const {
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    SDL_FRect cameraRect = {area.x, area.y, area.w + 20, area.h + 30};
-    SDL_RenderDrawRectF(renderer, &cameraRect);
+    SDL_FRect camera_rect = {area.x, area.y, area.w + 20, area.h + 30};
+    SDL_RenderDrawRectF(renderer, &camera_rect);
 }

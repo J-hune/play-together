@@ -10,11 +10,11 @@
 
 // Helper function to flatten a map of buttons into a vector of buttons
 std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Button>> &buttonsMap) {
-    std::vector<Button> flattenedButtons;
+    std::vector<Button> flattened_buttons;
     for (const auto &[state, buttons]: buttonsMap) {
-        flattenedButtons.insert(flattenedButtons.end(), buttons.begin(), buttons.end());
+        flattened_buttons.insert(flattened_buttons.end(), buttons.begin(), buttons.end());
     }
-    return flattenedButtons;
+    return flattened_buttons;
 }
 
 
@@ -288,8 +288,8 @@ void Menu::handleDeleteSaveButton(Button &button) {
     // Delete the save file and update the save slots
     button.reset();
 
-    std::string save_file = "saves/slot_" + std::to_string(button.getValue()) + ".json";
-    std::remove(save_file.c_str());
+    std::string save_file_name = std::format("saves/slot_{}.json", button.getValue());
+    std::remove(save_file_name.c_str());
     updateSaveSlots();
 }
 
@@ -315,7 +315,7 @@ void Menu::updateSaveSlots() {
 
     // Update the text for the save slots
     for (int i = 0; i < 3; i++) {
-        std::ifstream save_slot("saves/slot_" + std::to_string(i + 1) + ".json");
+        std::ifstream save_slot(std::format("saves/slot_{}.json", i + 1));
         Button &button = buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}][i * 2];
         Button &remove_button = buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}][i * 2 + 1];
 

@@ -10,15 +10,14 @@
  * @brief Defines the Polygon class responsible for handling polygons in 2D space.
  */
 
-enum class ZoneType {
+enum class PolygonType {
     COLLISION,
     ICE,
     SAND,
     DEATH,
     CINEMATIC,
     BOSS,
-    EVENT,
-    SAVE
+    EVENT
 };
 
 /**
@@ -29,7 +28,7 @@ class Polygon {
 public:
     /** CONSTRUCTOR **/
 
-    Polygon(const std::vector<Point> &vertices, ZoneType type);
+    Polygon(const std::vector<Point> &vertices, PolygonType type);
 
 
 /** ACCESSORS **/
@@ -44,7 +43,7 @@ public:
      * @brief Get the type of the zone.
      * @return The type of the zone.
      */
-    [[nodiscard]] ZoneType getType() const;
+    [[nodiscard]] PolygonType getType() const;
 
 
     /** PUBLIC METHODS **/
@@ -60,7 +59,7 @@ private:
     /** ATTRIBUTES **/
 
     std::vector<Point> vertices; /**< The vertices of the polygon. */
-    ZoneType type; /**< The type of the zone. */
+    PolygonType type; /**< The type of the zone. */
 
 
     /** PRIVATE METHODS **/

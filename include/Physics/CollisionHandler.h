@@ -65,9 +65,9 @@ bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &
  * @brief Handles collisions between the player and save zones.
  * @param player The player object.
  * @param level Reference to the level object.
- * @param saveZones Vector of polygons representing save zones.
+ * @param saveZones Vector of AABB representing save zones.
  */
-void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<Polygon> &savesZones);
+void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<AABB> &savesZones);
 
 
 

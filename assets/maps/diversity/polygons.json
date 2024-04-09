@@ -19,8 +19,5 @@
     ],
     "cinematicZones": [],
     "bossZones": [],
-    "eventZones": [],
-    "saveZones": [
-        [[1070, -70], [1070, 0], [1150, 0], [1150, -70]]
-    ]
+    "eventZones": []
 }

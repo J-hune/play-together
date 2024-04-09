@@ -190,12 +190,12 @@ bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &
     return i != deathZones.size(); // True if the player collided with a death zone
 }
 
-void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<Polygon> &saveZones) {
+void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<AABB> &saveZones) {
     // Check collisions with each save zone
     for (size_t i = 0; i < saveZones.size(); ++i) {
-        const Polygon &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
+        const AABB &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
         auto savePointID = static_cast<short>(i + 1);
-        if (checkSATCollision(player.getVertices(), saveZone) && level.getLastCheckpoint() < savePointID) {
+        if (checkAABBCollision(player.getBoundingBox(), saveZone.getRect()) && level.getLastCheckpoint() < savePointID) {
             level.setLastCheckpoint(savePointID);
             std::cout << "Checkpoint reached: " << savePointID << std::endl;
         }

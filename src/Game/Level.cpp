@@ -31,9 +31,9 @@ std::array<Point, 4> Level::getSpawnPoints(int index) const {
     return spawnPoints[index];
 }
 
-std::vector<Polygon> Level::getZones(ZoneType type) const {
+std::vector<Polygon> Level::getZones(PolygonType type) const {
     switch(type) {
-        using enum ZoneType;
+        using enum PolygonType;
         case COLLISION: return collisionZones;
         case ICE: return iceZones;
         case SAND: return sandZones;
@@ -41,6 +41,13 @@ std::vector<Polygon> Level::getZones(ZoneType type) const {
         case CINEMATIC: return cinematicZones;
         case BOSS: return bossZones;
         case EVENT: return eventZones;
+        default: return {};
+    }
+}
+
+std::vector<AABB> Level::getZones(AABBType type) const {
+    switch(type) {
+        using enum AABBType;
         case SAVE: return saveZones;
         default: return {};
     }
@@ -148,13 +155,10 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 
     SDL_SetRenderDrawColor(renderer, 144, 238, 144, 255);
-    for (const Polygon &save_zone: saveZones) {
-        for (size_t i = 0; i < save_zone.getVertices().size(); ++i) {
-            std::vector<Point> vertices = save_zone.getVertices();
-            const auto &vertex1 = vertices[i];
-            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
-        }
+    for (const AABB &save_zone: saveZones) {
+        // Draw only the outline of the save zone
+        SDL_FRect save_zone_rect = {save_zone.getX() - camera.x, save_zone.getY() - camera.y, save_zone.getWidth(), save_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &save_zone_rect);
     }
 }
 
@@ -266,13 +270,25 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     std::cout << "Level: Loaded map properties." << std::endl;
 }
 
-int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, ZoneType type) {
+int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, PolygonType type) {
     for (const auto &polygon : json_data[zone_name]) {
         std::vector<Point> vertices;
         for (const auto &vertex : polygon) {
             vertices.emplace_back(vertex[0], vertex[1]);
         }
         zones.emplace_back(vertices, type);
+    }
+
+    return (int)json_data[zone_name].size();
+}
+
+int Level::loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type) {
+    for (const auto &zone : json_data[zone_name]) {
+        float x = zone["x"];
+        float y = zone["y"];
+        float width = zone["width"];
+        float height = zone["height"];
+        zones.emplace_back(x, y, width, height, type);
     }
 
     return (int)json_data[zone_name].size();
@@ -289,29 +305,42 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     saveZones.clear();
     saveZones.clear();
 
-    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/polygons.json";
-    std::ifstream file(file_path);
+    std::string polygons_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/polygons.json";
+    std::string aabbs_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/aabbs.json";
+    std::ifstream polygons_file(polygons_file_path);
+    std::ifstream aabbs_file(aabbs_file_path);
 
-    if (!file.is_open()) {
+    if (!polygons_file.is_open()) {
         std::cerr << "Level: Unable to open the polygons file. Please check the file path." << std::endl;
         return;
     }
 
-    using enum ZoneType;
-    nlohmann::json j;
-    file >> j;
-    file.close();
+    if (!aabbs_file.is_open()) {
+        std::cerr << "Level: Unable to open the aabbs file. Please check the file path." << std::endl;
+        return;
+    }
 
-    int collision_zones_size = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
-    int ice_zones_size = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
-    int sand_zones_size = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
-    int death_zones_size = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
-    int cinematic_zones_size = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
-    int boss_zones_size = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
-    int event_zones_size = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
-    int save_zones_size = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
+    using enum PolygonType;
+    nlohmann::json polygons;
+    polygons_file >> polygons;
+    polygons_file.close();
 
-    std::cout << "Level: Loaded " << collision_zones_size << " collision zones, " << ice_zones_size << " ice zones, " << sand_zones_size << " sand zones, " << death_zones_size << " death zones, " << cinematic_zones_size << " cinematic zones, " << boss_zones_size << " boss zones, " << event_zones_size << " event zones and " << save_zones_size << " save zones." << std::endl;
+    int collision_zones_size = loadPolygonsFromJson(polygons, "collisionZones", collisionZones, COLLISION);
+    int ice_zones_size = loadPolygonsFromJson(polygons, "iceZones", iceZones, ICE);
+    int sand_zones_size = loadPolygonsFromJson(polygons, "sandZones", sandZones, SAND);
+    int death_zones_size = loadPolygonsFromJson(polygons, "deathZones", deathZones, DEATH);
+    int cinematic_zones_size = loadPolygonsFromJson(polygons, "cinematicZones", cinematicZones, CINEMATIC);
+    int boss_zones_size = loadPolygonsFromJson(polygons, "bossZones", bossZones, BOSS);
+    int event_zones_size = loadPolygonsFromJson(polygons, "eventZones", eventZones, EVENT);
+    std::cout << "Level: Loaded " << collision_zones_size << " collision zones, " << ice_zones_size << " ice zones, " << sand_zones_size << " sand zones, " << death_zones_size << " death zones, " << cinematic_zones_size << " cinematic zones, " << boss_zones_size << " boss zones and " << event_zones_size << " event zones." << std::endl;
+
+    using enum AABBType;
+    nlohmann::json aabbs;
+    aabbs_file >> aabbs;
+    aabbs_file.close();
+
+    int save_zones_size = loadAABBFromJson(aabbs, "saveZones", saveZones, SAVE);
+    std::cout << "Level: Loaded " << save_zones_size << " save zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {

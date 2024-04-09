@@ -15,6 +15,9 @@ find_package(SDL2_ttf REQUIRED)
 # Find SDL2_image library
 find_package(SDL2_image REQUIRED)
 
+# Find SDL2_mixer library
+find_package(SDL2_mixer REQUIRED)
+
 if(NOT SDL2_FOUND)
     message(FATAL_ERROR "SDL2 not found!")
 endif()
@@ -27,9 +30,14 @@ if(NOT SDL2_IMAGE_FOUND)
     message(FATAL_ERROR "SDL2_image not found!")
 endif()
 
+if(NOT SDL2_MIXER_FOUND)
+    message(FATAL_ERROR "SDL2_mixer not found!")
+endif()
+
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_TTF_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
+include_directories(${SDL2_MIXER_INCLUDE_DIRS})
 
 # Set assets directory
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
@@ -53,7 +61,7 @@ file(GLOB_RECURSE DEPENDENCIES ${DEPENDENCIES_DIR}/*)
 add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
 
 # Link libraries
-target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARY})
+target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARY} ${SDL2_MIXER_LIBRARY})
 
 # Check if it's Windows and add Ws2_32.lib
 if (WIN32)

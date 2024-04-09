@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include "../Physics/Polygon.h"
+#include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
 #include "Platforms/MovingPlatform1D.h"
@@ -54,6 +55,13 @@ public:
      * @return A vector of Point representing the spawn points of the map.
      */
     [[nodiscard]] std::array<Point, 4> getSpawnPoints(int index) const;
+
+    /**
+     * @brief Return a music from the musics attribute.
+     * @param id The id of the music to retrieve.
+     * @return A Music object.
+     */
+    [[nodiscard]] Music& getMusicById(int id) ;
 
     /**
      * @brief Return the zones of a specific type.
@@ -166,7 +174,21 @@ public:
     void renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
-     * @brief Renders the game by drawing the player and obstacles.
+     * @brief Renders asteroids by drawing sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroids(SDL_Renderer *renderer, Point camera);
+
+    /**
+     * @brief Renders asteroids by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the platforms by drawing collisions boxes.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
@@ -185,6 +207,8 @@ private:
     int mapID = 0; /**< Represents the ID of the map. */
     std::string mapName; /**< Represents the name of the map. */
     std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
+    std::vector<Music> musics; /**< Represents the musics of the map. */
+
     std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
     std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
     std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */

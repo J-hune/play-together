@@ -232,10 +232,8 @@ void Player::setWantToMoveLeft(bool state) {
 void Player::setSprint(bool state) {
     if (state) {
         sprintMultiplier = 1.3f;
-        sprite.setAnimation(run);
     } else {
         sprintMultiplier = 1.0;
-        sprite.setAnimation(walk);
     }
 }
 
@@ -407,29 +405,43 @@ void Player::applyMovement(double ratio) {
     y += static_cast<float>(moveY * ratio);
 }
 
-void Player::updateSprite(int direction) {
-    // Update animation
-    if (direction == 0) {
-        sprite.setAnimation(idle);
+void Player::updateSpriteAnimation() {
+    // If the player doesn't move, play idle or sneak animation
+    if (wantToMoveLeft == 0 && wantToMoveRight == 0) {
+        if (sprintMultiplier == 1) sprite.setAnimation(idle);
+        else sprite.setAnimation(sneak);
     }
+    // If the player is moving, play walk or run animation
     else {
         if (sprintMultiplier == 1) {
             sprite.setAnimation(walk);
         } else {
-            sprite.setAnimation(run);
-        }
-
-        // Update orientation
-        if (direction == PLAYER_LEFT) {
-            sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
-        } else {
-            sprite.setFlipHorizontal(SDL_FLIP_NONE);
+            // If the current animation is 'sneak', start the run animation at the second frame
+            if (sprite.getAnimation() == sneak) {
+                sprite.setAnimation(run);
+                sprite.setAnimationIndexX(1);
+            } else {
+                sprite.setAnimation(run);
+            }
         }
     }
 }
 
+void Player::updateSpriteOrientation() {
+     if (directionX == PLAYER_LEFT) {
+        sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
+    } else {
+        sprite.setFlipHorizontal(SDL_FLIP_NONE);
+    }
+}
+
+
 void Player::render(SDL_Renderer *renderer, Point camera) {
-    sprite.updateAnimation(); // Update sprite animation
+    // Update sprite
+    updateSpriteAnimation();
+    updateSpriteOrientation();
+    sprite.updateAnimation();
+
     SDL_Rect srcRect = sprite.getSrcRect();
     SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
     SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());

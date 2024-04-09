@@ -5,14 +5,18 @@
  * @brief Implements the SpeedPowerUp class responsible for SpeedPowerUp object.
  */
 
+// Static member initialization
+
+
 /* CONSTRUCTORS */
 
-SpeedPowerUp::SpeedPowerUp(float x, float y, float w, float h, bool fast) : Item(x, y, w, h), fast(fast) {}
+SpeedPowerUp::SpeedPowerUp(float x, float y, float w, float h, bool fast) :
+            Item(x, y, w, h, "powerUp.wav"), fast(fast) {}
 
 
 /* METHODS */
 
-void SpeedPowerUp::applyEffect(Player &player) const {
+void SpeedPowerUp::applyEffect(Player &player) {
     Item::applyEffect(player);
 
     // The item is a fast power-up

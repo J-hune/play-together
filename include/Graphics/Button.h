@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include "../../dependencies/SDL2_gfx/SDL2_gfxPrimitives.h"
+#include "../Sounds/SoundEffect.h"
 
 /**
  * @brief A struct representing the position of a button.
@@ -161,6 +162,7 @@ private:
     SDL_Color textColor = {0, 0, 0, 255};
     bool clicked = false;
     bool hovered = false;
+    SoundEffect hoverSound = SoundEffect("Menu/hover.wav", 10); /**< The sound played when the mouse goes hover a button. */
 };
 
 #endif //PLAY_TOGETHER_BUTTON_H

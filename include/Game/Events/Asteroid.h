@@ -5,6 +5,7 @@
 #include "../../Graphics/Sprite.h"
 #include "../Point.h"
 #include "../Camera.h"
+#include "../../Sounds/SoundEffect.h"
 #include <SDL_image.h>
 #include <cmath>
 #include <vector>
@@ -210,6 +211,7 @@ private :
     float angle_radians = 0; /**< The angle radians of the asteroid. */
 
     Sprite sprite; /**< The sprite of the player. */
+    SoundEffect explosionSound; /**< The sound effect associated to asteroid's explosion. */
 
     static std::vector<float> positions; /** Possible position array for the asteroid.*/
     static std::vector<int> positionsLock; /** Array of locked asteroid positions. */

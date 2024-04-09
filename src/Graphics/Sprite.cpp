@@ -13,6 +13,10 @@ Sprite::Sprite(Animation animation, SDL_Texture &texture, int width, int height)
 
 /** ACCESSORS **/
 
+Animation Sprite::getAnimation() const {
+    return animation;
+}
+
 SDL_Texture* Sprite::getTexture() const {
     return texturePtr;
 }
@@ -30,7 +34,7 @@ SDL_RendererFlip Sprite::getFlip() const {
 
 void Sprite::setAnimation(const Animation& newAnimation) {
     // Change animation only if it's different
-    if (animation.indexY != newAnimation.indexY) {
+    if (animation != newAnimation) {
         // Change animation only if the current is not unique or if the unique animation is ended
         if (!animation.unique || (animation.unique && nbFrameDisplayed == animation.frames)) {
 
@@ -52,6 +56,10 @@ void Sprite::setAnimation(const Animation& newAnimation) {
             nextAnimation = newAnimation;
         }
     }
+}
+
+void Sprite::setAnimationIndexX(int index) {
+    animationIndexX = index;
 }
 
 void Sprite::setTexture(SDL_Texture &newTexture) {

@@ -46,6 +46,10 @@ std::vector<Polygon> Level::getZones(ZoneType type) const {
     }
 }
 
+Music& Level::getMusicById(int id) {
+    return musics[id];
+}
+
 std::vector<Asteroid> Level::getAsteroids() const {
     return asteroids;
 }
@@ -157,6 +161,18 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
+void Level::renderAsteroids(SDL_Renderer *renderer, Point camera) {
+    for (Asteroid &asteroid : asteroids) {
+        asteroid.render(renderer, camera);
+    }
+}
+
+void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
+    for (Asteroid const &asteroid : asteroids) {
+        asteroid.renderDebug(renderer, camera);
+    }
+}
+
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
@@ -235,6 +251,7 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     mapID = j["id"];
     mapName = j["name"];
 
+    // Load spawn points
     for (const auto &spawnPoint : j["spawnPoints"]) {
         spawnPoints.emplace_back(std::array<Point, 4>{{
                Point(spawnPoint[0][0], spawnPoint[0][1]),
@@ -243,6 +260,12 @@ void Level::loadMapProperties(const std::string &mapFileName) {
                Point(spawnPoint[3][0], spawnPoint[3][1])
         }});
     }
+
+    // Load musics
+    for (const auto &music : j["musics"]) {
+        musics.emplace_back(music);
+    }
+
     std::cout << "Level: Loaded map properties." << std::endl;
 }
 

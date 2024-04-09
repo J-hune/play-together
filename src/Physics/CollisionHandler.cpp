@@ -317,9 +317,9 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
 
 /* COLLISIONS UNRELATED TO MAVITY */
 
-void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> const &items) {
+void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> &items) {
     // Check for collisions with each item
-    for (SizePowerUp const &item : items) {
+    for (SizePowerUp &item : items) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);
@@ -328,9 +328,9 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
     }
 }
 
-void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> const &items) {
+void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &items) {
     // Check for collisions with each item
-    for (SpeedPowerUp const &item : items) {
+    for (SpeedPowerUp &item : items) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);

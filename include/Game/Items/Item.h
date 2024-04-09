@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_ITEM_H
 
 #include "../Player.h"
+#include "../../Sounds/SoundEffect.h"
 
 /**
  * @file Item.h
@@ -27,12 +28,13 @@ private :
     float y; /**< The y-coordinate of the item's position. */
     float width; /**< The width of the item. */
     float height; /**< The height of the item. */
+    SoundEffect collectSound; /**< The sound effect associated to the item. */
 
 public:
 
     /* CONSTRUCTORS */
 
-    Item(float X, float Y, float width, float height);
+    Item(float X, float Y, float width, float height, const std::string& file_name);
     virtual ~Item() = default;
 
 
@@ -82,7 +84,7 @@ public:
      * @brief Apply the item's effect to a player.
      * @param player The player the effect will be applied to.
      */
-    virtual void applyEffect(Player &player) const;
+    virtual void applyEffect(Player &player);
 
     /**
      * @brief Renders the collisions by drawing a rectangle..

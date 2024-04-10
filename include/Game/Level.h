@@ -15,6 +15,7 @@
 #include "Items/SpeedPowerUp.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
+#include "Items/Coin.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -99,6 +100,11 @@ public:
     [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
 
     /**
+     * @brief Return the coins attribute.
+     * @return A vector of Coin.
+     */
+    [[nodiscard]] std::vector<Coin> getCoins() const;
+    /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.
      */
@@ -131,6 +137,12 @@ public:
      */
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
+
+    /**
+     * @brief Remove an item from coins attribute.
+     * @param item The item to remove.
+     */
+    void removeItemFromCoins(Coin const &item);
 
     /** PUBLIC METHODS **/
 
@@ -199,6 +211,7 @@ private:
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
+    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
 

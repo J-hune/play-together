@@ -338,3 +338,14 @@ void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<
         }
     }
 }
+
+void handleCollisionsWithCoins(Player *player, Level *level, std::vector<Coin> const &items) {
+    // Check for collisions with each item
+    for (Coin const &item : items) {
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
+            item.applyEffect(*player);
+            level->removeItemFromCoins(item);
+        }
+    }
+}

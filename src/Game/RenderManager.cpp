@@ -20,7 +20,10 @@ RenderManager::RenderManager(SDL_Renderer *renderer, Game *game) : renderer(rend
         std::cerr << "Error loading asteroid textures" << std::endl;
         exit(1);
     }
-
+    if(!Coin::loadTextures(*renderer)){
+        std::cerr << "Error loading coin textures" << std::endl;
+        exit(1);
+    }
     // Load the fonts
     TTF_Font *font16 = TTF_OpenFont("assets/font/arial.ttf", 16);
     TTF_Font *font24 = TTF_OpenFont("assets/font/arial.ttf", 24);

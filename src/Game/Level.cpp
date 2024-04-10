@@ -70,6 +70,10 @@ std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
     return speedPowerUp;
 }
 
+std::vector<Coin> Level::getCoins() const {
+    return coins;
+}
+
 short Level::getLastCheckpoint() const {
     return lastCheckpoint;
 }
@@ -101,6 +105,15 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
         i++;
     }
     speedPowerUp.erase(speedPowerUp.begin() + i);
+}
+
+void Level::removeItemFromCoins(Coin const &item) {
+    // Search the item and remove it
+    size_t i = 0;
+    while (i < coins.size() && item != coins[i]) {
+        i++;
+    }
+    coins.erase(coins.begin() + i);
 }
 
 
@@ -192,6 +205,13 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
     for (const SpeedPowerUp &item : speedPowerUp) {
         item.renderDebug(renderer, camera);
+    }
+
+    Coin::updateSprite();
+    // Draw the coin
+    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
+    for (const Coin &item : coins) {
+        item.render(renderer, camera);
     }
 }
 
@@ -386,5 +406,15 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         speedPowerUp.emplace_back(x, y, width, height, fast);
     }
 
-    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up and " << speedPowerUp.size() << " speed power-up." << std::endl;
+    // Load all Coin items
+    for (const auto &item : j["coins"]) {
+        float x = item["x"];
+        float y = item["y"];
+        float width = item["width"];
+        float height = item["height"];
+        int value  = item["value"];
+        coins.emplace_back(x, y, width, height, value);
+    }
+
+    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up, " << speedPowerUp.size() << " speed power-up and " << coins.size() << " coins." << std::endl;
 }

@@ -216,6 +216,7 @@ void Game::broadPhase() {
     switchingPlatforms.clear();
     sizePowerUp.clear();
     speedPowerUp.clear();
+    coins.clear();
 
     std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
     SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
@@ -273,6 +274,13 @@ void Game::broadPhase() {
     for (const SpeedPowerUp &item: level.getSpeedPowerUp()) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
             speedPowerUp.push_back(item);
+        }
+    }
+
+    // Check for collisions with coin
+    for (const Coin &item: level.getCoins()) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
+            coins.push_back(item);
         }
     }
 }

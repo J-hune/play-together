@@ -192,6 +192,7 @@ private:
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
 
     // Debug variables used for the application console
     bool enable_platforms_movement = true;

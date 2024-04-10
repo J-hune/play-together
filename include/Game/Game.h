@@ -187,6 +187,8 @@ private:
 
     // Broad phase attributes
     std::vector<AABB> saveZones; /**< Collection of AABB representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of AABB representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABB representing increase fall speed zones. */
     std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */

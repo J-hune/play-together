@@ -212,6 +212,8 @@ void Game::switchMavity() {
 void Game::broadPhase() {
     // Empty old broad phase elements
     saveZones.clear();
+    toggleGravityZones.clear();
+    increaseFallSpeedZones.clear();
     deathZones.clear();
     obstacles.clear();
     movingPlatforms1D.clear();
@@ -227,6 +229,20 @@ void Game::broadPhase() {
     for (const AABB &aabb: level.getZones(AABBType::SAVE)) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
             saveZones.push_back(aabb);
+        }
+    }
+
+    // Check collisions with each toggle gravity zone
+    for (const AABB &aabb: level.getZones(AABBType::TOGGLE_GRAVITY)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
+            toggleGravityZones.push_back(aabb);
+        }
+    }
+
+    // Check collisions with each increase fall speed zone
+    for (const AABB &aabb: level.getZones(AABBType::INCREASE_FALL_SPEED)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
+            increaseFallSpeedZones.push_back(aabb);
         }
     }
 
@@ -298,6 +314,8 @@ void Game::narrowPhase() {
         handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
+        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
+        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
 
         // Handle collisions with death zones and camera borders
         if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())

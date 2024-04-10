@@ -226,6 +226,8 @@ private:
     std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
     std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
     std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
     std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */

@@ -10,7 +10,9 @@
  */
 
 enum class AABBType {
-    SAVE
+    SAVE,
+    TOGGLE_GRAVITY,
+    INCREASE_FALL_SPEED,
 };
 
 class AABB {

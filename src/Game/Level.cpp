@@ -49,6 +49,8 @@ std::vector<AABB> Level::getZones(AABBType type) const {
     switch(type) {
         using enum AABBType;
         case SAVE: return saveZones;
+        case TOGGLE_GRAVITY: return toggleGravityZones;
+        case INCREASE_FALL_SPEED: return increaseFallSpeedZones;
         default: return {};
     }
 }
@@ -159,6 +161,20 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
         // Draw only the outline of the save zone
         SDL_FRect save_zone_rect = {save_zone.getX() - camera.x, save_zone.getY() - camera.y, save_zone.getWidth(), save_zone.getHeight()};
         SDL_RenderDrawRectF(renderer, &save_zone_rect);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 127, 25, 230, 255);
+    for (const AABB &toggle_gravity_zone: toggleGravityZones) {
+        // Draw only the outline of the toggle gravity zone
+        SDL_FRect toggle_gravity_zone_rect = {toggle_gravity_zone.getX() - camera.x, toggle_gravity_zone.getY() - camera.y, toggle_gravity_zone.getWidth(), toggle_gravity_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &toggle_gravity_zone_rect);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 58, 92, 217, 255);
+    for (const AABB &increase_fall_speed_zone: increaseFallSpeedZones) {
+        // Draw only the outline of the increase fall speed zone
+        SDL_FRect increase_fall_speed_zone_rect = {increase_fall_speed_zone.getX() - camera.x, increase_fall_speed_zone.getY() - camera.y, increase_fall_speed_zone.getWidth(), increase_fall_speed_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &increase_fall_speed_zone_rect);
     }
 }
 
@@ -303,7 +319,8 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     bossZones.clear();
     eventZones.clear();
     saveZones.clear();
-    saveZones.clear();
+    toggleGravityZones.clear();
+    increaseFallSpeedZones.clear();
 
     std::string polygons_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/polygons.json";
     std::string aabbs_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/aabbs.json";
@@ -340,7 +357,9 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     aabbs_file.close();
 
     int save_zones_size = loadAABBFromJson(aabbs, "saveZones", saveZones, SAVE);
-    std::cout << "Level: Loaded " << save_zones_size << " save zones." << std::endl;
+    int toggle_gravity_zones_size = loadAABBFromJson(aabbs, "toggleGravityZones", toggleGravityZones, TOGGLE_GRAVITY);
+    int increase_fall_speed_zones_size = loadAABBFromJson(aabbs, "increaseFallSpeedZones", increaseFallSpeedZones, INCREASE_FALL_SPEED);
+    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {

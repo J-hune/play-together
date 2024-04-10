@@ -1,5 +1,11 @@
 {
     "saveZones": [
         {"x": 1070, "y": -400, "width": 80, "height": 400}
+    ],
+    "toggleGravityZones": [
+        {"x": 1300, "y":40, "width": 300, "height": 20}
+    ],
+    "increaseFallSpeedZones" : [
+        {"x": 1300, "y": -400, "width": 300, "height": 800}
     ]
 }

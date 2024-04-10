@@ -74,12 +74,6 @@ void InputManager::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &key
             // Reset horizontal movement if moving left
             if (player->getMoveX() < 0) player->setMoveX(0);
             player->setWantToMoveLeft(false); // Disable left movement
-            // Trigger idle animation if not moving right
-            if (!player->getWantToMoveRight()) {
-                player->updateSprite(0);
-            } else {
-                player->getSprite()->setFlipHorizontal(SDL_FLIP_NONE);
-            }
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
@@ -90,17 +84,10 @@ void InputManager::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &key
                 player->setMoveX(0);
             }
             player->setWantToMoveRight(false); // Disable right movement
-            // Trigger idle animation if not moving left
-            if (!player->getWantToMoveLeft()) {
-                player->updateSprite(0);
-            } else {
-                player->getSprite()->setFlipHorizontal(SDL_FLIP_HORIZONTAL);
-            }
             break;
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
             player->setSprint(false);
-            player->updateSprite(0);
             break;
         default:
             break;
@@ -124,13 +111,11 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_A:
             if (player == nullptr) break;
             player->setWantToMoveLeft(true);
-            player->updateSprite(PLAYER_LEFT);
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
             if (player == nullptr) break;
             player->setWantToMoveRight(true);
-            player->updateSprite(PLAYER_RIGHT);
             break;
         case SDL_SCANCODE_G:
             gamePtr->switchMavity(); // Switch mavity for all players
@@ -142,7 +127,6 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
             player->setSprint(true);
-            player->updateSprite(0);
             break;
         default:
             break;
@@ -152,12 +136,19 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
 
 void InputManager::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) const {
 
+    // Check if the game is in development mode
+#ifdef DEVELOPMENT_MODE
+    bool isDevelopmentMode = true;
+#else
+    bool isDevelopmentMode = false;
+#endif
+
     // Get the current keyboard state mask
     const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
     uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
 
     // If the keyboard state has changed since the last message was sent
-    if (currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+    if (!isDevelopmentMode || currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
         // Send the new keyboard state mask to the server
         Mediator::sendPlayerUpdate(currentKeyboardStateMask);
 

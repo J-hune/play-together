@@ -5,13 +5,12 @@
 #include <SDL_ttf.h>
 #include <map>
 #include <thread>
+#include <format>
 
 #include "../Graphics/Button.h"
 #include "Game.h"
 #include "../Utils/Mediator.h"
 #include "TextBox.h"
-
-constexpr unsigned int MAX_JSON_SIZE = 1024;
 
 enum class MenuAction {
     MAIN,
@@ -41,8 +40,9 @@ public:
      * @brief Constructor for the Menu class.
      * @param renderer The SDL_Renderer to render the menu.
      * @param quit A pointer to a boolean to control the game loop.
+     * @param music_file_name Menu music file name.
      */
-    Menu(SDL_Renderer *renderer, bool *quit);
+    Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name);
 
 
     /** ACCESSORS **/
@@ -64,15 +64,15 @@ public:
 
     /**
      * @brief Set whether the menu should be displayed or not.
-     * @param displayMenu True to display the menu, false to hide it.
+     * @param display_menu True to display the menu, false to hide it.
      */
-    void setDisplayMenu(bool displayMenu);
+    void setDisplayMenu(bool display_menu);
 
     /**
      * @brief Set the current menu action.
-     * @param menuAction The menu action to set.
+     * @param menu_action The menu action to set.
      */
-    void setMenuAction(MenuAction menuAction);
+    void setMenuAction(MenuAction menu_action);
 
     /**
      * @brief Set whether the game loop should quit or not.
@@ -82,6 +82,11 @@ public:
 
 
     /** METHODS **/
+
+    /**
+     * @brief Start playing the menu music.
+     */
+    void playMusic();
 
     /**
      * @brief Render the menu on the screen.
@@ -114,6 +119,9 @@ private:
     std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
     std::map<GameStateKey, std::vector<TextBox>> textInputs;
     short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
+    Music music; /**< The music played when the menu is displayed. */
+    SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
+    SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
 
     /** ACCESSORS **/
 

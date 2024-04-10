@@ -117,7 +117,7 @@ void ApplicationConsole::changeMap(const std::string &command) const {
 }
 
 void ApplicationConsole::showDebugInfo(const std::string &command) const {
-    RenderManager renderManager = gamePtr->getRenderManager();
+    RenderManager &renderManager = gamePtr->getRenderManager();
     std::istringstream iss(command);
     std::string command_name;
     std::string option;
@@ -152,7 +152,7 @@ void ApplicationConsole::showDebugInfo(const std::string &command) const {
 }
 
 void ApplicationConsole::hideDebugInfo(const std::string &command) const {
-    RenderManager renderManager = gamePtr->getRenderManager();
+    RenderManager &renderManager = gamePtr->getRenderManager();
     std::istringstream iss(command);
     std::string command_name;
     std::string option;

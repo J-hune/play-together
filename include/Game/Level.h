@@ -6,6 +6,8 @@
 #include <sstream>
 #include <iostream>
 #include "../Physics/Polygon.h"
+#include "../Physics/AABB.h"
+#include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
 #include "Platforms/MovingPlatform1D.h"
@@ -56,11 +58,25 @@ public:
     [[nodiscard]] std::array<Point, 4> getSpawnPoints(int index) const;
 
     /**
+     * @brief Return a music from the musics attribute.
+     * @param id The id of the music to retrieve.
+     * @return A Music object.
+     */
+    [[nodiscard]] Music& getMusicById(int id) ;
+
+    /**
      * @brief Return the zones of a specific type.
      * @param type Represents the type of zone.
      * @return A vector of Polygon.
      */
-    [[nodiscard]] std::vector<Polygon> getZones(ZoneType type) const;
+    [[nodiscard]] std::vector<Polygon> getZones(PolygonType type) const;
+
+    /**
+     * @brief Return the zones of a specific type.
+     * @param type Represents the type of zone.
+     * @return A vector of AABB.
+     */
+    [[nodiscard]] std::vector<AABB> getZones(AABBType type) const;
 
     /**
      * @brief Return the asteroids attribute.
@@ -136,15 +152,16 @@ public:
 
     /**
      * @brief Applies the movement to all asteroid in the game.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see applyMovement() for applying movement to one asteroid.
      */
-    void applyAsteroidsMovement(double deltaTime);
+    void applyAsteroidsMovement(double delta_time);
 
     /**
      * @brief Applies the movement of every platforms in the level.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyPlatformsMovement(double deltaTime);
+    void applyPlatformsMovement(double delta_time);
 
     /**
      * @brief Generates a specified number of asteroids in the game.
@@ -166,7 +183,21 @@ public:
     void renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
-     * @brief Renders the game by drawing the player and obstacles.
+     * @brief Renders asteroids by drawing sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroids(SDL_Renderer *renderer, Point camera);
+
+    /**
+     * @brief Renders asteroids by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the platforms by drawing collisions boxes.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
@@ -185,6 +216,8 @@ private:
     int mapID = 0; /**< Represents the ID of the map. */
     std::string mapName; /**< Represents the name of the map. */
     std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
+    std::vector<Music> musics; /**< Represents the musics of the map. */
+
     std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
     std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
     std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
@@ -192,7 +225,9 @@ private:
     std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
     std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
     std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
     std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
@@ -206,37 +241,46 @@ private:
 
     /**
      * @brief Load the properties of the map.
-     * @param mapName Represents the name of the map file.
+     * @param map_file_name Represents the name of the map file.
      */
-    void loadMapProperties(const std::string &mapName);
+    void loadMapProperties(const std::string &map_file_name);
 
     /**
      * @brief Load the polygons from a JSON file.
-     * @param jsonData Represents the JSON data.
-     * @param zoneName Represents the name of the zone.
+     * @param json_data Represents the JSON data.
+     * @param zone_name Represents the name of the zone.
      * @param[out] zones Represents the collection of polygons.
      * @return The number of polygons loaded.
      */
-    static int loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type);
+    static int loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, PolygonType type);
+
+    /**
+     * @brief Load the AABB from a JSON file.
+     * @param json_data Represents the JSON data.
+     * @param zone_name Represents the name of the zone.
+     * @param[out] zones Represents the collection of AABB.
+     * @return The number of AABB loaded.
+     */
+    static int loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type);
 
     /**
      * @brief Load the polygons from a map.
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      * @see loadPolygonsFromJson() for sub-function.
      */
-    void loadPolygonsFromMap(const std::string &mapName);
+    void loadPolygonsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the platforms from a map. (1D, 2D and switching platforms)
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      */
-    void loadPlatformsFromMap(const std::string &mapName);
+    void loadPlatformsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the items from a map.
-     * @param mapName Represents the name of the map.
+     * @param map_file_name Represents the name of the map.
      */
-    void loadItemsFromMap(const std::string &mapName);
+    void loadItemsFromMap(const std::string &map_file_name);
 
 
 };

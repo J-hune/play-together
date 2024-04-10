@@ -5,9 +5,12 @@
  * @brief Implements the Item class responsible for Item object.
  */
 
+
 /* CONSTRUCTORS */
 
-Item ::Item(float X, float Y, float height, float width) : x(X), y(Y), width(width), height(height) {}
+Item::Item(float X, float Y, float height, float width, const std::string& file_name) :
+            x(X), y(Y), width(width), height(height), collectSound("Items/" + file_name) {}
+
 
 /* ACCESSORS */
 
@@ -41,8 +44,9 @@ bool Item::operator==(const Item &item) const {
 
 /* METHODS */
 
-void Item::applyEffect(Player &player) const {
+void Item::applyEffect(Player &player) {
     player.addToScore(5);
+    collectSound.play(0, -1);
 }
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {

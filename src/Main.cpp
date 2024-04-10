@@ -1,11 +1,15 @@
 #include <thread>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 #include "../include/Utils/ApplicationConsole.h"
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
 #include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+#ifdef DEVELOPMENT_MODE
+    std::cout << "APP : WARNING : DEVELOPMENT_MODE is enabled" << std::endl;
+#endif
 
 // Initialize Winsock on Windows
 #ifdef _WIN32
@@ -26,6 +30,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Initialize SDL_ttf
     if (TTF_Init() == -1) {
         std::cerr << "Error initializing SDL2_ttf: " << TTF_GetError() << std::endl;
+        return 1;
+    }
+
+    // Initialize SDL_mixer
+    int audioFlags = MIX_INIT_MP3;
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 8, 2048) == -1 || Mix_Init(audioFlags) != audioFlags) {
+        std::cerr << "Error initializing SDL2_Mixer: " << Mix_GetError() << std::endl;
         return 1;
     }
 
@@ -74,7 +85,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     bool quit = false;
 
     Game game(window, renderer, maxFrameRate, &quit);
-    Menu menu(renderer, &quit);
+    Menu menu(renderer, &quit, "menu.mp3");
     NetworkManager networkManager;
     ApplicationConsole console(&game);
 
@@ -86,6 +97,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Start console thread
     std::jthread consoleThread(&ApplicationConsole::run, &console);
     consoleThread.detach();
+
+    menu.playMusic(); // Start the menu music
 
     Uint64 lastFrameTime = SDL_GetPerformanceCounter();
 
@@ -135,6 +148,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         TTF_CloseFont(font);
     }
     TTF_Quit();
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_Quit();
 
 #ifdef _WIN32

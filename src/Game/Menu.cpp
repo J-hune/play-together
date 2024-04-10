@@ -11,16 +11,17 @@
 
 // Helper function to flatten a map of buttons into a vector of buttons
 std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Button>> &buttonsMap) {
-    std::vector<Button> flattenedButtons;
+    std::vector<Button> flattened_buttons;
     for (const auto &[state, buttons]: buttonsMap) {
-        flattenedButtons.insert(flattenedButtons.end(), buttons.begin(), buttons.end());
+        flattened_buttons.insert(flattened_buttons.end(), buttons.begin(), buttons.end());
     }
-    return flattenedButtons;
+    return flattened_buttons;
 }
+
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, bool *quit) : renderer(renderer), quitPtr(quit) {
+Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name) : renderer(renderer), quitPtr(quit), music(music_file_name) {
     std::vector<TTF_Font *> fonts = RenderManager::getFonts();
 
     // Create menu buttons
@@ -103,6 +104,7 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit) : renderer(renderer), quitPtr(qui
     textInputs[{GameState::STOPPED, MenuAction::PLAY}].push_back(text_input);
 }
 
+
 /** ACCESSORS **/
 
 bool Menu::isDisplayingMenu() const {
@@ -135,6 +137,10 @@ void Menu::setQuit(bool quit_value) {
 
 /** METHODS **/
 
+void Menu::playMusic() {
+    music.play(-1);
+}
+
 void Menu::render() {
     // Render buttons
     for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
@@ -148,6 +154,7 @@ void Menu::render() {
 
 void Menu::reset() {
     displayMenu = true;
+    music.play(-1);
 
     // Reset all buttons
     for (Button &button: aggregateButtons(buttons)) {
@@ -183,33 +190,42 @@ void Menu::handleButtonAction(Button &button) {
     switch (button.getButtonAction()) {
         using enum ButtonAction;
         case VIEW_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleStartButton(button, button.getValue());
             break;
         case RESUME:
+            backSound.play(0, backSound.getVolume());
             handleResumeButton(button);
             break;
         case STOP:
+            backSound.play(0, backSound.getVolume());
             handleStopButton(button);
             break;
         case SAVE:
+            forwardSound.play(0, forwardSound.getVolume());
             handleSaveButton(button);
             break;
         case QUIT:
             handleQuitButton(button);
             break;
         case CREATE_OR_LOAD_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleCreateOrLoadGameButton(button);
             break;
         case DELETE_SAVE:
+            backSound.play(0, backSound.getVolume());
             handleDeleteSaveButton(button);
             break;
         case JOIN_HOSTED_GAME:
+            forwardSound.play(0, forwardSound.getVolume());
             handleJoinHostedGameButton(button);
             break;
         case NAVIGATE_TO_MENU_MAIN:
+            backSound.play(0, backSound.getVolume());
             handleNavigateToMainMenuButton(button);
             break;
         case NAVIGATE_TO_MENU_PLAY:
+            forwardSound.play(0, forwardSound.getVolume());
             handleNavigateToPlayMenuButton(button);
             break;
         default:
@@ -219,6 +235,7 @@ void Menu::handleButtonAction(Button &button) {
 
 void Menu::handleStartButton(Button &button, int slot) {
     button.reset();
+    Music::stop();
     Mediator::initializeHostedGame(slot);
     displayMenu = false;
     setMenuAction(MenuAction::MAIN);
@@ -266,7 +283,7 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
 
 void Menu::handleJoinHostedGameButton(Button &button) {
     Mediator::stopServers();
-
+    Music::stop();
     try {
         Mediator::startClients();
         displayMenu = false;
@@ -284,8 +301,8 @@ void Menu::handleDeleteSaveButton(Button &button) {
     // Delete the save file and update the save slots
     button.reset();
 
-    std::string save_file = "saves/slot_" + std::to_string(button.getValue()) + ".json";
-    std::remove(save_file.c_str());
+    std::string save_file_name = std::format("saves/slot_{}.json", button.getValue());
+    std::remove(save_file_name.c_str());
     updateSaveSlots();
 }
 
@@ -311,7 +328,7 @@ void Menu::updateSaveSlots() {
 
     // Update the text for the save slots
     for (int i = 0; i < 3; i++) {
-        std::ifstream save_slot("saves/slot_" + std::to_string(i + 1) + ".json");
+        std::ifstream save_slot(std::format("saves/slot_{}.json", i + 1));
         Button &button = buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}][i * 2];
         Button &remove_button = buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}][i * 2 + 1];
 

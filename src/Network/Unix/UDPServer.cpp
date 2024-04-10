@@ -43,7 +43,9 @@ void UDPServer::start(std::map<int, sockaddr_in> &clientAddresses, std::mutex &c
 }
 
 bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &message) const {
+#ifdef DEVELOPMENT_MODE
     std::cout << "UDPServer: Sending message: " << message << " (" << message.length() << " bytes)" << std::endl;
+#endif
 
     if (sendto(socketFileDescriptor, message.c_str(), message.length(), 0, (const sockaddr*)&clientAddress, sizeof(clientAddress)) == -1) {
         perror("UDPServer: Error sending message");
@@ -54,7 +56,9 @@ bool UDPServer::send(const sockaddr_in& clientAddress, const std::string &messag
 }
 
 bool UDPServer::broadcast(const std::string &message, int socketIgnored) const {
+#ifdef DEVELOPMENT_MODE
     std::cout << "UDPServer: Broadcasting message: " << message << " (" << message.length() << " bytes)" << std::endl;
+#endif
 
     clientAddressesMutexPtr->lock();
     for (const auto& [id, address] : *clientAddressesPtr) {
@@ -129,7 +133,9 @@ void UDPServer::handleMessage() {
                 // Handle received message
                 Mediator::handleMessages(1, message, clientID);
             } else {
+            #ifdef DEVELOPMENT_MODE
                 std::cout << "UDPServer: Received message: " << message << " from unknown client" << std::endl;
+            #endif
             }
         }
     }

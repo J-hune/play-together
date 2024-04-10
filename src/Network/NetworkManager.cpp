@@ -111,18 +111,14 @@ void NetworkManager::broadcastMessage(int protocol, const std::string &message, 
     if (protocol == 0) {
         if (SOCKET_VALID(tcpServer.getSocketFileDescriptor())) {
             bool success = tcpServer.broadcast(message, socketIgnored);
-            if (success) {
-                std::cout << "NetworkManager: Message sent to all clients" << std::endl;
-            } else {
+            if (!success) {
                 std::cerr << "NetworkManager: Failed to send message to all clients" << std::endl;
             }
         }
     } else if (protocol == 1) {
         if (SOCKET_VALID(udpServer.getSocketFileDescriptor())) {
             bool success = udpServer.broadcast(message, socketIgnored);
-            if (success) {
-                std::cout << "Message sent to all clients" << std::endl;
-            } else {
+            if (!success) {
                 std::cerr << "Failed to send message to all clients" << std::endl;
             }
         }

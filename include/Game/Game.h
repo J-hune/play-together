@@ -50,25 +50,25 @@ public:
      * @brief Returns the input manager of the game.
      * @return A pointer of InputManager object representing the input manager of the game.
      */
-    [[nodiscard]] InputManager &getInputManager() const;
+    [[nodiscard]] InputManager &getInputManager();
 
     /**
      * @brief Returns the render object of the game.
      * @return A pointer of Renderer object representing the render object of the game.
      */
-    [[nodiscard]] RenderManager &getRenderManager() const;
+    [[nodiscard]] RenderManager &getRenderManager();
 
     /**
      * @brief Returns the save manager of the game.
      * @return A pointer of SaveManager object representing the save manager of the game.
      */
-    [[nodiscard]] SaveManager &getSaveManager() const;
+    [[nodiscard]] SaveManager &getSaveManager();
 
     /**
      * @brief Returns the player manager of the game.
      * @return A pointer of PlayerManager object representing the player manager of the game.
      */
-    [[nodiscard]] PlayerManager &getPlayerManager() const;
+    [[nodiscard]] PlayerManager &getPlayerManager();
 
     /**
      * @brief Returns the camera of the game.
@@ -131,6 +131,12 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
+     * @brief Initializes a client game by loading the level and setting music.
+     * @param slot The save slot to use when loading the game. (0 by default)
+     */
+    void initializeClientGame(const std::string& map_name, short last_checkpoint);
+
+    /**
      * @brief Updates the game logic in a fixed time step.
      */
     void fixedUpdate();
@@ -181,10 +187,14 @@ private:
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
+    Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
+
     // Broad phase attributes
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> saveZones; /**< Collection of AABB representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of AABB representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABB representing increase fall speed zones. */
     std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */

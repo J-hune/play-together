@@ -86,11 +86,11 @@ void RenderManager::toggleRenderFps() {
 /* METHODS */
 
 void RenderManager::render() {
-    Level const &level = gamePtr->getLevel();
+    Level &level = gamePtr->getLevel();
     PlayerManager &playerManager = gamePtr->getPlayerManager();
     std::vector<Player> &players = playerManager.getAlivePlayers();
 
-    Point cameraPoint {
+    Point camera_point {
             gamePtr->getCamera()->getX(),
             gamePtr->getCamera()->getY()
     };
@@ -100,28 +100,29 @@ void RenderManager::render() {
 
     // Render textures
     if (render_textures) {
+        level.renderAsteroids(renderer, camera_point); // Draw the asteroids
+        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level.renderItemsDebug(renderer, camera_point); // Draw the items
+
         // Draw the characters
         for (Player &player : players) {
-            player.render(renderer, cameraPoint);
+            player.render(renderer, camera_point);
         }
-
-        for (Asteroid& asteroid : level.getAsteroids()) asteroid.render(renderer, cameraPoint); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, cameraPoint); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, cameraPoint); // Draw the platforms
-        level.renderItemsDebug(renderer, cameraPoint); // Draw the items
     }
 
     // Render collision boxes
     else {
+        level.renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
+        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level.renderItemsDebug(renderer, camera_point); // Draw the items
+
         // Draw the characters
         for (Player const& player : players) {
-            player.renderDebug(renderer, cameraPoint);
+            player.renderDebug(renderer, camera_point);
+            player.renderDebug(renderer, camera_point);
         }
-
-        for (Asteroid const& asteroid : level.getAsteroids()) asteroid.renderDebug(renderer, cameraPoint); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, cameraPoint); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, cameraPoint); // Draw the platforms
-        level.renderItemsDebug(renderer, cameraPoint); // Draw the items
     }
 
     // Render the fps counter
@@ -149,7 +150,7 @@ void RenderManager::render() {
     // Render the player colliders
     if (render_player_colliders) {
         for (Player const& player : players) {
-            player.renderColliders(renderer, cameraPoint);
+            player.renderColliders(renderer, camera_point);
         }
     }
 

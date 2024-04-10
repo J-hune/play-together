@@ -31,9 +31,9 @@ std::array<Point, 4> Level::getSpawnPoints(int index) const {
     return spawnPoints[index];
 }
 
-std::vector<Polygon> Level::getZones(ZoneType type) const {
+std::vector<Polygon> Level::getZones(PolygonType type) const {
     switch(type) {
-        using enum ZoneType;
+        using enum PolygonType;
         case COLLISION: return collisionZones;
         case ICE: return iceZones;
         case SAND: return sandZones;
@@ -41,9 +41,22 @@ std::vector<Polygon> Level::getZones(ZoneType type) const {
         case CINEMATIC: return cinematicZones;
         case BOSS: return bossZones;
         case EVENT: return eventZones;
-        case SAVE: return saveZones;
         default: return {};
     }
+}
+
+std::vector<AABB> Level::getZones(AABBType type) const {
+    switch(type) {
+        using enum AABBType;
+        case SAVE: return saveZones;
+        case TOGGLE_GRAVITY: return toggleGravityZones;
+        case INCREASE_FALL_SPEED: return increaseFallSpeedZones;
+        default: return {};
+    }
+}
+
+Music& Level::getMusicById(int id) {
+    return musics[id];
 }
 
 std::vector<Asteroid> Level::getAsteroids() const {
@@ -87,20 +100,18 @@ void Level::setAsteroids(std::vector<Asteroid> const &value) {
 
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < sizePowerUp.size() && item != sizePowerUp[i]) {
-        i++;
+    auto it = std::ranges::find(sizePowerUp, item);
+    if (it != sizePowerUp.end()) {
+        sizePowerUp.erase(it);
     }
-    sizePowerUp.erase(sizePowerUp.begin() + i);
 }
 
 void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < speedPowerUp.size() && item != speedPowerUp[i]) {
-        i++;
+    auto it = std::ranges::find(speedPowerUp, item);
+    if (it != speedPowerUp.end()) {
+        speedPowerUp.erase(it);
     }
-    speedPowerUp.erase(speedPowerUp.begin() + i);
 }
 
 
@@ -110,18 +121,17 @@ void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
     // Loop to generate asteroids until the desired number is reached
     for (auto i = static_cast<int>(asteroids.size()); i < nbAsteroid; i++){
         // Add a new asteroid to the asteroids vector with coordinates based on the camera position
-        Asteroid newAsteroid(camera.x, camera.y, seed);
-        asteroids.emplace_back(newAsteroid);
+        Asteroid new_asteroid(camera.x, camera.y, seed);
+        asteroids.emplace_back(new_asteroid);
 
         // Send the asteroid throw the network
         if (Mediator::isServerRunning()) {
-            Mediator::sendAsteroidCreation(newAsteroid);
+            Mediator::sendAsteroidCreation(new_asteroid);
         }
     }
 }
 
 void Level::addAsteroid(Asteroid const &asteroid) {
-    std::cout << "Level: Adding asteroid to the game. " << asteroids.size() << std::endl;
     asteroids.emplace_back(asteroid);
 }
 
@@ -147,13 +157,36 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 
     SDL_SetRenderDrawColor(renderer, 144, 238, 144, 255);
-    for (const Polygon &saveZone: saveZones) {
-        for (size_t i = 0; i < saveZone.getVertices().size(); ++i) {
-            std::vector<Point> vertices = saveZone.getVertices();
-            const auto &vertex1 = vertices[i];
-            const auto &vertex2 = vertices[(i + 1) % vertices.size()];
-            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
-        }
+    for (const AABB &save_zone: saveZones) {
+        // Draw only the outline of the save zone
+        SDL_FRect save_zone_rect = {save_zone.getX() - camera.x, save_zone.getY() - camera.y, save_zone.getWidth(), save_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &save_zone_rect);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 127, 25, 230, 255);
+    for (const AABB &toggle_gravity_zone: toggleGravityZones) {
+        // Draw only the outline of the toggle gravity zone
+        SDL_FRect toggle_gravity_zone_rect = {toggle_gravity_zone.getX() - camera.x, toggle_gravity_zone.getY() - camera.y, toggle_gravity_zone.getWidth(), toggle_gravity_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &toggle_gravity_zone_rect);
+    }
+
+    SDL_SetRenderDrawColor(renderer, 58, 92, 217, 255);
+    for (const AABB &increase_fall_speed_zone: increaseFallSpeedZones) {
+        // Draw only the outline of the increase fall speed zone
+        SDL_FRect increase_fall_speed_zone_rect = {increase_fall_speed_zone.getX() - camera.x, increase_fall_speed_zone.getY() - camera.y, increase_fall_speed_zone.getWidth(), increase_fall_speed_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &increase_fall_speed_zone_rect);
+    }
+}
+
+void Level::renderAsteroids(SDL_Renderer *renderer, Point camera) {
+    for (Asteroid &asteroid : asteroids) {
+        asteroid.render(renderer, camera);
+    }
+}
+
+void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
+    for (Asteroid const &asteroid : asteroids) {
+        asteroid.renderDebug(renderer, camera);
     }
 }
 
@@ -161,22 +194,22 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     // Draw the 1D moving platforms
     SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
     for (const MovingPlatform1D &platform: movingPlatforms1D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 
     // Draw the 2D moving platforms
     SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
     for (const MovingPlatform2D &platform: movingPlatforms2D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 
     // Draw the switching platforms
     SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
     for (const SwitchingPlatform &platform: switchingPlatforms) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
+        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
+        SDL_RenderFillRectF(renderer, &platform_rect);
     }
 }
 
@@ -195,22 +228,22 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::applyAsteroidsMovement(double deltaTime) {
+void Level::applyAsteroidsMovement(double delta_time) {
     // Apply movement to all players
     for (Asteroid &asteroid: asteroids) {
-        asteroid.applyMovement(deltaTime);
+        asteroid.applyMovement(delta_time);
     }
 }
 
-void Level::applyPlatformsMovement(double deltaTime) {
+void Level::applyPlatformsMovement(double delta_time) {
     // Apply movement for 1D platforms
     for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 
     // Apply movement for 2D platforms
     for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 
     // Apply movement for switching platforms
@@ -219,9 +252,9 @@ void Level::applyPlatformsMovement(double deltaTime) {
     }
 }
 
-void Level::loadMapProperties(const std::string &mapFileName) {
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/level.json";
-    std::ifstream file(filePath);
+void Level::loadMapProperties(const std::string &map_file_name) {
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/level.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the properties file. Please check the file path." << std::endl;
@@ -235,19 +268,26 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     mapID = j["id"];
     mapName = j["name"];
 
-    for (const auto &spawnPoint : j["spawnPoints"]) {
-        spawnPoints.emplace_back(std::array<Point, 4>{{
-               Point(spawnPoint[0][0], spawnPoint[0][1]),
-               Point(spawnPoint[1][0], spawnPoint[1][1]),
-               Point(spawnPoint[2][0], spawnPoint[2][1]),
-               Point(spawnPoint[3][0], spawnPoint[3][1])
-        }});
+    // Load spawn points
+    for (const auto &spawn_point : j["spawnPoints"]) {
+        spawnPoints.push_back({
+               Point(spawn_point[0][0], spawn_point[0][1]),
+               Point(spawn_point[1][0], spawn_point[1][1]),
+               Point(spawn_point[2][0], spawn_point[2][1]),
+               Point(spawn_point[3][0], spawn_point[3][1])
+        });
     }
+
+    // Load musics
+    for (const auto &music : j["musics"]) {
+        musics.emplace_back(music);
+    }
+
     std::cout << "Level: Loaded map properties." << std::endl;
 }
 
-int Level::loadPolygonsFromJson(const nlohmann::json &jsonData, const std::string &zoneName, std::vector<Polygon> &zones, ZoneType type) {
-    for (const auto &polygon : jsonData[zoneName]) {
+int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, PolygonType type) {
+    for (const auto &polygon : json_data[zone_name]) {
         std::vector<Point> vertices;
         for (const auto &vertex : polygon) {
             vertices.emplace_back(vertex[0], vertex[1]);
@@ -255,10 +295,22 @@ int Level::loadPolygonsFromJson(const nlohmann::json &jsonData, const std::strin
         zones.emplace_back(vertices, type);
     }
 
-    return (int)jsonData[zoneName].size();
+    return (int)json_data[zone_name].size();
 }
 
-void Level::loadPolygonsFromMap(const std::string &mapFileName) {
+int Level::loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type) {
+    for (const auto &zone : json_data[zone_name]) {
+        float x = zone["x"];
+        float y = zone["y"];
+        float width = zone["width"];
+        float height = zone["height"];
+        zones.emplace_back(x, y, width, height, type);
+    }
+
+    return (int)json_data[zone_name].size();
+}
+
+void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     collisionZones.clear();
     iceZones.clear();
     sandZones.clear();
@@ -267,36 +319,52 @@ void Level::loadPolygonsFromMap(const std::string &mapFileName) {
     bossZones.clear();
     eventZones.clear();
     saveZones.clear();
-    saveZones.clear();
+    toggleGravityZones.clear();
+    increaseFallSpeedZones.clear();
 
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/polygons.json";
-    std::ifstream file(filePath);
+    std::string polygons_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/polygons.json";
+    std::string aabbs_file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/aabbs.json";
+    std::ifstream polygons_file(polygons_file_path);
+    std::ifstream aabbs_file(aabbs_file_path);
 
-    if (!file.is_open()) {
+    if (!polygons_file.is_open()) {
         std::cerr << "Level: Unable to open the polygons file. Please check the file path." << std::endl;
         return;
     }
 
-    using enum ZoneType;
-    nlohmann::json j;
-    file >> j;
-    file.close();
+    if (!aabbs_file.is_open()) {
+        std::cerr << "Level: Unable to open the aabbs file. Please check the file path." << std::endl;
+        return;
+    }
 
-    int collisionZoneSize = loadPolygonsFromJson(j, "collisionZones", collisionZones, COLLISION);
-    int iceZonesSize = loadPolygonsFromJson(j, "iceZones", iceZones, ICE);
-    int sandZonesSize = loadPolygonsFromJson(j, "sandZones", sandZones, SAND);
-    int deathZonesSize = loadPolygonsFromJson(j, "deathZones", deathZones, DEATH);
-    int cinematicZonesSize = loadPolygonsFromJson(j, "cinematicZones", cinematicZones, CINEMATIC);
-    int bossZonesSize = loadPolygonsFromJson(j, "bossZones", bossZones, BOSS);
-    int eventZonesSize = loadPolygonsFromJson(j, "eventZones", eventZones, EVENT);
-    int saveZonesSize = loadPolygonsFromJson(j, "saveZones", saveZones, SAVE);
+    using enum PolygonType;
+    nlohmann::json polygons;
+    polygons_file >> polygons;
+    polygons_file.close();
 
-    std::cout << "Level: Loaded " << collisionZoneSize << " collision zones, " << iceZonesSize << " ice zones, " << sandZonesSize << " sand zones, " << deathZonesSize << " death zones, " << cinematicZonesSize << " cinematic zones, " << bossZonesSize << " boss zones, " << eventZonesSize << " event zones and " << saveZonesSize << " save zones." << std::endl;
+    int collision_zones_size = loadPolygonsFromJson(polygons, "collisionZones", collisionZones, COLLISION);
+    int ice_zones_size = loadPolygonsFromJson(polygons, "iceZones", iceZones, ICE);
+    int sand_zones_size = loadPolygonsFromJson(polygons, "sandZones", sandZones, SAND);
+    int death_zones_size = loadPolygonsFromJson(polygons, "deathZones", deathZones, DEATH);
+    int cinematic_zones_size = loadPolygonsFromJson(polygons, "cinematicZones", cinematicZones, CINEMATIC);
+    int boss_zones_size = loadPolygonsFromJson(polygons, "bossZones", bossZones, BOSS);
+    int event_zones_size = loadPolygonsFromJson(polygons, "eventZones", eventZones, EVENT);
+    std::cout << "Level: Loaded " << collision_zones_size << " collision zones, " << ice_zones_size << " ice zones, " << sand_zones_size << " sand zones, " << death_zones_size << " death zones, " << cinematic_zones_size << " cinematic zones, " << boss_zones_size << " boss zones and " << event_zones_size << " event zones." << std::endl;
+
+    using enum AABBType;
+    nlohmann::json aabbs;
+    aabbs_file >> aabbs;
+    aabbs_file.close();
+
+    int save_zones_size = loadAABBFromJson(aabbs, "saveZones", saveZones, SAVE);
+    int toggle_gravity_zones_size = loadAABBFromJson(aabbs, "toggleGravityZones", toggleGravityZones, TOGGLE_GRAVITY);
+    int increase_fall_speed_zones_size = loadAABBFromJson(aabbs, "increaseFallSpeedZones", increaseFallSpeedZones, INCREASE_FALL_SPEED);
+    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
-    std::ifstream file(filePath);
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the platforms file. Please check the file path." << std::endl;
@@ -355,8 +423,8 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
     sizePowerUp.clear();
     speedPowerUp.clear();
 
-    std::string filePath = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
-    std::ifstream file(filePath);
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
+    std::ifstream file(file_path);
 
     if (!file.is_open()) {
         std::cerr << "Level: Unable to open the items file. Please check the file path." << std::endl;

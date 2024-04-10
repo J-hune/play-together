@@ -26,8 +26,6 @@ public:
 
     /** CONSTRUCTORS **/
 
-    Player() = default; // Used for the useless empty Game constructor of Athena
-
     /**
      * @brief Constructor for the Player class.
      * @param spawnPoint The spawn point of the player.
@@ -146,6 +144,12 @@ public:
      * @return The value of the isJumping attribute
      */
     [[nodiscard]] bool getIsJumping() const;
+
+    /**
+     * @brief Return the id of the current zone in which the player is.
+     * @return The current zone ID.
+     */
+    [[nodiscard]] size_t getCurrentZoneID() const;
 
 
     /** SPECIFIC ACCESSORS **/
@@ -327,6 +331,18 @@ public:
     */
     void setSpriteID(short id);
 
+    /**
+     * @brief Set the current zone ID of the player.
+     * @param id The zone ID to set.
+     */
+    void setCurrentZoneID(size_t id);
+
+    /**
+     * @brief Set the mavity attribute.
+     * @param val The new value of the mavity attribute.
+     */
+    void setMaxFallSpeed(float val);
+
 
     /** PUBLIC METHODS **/
 
@@ -376,12 +392,6 @@ public:
     void applyMovement(double ratio);
 
     /**
-     * @brief Update the sprite animation of the player.
-     * @param direction The current x-axis direction of the player.
-     */
-    void updateSprite(int direction);
-
-    /**
      * @brief Renders the player's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -415,7 +425,6 @@ private:
     float height; /**< The height of the player. */
     Sprite sprite; /**< The sprite of the player. */
     int score = 0;
-    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // X-AXIS MOVEMENT ATTRIBUTES
     float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
@@ -430,6 +439,7 @@ private:
     float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
     float decelerationFactorX = 3.0f; /**< The deceleration factor controlling how quickly the player's speed curve decreases when not moving. A higher value results in faster deceleration. */
     float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
+    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
 
     // Y-AXIS MOVEMENT ATTRIBUTES
     float moveY = 0; /**< Vertical movement of the player during this frame. */
@@ -442,11 +452,12 @@ private:
     Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
     float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
     float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
-    float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
+    float maxFallSpeed = 600.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
     float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
     Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
+    size_t currentZoneID = 0; /**< The ID of the current zone the player is in. */
 
     // LOADED TEXTURES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
@@ -457,10 +468,12 @@ private:
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
+    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
     static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
+
 
 
     /** PRIVATE METHODS **/
@@ -512,6 +525,17 @@ private:
      * @see calculateMovement() for main use.
      */
     void calculateYaxisMovement(double deltaTime);
+
+    /**
+     * @brief Update the sprite animation of the player.
+     */
+    void updateSpriteAnimation();
+
+    /**
+     * @brief Update the sprite orientation of the player.
+     * @param direction The current x-axis direction of the player.
+     */
+    void updateSpriteOrientation();
 
 };
 

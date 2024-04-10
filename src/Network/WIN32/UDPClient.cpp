@@ -47,7 +47,7 @@ void UDPClient::initialize(const std::string &serverHostname, short serverPort, 
     this->serverAddress = serverAddr;
 }
 
-void UDPClient::start() {
+void UDPClient::start() const {
     handleMessages(); // Start handling incoming messages (blocking)
     std::cout << "UDPClient: Client shutdown" << std::endl;
 }
@@ -67,7 +67,9 @@ void UDPClient::handleMessages() const {
 }
 
 bool UDPClient::send(const std::string &message) const {
+#ifdef DEVELOPMENT_MODE
     std::cout << "UDPClient: Sending message: " << message << " (" << message.length() << " bytes) to " << inet_ntoa(serverAddress.sin_addr) << ":" << ntohs(serverAddress.sin_port) << std::endl;
+#endif
 
     if (sendto(socketFileDescriptor, message.c_str(), static_cast<int>(message.length()), 0, (const sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
         std::cerr << "UDPClient: Error sending message: " << WSAGetLastError() << std::endl;

@@ -190,19 +190,69 @@ bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &
     return i != deathZones.size(); // True if the player collided with a death zone
 }
 
-void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<Polygon> &saveZones) {
+void handleCollisionsWithSaveZones(Player &player, Level &level, std::vector<AABB> &saveZones) {
     // Check collisions with each save zone
     for (size_t i = 0; i < saveZones.size(); ++i) {
-        const Polygon &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
+        const AABB &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
         auto savePointID = static_cast<short>(i + 1);
-        if (checkSATCollision(player.getVertices(), saveZone) && level.getLastCheckpoint() < savePointID) {
+
+        // Check if the player is already in the save zone
+        if (player.getCurrentZoneID() == (i + 1)) return;
+        if (checkAABBCollision(player.getBoundingBox(), saveZone.getRect()) && level.getLastCheckpoint() < savePointID) {
             level.setLastCheckpoint(savePointID);
+            player.setCurrentZoneID(i + 1);
             std::cout << "Checkpoint reached: " << savePointID << std::endl;
         }
     }
 }
 
+void handleCollisionsWithToggleGravityZones(Player &player, const std::vector<AABB> &toggleGravityZones) {
+    // Check collisions with each toggle gravity zone
+    for (size_t i = 0; i < toggleGravityZones.size(); ++i) {
+        const AABB &toggleGravityZone = toggleGravityZones[i];
+        const SDL_FRect &playerBoundingBox = player.getBoundingBox();
+        const SDL_FRect &toggleGravityRect = toggleGravityZone.getRect();
 
+        if (checkAABBCollision(playerBoundingBox, toggleGravityRect)) {
+            const size_t zoneID = i + 100;
+
+            // If the player was already in the zone, skip the zone
+            if (player.getCurrentZoneID() == zoneID) {
+                continue;
+            }
+
+            player.toggleMavity();
+            player.getSprite()->toggleFlipVertical();
+
+            float gravityOffset = toggleGravityZone.getHeight() + 4.f;
+            float currentMoveY = player.getMoveY();
+            float newMoveY = (player.getMavity() < 0) ? std::max(currentMoveY, gravityOffset) : std::min(currentMoveY, -gravityOffset);
+            player.setMoveY(newMoveY);
+            player.setCurrentZoneID(zoneID);
+
+            // Exit the loop if the player is in the zone (no need to check the other zones)
+            return;
+        }
+
+        // If the player is in the zone, but not colliding with it anymore, reset the player's zone
+        else if (player.getCurrentZoneID() == i + 100) {
+            player.setCurrentZoneID(0);
+        }
+    }
+}
+
+void handleCollisionsWithIncreaseFallSpeedZones(Player &player, const std::vector<AABB> &increaseFallSpeedZones) {
+    // Check collisions with each increase fall speed zone
+    for (const auto & increaseFallSpeedZone : increaseFallSpeedZones) {
+        // Check if the player is already in the increase fall speed zone
+        if (checkAABBCollision(player.getBoundingBox(), increaseFallSpeedZone.getRect())) {
+            player.setMaxFallSpeed(1300);
+        } else {
+            player.setCurrentZoneID(0);
+            player.setMaxFallSpeed(600);
+        }
+    }
+}
 
 /* PLAYER REVERSED MAVITY */
 
@@ -317,9 +367,9 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
 
 /* COLLISIONS UNRELATED TO MAVITY */
 
-void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> const &items) {
+void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> &items) {
     // Check for collisions with each item
-    for (SizePowerUp const &item : items) {
+    for (SizePowerUp &item : items) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);
@@ -328,9 +378,9 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
     }
 }
 
-void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> const &items) {
+void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &items) {
     // Check for collisions with each item
-    for (SpeedPowerUp const &item : items) {
+    for (SpeedPowerUp &item : items) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);

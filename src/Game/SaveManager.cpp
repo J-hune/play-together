@@ -25,44 +25,44 @@ void SaveManager::saveGameState() {
 
     // Create a JSON object to store the game state
     using json = nlohmann::json;
-    json gameStateJSON;
+    json game_state_json;
 
     // Store the game state
 
     // Save date to format YYYY-MM-DD (local time) using the C++ standard library
     auto now = std::chrono::system_clock::now();
-    auto currentTime = std::chrono::system_clock::to_time_t(now);
+    auto current_time = std::chrono::system_clock::to_time_t(now);
 
-    std::tm localTime = {};
+    std::tm local_time = {};
 #ifdef _WIN32
-    localtime_s(&localTime, &currentTime);
+    localtime_s(&local_time, &current_time);
 #else
-    localtime_r(&currentTime, &localTime);
+    localtime_r(&current_time, &local_time);
 #endif
 
     std::stringstream ss;
-    ss << std::put_time(&localTime, "%Y-%m-%d");
+    ss << std::put_time(&local_time, "%Y-%m-%d");
 
 
-    gameStateJSON["date"] = ss.str();
-    gameStateJSON["level"] = level.getMapName();
-    gameStateJSON["lastCheckpoint"] = level.getLastCheckpoint();
+    game_state_json["date"] = ss.str();
+    game_state_json["level"] = level.getMapName();
+    game_state_json["lastCheckpoint"] = level.getLastCheckpoint();
 
     // Save the player state
-    std::string saveFileName = "saves/slot_" + std::to_string(slot) + ".json";
+    std::string save_file_name = std::format("saves/slot_{}.json", slot);
 
     // If the "saves" directory does not exist, create it
-    if (!std::filesystem::exists(saveFileName)) {
+    if (!std::filesystem::exists(save_file_name)) {
         std::cout << "Game: Creating missing saves directory" << std::endl;
         std::filesystem::create_directory("saves");
     }
 
     // Open the file for writing
-    std::ofstream file(saveFileName);
+    std::ofstream file(save_file_name);
 
     // If the file was successfully created, write the game state to the file
     if (file.is_open()) {
-        file << gameStateJSON.dump(4);
+        file << game_state_json.dump(4);
         file.close();
         std::cout << "SaveManager: Saved game to slot " << slot << std::endl;
     } else {
@@ -74,15 +74,15 @@ bool SaveManager::loadGameState() {
     printf("SaveManager: Loading game from slot %d\n", slot);
 
     // Load the game state from the file
-    std::string saveFileName = "saves/slot_" + std::to_string(slot) + ".json";
+    std::string save_file_name = std::format("saves/slot_{}.json", slot);
 
     // If the file does not exist, return false
-    if (!std::filesystem::exists(saveFileName)) {
+    if (!std::filesystem::exists(save_file_name)) {
         return false;
     }
 
     // Open the file for reading
-    std::ifstream file(saveFileName);
+    std::ifstream file(save_file_name);
 
     // If the file was successfully opened, read the game state from the file
     if (file.is_open()) {
@@ -92,12 +92,12 @@ bool SaveManager::loadGameState() {
 
         // Parse the JSON content
         using json = nlohmann::json;
-        json gameStateJSON = json::parse(buffer.str());
+        json game_state_json = json::parse(buffer.str());
 
         // Load the game state
         Level &level = gamePtr->getLevel();
-        level = Level(gameStateJSON["level"]);
-        level.setLastCheckpoint(gameStateJSON["lastCheckpoint"]);
+        level = Level(game_state_json["level"]);
+        level.setLastCheckpoint(game_state_json["lastCheckpoint"]);
 
         std::cout << "SaveManager: Loaded game from slot " << slot << std::endl;
         return true;

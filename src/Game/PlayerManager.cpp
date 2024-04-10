@@ -26,54 +26,47 @@ size_t PlayerManager::getPlayerCount() const {
 
 /* METHODS */
 
-Player *PlayerManager::findPlayerById(int id) {
-    for (Player &player: alivePlayers) {
-        if (player.getPlayerID() == id) {
-            return &player;
-        }
-    }
-    return nullptr;
+Player* PlayerManager::findPlayerById(int id) {
+    auto it = std::ranges::find_if(alivePlayers, [id](const Player& player) {
+        return player.getPlayerID() == id;
+    });
+    return (it != alivePlayers.end()) ? std::to_address(it) : nullptr;
 }
 
 int PlayerManager::findPlayerIndexById(int id) {
-    for (std::vector<Player>::size_type i = 0; i < alivePlayers.size(); i++) {
-        if (alivePlayers[i].getPlayerID() == id) {
-            return static_cast<int>(i);
-        }
-    }
-    return -1;
+    auto it = std::ranges::find_if(alivePlayers, [id](const Player& player) {
+        return player.getPlayerID() == id;
+    });
+    return (it != alivePlayers.end()) ? static_cast<int>(std::distance(alivePlayers.begin(), it)) : -1;
 }
 
 Point PlayerManager::getAveragePlayerPosition() const {
-    Point averagePosition = {0, 0};
+    Point average_position = {0, 0};
     for (const Player &player: alivePlayers) {
-        averagePosition.x += player.getX();
-        averagePosition.y += player.getY();
+        average_position.x += player.getX();
+        average_position.y += player.getY();
     }
 
     if (!alivePlayers.empty()) {
-        averagePosition.x /= static_cast<float>(alivePlayers.size());
-        averagePosition.y /= static_cast<float>(alivePlayers.size());
+        average_position.x /= static_cast<float>(alivePlayers.size());
+        average_position.y /= static_cast<float>(alivePlayers.size());
     }
 
-    return averagePosition;
+    return average_position;
 }
 
 void PlayerManager::addPlayer(const Player &player) {
-    alivePlayers.emplace_back(player);
+    alivePlayers.push_back(player);
 }
 
 void PlayerManager::removePlayer(const Player &player) {
-    alivePlayers.erase(std::remove(alivePlayers.begin(), alivePlayers.end(), player), alivePlayers.end());
-    deadPlayers.erase(std::remove(deadPlayers.begin(), deadPlayers.end(), player), deadPlayers.end());
+    std::erase(alivePlayers, player);
+    std::erase(deadPlayers, player);
 }
 
 
 void PlayerManager::killPlayer(Player &player) {
-    // Remove the player from the alive players list
     removePlayer(player);
-
-    // Add the player to the dead players list
     deadPlayers.emplace_back(player);
 }
 
@@ -88,11 +81,11 @@ void PlayerManager::respawnPlayer(Player &player) {
 
     // Teleport the player to the last checkpoint
     Level const &level = game->getLevel();
-    int lastCheckpoint = level.getLastCheckpoint();
-    size_t spawnIndex = alivePlayers.size();
-    Point spawnPoint = level.getSpawnPoints(lastCheckpoint)[spawnIndex];
-    player.setX(spawnPoint.x);
-    player.setY(spawnPoint.y);
+    int last_checkpoint = level.getLastCheckpoint();
+    size_t spawn_index = alivePlayers.size();
+    Point spawn_point = level.getSpawnPoints(last_checkpoint)[spawn_index];
+    player.setX(spawn_point.x);
+    player.setY(spawn_point.y);
 }
 
 void PlayerManager::clearPlayers() {

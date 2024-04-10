@@ -10,14 +10,14 @@ std::vector<float> Asteroid::positions;
 /** CONSTRUCTORS **/
 
 // Constructor for Asteroid class with default parameters
-Asteroid::Asteroid(float x, float y, size_t seed): x(x + Asteroid::getRandomPosition(seed)), y(y - 60), speed(0.6f) {
+Asteroid::Asteroid(float x, float y, size_t seed): x(x + Asteroid::getRandomPosition(seed)), y(y - 60), speed(0.6f), explosionSound("Events/explosion.wav") {
     angle = getRandomAngle(seed);
     sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
 }
 
 // Constructor for Asteroid class with specified parameters
 Asteroid::Asteroid(float x, float y, float speed, float h, float w, float angle)
-        : x(x), y(y), h(h), w(w), speed(speed), angle(angle) {
+        : x(x), y(y), h(h), w(w), speed(speed), angle(angle), explosionSound("Events/explosion.wav") {
     sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
 }
 
@@ -115,11 +115,11 @@ void Asteroid::render(SDL_Renderer *renderer, Point camera) {
 
 void Asteroid::renderDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 173, 79, 9, 255);
-    SDL_FRect asteroidRect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &asteroidRect);
+    SDL_FRect asteroid_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderFillRectF(renderer, &asteroid_rect);
 }
 
-void Asteroid::applyMovement(double deltaTime) {
+void Asteroid::applyMovement(double delta_time) {
     angle_radians = static_cast<float>(angle * (M_PI / 180)); // Convert angle to radians
 
     // Calculate horizontal and vertical speeds
@@ -127,11 +127,11 @@ void Asteroid::applyMovement(double deltaTime) {
     verticalSpeed = - speed * std::sin(angle_radians);
 
     // Update current coordinates based on speed components
-    x += 100 * horizontalSpeed * static_cast<float>(deltaTime); // '* 100' temporaire (c'est pour qu'il avance plus vite)
-    y += 100 * verticalSpeed * static_cast<float>(deltaTime);
+    x += 100 * horizontalSpeed * static_cast<float>(delta_time); // '* 100' temporary for testing TODO: remove
+    y += 100 * verticalSpeed * static_cast<float>(delta_time);
 }
 
-void Asteroid::generateRandomPositionsArray(int nbPosition, float x, float y, size_t seed) {
+void Asteroid::generateRandomPositionsArray(int position_count, float x, float y, size_t seed) {
     positions.clear();
     positionsLock.clear();
 
@@ -139,11 +139,11 @@ void Asteroid::generateRandomPositionsArray(int nbPosition, float x, float y, si
     std::uniform_real_distribution<float> dis(x, y); // Define uniform distribution
 
     // Reserve space for vectors to avoid frequent reallocation
-    positions.reserve(nbPosition);
-    positionsLock.reserve(nbPosition);
+    positions.reserve(position_count);
+    positionsLock.reserve(position_count);
 
     // Generate positions and mark them as unlocked
-    for (int i = 0; i < nbPosition; i++) {
+    for (int i = 0; i < position_count; i++) {
         float random_position = dis(gen);
         positions.push_back(random_position);
         positionsLock.push_back(0);
@@ -169,14 +169,14 @@ float Asteroid::getRandomPosition(size_t seed) {
     }
 
     // Decrement all locked positions
-    for(int & positionLock : positionsLock){
-        positionLock = positionLock - 1 >= 0 ? positionLock - 1 : positionLock;
+    for(int & position_lock : positionsLock){
+        position_lock = position_lock - 1 >= 0 ? position_lock - 1 : position_lock;
     }
 
     return res; // Return the randomly selected position
 }
 
-void Asteroid::generateRandomAnglesArray(int nbAngle, size_t seed) {
+void Asteroid::generateRandomAnglesArray(int angle_count, size_t seed) {
     angles.clear();
     anglesLock.clear();
 
@@ -184,11 +184,11 @@ void Asteroid::generateRandomAnglesArray(int nbAngle, size_t seed) {
     std::uniform_real_distribution<float> dis(210.0f, 330.0f); // Define uniform distribution
 
     // Reserve space for vectors to avoid frequent reallocation
-    angles.reserve(nbAngle);
-    anglesLock.reserve(nbAngle);
+    angles.reserve(angle_count);
+    anglesLock.reserve(angle_count);
 
     // Generate angles and mark them as unlocked
-    for (int i = 0; i < nbAngle; i++){
+    for (int i = 0; i < angle_count; i++){
         float random_angle = dis(gen);
         angles.push_back(random_angle);
         anglesLock.push_back(0);
@@ -215,8 +215,8 @@ float Asteroid::getRandomAngle(size_t seed) {
     }
 
     // Decrement all locked angles
-    for(int & angleLock : anglesLock){
-        angleLock = angleLock - 1 >= 0 ? angleLock - 1 : angleLock;
+    for(int & angle_lock : anglesLock){
+        angle_lock = angle_lock - 1 >= 0 ? angle_lock - 1 : angle_lock;
     }
 
     return res; // Return the randomly selected angle
@@ -224,6 +224,7 @@ float Asteroid::getRandomAngle(size_t seed) {
 
 // Trigger the explosion effect for the asteroid
 void Asteroid::explode() {
+    explosionSound.play(0, -1);
     // Placeholder for explosion effect
     // angle = 0;
     // sprite.setAnimation(explosion);

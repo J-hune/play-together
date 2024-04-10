@@ -1,10 +1,9 @@
 #ifndef PLAY_TOGETHER_LEVEL_H
 #define PLAY_TOGETHER_LEVEL_H
 
-#include <string>
-#include <fstream>
 #include <sstream>
-#include <iostream>
+#include <fstream>
+#include "../Graphics/Layer.h"
 #include "../Physics/Polygon.h"
 #include "../Sounds/Music.h"
 #include "Camera.h"
@@ -16,6 +15,8 @@
 #include "Items/SpeedPowerUp.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
+#include "LevelManagers/TextureManager.h"
+
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -25,18 +26,66 @@ constexpr char MAPS_DIRECTORY[] = "assets/maps/";
  * @brief Defines the Level class responsible for level object.
  */
 
+// Forward declaration of TextureManager and LoadManager
+class TextureManager;
+class LoadManager;
+
+
 /**
  * @class Level
  * @brief Represents the level object including obstacles.
  */
 class Level {
+private:
+    /* ATTRIBUTES */
+
+    // PROPERTIES
+    int worldID = -1; /**< Represents the ID of the world. */
+    int mapID = 0; /**< Represents the ID of the map. */
+    short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
+    std::string mapName; /**< Represents the name of the map. */
+    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
+    std::vector<Music> musics; /**< Represents the musics of the map. */
+
+    // MANAGERS
+    std::unique_ptr<TextureManager> textureManager; /**< Load manager for handling loading events. */
+
+    // GRAPHICS
+    std::vector<Layer> backgrounds; /**< Collection of layers representing the backgrounds, arranged from farthest to nearest. */
+    Layer middleground; /**< Layer representing the middle ground. */
+    std::vector<Layer> foregrounds; /**< Collection of layers representing the foregrounds, arranged from farthest to nearest */
+
+    // ZONES
+    std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
+    std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
+    std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
+    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
+    std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
+    std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
+    std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
+    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+
+    // EVENTS
+    std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
+
+    // PLATFORMS
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+
+    // ITEMS
+    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
     explicit Level(const std::string &map_name, SDL_Renderer *renderer);
     Level() = default;
 
-    /** ACCESSORS **/
+
+    /* ACCESSORS */
 
     /**
      * @brief Return the ID of the world.
@@ -119,7 +168,7 @@ public:
     [[nodiscard]] short getLastCheckpoint() const;
 
 
-    /** MUTATORS **/
+    /* MUTATORS */
 
     /**
      * @brief Set the last checkpoint reached by the player.
@@ -146,7 +195,7 @@ public:
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Applies the movement to all asteroid in the game.
@@ -172,6 +221,27 @@ public:
      * @param asteroid The asteroid to add.
      */
     void addAsteroid(Asteroid const &asteroid);
+
+    /**
+     * @brief Renders the background textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderBackgrounds(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the midleground texture.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderMiddleground(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the midleground texture.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderForegrounds(SDL_Renderer *renderer, Point camera) const;
 
     /**
      * @brief Renders the collisions by drawing obstacles.
@@ -215,46 +285,22 @@ public:
      */
     void renderItemsDebug(SDL_Renderer *renderer, Point camera) const;
 
+
 private:
-    /** ATTRIBUTES **/
 
-    int worldID = -1; /**< Represents the ID of the world. */
-    int mapID = 0; /**< Represents the ID of the map. */
-    bool reloadTexture = true; /**< Flag indicating if the textures must be reloaded. */
-
-    std::string mapName; /**< Represents the name of the map. */
-    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
-    std::vector<Music> musics; /**< Represents the musics of the map. */
-
-    std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
-    std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
-    std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
-    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
-    std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
-    std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
-    std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
-    std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
-    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
-    short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
-
-
-    /** PRIVATE METHODS **/
-
-    /**
-     * @brief Load the textures of the world.
-     */
-    void loadWorldTextures(SDL_Renderer *renderer) const;
+    /* PRIVATE METHODS  */
 
     /**
      * @brief Load the properties of the map.
      * @param map_file_name Represents the name of the map file.
      */
     void loadMapProperties(const std::string &map_file_name);
+
+    /**
+     * @brief Load the environment of the map.
+     * @param map_file_name Represents the name of the map file.
+     */
+    void loadEnvironmentFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the polygons from a JSON file.

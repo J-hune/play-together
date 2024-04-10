@@ -47,8 +47,8 @@ Camera *Game::getCamera() {
     return &camera;
 }
 
-Level &Game::getLevel() {
-    return level;
+Level *Game::getLevel() {
+    return &level;
 }
 
 int Game::getTickRate() const {

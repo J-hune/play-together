@@ -1,7 +1,7 @@
 #ifndef PLAY_TOGETHER_PLAYERMANAGER_H
 #define PLAY_TOGETHER_PLAYERMANAGER_H
 
-#include "Game.h"
+#include "../Game.h"
 
 class PlayerManager {
 public:

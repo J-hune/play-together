@@ -2,8 +2,8 @@
 #define PLAY_TOGETHER_INPUTMANAGER_H
 
 #include <SDL_events.h>
-#include "Player.h"
-#include "Game.h"
+#include "../Player.h"
+#include "../Game.h"
 
 class InputManager {
 public:

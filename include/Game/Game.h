@@ -11,10 +11,11 @@
 #include <SDL_ttf.h>
 #include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
-#include "InputManager.h"
-#include "RenderManager.h"
-#include "SaveManager.h"
-#include "PlayerManager.h"
+#include "GameManagers/InputManager.h"
+#include "GameManagers/RenderManager.h"
+#include "GameManagers/SaveManager.h"
+#include "GameManagers/PlayerManager.h"
+
 
 /**
  * @file Game.h
@@ -80,7 +81,7 @@ public:
      * @brief Get the level object.
      * @return The level object.
      */
-    [[nodiscard]] Level &getLevel();
+    [[nodiscard]] Level *getLevel();
 
     /**
      *

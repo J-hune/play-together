@@ -6,6 +6,8 @@
  */
 
 
+/* CONSTRUCTORS */
+
 Texture::Texture(SDL_Texture &texture) : texturePtr(&texture) {
     SDL_QueryTexture(&texture, nullptr, nullptr, &sizeRect.w, &sizeRect.h);
 }

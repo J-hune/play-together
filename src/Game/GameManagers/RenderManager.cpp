@@ -1,4 +1,4 @@
-#include "../../include/Game/RenderManager.h"
+#include "../../../include/Game/GameManagers/RenderManager.h"
 
 /**
  * @file RenderManager.cpp
@@ -90,7 +90,7 @@ void RenderManager::toggleRenderFps() {
 /* METHODS */
 
 void RenderManager::render() {
-    Level &level = gamePtr->getLevel();
+    Level *level = gamePtr->getLevel();
     PlayerManager &playerManager = gamePtr->getPlayerManager();
     std::vector<Player> &players = playerManager.getAlivePlayers();
 
@@ -104,15 +104,21 @@ void RenderManager::render() {
 
     // Render textures
     if (render_textures) {
+        // Draw the environment
+        level->renderBackgrounds(renderer, camera_point); // Draw the background
+
         // Draw the characters
         for (Player &player : players) {
             player.render(renderer, camera_point);
         }
 
-        level.renderAsteroids(renderer, camera_point); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level.renderPlatforms(renderer, camera_point); // Draw the platforms
-        level.renderItemsDebug(renderer, camera_point); // Draw the items
+        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatforms(renderer, camera_point); // Draw the platforms
+        level->renderItemsDebug(renderer, camera_point); // Draw the items
+
+        level->renderMiddleground(renderer, camera_point); // Draw the middleground
+        level->renderForegrounds(renderer, camera_point); // Draw the foreground
     }
 
     // Render collision boxes
@@ -123,10 +129,10 @@ void RenderManager::render() {
             player.renderDebug(renderer, camera_point);
         }
 
-        level.renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
-        level.renderItemsDebug(renderer, camera_point); // Draw the items
+        level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderItemsDebug(renderer, camera_point); // Draw the items
     }
 
     // Render the fps counter

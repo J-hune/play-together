@@ -2,7 +2,7 @@
 #define PLAY_TOGETHER_RENDERMANAGER_H
 
 #include <SDL_render.h>
-#include "Game.h"
+#include "../Game.h"
 
 class RenderManager {
 private:
@@ -20,7 +20,8 @@ private:
 
 public:
 
-    /* CONSTRUCTOR */
+    /* CONSTRUCTORS */
+
     RenderManager(SDL_Renderer *renderer, Game *game);
 
 

@@ -20,8 +20,6 @@
 class IPlatform {
 public:
 
-    static std::vector<Texture> textures; /**< The textures of all loaded platforms. */
-
     // VIRTUAL DESTRUCTOR
     virtual ~IPlatform() = default;
 
@@ -41,11 +39,6 @@ public:
     virtual void render(SDL_Renderer *renderer, Point camera) const = 0;
     virtual void renderDebug(SDL_Renderer *renderer, Point camera) const = 0;
 
-    /**
-     * @brief Load the textures of the platforms.
-     * @param world_id The id of the world.
-     */
-    static void loadTextures(SDL_Renderer &renderer, int world_id);
 };
 
 

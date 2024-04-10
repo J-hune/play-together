@@ -10,8 +10,17 @@
 Level::Level(const std::string &map_name, SDL_Renderer *renderer) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
 
+    // Initialize managers
+    textureManager = std::make_unique<TextureManager>(this);
+
     loadMapProperties(map_name);
-    if (reloadTexture) loadWorldTextures(renderer);
+
+    // Load textures
+    textureManager->loadMiddlegroundTexture(renderer);
+    if (textureManager->getReloadTexture()) textureManager->loadWorldTextures(renderer);
+
+    // Load map environment
+    loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
     loadItemsFromMap(map_name);
@@ -131,6 +140,22 @@ void Level::addAsteroid(Asteroid const &asteroid) {
     asteroids.emplace_back(asteroid);
 }
 
+void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
+    for (const Layer &layer: backgrounds) {
+        layer.render(renderer, &camera);
+    }
+}
+
+void Level::renderMiddleground(SDL_Renderer *renderer, const Point camera) const {
+    middleground.render(renderer, &camera);
+}
+
+void Level::renderForegrounds(SDL_Renderer *renderer, const Point camera) const {
+    for (const Layer &layer: foregrounds) {
+        layer.render(renderer, &camera);
+    }
+}
+
 void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     for (const Polygon &obstacle: collisionZones) {
@@ -227,11 +252,10 @@ void Level::applyPlatformsMovement(double delta_time) {
     }
 }
 
-void Level::loadWorldTextures(SDL_Renderer *renderer) const {
-    IPlatform::loadTextures(*renderer, worldID);
-}
 
 void Level::loadMapProperties(const std::string &map_file_name) {
+    musics.clear();
+
     std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/level.json";
     std::ifstream file(file_path);
 
@@ -244,7 +268,7 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     file >> j;
     file.close();
 
-    reloadTexture = (worldID != j["worldID"]);
+    textureManager->setReloadTexture(worldID != j["worldID"]);
     worldID = j["worldID"];
     mapID = j["levelID"];
     mapName = j["name"];
@@ -252,10 +276,10 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     // Load spawn points
     for (const auto &spawn_point : j["spawnPoints"]) {
         spawnPoints.emplace_back(std::array<Point, 4>{{
-               Point(spawn_point[0][0], spawn_point[0][1]),
-               Point(spawn_point[1][0], spawn_point[1][1]),
-               Point(spawn_point[2][0], spawn_point[2][1]),
-               Point(spawn_point[3][0], spawn_point[3][1])
+            Point(spawn_point[0][0], spawn_point[0][1]),
+            Point(spawn_point[1][0], spawn_point[1][1]),
+            Point(spawn_point[2][0], spawn_point[2][1]),
+            Point(spawn_point[3][0], spawn_point[3][1])
         }});
     }
 
@@ -265,6 +289,45 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     }
 
     std::cout << "Level: Loaded map properties." << std::endl;
+}
+
+void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
+    backgrounds.clear();
+    foregrounds.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/environment.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the environment file. Please check the file path." << std::endl;
+        return;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    const std::vector<SDL_Texture*>& background_textures = textureManager->getBackgrounds();
+    const std::vector<SDL_Texture*>& foreground_textures = textureManager->getForegrounds();
+
+    // Load background layers
+    for (const auto& layer : j["backgroundLayers"]) {
+        int texture_id = layer["textureID"];
+        int layer_index = layer["layerIndex"];
+        backgrounds.emplace_back(*background_textures[texture_id], layer_index);
+    }
+
+    // Load middle ground layer
+    middleground = Layer(*textureManager->getMiddleground(), 1);
+
+    // Load foreground layers
+    for (const auto& layer : j["foregroundLayers"]) {
+        int texture_id = layer["textureID"];
+        int layer_index = layer["layerIndex"];
+        foregrounds.emplace_back(*foreground_textures[texture_id], layer_index);
+    }
+
+    std::cout << "Level: Loaded background, middleground and foreground layers." << std::endl;
 }
 
 int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, ZoneType type) {
@@ -316,6 +379,10 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
+    movingPlatforms1D.clear();
+    movingPlatforms2D.clear();
+    switchingPlatforms.clear();
+
     std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
     std::ifstream file(file_path);
 
@@ -327,6 +394,8 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     nlohmann::json j;
     file >> j;
     file.close();
+
+    const std::vector<Texture> &textures = textureManager->getPlatforms();
 
     // Load all 1D moving platforms
     for (const auto &platform : j["movingPlatforms1D"]) {
@@ -340,7 +409,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         bool start = platform["start"];
         bool axis = platform["axis"];
         int texture_id = platform["texture"];
-        movingPlatforms1D.emplace_back(x, y, width, height, IPlatform::textures[texture_id], speed, min_x, max_x, start, axis);
+        movingPlatforms1D.emplace_back(x, y, width, height, textures[texture_id], speed, min_x, max_x, start, axis);
     }
 
     // Load all 2D moving platforms
@@ -354,7 +423,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         Point right(platform["right"][0], platform["right"][1]);
         bool start = platform["start"];
         int texture_id = platform["texture"];
-        movingPlatforms2D.emplace_back(x, y, width, height, IPlatform::textures[texture_id], speed, left, right, start);
+        movingPlatforms2D.emplace_back(x, y, width, height, textures[texture_id], speed, left, right, start);
     }
 
     // Load all switching platforms
@@ -369,7 +438,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
             steps.emplace_back(step[0], step[1]);
         }
         int texture_id = platform["texture"];
-        switchingPlatforms.emplace_back(x, y, width, height, IPlatform::textures[texture_id], bpm, steps);
+        switchingPlatforms.emplace_back(x, y, width, height, textures[texture_id], bpm, steps);
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;

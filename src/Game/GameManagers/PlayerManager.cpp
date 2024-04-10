@@ -1,4 +1,4 @@
-#include "../../include/Game/PlayerManager.h"
+#include "../../../include/Game/GameManagers/PlayerManager.h"
 
 /**
  * @file PlayerManager.cpp
@@ -80,10 +80,10 @@ void PlayerManager::respawnPlayer(Player &player) {
     alivePlayers.push_back(player);
 
     // Teleport the player to the last checkpoint
-    Level const &level = game->getLevel();
-    int last_checkpoint = level.getLastCheckpoint();
+    Level const *level = game->getLevel();
+    int last_checkpoint = level->getLastCheckpoint();
     size_t spawn_index = alivePlayers.size();
-    Point spawn_point = level.getSpawnPoints(last_checkpoint)[spawn_index];
+    Point spawn_point = level->getSpawnPoints(last_checkpoint)[spawn_index];
     player.setX(spawn_point.x);
     player.setY(spawn_point.y);
 }

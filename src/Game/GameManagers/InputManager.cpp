@@ -1,4 +1,4 @@
-#include "../../include/Game/InputManager.h"
+#include "../../../include/Game/GameManagers/InputManager.h"
 
 /**
  * @file InputManager.cpp
@@ -121,7 +121,7 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
             gamePtr->switchMavity(); // Switch mavity for all players
             break;
         case SDL_SCANCODE_M:
-            if (gamePtr->getLevel().getMapID() == 1) gamePtr->setLevel("assurance");
+            if (gamePtr->getLevel()->getMapID() == 1) gamePtr->setLevel("assurance");
             else gamePtr->setLevel("diversity");
             break;
         case SDL_SCANCODE_LSHIFT:

@@ -83,13 +83,6 @@ public:
     [[nodiscard]] Level &getLevel();
 
     /**
-     *
-     * @brief Get the tick rate of the game.
-     * @return The tick rate of the game.
-     */
-    [[nodiscard]] int getTickRate() const;
-
-    /**
      * @brief Get the frame rate of the game.
      * @return The frame rate of the game.
      */
@@ -131,16 +124,10 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
-     * @brief Updates the game logic in a fixed time step.
-     */
-    void fixedUpdate();
-
-    /**
      * @brief Updates the game logic.
      * @param deltaTime The time elapsed since the last frame in seconds.
-     * @param ratio The ratio of the movement to apply.
      */
-    void update(double deltaTime, double ratio);
+    void update(double deltaTime);
 
     /**
      * @brief Runs the game loop.
@@ -174,7 +161,6 @@ private:
     std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
 
     int frameRate = 60; /**< The refresh rate of the game. */
-    const int tickRate = 30; /**< The tick rate of the game. */
     int effectiveFrameFps = frameRate; /**< The effective fps. */
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
@@ -203,9 +189,8 @@ private:
 
     /**
      * @brief Applies the movement to all players in the game.
-     * @param ratio The ratio of the movement to apply.
      */
-    void applyPlayersMovement(double ratio);
+    void applyPlayersMovement();
 
     /**
      * @brief Calculates the movement of all players in the game.

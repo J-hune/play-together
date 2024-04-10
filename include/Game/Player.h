@@ -371,9 +371,8 @@ public:
 
     /**
      * @brief Apply the movement by adding moveX and moveY to the player position.
-     * @param ratio The ratio of the movement to apply.
      */
-    void applyMovement(double ratio);
+    void applyMovement();
 
     /**
      * @brief Renders the player's sprite.
@@ -435,11 +434,11 @@ private:
     bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
     Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
     float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
-    float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
+    float jumpMaxHeight = 100.f; /**< Maximum height of the player's jump. */
     float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
     float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
-    Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
+    float jumpStartHeight = 0; /**< Current height of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
 
     // LOADED TEXTURES

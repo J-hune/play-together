@@ -346,27 +346,26 @@ void Player::calculateYaxisMovement(double deltaTime) {
     if (!jumpLock && wantToJump && canJump() && !isJumping) {
         isJumping = true;
         jumpLock = true;
-        jumpStartTime = SDL_GetPerformanceCounter(); // Record the time at the beginning of the jump
+        jumpStartHeight = y; // Record the height at the beginning of the jump
         jumpVelocity = jumpInitialVelocity; // Set the initial jump velocity
     }
 
     // If the player is jumping, calculate the jump movement for this frame
     else if (isJumping) {
-        // Calculate the time since the beginning of the jump in seconds
-        Uint64 now = SDL_GetPerformanceCounter();
-        float jumpTime = static_cast<float>(now - jumpStartTime) / static_cast<float>(SDL_GetPerformanceFrequency());
+        // Calculate the jump height
+        float jumpHeight = jumpStartHeight - y;
 
         // Check if the player has finished the jump (with a very very very small margin of error)
-        if (jumpTime - 0.00755 >= jumpMaxDuration || jumpVelocity <= 0 || !wantToJump) {
+        if (jumpStartHeight - y > jumpMaxHeight || jumpVelocity <= 0 || !wantToJump) {
             isJumping = false;
-            jumpStartTime = 0;
+            jumpStartHeight = 0;
             jumpVelocity = 0;
             wantToJump = false;
         }
 
         // The player is still jumping, calculate the jump movement for this frame
         else {
-            jumpVelocity = jumpInitialVelocity - mavity * jumpTime;
+            jumpVelocity = jumpInitialVelocity - mavity * jumpHeight * 0.02f;
 
             // Calculate vertical movement based on jump velocity and time
             moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime) * (mavity < 0 ? 1 : -1));
@@ -400,9 +399,9 @@ bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
 
-void Player::applyMovement(double ratio) {
-    x += static_cast<float>(moveX * ratio);
-    y += static_cast<float>(moveY * ratio);
+void Player::applyMovement() {
+    x += moveX;
+    y += moveY;
 }
 
 void Player::updateSpriteAnimation() {

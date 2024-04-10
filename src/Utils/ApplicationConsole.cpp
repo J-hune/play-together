@@ -264,12 +264,6 @@ void ApplicationConsole::changeMaxFrameRate(const std::string& command) const {
         return;
     }
 
-    if (fps < gamePtr->getTickRate()) {
-        std::cout << "Invalid frame rate. Frame rate must be greater or equal to 30.\n";
-        return;
-    }
-
     gamePtr->setFrameRate(fps);
     std::cout << "Max frame rate set to " << fps << ".\n";
 }
-

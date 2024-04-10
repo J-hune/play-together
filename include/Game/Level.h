@@ -33,10 +33,16 @@ class Level {
 public:
     /** CONSTRUCTOR **/
 
-    explicit Level(const std::string &map_name);
+    explicit Level(const std::string &map_name, SDL_Renderer *renderer);
     Level() = default;
 
     /** ACCESSORS **/
+
+    /**
+     * @brief Return the ID of the world.
+     * @return An integer representing the ID of the world.
+     */
+    [[nodiscard]] int getWorldID() const;
 
     /**
      * @brief Return the ID of the map.
@@ -188,6 +194,13 @@ public:
     void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
+     * @brief Renders the platforms by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
+
+    /**
      * @brief Renders the platforms by drawing collisions boxes.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -204,7 +217,10 @@ public:
 private:
     /** ATTRIBUTES **/
 
+    int worldID = -1; /**< Represents the ID of the world. */
     int mapID = 0; /**< Represents the ID of the map. */
+    bool reloadTexture = true; /**< Flag indicating if the textures must be reloaded. */
+
     std::string mapName; /**< Represents the name of the map. */
     std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
     std::vector<Music> musics; /**< Represents the musics of the map. */
@@ -227,6 +243,11 @@ private:
 
 
     /** PRIVATE METHODS **/
+
+    /**
+     * @brief Load the textures of the world.
+     */
+    void loadWorldTextures(SDL_Renderer *renderer) const;
 
     /**
      * @brief Load the properties of the map.

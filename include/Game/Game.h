@@ -184,6 +184,7 @@ private:
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
+    int worldID = 1; /**< Represents the ID of the current world. */
 
     // Broad phase attributes
     std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */

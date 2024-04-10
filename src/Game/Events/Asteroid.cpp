@@ -12,13 +12,13 @@ std::vector<float> Asteroid::positions;
 // Constructor for Asteroid class with default parameters
 Asteroid::Asteroid(float x, float y, size_t seed): x(x + Asteroid::getRandomPosition(seed)), y(y - 60), speed(0.6f), explosionSound("Events/explosion.wav") {
     angle = getRandomAngle(seed);
-    sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
+    sprite = Sprite(*spriteTexturePtr, Asteroid::idle, 64, 64); // Initialize sprite with default animation
 }
 
 // Constructor for Asteroid class with specified parameters
 Asteroid::Asteroid(float x, float y, float speed, float h, float w, float angle)
         : x(x), y(y), h(h), w(w), speed(speed), angle(angle), explosionSound("Events/explosion.wav") {
-    sprite = Sprite(Asteroid::idle, *spriteTexturePtr, 64, 64); // Initialize sprite with default animation
+    sprite = Sprite(*spriteTexturePtr, Asteroid::idle, 64, 64); // Initialize sprite with default animation
 }
 
 

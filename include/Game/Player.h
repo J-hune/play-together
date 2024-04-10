@@ -2,7 +2,6 @@
 #define PLAY_TOGETHER_PLAYER_H
 
 #include <vector>
-#include <SDL.h>
 #include <SDL_image.h>
 #include <map>
 #include "Point.h"

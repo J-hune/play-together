@@ -63,7 +63,7 @@ int Game::getEffectiveFrameRate() const {
 /** MODIFIERS **/
 
 void Game::setLevel(std::string const &map_name) {
-    level = Level(map_name);
+    level = Level(map_name, renderer);
 }
 
 void Game::setEnablePlatformsMovement(bool state) {
@@ -82,7 +82,7 @@ void Game::initializeHostedGame(int slot) {
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
-        level = Level("diversity");
+        level = Level("diversity", renderer);
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
 

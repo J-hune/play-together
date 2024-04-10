@@ -96,7 +96,7 @@ bool SaveManager::loadGameState() {
 
         // Load the game state
         Level &level = gamePtr->getLevel();
-        level = Level(gameStateJSON["level"]);
+        level = Level(gameStateJSON["level"], gamePtr->getRenderManager().getRenderer());
         level.setLastCheckpoint(gameStateJSON["lastCheckpoint"]);
 
         std::cout << "SaveManager: Loaded game from slot " << slot << std::endl;

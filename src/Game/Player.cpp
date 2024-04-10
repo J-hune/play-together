@@ -18,7 +18,7 @@ SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
         : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
 
-    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, 24, 18);
 }
 
 

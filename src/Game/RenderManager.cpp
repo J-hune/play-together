@@ -38,6 +38,10 @@ RenderManager::RenderManager(SDL_Renderer *renderer, Game *game) : renderer(rend
 
 /* ACCESSORS */
 
+SDL_Renderer* RenderManager::getRenderer() {
+    return renderer;
+}
+
 std::vector<TTF_Font *> &RenderManager::getFonts() {
     return fonts;
 }
@@ -107,7 +111,7 @@ void RenderManager::render() {
 
         level.renderAsteroids(renderer, camera_point); // Draw the asteroids
         level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level.renderPlatforms(renderer, camera_point); // Draw the platforms
         level.renderItemsDebug(renderer, camera_point); // Draw the items
     }
 

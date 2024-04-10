@@ -7,10 +7,11 @@
 
 /** CONSTRUCTOR **/
 
-Level::Level(const std::string &map_name) {
+Level::Level(const std::string &map_name, SDL_Renderer *renderer) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
 
     loadMapProperties(map_name);
+    if (reloadTexture) loadWorldTextures(renderer);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
     loadItemsFromMap(map_name);
@@ -18,6 +19,10 @@ Level::Level(const std::string &map_name) {
 
 
 /** ACCESSORS **/
+
+int Level::getWorldID() const {
+    return worldID;
+}
 
 int Level::getMapID() const {
     return mapID;
@@ -173,27 +178,17 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
+void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+    for (const MovingPlatform1D &platform: movingPlatforms1D) platform.render(renderer, camera);
+    for (const MovingPlatform2D &platform: movingPlatforms2D) platform.render(renderer, camera);
+    for (const SwitchingPlatform &platform: switchingPlatforms) platform.render(renderer, camera);
+}
+
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
-    // Draw the 1D moving platforms
-    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-    for (const MovingPlatform1D &platform: movingPlatforms1D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
-    }
+    for (const MovingPlatform1D &platform: movingPlatforms1D) platform.renderDebug(renderer, camera);
+    for (const MovingPlatform2D &platform: movingPlatforms2D) platform.renderDebug(renderer, camera);
+    for (const SwitchingPlatform &platform: switchingPlatforms) platform.renderDebug(renderer, camera);
 
-    // Draw the 2D moving platforms
-    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
-    for (const MovingPlatform2D &platform: movingPlatforms2D) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
-    }
-
-    // Draw the switching platforms
-    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
-    for (const SwitchingPlatform &platform: switchingPlatforms) {
-        SDL_FRect platformRect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platformRect);
-    }
 }
 
 void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
@@ -231,8 +226,12 @@ void Level::applyPlatformsMovement(double deltaTime) {
 
     // Apply movement for switching platforms
     for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement();
+        if(platform.getIsMoving()) platform.applyMovement(deltaTime);
     }
+}
+
+void Level::loadWorldTextures(SDL_Renderer *renderer) const {
+    IPlatform::loadTextures(*renderer, worldID);
 }
 
 void Level::loadMapProperties(const std::string &mapFileName) {
@@ -248,7 +247,9 @@ void Level::loadMapProperties(const std::string &mapFileName) {
     file >> j;
     file.close();
 
-    mapID = j["id"];
+    reloadTexture = (worldID != j["worldID"]);
+    worldID = j["worldID"];
+    mapID = j["levelID"];
     mapName = j["name"];
 
     // Load spawn points
@@ -337,11 +338,12 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         float width = platform["width"];
         float height = platform["height"];
         float speed = platform["speed"];
-        float minX = platform["min"];
-        float maxX = platform["max"];
+        float min_x = platform["min"];
+        float max_x = platform["max"];
         bool start = platform["start"];
         bool axis = platform["axis"];
-        movingPlatforms1D.emplace_back(x, y, width, height, speed, minX, maxX, start, axis);
+        int texture_id = platform["texture"];
+        movingPlatforms1D.emplace_back(x, y, width, height, IPlatform::textures[texture_id], speed, min_x, max_x, start, axis);
     }
 
     // Load all 2D moving platforms
@@ -354,7 +356,8 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         Point left(platform["left"][0], platform["left"][1]);
         Point right(platform["right"][0], platform["right"][1]);
         bool start = platform["start"];
-        movingPlatforms2D.emplace_back(x, y, width, height, speed, left, right, start);
+        int texture_id = platform["texture"];
+        movingPlatforms2D.emplace_back(x, y, width, height, IPlatform::textures[texture_id], speed, left, right, start);
     }
 
     // Load all switching platforms
@@ -368,7 +371,8 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         for (const auto &step : platform["steps"]) {
             steps.emplace_back(step[0], step[1]);
         }
-        switchingPlatforms.emplace_back(x, y, width, height, bpm, steps);
+        int texture_id = platform["texture"];
+        switchingPlatforms.emplace_back(x, y, width, height, IPlatform::textures[texture_id], bpm, steps);
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;

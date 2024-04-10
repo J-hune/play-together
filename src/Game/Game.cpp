@@ -212,6 +212,8 @@ void Game::switchMavity() {
 void Game::broadPhase() {
     // Empty old broad phase elements
     saveZones.clear();
+    toggleGravityZones.clear();
+    increaseFallSpeedZones.clear();
     deathZones.clear();
     obstacles.clear();
     movingPlatforms1D.clear();
@@ -224,21 +226,35 @@ void Game::broadPhase() {
     SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
 
     // Check collisions with each save zone
-    for (const Polygon &zone: level.getZones(ZoneType::SAVE)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
-            saveZones.push_back(zone);
+    for (const AABB &aabb: level.getZones(AABBType::SAVE)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
+            saveZones.push_back(aabb);
+        }
+    }
+
+    // Check collisions with each toggle gravity zone
+    for (const AABB &aabb: level.getZones(AABBType::TOGGLE_GRAVITY)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
+            toggleGravityZones.push_back(aabb);
+        }
+    }
+
+    // Check collisions with each increase fall speed zone
+    for (const AABB &aabb: level.getZones(AABBType::INCREASE_FALL_SPEED)) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
+            increaseFallSpeedZones.push_back(aabb);
         }
     }
 
     // Check collisions with each death zone
-    for (const Polygon &zone: level.getZones(ZoneType::DEATH)) {
+    for (const Polygon &zone: level.getZones(PolygonType::DEATH)) {
         if (checkSATCollision(broadPhaseAreaVertices, zone)) {
             deathZones.push_back(zone);
         }
     }
 
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getZones(ZoneType::COLLISION)) {
+    for (const Polygon &obstacle: level.getZones(PolygonType::COLLISION)) {
         if (checkSATCollision(broadPhaseAreaVertices, obstacle)) {
             obstacles.push_back(obstacle);
         }
@@ -298,6 +314,8 @@ void Game::narrowPhase() {
         handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
+        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
+        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
 
         // Handle collisions with death zones and camera borders
         if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
@@ -335,7 +353,7 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
 
 void Game::handleAsteroidsCollisions() {
     std::vector<Asteroid> asteroids = level.getAsteroids();
-    const std::vector<Polygon>& collisionObstacles = level.getZones(ZoneType::COLLISION);
+    const std::vector<Polygon>& collisionObstacles = level.getZones(PolygonType::COLLISION);
 
     for (auto asteroidIt = asteroids.begin(); asteroidIt != asteroids.end();) {
         Asteroid& asteroid = *asteroidIt;

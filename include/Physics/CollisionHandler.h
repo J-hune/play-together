@@ -65,10 +65,23 @@ bool handleCollisionsWithDeathZones(const Player &player, std::vector<Polygon> &
  * @brief Handles collisions between the player and save zones.
  * @param player The player object.
  * @param level Reference to the level object.
- * @param saveZones Vector of polygons representing save zones.
+ * @param saveZones Vector of AABB representing save zones.
  */
-void handleCollisionsWithSaveZones(const Player &player, Level &level, std::vector<Polygon> &savesZones);
+void handleCollisionsWithSaveZones(Player &player, Level &level, std::vector<AABB> &savesZones);
 
+/**
+ * @brief Handles collisions between the player and toggle gravity zones.
+ * @param player The player object.
+ * @param toggleGravityZones Vector of AABB representing toggle gravity zones.
+ */
+void handleCollisionsWithToggleGravityZones(Player &player, const std::vector<AABB> &toggleGravityZones);
+
+/**
+ * @brief Handles collisions between the player and increase fall speed zones.
+ * @param player The player object.
+ * @param increaseFallSpeedZones Vector of AABB representing increase fall speed zones.
+ */
+void handleCollisionsWithIncreaseFallSpeedZones(Player &player, const std::vector<AABB> &increaseFallSpeedZones);
 
 
 /* PLAYER REVERSED MAVITY */

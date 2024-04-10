@@ -642,10 +642,12 @@ void correctSATCollision(Player *player, const Polygon &obstacle) {
     // If the collision is only on x-axis
     if (xaxis && !yaxis) {
         player->setX( correctSATCollisionOnXAxis(player, obstacle));
+        player->setMoveX(0);
     }
     // If the collision is only on y-axis
     else if (!xaxis) {
         player->setY(correctSATCollisionOnYAxis(player, obstacle));
+        player->setMoveY(0);
     }
     // If the collision is on both axis
     else {

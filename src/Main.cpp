@@ -7,6 +7,9 @@
 #include "../include/Network/NetworkManager.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+#ifdef DEVELOPMENT_MODE
+    std::cout << "APP : WARNING : DEVELOPMENT_MODE is enabled" << std::endl;
+#endif
 
 // Initialize Winsock on Windows
 #ifdef _WIN32

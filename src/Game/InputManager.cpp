@@ -136,12 +136,19 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
 
 void InputManager::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) const {
 
+    // Check if the game is in development mode
+#ifdef DEVELOPMENT_MODE
+    bool isDevelopmentMode = true;
+#else
+    bool isDevelopmentMode = false;
+#endif
+
     // Get the current keyboard state mask
     const Uint8 *keyboardState = SDL_GetKeyboardState(nullptr);
     uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
 
     // If the keyboard state has changed since the last message was sent
-    if (currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+    if (!isDevelopmentMode || currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
         // Send the new keyboard state mask to the server
         Mediator::sendPlayerUpdate(currentKeyboardStateMask);
 

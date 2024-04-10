@@ -109,9 +109,9 @@ public:
     /**
      * @brief Applies camera movement based on the positions of all players.
      * @param camera_point A point representing the camera point position.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyMovement(Point camera_point, double deltaTime);
+    void applyMovement(Point camera_point, double delta_time);
 
     /**
      * @brief Renders the collisions by drawing obstacles.

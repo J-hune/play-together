@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.26)
 
 project(play-together)
+option(DEVELOPMENT_MODE "Development mode" OFF)
+
+if(DEVELOPMENT_MODE)
+    add_definitions(-DDEVELOPMENT_MODE)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -std=c++20")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/)
 set(DEPENDENCIES_DIR ${CMAKE_SOURCE_DIR}/dependencies)
 

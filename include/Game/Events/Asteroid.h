@@ -161,12 +161,12 @@ public :
 
     /**
      * @brief Generates an array of possible positions for the asteroid.
-     * @param nbPosition The number of positions to generate.
+     * @param position_count The number of positions to generate.
      * @param x The lower bound of the position range.
      * @param y The upper bound of the position range.
      * @param seed The seed for random number generation.
      */
-    static void generateRandomPositionsArray(int nbPosition, float x, float y, size_t seed);
+    static void generateRandomPositionsArray(int position_count, float x, float y, size_t seed);
 
     /**
      * @brief Get a random position from the array of possible positions.
@@ -178,10 +178,10 @@ public :
 
     /**
      * @brief Get an array of possible angles for the asteroid.
-     * @param nbAngle The number of angles to generate.
+     * @param angle_count The number of angles to generate.
      * @param seed The seed for random number generation.
      */
-    static void generateRandomAnglesArray(int nbAngle, size_t seed);
+    static void generateRandomAnglesArray(int angle_count, size_t seed);
 
     /**
     * @brief Generates a random angle from the array of possible angles.

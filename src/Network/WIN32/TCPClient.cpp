@@ -91,7 +91,9 @@ void TCPClient::handleMessages() {
 }
 
 bool TCPClient::send(const std::string &message) const {
+#ifdef DEVELOPMENT_MODE
     std::cout << "TCPClient: Sending message: " << message << " (" << message.length() << " bytes) to server (socket " << socketFileDescriptor << ")" << std::endl;
+#endif
 
     // First, send the size of the message
     auto messageSize = static_cast<int>(message.length()); // Message size including null terminator

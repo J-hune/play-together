@@ -250,12 +250,12 @@ void Level::loadMapProperties(const std::string &map_file_name) {
 
     // Load spawn points
     for (const auto &spawn_point : j["spawnPoints"]) {
-        spawnPoints.emplace_back(std::array<Point, 4>{{
+        spawnPoints.push_back({
                Point(spawn_point[0][0], spawn_point[0][1]),
                Point(spawn_point[1][0], spawn_point[1][1]),
                Point(spawn_point[2][0], spawn_point[2][1]),
                Point(spawn_point[3][0], spawn_point[3][1])
-        }});
+        });
     }
 
     // Load musics

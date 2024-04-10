@@ -131,6 +131,12 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
+     * @brief Initializes a client game by loading the level and setting music.
+     * @param slot The save slot to use when loading the game. (0 by default)
+     */
+    void initializeClientGame(const std::string& map_name, short last_checkpoint);
+
+    /**
      * @brief Updates the game logic in a fixed time step.
      */
     void fixedUpdate();

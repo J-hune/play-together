@@ -101,6 +101,13 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
+void Game::initializeClientGame(const std::string& map_name, short last_checkpoint) {
+    setLevel(map_name);
+    level.setLastCheckpoint(last_checkpoint);
+    music = level.getMusicById(0);
+    music.play(-1);
+}
+
 void Game::fixedUpdate() {
     inputManager->handleKeyboardEvents();
     calculatePlayersMovement(1.0 / tickRate);

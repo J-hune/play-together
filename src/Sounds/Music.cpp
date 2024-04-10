@@ -22,7 +22,7 @@ Music::Music(const std::string& file_name) {
 }
 
 Music::~Music() {
-    Mix_FreeMusic(music);
+    if (Mix_QuerySpec(0, 0, 0) == 0) Mix_FreeMusic(music);
 }
 
 

@@ -148,6 +148,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         TTF_CloseFont(font);
     }
     TTF_Quit();
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_Quit();
 
 #ifdef _WIN32

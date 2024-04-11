@@ -47,7 +47,7 @@ public:
     /**
      * @brief Starts the client to handle incoming messages.
      */
-    void start() const;
+    void start();
 
     /**
      * @brief Handles incoming messages from the server.

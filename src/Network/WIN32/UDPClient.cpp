@@ -47,7 +47,8 @@ void UDPClient::initialize(const std::string &serverHostname, short serverPort, 
     this->serverAddress = serverAddr;
 }
 
-void UDPClient::start() const {
+void UDPClient::start() {
+    stopRequested = false;
     handleMessages(); // Start handling incoming messages (blocking)
     std::cout << "UDPClient: Client shutdown" << std::endl;
 }

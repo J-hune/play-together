@@ -143,6 +143,31 @@ void UDPServer::handleMessage() {
     std::cout << "UDPServer: Stopping message handling" << std::endl;
 }
 
+bool UDPServer::sendSyncCorrection(int clientSocket, sockaddr_in address, nlohmann::json &message) const {
+    using json = nlohmann::json;
+
+    // Add each player's position and movement to the message
+    message["players"] = json::array();
+
+    for (const Player &player : Mediator::getAlivePlayers()) {
+        json playerData;
+
+        int playerID = player.getPlayerID();
+        if (playerID == -1) playerID = 0; // The server player has ID 0
+        if (playerID == clientSocket) playerID = -1; // The client itself has ID -1
+
+        playerData["id"] = playerID;
+        playerData["x"] = player.getX();
+        playerData["y"] = player.getY();
+        playerData["moveX"] = player.getMoveX();
+        playerData["moveY"] = player.getMoveY();
+        message["players"].push_back(playerData);
+    }
+
+    std::cout << message.dump() << std::endl;
+    return send(address, message.dump());
+}
+
 // Stop the server
 void UDPServer::stop() {
     stopRequested = true;

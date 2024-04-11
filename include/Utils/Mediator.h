@@ -67,6 +67,7 @@ public:
     static void stopServers();
     static void stopClients();
     static void sendPlayerUpdate(uint16_t keyboardStateMask);
+    static void sendSyncCorrection(nlohmann::json &message);
     static void sendAsteroidCreation(Asteroid const &asteroid);
 
     // Menu methods
@@ -82,7 +83,7 @@ public:
     static void stop();
     static void save();
     static void getGameProperties(nlohmann::json &properties);
-    static std::vector<Player> getCharacters();
+    static std::vector<Player> const &getAlivePlayers();
 
     // Other methods
     /**

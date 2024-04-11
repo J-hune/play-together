@@ -283,7 +283,7 @@ bool TCPServer::sendPlayerList(SOCKET clientSocket) const {
     message["players"] = json::array();
 
     // Add all connected clients to the player list
-    for (std::vector<Player> players = Mediator::getCharacters(); auto& player : players) {
+    for (std::vector<Player> players = Mediator::getAlivePlayers(); auto& player : players) {
         int playerID = player.getPlayerID();
         if (playerID == -1) playerID = 0; // The server player has ID 0
         if (playerID == static_cast<int>(clientSocket)) playerID = -1; // The client itself has ID -1

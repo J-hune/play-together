@@ -4,9 +4,9 @@
 #include "../../include/Network/NetworkManager.h"
 
 // Define the static member variables
-Game* Mediator::gamePtr = nullptr;
-Menu* Mediator::menuPtr = nullptr;
-NetworkManager* Mediator::networkManagerPtr = nullptr;
+Game *Mediator::gamePtr = nullptr;
+Menu *Mediator::menuPtr = nullptr;
+NetworkManager *Mediator::networkManagerPtr = nullptr;
 std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> Mediator::playersKeyStates;
 const std::array<SDL_Scancode, 7> Mediator::keyMapping = {
         SDL_SCANCODE_UP, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_DOWN,
@@ -71,6 +71,10 @@ void Mediator::sendAsteroidCreation(Asteroid const &asteroid) {
     Mediator::networkManagerPtr->sendAsteroidCreation(asteroid);
 }
 
+void Mediator::sendSyncCorrection(nlohmann::json &message) {
+    Mediator::networkManagerPtr->sendSyncCorrection(message);
+}
+
 /** MENU METHODS **/
 
 void Mediator::handleServerDisconnect() {
@@ -118,7 +122,7 @@ void Mediator::getGameProperties(nlohmann::json &properties) {
     properties["lastCheckpoint"] = level.getLastCheckpoint();
 }
 
-std::vector<Player> Mediator::getCharacters() {
+std::vector<Player> const &Mediator::getAlivePlayers() {
     return gamePtr->getPlayerManager().getAlivePlayers();
 }
 

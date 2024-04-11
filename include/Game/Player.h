@@ -24,9 +24,7 @@ const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
 class Player {
 public:
 
-    /** CONSTRUCTORS **/
-
-    Player() = default; // Used for the useless empty Game constructor of Athena
+    /** CONSTRUCTOR **/
 
     /**
      * @brief Constructor for the Player class.

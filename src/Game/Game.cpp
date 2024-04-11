@@ -140,19 +140,27 @@ void Game::run() {
         // Calculate game rendering at the specified rate (frameRate)
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
-
-            // Calculate the ratio for applying players movement
             update(deltaTime);
 
-            // Reset accumulated time for rendering
-            accumulatedTime -= 1.0 / frameRate;
+            // Every 1/60 seconds or more, send the keyboard state to the network
+            if (elapsedTimeSinceLastReset > networkInputSendIntervalSeconds) {
+                inputManager->sendKeyboardStateToNetwork();
+            }
+
+            // Every 20 seconds or more, send the sync correction to the network
+            if (Mediator::isServerRunning() && elapsedTimeSinceLastReset > networkSyncCorrectionIntervalSeconds) {
+                inputManager->sendSyncCorrectionToNetwork();
+            }
 
             // Check if one second has passed since the last reset, and if so, reset frame counters and elapsed time
-            if (elapsedTimeSinceLastReset >= 1.0) {
+            if (elapsedTimeSinceLastReset >= effectiveFrameRateUpdateIntervalSeconds) {
                 effectiveFrameFps = frameCounter;
                 frameCounter = 0;
                 elapsedTimeSinceLastReset -= 1.0;
             }
+
+            // Reset accumulated time for rendering
+            accumulatedTime -= 1.0 / frameRate;
         }
 
         // Waiting to maintain the desired game FPS

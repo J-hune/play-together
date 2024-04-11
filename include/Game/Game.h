@@ -150,6 +150,10 @@ public:
     void exitGame();
 
 private:
+    static constexpr float effectiveFrameRateUpdateIntervalSeconds = 1.0f;
+    static constexpr float networkInputSendIntervalSeconds = 1.0f / 60.0f;
+    static constexpr float networkSyncCorrectionIntervalSeconds = 0.50f;
+
     /** ATTRIBUTES **/
 
     SDL_Window *window; /**< SDL window for rendering. */

@@ -14,7 +14,6 @@ InputManager::InputManager(Game *game) : gamePtr(game) {}
 
 void InputManager::handleKeyboardEvents() {
     SDL_Event e;
-    static uint16_t lastKeyboardStateMask = 0;
     Player *playerPtr = gamePtr->getPlayerManager().findPlayerById(-1);
 
     // Main loop handling every event one by one
@@ -54,9 +53,7 @@ void InputManager::handleKeyboardEvents() {
     }
 
     // If the player is alive, send the keyboard state to the network after handling all events
-    if (playerPtr != nullptr) {
-        sendKeyboardStateToNetwork(&lastKeyboardStateMask);
-    }
+    if (playerPtr != nullptr) sendKeyboardStateToNetwork();
 }
 
 void InputManager::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const {
@@ -134,7 +131,7 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
 }
 
 
-void InputManager::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr) const {
+void InputManager::sendKeyboardStateToNetwork() {
 
     // Check if the game is in development mode
 #ifdef DEVELOPMENT_MODE
@@ -148,11 +145,21 @@ void InputManager::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr
     uint16_t currentKeyboardStateMask = Mediator::encodeKeyboardStateMask(keyboardState);
 
     // If the keyboard state has changed since the last message was sent
-    if (!isDevelopmentMode || currentKeyboardStateMask != *lastKeyboardStateMaskPtr) {
+    if (!isDevelopmentMode || currentKeyboardStateMask != lastKeyboardStateMask) {
         // Send the new keyboard state mask to the server
         Mediator::sendPlayerUpdate(currentKeyboardStateMask);
 
         // Update the last keyboard state mask and the last send time
-        *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
+        lastKeyboardStateMask = currentKeyboardStateMask;
     }
+}
+
+void InputManager::sendSyncCorrectionToNetwork() const {
+    using json = nlohmann::json;
+    json message;
+
+    message["messageType"] = "syncCorrection";
+    message["timestamp"] = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+    Mediator::sendSyncCorrection(message);
 }

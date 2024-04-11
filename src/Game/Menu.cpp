@@ -270,7 +270,7 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
 
 void Menu::handleJoinHostedGameButton(Button &button) {
     Mediator::stopServers();
-
+    Music::stop();
     try {
         Mediator::startClients();
         displayMenu = false;

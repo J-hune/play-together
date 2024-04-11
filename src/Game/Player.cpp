@@ -96,6 +96,10 @@ bool Player::getIsJumping() const {
     return isJumping;
 }
 
+size_t Player::getCurrentZoneID() const {
+    return currentZoneID;
+}
+
 
 /** SPECIFIC ACCESSORS **/
 
@@ -270,6 +274,14 @@ void Player::setPlayerID(int id) {
 
 void Player::setSpriteID(short id) {
     SpriteID = id;
+}
+
+void Player::setCurrentZoneID(size_t id) {
+    currentZoneID = id;
+}
+
+void Player::setMaxFallSpeed(float val) {
+    maxFallSpeed = val;
 }
 
 

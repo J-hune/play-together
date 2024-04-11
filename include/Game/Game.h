@@ -124,6 +124,12 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
+     * @brief Initializes a client game by loading the level and setting music.
+     * @param slot The save slot to use when loading the game. (0 by default)
+     */
+    void initializeClientGame(const std::string& map_name, short last_checkpoint);
+
+    /**
      * @brief Updates the game logic.
      * @param delta_time The time elapsed since the last frame in seconds.
      */
@@ -176,7 +182,9 @@ private:
 
 
     // Broad phase attributes
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> saveZones; /**< Collection of AABB representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of AABB representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABB representing increase fall speed zones. */
     std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */

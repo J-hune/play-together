@@ -31,7 +31,7 @@ struct Buffer {
 class Player {
 public:
 
-    /** CONSTRUCTOR **/
+    /** CONSTRUCTORS **/
 
     /**
      * @brief Constructor for the Player class.
@@ -151,6 +151,12 @@ public:
      * @return The value of the isJumping attribute
      */
     [[nodiscard]] bool getIsJumping() const;
+
+    /**
+     * @brief Return the id of the current zone in which the player is.
+     * @return The current zone ID.
+     */
+    [[nodiscard]] size_t getCurrentZoneID() const;
 
 
     /** SPECIFIC ACCESSORS **/
@@ -338,6 +344,18 @@ public:
     */
     void setSpriteID(short id);
 
+    /**
+     * @brief Set the current zone ID of the player.
+     * @param id The zone ID to set.
+     */
+    void setCurrentZoneID(size_t id);
+
+    /**
+     * @brief Set the mavity attribute.
+     * @param val The new value of the mavity attribute.
+     */
+    void setMaxFallSpeed(float val);
+
 
     /** PUBLIC METHODS **/
 
@@ -448,11 +466,12 @@ private:
     Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
     float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
     float jumpMaxHeight = 100.f; /**< Maximum height of the player's jump. */
-    float maxFallSpeed = 500.f; /**< Maximum falling speed of the player. */
+    float maxFallSpeed = 600.f; /**< Maximum falling speed of the player. */
     float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
     float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
     float jumpStartHeight = 0; /**< Current height of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
+    size_t currentZoneID = 0; /**< The ID of the current zone the player is in. */
 
     // LOADED TEXTURES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */

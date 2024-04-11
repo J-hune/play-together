@@ -224,7 +224,7 @@ void handleCollisionsWithToggleGravityZones(Player &player, const std::vector<AA
             player.toggleMavity();
             player.getSprite()->toggleFlipVertical();
 
-            float gravityOffset = toggleGravityZone.getHeight() + 4.f;
+            float gravityOffset = toggleGravityZone.getHeight() / 5;
             float currentMoveY = player.getMoveY();
             float newMoveY = (player.getMavity() < 0) ? std::max(currentMoveY, gravityOffset) : std::min(currentMoveY, -gravityOffset);
             player.setMoveY(newMoveY);

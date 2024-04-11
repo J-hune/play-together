@@ -372,7 +372,7 @@ void Player::calculateYaxisMovement(double delta_time) {
         float jumpHeight = jumpStartHeight - y;
 
         // Check if the player has finished the jump (with a very very very small margin of error)
-        if (jumpStartHeight - y > jumpMaxHeight || jumpVelocity <= 0 || !wantToJump) {
+        if (std::abs(jumpStartHeight - y) > jumpMaxHeight || jumpVelocity <= 0 || !wantToJump) {
             isJumping = false;
             jumpStartHeight = 0;
             jumpVelocity = 0;

@@ -151,7 +151,7 @@ public:
 
     /**
      * @brief Applies the movement of every platforms in the level.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
     void applyPlatformsMovement(double delta_time);
 

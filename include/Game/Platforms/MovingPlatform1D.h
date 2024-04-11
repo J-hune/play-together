@@ -90,10 +90,10 @@ public:
 
     /**
      * @brief Selects whether to calculate x- or y-axis movement.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see applyXaxisMovement() and applyYaxisMovement() for sub-functions.
      */
-    void applyMovement(double deltaTime);
+    void applyMovement(double delta_time);
 
 private:
     /** ATTRIBUTES **/
@@ -119,15 +119,15 @@ private:
 
     /**
      * @brief Calculate the new position of the platform on x-axis.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyXaxisMovement(double deltaTime);
+    void applyXaxisMovement(double delta_time);
 
     /**
      * @brief Calculate the new position of the platform on y-axis.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyYaxisMovement(double deltaTime);
+    void applyYaxisMovement(double delta_time);
 
 };
 

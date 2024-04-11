@@ -195,6 +195,27 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
             if (playerPtr != nullptr) handleKeyboardState(playerPtr, keyStates);
         }
 
+        else if (messageType == "syncCorrection") {
+            // For each player in "Players" array, update the player's position and movement
+            json playersArray = message["players"];
+            for (const auto &player : playersArray) {
+                int playerSocketID = player["playerID"];
+                Player *playerPtr = gamePtr->getPlayerManager().findPlayerById(playerSocketID);
+                if (playerPtr == nullptr) {
+                    continue;
+                }
+
+                if (!player.contains("x") || !player.contains("y")) continue;
+                float playerX = player["x"];
+                float playerY = player["y"];
+
+                playerPtr->setBuffer({
+                    playerX - playerPtr->getX(),
+                    playerY - playerPtr->getY(),
+                });
+            }
+        }
+
         else if (messageType == "playerConnect") {
             int playerSocketID = message["playerID"];
 
@@ -246,6 +267,10 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
             // Create a new asteroid with the received properties
             Asteroid asteroid(message["x"], message["y"], message["speed"], message["h"], message["w"], message["angle"]);
             gamePtr->getLevel().addAsteroid(asteroid);
+        }
+
+        else {
+            std::cerr << "Mediator: Unknown message type: " << messageType << std::endl;
         }
 
     } catch (const json::parse_error &e) {

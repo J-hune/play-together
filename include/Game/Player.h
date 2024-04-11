@@ -5,6 +5,8 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <map>
+#include <chrono>
+#include <iostream>
 #include "Point.h"
 #include "../Graphics/Animation.h"
 #include "../Graphics/Sprite.h"
@@ -16,6 +18,11 @@ const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
  * @file Player.h
  * @brief Defines the Player class representing a player in a 2D game.
  */
+
+struct Buffer {
+    float deltaX;
+    float deltaY;
+};
 
 /**
  * @class Player
@@ -77,7 +84,7 @@ public:
      * @brief Return the sprite attribute.
      * @return A pointer of a sprite object representing the sprite of the player.
      */
-    [[nodiscard]] Sprite* getSprite();
+    [[nodiscard]] Sprite *getSprite();
 
     /**
      * @brief Return the moveX attribute.
@@ -261,6 +268,12 @@ public:
     void setMoveY(float val);
 
     /**
+     * @brief Sets the buffer attribute.
+     * @param val The new value of the buffer attribute.
+     */
+    void setBuffer(Buffer val);
+
+    /**
      * @brief Sets the canMove attribute.
      * @param state The new value of the canMove attribute.
      */
@@ -356,10 +369,10 @@ public:
 
     /**
      * @brief Calculate the new position of the player.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
      */
-    void calculateMovement(double deltaTime);
+    void calculateMovement(double delta_time);
 
     /**
      * @brief Checks if the player has moved by checking moveX and moveY attributes.
@@ -369,8 +382,9 @@ public:
 
     /**
      * @brief Apply the movement by adding moveX and moveY to the player position.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyMovement();
+    void applyMovement(double delta_time);
 
     /**
      * @brief Renders the player's sprite.
@@ -404,6 +418,7 @@ private:
     float y; /**< The y-coordinate of the player's position. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
+    Buffer buffer = {0, 0}; /**< The buffer of the player */
     Sprite sprite; /**< The sprite of the player. */
     int score = 0;
 
@@ -494,17 +509,17 @@ private:
 
     /**
      * @brief Calculates the horizontal movement of the player for the current frame.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
      */
-    void calculateXaxisMovement(double deltaTime);
+    void calculateXaxisMovement(double delta_time);
 
     /**
      * @brief Calculates the vertical movement of the player for the current frame.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see calculateMovement() for main use.
      */
-    void calculateYaxisMovement(double deltaTime);
+    void calculateYaxisMovement(double delta_time);
 
     /**
      * @brief Update the sprite animation of the player.

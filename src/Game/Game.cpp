@@ -97,14 +97,14 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::update(double deltaTime) {
+void Game::update(double delta_time) {
     inputManager->handleKeyboardEvents();
-    calculatePlayersMovement(deltaTime);
+    calculatePlayersMovement(delta_time);
 
-    if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-    level.applyAsteroidsMovement(deltaTime);
-    applyPlayersMovement();
-    camera.applyMovement(playerManager->getAveragePlayerPosition(), deltaTime);
+    if (enable_platforms_movement) level.applyPlatformsMovement(delta_time);
+    level.applyAsteroidsMovement(delta_time);
+    applyPlayersMovement(delta_time);
+    camera.applyMovement(playerManager->getAveragePlayerPosition(), delta_time);
 
     // Handle collisions
     broadPhase();
@@ -130,17 +130,17 @@ void Game::run() {
         // Calculate delta time for game logic
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
         Uint64 frameTicks = currentFrameTime - lastFrameTime;
-        float deltaTime = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds for game logic
+        float delta_time = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds for game logic
         lastFrameTime = currentFrameTime;
 
         // Accumulate time for game logic and rendering
-        accumulatedTime += deltaTime;
-        elapsedTimeSinceLastReset += deltaTime;
+        accumulatedTime += delta_time;
+        elapsedTimeSinceLastReset += delta_time;
 
         // Calculate game rendering at the specified rate (frameRate)
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
-            update(deltaTime);
+            update(delta_time);
 
             // Every 1/60 seconds or more, send the keyboard state to the network
             if (elapsedTimeSinceLastReset > networkInputSendIntervalSeconds) {
@@ -171,17 +171,17 @@ void Game::run() {
     }
 }
 
-void Game::calculatePlayersMovement(double deltaTime) {
+void Game::calculatePlayersMovement(double delta_time) {
     // Apply movement to all players
     for (Player &character: playerManager->getAlivePlayers()) {
-        character.calculateMovement(deltaTime);
+        character.calculateMovement(delta_time);
     }
 }
 
-void Game::applyPlayersMovement() {
+void Game::applyPlayersMovement(double delta_time) {
     // Apply movement for all players
     for (Player &character: playerManager->getAlivePlayers()) {
-        character.applyMovement();
+        character.applyMovement(delta_time);
     }
 }
 

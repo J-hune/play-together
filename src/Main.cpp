@@ -116,12 +116,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         }
 
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
-        float deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(SDL_GetPerformanceFrequency());
+        float delta_time = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(SDL_GetPerformanceFrequency());
         lastFrameTime = currentFrameTime;
 
         // Limit the frame rate
-        if (deltaTime < 1000.0f / static_cast<float>(maxFrameRate)) {
-            SDL_Delay(static_cast<Uint32>((1000.0f / static_cast<float>(maxFrameRate)) - deltaTime));
+        if (delta_time < 1000.0f / static_cast<float>(maxFrameRate)) {
+            SDL_Delay(static_cast<Uint32>((1000.0f / static_cast<float>(maxFrameRate)) - delta_time));
         }
 
         // Clear the screen

@@ -89,9 +89,9 @@ public:
 
     /**
      * @brief Calculate the new position of the platform on x-axis and y-axis.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyMovement(double deltaTime);
+    void applyMovement(double delta_time);
 
 private:
     /** ATTRIBUTES **/

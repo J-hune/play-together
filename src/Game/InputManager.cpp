@@ -159,7 +159,5 @@ void InputManager::sendSyncCorrectionToNetwork() const {
     json message;
 
     message["messageType"] = "syncCorrection";
-    message["timestamp"] = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
     Mediator::sendSyncCorrection(message);
 }

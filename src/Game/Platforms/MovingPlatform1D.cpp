@@ -70,9 +70,9 @@ void MovingPlatform1D::setIsMoving(bool state) {
 
 /** METHODS **/
 
-void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
+void MovingPlatform1D::applyXaxisMovement(double delta_time) {
     move = 150; // Add basic movement
-    move *= static_cast<float>(deltaTime); // Apply movement per second
+    move *= static_cast<float>(delta_time); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -90,10 +90,10 @@ void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
     }
 }
 
-void MovingPlatform1D::applyYaxisMovement(double deltaTime) {
+void MovingPlatform1D::applyYaxisMovement(double delta_time) {
     move = 150; // Add basic movement
 
-    move *= static_cast<float>(deltaTime); // Apply movement per second
+    move *= static_cast<float>(delta_time); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -111,6 +111,6 @@ void MovingPlatform1D::applyYaxisMovement(double deltaTime) {
     }
 }
 
-void MovingPlatform1D::applyMovement(double deltaTime) {
-    axis ? applyYaxisMovement(deltaTime) : applyXaxisMovement(deltaTime);
+void MovingPlatform1D::applyMovement(double delta_time) {
+    axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
 }

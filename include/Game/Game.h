@@ -125,9 +125,9 @@ public:
 
     /**
      * @brief Updates the game logic.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void update(double deltaTime);
+    void update(double delta_time);
 
     /**
      * @brief Runs the game loop.
@@ -193,14 +193,15 @@ private:
 
     /**
      * @brief Applies the movement to all players in the game.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyPlayersMovement();
+    void applyPlayersMovement(double delta_time);
 
     /**
      * @brief Calculates the movement of all players in the game.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void calculatePlayersMovement(double deltaTime);
+    void calculatePlayersMovement(double delta_time);
 
     /**
      * @brief Handles collisions between the asteroid and obstacles.

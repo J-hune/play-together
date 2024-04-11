@@ -213,6 +213,10 @@ void Player::setMoveY(float val) {
     moveY = val;
 }
 
+void Player::setBuffer(Buffer val) {
+    buffer = val;
+}
+
 void Player::setCanMove(bool state) {
     canMove = state;
 }
@@ -308,7 +312,7 @@ bool Player::canJump() const {
     return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
 }
 
-void Player::calculateXaxisMovement(double deltaTime) {
+void Player::calculateXaxisMovement(double delta_time) {
 
     // Determine the desired direction
     float wantedDirection = 0;
@@ -326,21 +330,21 @@ void Player::calculateXaxisMovement(double deltaTime) {
             speedCurveX = initialSpeedCurveX;
         } else {
             // Gradually increase speed curve for smooth acceleration
-            speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0));
+            speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * delta_time, 1.0));
         }
     } else {
         // If no input, gradually decrease speed curve for smooth deceleration
-        speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0));
+        speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * delta_time, 0.0));
     }
 
     // Calculate movement based on speed curve and direction
-    moveX = static_cast<float>(baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX * speed);
+    moveX = static_cast<float>(baseMovementX * sprintMultiplier * delta_time * speedCurveX * directionX * speed);
 
     // Remember previous direction
     previousDirectionX = directionX;
 }
 
-void Player::calculateYaxisMovement(double deltaTime) {
+void Player::calculateYaxisMovement(double delta_time) {
 
     // If the player wants to jump and can jump, start the jump
     if (!jumpLock && wantToJump && canJump() && !isJumping) {
@@ -368,20 +372,20 @@ void Player::calculateYaxisMovement(double deltaTime) {
             jumpVelocity = jumpInitialVelocity - mavity * jumpHeight * 0.02f;
 
             // Calculate vertical movement based on jump velocity and time
-            moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime) * (mavity < 0 ? 1 : -1));
+            moveY = static_cast<float>((jumpVelocity * delta_time - 0.5f * mavity * delta_time * delta_time) * (mavity < 0 ? 1 : -1));
 
             // Update jump velocity for the next frame
-            jumpVelocity -= mavity * static_cast<float>(deltaTime);
+            jumpVelocity -= mavity * static_cast<float>(delta_time);
         }
     }
 
     // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
     else if (!isOnPlatform)  {
-        moveY += static_cast<float>(fallSpeedFactor * mavity * deltaTime * deltaTime);
+        moveY += static_cast<float>(fallSpeedFactor * mavity * delta_time * delta_time);
         if (mavity > 0) {
-            moveY = std::min(moveY, static_cast<float>(maxFallSpeed * deltaTime));
+            moveY = std::min(moveY, static_cast<float>(maxFallSpeed * delta_time));
         } else {
-            moveY = std::max(moveY, static_cast<float>(-maxFallSpeed * deltaTime));
+            moveY = std::max(moveY, static_cast<float>(-maxFallSpeed * delta_time));
         }
     }
 
@@ -390,18 +394,39 @@ void Player::calculateYaxisMovement(double deltaTime) {
     else directionY = moveY < 0 ? -1 : 1;
 }
 
-void Player::calculateMovement(double deltaTime) {
-    calculateXaxisMovement(deltaTime);
-    calculateYaxisMovement(deltaTime);
+void Player::calculateMovement(double delta_time) {
+    calculateXaxisMovement(delta_time);
+    calculateYaxisMovement(delta_time);
 }
 
 bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
 
-void Player::applyMovement() {
-    x += moveX;
-    y += moveY;
+void Player::applyMovement(double delta_time) {
+
+    // If the buffer is too big, move the player and decrease the buffer by the full amount
+    if (buffer.deltaX > 40 || buffer.deltaX < -40 || buffer.deltaY > 40 || buffer.deltaY < -40) {
+        std::cout << "Player: Buffer too big: " << buffer.deltaX << ", " << buffer.deltaY << std::endl;
+
+        x = x + buffer.deltaX;
+        y = y + buffer.deltaY;
+
+        buffer.deltaX = 0;
+        buffer.deltaY = 0;
+    }
+
+    else {
+        // Add a part of the buffer to the player's position
+        float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+
+        x += moveX + bufferFraction * buffer.deltaX;
+        y += moveY + bufferFraction * buffer.deltaY;
+
+        // Decrease the buffer
+        buffer.deltaX -= bufferFraction * buffer.deltaX;
+        buffer.deltaY -= bufferFraction * buffer.deltaY;
+    }
 }
 
 void Player::updateSpriteAnimation() {

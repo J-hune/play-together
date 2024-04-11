@@ -75,18 +75,18 @@ void MovingPlatform2D::setIsMoving(bool state) {
 
 /** METHODS **/
 
-void MovingPlatform2D::applyMovement(double deltaTime) {
+void MovingPlatform2D::applyMovement(double delta_time) {
     // Add basic movement
     moveX = 150;
     moveY = 150;
 
     // Calculate x-axis movement
-    moveX *= static_cast<float>(deltaTime); // Apply movement per second
+    moveX *= static_cast<float>(delta_time); // Apply movement per second
     moveX *= speed; // Apply speed
     moveX *= directionX; // Apply direction
 
     // Calculate y-axis movement
-    moveY *= static_cast<float>(deltaTime); // Apply movement per second
+    moveY *= static_cast<float>(delta_time); // Apply movement per second
     moveY *= speed; // Apply speed
     moveY *= directionY; // Apply direction
 

@@ -156,7 +156,7 @@ public :
      *        Updates the current position coordinates accordingly.
      * TODO: correct the movement according to the delta time
      */
-    void applyMovement(double deltaTime);
+    void applyMovement(double delta_time);
 
 
     /**

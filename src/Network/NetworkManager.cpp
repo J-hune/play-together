@@ -153,8 +153,8 @@ void NetworkManager::sendSyncCorrection(nlohmann::json &message) {
     // Send the correction message to all clients
     std::scoped_lock<std::mutex> lock(clientAddressesMutex);
 
-    for (const auto& [id, address] : clientAddresses) {
-        udpServer.sendSyncCorrection(static_cast<int>(id), address, message);
+    for (const auto& [clientId, clientAddress] : clientAddresses) {
+        udpServer.sendSyncCorrection(static_cast<int>(clientId), clientAddress, message);
     }
 }
 

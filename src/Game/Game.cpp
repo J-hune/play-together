@@ -103,6 +103,13 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
+void Game::initializeClientGame(const std::string& map_name, short last_checkpoint) {
+    setLevel(map_name);
+    level.setLastCheckpoint(last_checkpoint);
+    music = level.getMusicById(0);
+    music.play(-1);
+}
+
 void Game::fixedUpdate() {
     inputManager->handleKeyboardEvents();
     calculatePlayersMovement(1.0 / tickRate);
@@ -229,6 +236,8 @@ void Game::narrowPhase() {
         handleCollisionsWithSpeedPowerUp(&character, &level, broadPhaseManager->getSpeedPowerUp());
 
         handleCollisionsWithSaveZones(character, level, broadPhaseManager->getSaveZones()); // Handle collisions with save zones
+        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
+        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
 
         // Handle collisions with death zones and camera borders
         if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
@@ -267,7 +276,7 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
 
 void Game::handleAsteroidsCollisions() {
     std::vector<Asteroid> asteroids = level.getAsteroids();
-    const std::vector<Polygon>& collisionObstacles = level.getZones(ZoneType::COLLISION);
+    const std::vector<Polygon>& collisionObstacles = level.getZones(PolygonType::COLLISION);
 
     for (auto asteroidIt = asteroids.begin(); asteroidIt != asteroids.end();) {
         Asteroid& asteroid = *asteroidIt;

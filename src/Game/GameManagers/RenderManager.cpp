@@ -107,15 +107,15 @@ void RenderManager::render() {
         // Draw the environment
         level->renderBackgrounds(renderer, camera_point); // Draw the background
 
+        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderItemsDebug(renderer, camera_point); // Draw the items
+
         // Draw the characters
         for (Player &player : players) {
             player.render(renderer, camera_point);
         }
-
-        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
-        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level->renderPlatforms(renderer, camera_point); // Draw the platforms
-        level->renderItemsDebug(renderer, camera_point); // Draw the items
 
         level->renderMiddleground(renderer, camera_point); // Draw the middleground
         level->renderForegrounds(renderer, camera_point); // Draw the foreground
@@ -123,16 +123,16 @@ void RenderManager::render() {
 
     // Render collision boxes
     else {
+        level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderItemsDebug(renderer, camera_point); // Draw the items
+
         // Draw the characters
         for (Player const& player : players) {
             player.renderDebug(renderer, camera_point);
             player.renderDebug(renderer, camera_point);
         }
-
-        level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
-        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
-        level->renderItemsDebug(renderer, camera_point); // Draw the items
     }
 
     // Render the fps counter

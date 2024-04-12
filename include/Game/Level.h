@@ -5,6 +5,7 @@
 #include <fstream>
 #include "../Graphics/Layer.h"
 #include "../Physics/Polygon.h"
+#include "../Physics/AABB.h"
 #include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
@@ -65,6 +66,9 @@ private:
     std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
     std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
     std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
+
 
     // EVENTS
     std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
@@ -125,7 +129,14 @@ public:
      * @param type Represents the type of zone.
      * @return A vector of Polygon.
      */
-    [[nodiscard]] std::vector<Polygon> getZones(ZoneType type) const;
+    [[nodiscard]] std::vector<Polygon> getZones(PolygonType type) const;
+
+    /**
+     * @brief Return the zones of a specific type.
+     * @param type Represents the type of zone.
+     * @return A vector of AABB.
+     */
+    [[nodiscard]] std::vector<AABB> getZones(AABBType type) const;
 
     /**
      * @brief Return the asteroids attribute.
@@ -323,7 +334,16 @@ private:
      * @param[out] zones Represents the collection of polygons.
      * @return The number of polygons loaded.
      */
-    static int loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, ZoneType type);
+    static int loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, PolygonType type);
+
+    /**
+     * @brief Load the AABB from a JSON file.
+     * @param json_data Represents the JSON data.
+     * @param zone_name Represents the name of the zone.
+     * @param[out] zones Represents the collection of AABB.
+     * @return The number of AABB loaded.
+     */
+    static int loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type);
 
     /**
      * @brief Load the polygons from a map.

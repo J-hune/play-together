@@ -212,8 +212,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         }
 
         else if (messageType == "gameProperties") {
-            gamePtr->setLevel(message["mapName"]);
-            gamePtr->getLevel()->setLastCheckpoint(message["lastCheckpoint"]);
+            gamePtr->initializeClientGame(message["mapName"], message["lastCheckpoint"]);
         }
 
         else if (messageType == "playerList") {

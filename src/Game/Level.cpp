@@ -107,8 +107,8 @@ void Level::setAsteroids(std::vector<Asteroid> const &value) {
     this->asteroids = value;
 }
 
-void Level::increaseWeightFromPlatform(const WeightPlatform &platform) {
-    // Search the item and remove it
+void Level::increaseWeightForPlatform(const WeightPlatform &platform) {
+    // Search the platform and increase its weight
     auto it = std::ranges::find(weightPlatforms, platform);
     if (it != weightPlatforms.end()) {
         it->increaseWeight();

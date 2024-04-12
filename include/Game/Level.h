@@ -194,7 +194,7 @@ public:
      * @brief Increase the weight of a platform in weightPlatforms attribute.
      * @param platform The platform to increase the weight.
      */
-    void increaseWeightFromPlatform(const WeightPlatform &platform);
+    void increaseWeightForPlatform(const WeightPlatform &platform);
 
     /**
      * @brief Remove an item from sizePowerUp attribute.

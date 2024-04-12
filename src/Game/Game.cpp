@@ -10,10 +10,12 @@
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag)
         : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag) {
 
+    // Initialize managers
     inputManager = std::make_unique<InputManager>(this);
     renderManager = std::make_unique<RenderManager>(renderer, this);
     saveManager = std::make_unique<SaveManager>(this);
     playerManager = std::make_unique<PlayerManager>(this);
+    broadPhaseManager = std::make_unique<BroadPhaseManager>(this);
 
     // Create the game seed
     std::random_device rd;
@@ -115,11 +117,11 @@ void Game::update(double deltaTime, double ratio) {
 
     level.applyAsteroidsMovement(deltaTime);
 
-    // Apply players movement directly with the calculated ratio
+    // Apply player movement directly with the calculated ratio
     applyPlayersMovement(ratio);
 
     // Handle collisions
-    broadPhase();
+    broadPhaseManager->broadPhase();
     narrowPhase();
 
     camera.applyMovement(playerManager->getAveragePlayerPosition(), deltaTime);
@@ -201,90 +203,11 @@ void Game::applyPlayersMovement(double ratio) {
 }
 
 void Game::switchMavity() {
-    // Change mavity for all player
+    // Change mavity for all players
     for (Player &character: playerManager->getAlivePlayers()) {
         character.setIsOnPlatform(false);
         character.getSprite()->toggleFlipVertical();
         character.toggleMavity();
-    }
-}
-
-void Game::broadPhase() {
-    // Empty old broad phase elements
-    saveZones.clear();
-    deathZones.clear();
-    obstacles.clear();
-    movingPlatforms1D.clear();
-    movingPlatforms2D.clear();
-    switchingPlatforms.clear();
-    weightPlatforms.clear();
-    sizePowerUp.clear();
-    speedPowerUp.clear();
-
-    std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
-    SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
-
-    // Check collisions with each save zone
-    for (const Polygon &zone: level.getZones(ZoneType::SAVE)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
-            saveZones.push_back(zone);
-        }
-    }
-
-    // Check collisions with each death zone
-    for (const Polygon &zone: level.getZones(ZoneType::DEATH)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
-            deathZones.push_back(zone);
-        }
-    }
-
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getZones(ZoneType::COLLISION)) {
-        if (checkSATCollision(broadPhaseAreaVertices, obstacle)) {
-            obstacles.push_back(obstacle);
-        }
-    }
-
-    // Check for collisions with each 1D moving platform
-    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms1D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each 2D moving platform
-    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms2D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each switching platform
-    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            switchingPlatforms.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each weight platform
-    for (const WeightPlatform &platform: level.getWeightPlatforms()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            weightPlatforms.push_back(platform);
-        }
-    }
-
-    // Check for collisions with size power-up
-    for (const SizePowerUp &item: level.getSizePowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            sizePowerUp.push_back(item);
-        }
-    }
-
-    // Check for collisions with speed power-up
-    for (const SpeedPowerUp &item: level.getSpeedPowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            speedPowerUp.push_back(item);
-        }
     }
 }
 
@@ -302,14 +225,14 @@ void Game::narrowPhase() {
         else handleCollisionsReversedMavity(character);
 
         // Handle collisions with items
-        handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
-        handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
+        handleCollisionsWithSizePowerUp(&character, &level, broadPhaseManager->getSizePowerUp());
+        handleCollisionsWithSpeedPowerUp(&character, &level, broadPhaseManager->getSpeedPowerUp());
 
-        handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
+        handleCollisionsWithSaveZones(character, level, broadPhaseManager->getSaveZones()); // Handle collisions with save zones
 
         // Handle collisions with death zones and camera borders
         if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
-            ||handleCollisionsWithDeathZones(character, deathZones))
+            || handleCollisionsWithDeathZones(character, broadPhaseManager->getDeathZones()))
         {
             playerManager->killPlayer(character);
         }
@@ -322,24 +245,24 @@ void Game::narrowPhase() {
 void Game::handleCollisionsNormalMavity(Player &player) {
     // Check obstacle collisions only if the player has moved
     if (player.hasMoved()) {
-        handleCollisionsWithObstacles(&player, obstacles);
+        handleCollisionsWithObstacles(&player, broadPhaseManager->getObstacles());
     }
 
-    handleCollisionsWithMovingPlatform1D(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsWithMovingPlatform2D(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsWithSwitchingPlatform(&player, switchingPlatforms); // Handle collisions with switching platforms
-    handleCollisionsWithWeightPlatform(&player, weightPlatforms, &level); // Handle collisions with weight platforms
+    handleCollisionsWithMovingPlatform1D(&player, broadPhaseManager->getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
+    handleCollisionsWithMovingPlatform2D(&player, broadPhaseManager->getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
+    handleCollisionsWithSwitchingPlatform(&player, broadPhaseManager->getSwitchingPlatforms()); // Handle collisions with switching platforms
+    handleCollisionsWithWeightPlatform(&player, broadPhaseManager->getWeightPlatforms(), &level); // Handle collisions with weight platforms
 }
 
 void Game::handleCollisionsReversedMavity(Player &player) const {
     // Check obstacle collisions only if the player has moved
     if (player.hasMoved()) {
-        handleCollisionsSelcatsbOhtiw(&player, obstacles);
+        handleCollisionsSelcatsbOhtiw(&player, broadPhaseManager->getObstacles());
     }
 
-    handleCollisionsD1mroftalPgnivoMhtiw(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsD2mroftalPgnivoMhtiw(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsMroftalPgnihctiwShtiw(&player, switchingPlatforms); // Handle collisions with switching platforms
+    handleCollisionsD1mroftalPgnivoMhtiw(&player, broadPhaseManager->getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
+    handleCollisionsD2mroftalPgnivoMhtiw(&player, broadPhaseManager->getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
+    handleCollisionsMroftalPgnihctiwShtiw(&player, broadPhaseManager->getSwitchingPlatforms()); // Handle collisions with switching platforms
 }
 
 void Game::handleAsteroidsCollisions() {

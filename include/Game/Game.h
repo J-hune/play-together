@@ -15,6 +15,7 @@
 #include "GameManagers/RenderManager.h"
 #include "GameManagers/SaveManager.h"
 #include "GameManagers/PlayerManager.h"
+#include "GameManagers/BroadPhaseManager.h"
 
 
 /**
@@ -27,6 +28,7 @@ class InputManager;
 class RenderManager;
 class SaveManager;
 class PlayerManager;
+class BroadPhaseManager;
 
 /**
  * @class Game
@@ -173,6 +175,7 @@ private:
     std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
     std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
     std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
+    std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
 
     int frameRate = 60; /**< The refresh rate of the game. */
     const int tickRate = 30; /**< The tick rate of the game. */
@@ -186,17 +189,6 @@ private:
     size_t seed;
 
     int worldID = 1; /**< Represents the ID of the current world. */
-
-    // Broad phase attributes
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
-    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
-    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
-    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
 
     // Debug variables used for the application console
     bool enable_platforms_movement = true;
@@ -220,11 +212,6 @@ private:
      * @brief Handles collisions between the asteroid and obstacles.
      */
     void handleAsteroidsCollisions();
-
-    /**
-     * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
-     */
-    void broadPhase();
 
     /**
      * @brief Handles collisions between a player and every object.

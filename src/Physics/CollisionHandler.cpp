@@ -132,7 +132,7 @@ void handleCollisionsWithWeightPlatform(Player *player, std::vector<WeightPlatfo
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
-                level->increaseWeightFromPlatform(platform);
+                level->increaseWeightForPlatform(platform);
 
             }
             // If the collision is with the wall, the player can't move

@@ -80,6 +80,10 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
 }
 
+std::vector<WeightPlatform> Level::getWeightPlatforms() const {
+    return weightPlatforms;
+}
+
 std::vector<SizePowerUp> Level::getSizePowerUp() const {
     return sizePowerUp;
 }
@@ -101,6 +105,14 @@ void Level::setLastCheckpoint(short checkpoint) {
 
 void Level::setAsteroids(std::vector<Asteroid> const &value) {
     this->asteroids = value;
+}
+
+void Level::increaseWeightFromPlatform(const WeightPlatform &platform) {
+    // Search the item and remove it
+    auto it = std::ranges::find(weightPlatforms, platform);
+    if (it != weightPlatforms.end()) {
+        it->increaseWeight();
+    }
 }
 
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
@@ -204,12 +216,14 @@ void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
     for (const MovingPlatform1D &platform: movingPlatforms1D) platform.render(renderer, camera);
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.render(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.render(renderer, camera);
+    for (const WeightPlatform &platform: weightPlatforms) platform.render(renderer, camera);
 }
 
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     for (const MovingPlatform1D &platform: movingPlatforms1D) platform.renderDebug(renderer, camera);
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.renderDebug(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.renderDebug(renderer, camera);
+    for (const WeightPlatform &platform: weightPlatforms) platform.renderDebug(renderer, camera);
 
 }
 
@@ -248,6 +262,11 @@ void Level::applyPlatformsMovement(double delta_time) {
 
     // Apply movement for switching platforms
     for (SwitchingPlatform &platform: switchingPlatforms) {
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
+    }
+
+    // Apply movement for weight platforms
+    for (WeightPlatform &platform: weightPlatforms) {
         if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 }
@@ -382,6 +401,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     movingPlatforms1D.clear();
     movingPlatforms2D.clear();
     switchingPlatforms.clear();
+    weightPlatforms.clear();
 
     std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
     std::ifstream file(file_path);
@@ -441,7 +461,18 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         switchingPlatforms.emplace_back(x, y, width, height, textures[texture_id], bpm, steps);
     }
 
-    std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;
+    // Load all weight platforms
+    for (const auto &platform : j["weightPlatforms"]) {
+        float x = platform["x"];
+        float y = platform["y"];
+        float width = platform["width"];
+        float height = platform["height"];
+        float stepDistance = platform["stepDistance"];
+        int texture_id = platform["texture"];
+        weightPlatforms.emplace_back(x, y, width, height, stepDistance, textures[texture_id]);
+    }
+
+    std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

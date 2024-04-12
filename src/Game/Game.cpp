@@ -217,6 +217,7 @@ void Game::broadPhase() {
     movingPlatforms1D.clear();
     movingPlatforms2D.clear();
     switchingPlatforms.clear();
+    weightPlatforms.clear();
     sizePowerUp.clear();
     speedPowerUp.clear();
 
@@ -244,24 +245,31 @@ void Game::broadPhase() {
         }
     }
 
-    // Check for collisions with each 1D moving platforms
+    // Check for collisions with each 1D moving platform
     for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             movingPlatforms1D.push_back(platform);
         }
     }
 
-    // Check for collisions with each 2D moving platforms
+    // Check for collisions with each 2D moving platform
     for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             movingPlatforms2D.push_back(platform);
         }
     }
 
-    // Check for collisions with each switching platforms
+    // Check for collisions with each switching platform
     for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
             switchingPlatforms.push_back(platform);
+        }
+    }
+
+    // Check for collisions with each weight platform
+    for (const WeightPlatform &platform: level.getWeightPlatforms()) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
+            weightPlatforms.push_back(platform);
         }
     }
 
@@ -311,8 +319,8 @@ void Game::narrowPhase() {
 
 /** COLLISION HANDLING **/
 
-void Game::handleCollisionsNormalMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
+void Game::handleCollisionsNormalMavity(Player &player) {
+    // Check obstacle collisions only if the player has moved
     if (player.hasMoved()) {
         handleCollisionsWithObstacles(&player, obstacles);
     }
@@ -320,10 +328,11 @@ void Game::handleCollisionsNormalMavity(Player &player) const {
     handleCollisionsWithMovingPlatform1D(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
     handleCollisionsWithMovingPlatform2D(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
     handleCollisionsWithSwitchingPlatform(&player, switchingPlatforms); // Handle collisions with switching platforms
+    handleCollisionsWithWeightPlatform(&player, weightPlatforms, &level); // Handle collisions with weight platforms
 }
 
 void Game::handleCollisionsReversedMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
+    // Check obstacle collisions only if the player has moved
     if (player.hasMoved()) {
         handleCollisionsSelcatsbOhtiw(&player, obstacles);
     }

@@ -11,6 +11,7 @@
 #include "Platforms/MovingPlatform1D.h"
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
+#include "Platforms/WeightPlatform.h"
 #include "Items/SizePowerUp.h"
 #include "Items/SpeedPowerUp.h"
 #include "../Utils/Mediator.h"
@@ -71,7 +72,8 @@ private:
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of SwitchingPlatform representing switching platforms. */
+    std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
 
     // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
@@ -150,6 +152,12 @@ public:
     [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
 
     /**
+     * @brief Return the weightPlatform attribute.
+     * @return A vector of WeightPlatform.
+     */
+    [[nodiscard]] std::vector<WeightPlatform> getWeightPlatforms() const;
+
+    /**
      * @brief Return the sizePowerUp attribute.
      * @return A vector of SizePowerUp.
      */
@@ -181,6 +189,12 @@ public:
      * @param value Represents the asteroids attribute.
      */
     void setAsteroids(const std::vector<Asteroid> &value);
+
+    /**
+     * @brief Increase the weight of a platform in weightPlatforms attribute.
+     * @param platform The platform to increase the weight.
+     */
+    void increaseWeightFromPlatform(const WeightPlatform &platform);
 
     /**
      * @brief Remove an item from sizePowerUp attribute.
@@ -319,7 +333,7 @@ private:
     void loadPolygonsFromMap(const std::string &map_file_name);
 
     /**
-     * @brief Load the platforms from a map. (1D, 2D and switching platforms)
+     * @brief Load the platforms from a map. (1D, 2D, switching and weight platforms)
      * @param map_file_name Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &map_file_name);

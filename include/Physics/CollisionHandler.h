@@ -23,23 +23,30 @@ void handleCollisionsWithObstacles(Player *player, const std::vector<Polygon> &o
 /**
  * @brief Handles collisions between a player and 1D moving platforms.
  * @param player The player object.
- * @param platforms Vector of movingPlatform1D.
+ * @param platforms Vector of MovingPlatform1D.
  */
 void handleCollisionsWithMovingPlatform1D(Player *player, const std::vector<MovingPlatform1D> &platforms);
 
 /**
  * @brief Handles collisions between a player and 2D moving platforms.
  * @param player The player object.
- * @param platforms Vector of movingPlatform2D.
+ * @param platforms Vector of MovingPlatform2D.
  */
 void handleCollisionsWithMovingPlatform2D(Player *player, const std::vector<MovingPlatform2D> &platforms);
 
 /**
  * @brief Handles collisions between a player and switching platforms.
  * @param player The player object.
- * @param platforms Vector of switchingPlatform.
+ * @param platforms Vector of SwitchingPlatform.
  */
 void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<SwitchingPlatform> &platforms);
+
+/**
+ * @brief Handles collisions between a player and weight platforms.
+ * @param player The player object.
+ * @param platforms Vector of WeightPlatform.
+ */
+void handleCollisionsWithWeightPlatform(Player *player, std::vector<WeightPlatform> platforms, Level *level);
 
 /**
  * @brief Handles collisions between the player and other players.

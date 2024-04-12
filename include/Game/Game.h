@@ -194,6 +194,7 @@ private:
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
+    std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
 
@@ -229,7 +230,7 @@ private:
      * @brief Handles collisions between a player and every object.
      * @param player The player to handle collisions for.
      */
-    void handleCollisionsNormalMavity(Player &player) const;
+    void handleCollisionsNormalMavity(Player &player);
 
     /**
      * @brief Handles collisions between a player and every object when the mavity is reversed.

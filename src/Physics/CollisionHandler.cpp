@@ -115,10 +115,10 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
     }
 }
 
-void handleCollisionsWithWeightPlatform(Player *player, std::vector<WeightPlatform> platforms, Level *level) {
+void handleCollisionsWithWeightPlatform(Player *player, const std::vector<WeightPlatform> &platforms, Level *level) {
 
     // Check for collisions with each switching platform
-    for (WeightPlatform &platform: platforms) {
+    for (const WeightPlatform &platform: platforms) {
         // Check if a collision is detected
         if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
 

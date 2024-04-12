@@ -8,13 +8,20 @@ class BroadPhaseManager {
 private:
     Game *gamePtr; /**< A pointer to the game object. */
 
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    // ZONES
+    std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
     std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
+
+    // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
+
+    // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
 
@@ -28,7 +35,9 @@ public:
 
     /* ACCESSORS */
 
-    [[nodiscard]] std::vector<Polygon> &getSaveZones();
+    [[nodiscard]] std::vector<AABB> &getSaveZones();
+    [[nodiscard]] std::vector<AABB> &getToggleGravityZones();
+    [[nodiscard]] std::vector<AABB> &getIncreaseFallSpeedZones();
     [[nodiscard]] std::vector<Polygon> &getDeathZones();
     [[nodiscard]] std::vector<Polygon> &getObstacles();
     [[nodiscard]] std::vector<MovingPlatform1D> &getMovingPlatforms1D();
@@ -50,7 +59,9 @@ public:
 private:
 
     /* SUB METHODS */
-    void checkSavesZones(const std::vector<Point>& broad_phase_area);
+    void checkSavesZones(const SDL_FRect& broad_phase_area);
+    void checkToggleGravityZones(const SDL_FRect& broad_phase_area);
+    void checkIncreaseFallSpeedZones(const SDL_FRect& broad_phase_area);
     void checkDeathZones(const std::vector<Point>& broad_phase_area);
     void checkObstacles(const std::vector<Point>& broad_phase_area);
     void check1DMovingPlatforms(const SDL_FRect& broad_phase_area);

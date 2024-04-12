@@ -65,7 +65,7 @@ private:
     std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
     std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
     std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
-    std::vector<Polygon> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
     std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
     std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
 

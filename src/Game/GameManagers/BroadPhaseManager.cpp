@@ -13,8 +13,16 @@ BroadPhaseManager::BroadPhaseManager(Game *game) : gamePtr(game) {}
 
 /* ACCESSORS */
 
-std::vector<Polygon> &BroadPhaseManager::getSaveZones() {
+std::vector<AABB> &BroadPhaseManager::getSaveZones() {
     return saveZones;
+}
+
+std::vector<AABB> &BroadPhaseManager::getToggleGravityZones() {
+    return toggleGravityZones;
+}
+
+std::vector<AABB> &BroadPhaseManager::getIncreaseFallSpeedZones() {
+    return increaseFallSpeedZones;
 }
 
 std::vector<Polygon> &BroadPhaseManager::getDeathZones() {
@@ -52,13 +60,35 @@ std::vector<SpeedPowerUp> &BroadPhaseManager::getSpeedPowerUp() {
 
 /* METHODS */
 
-void BroadPhaseManager::checkSavesZones(const std::vector<Point>& broad_phase_area) {
+void BroadPhaseManager::checkSavesZones(const SDL_FRect& broad_phase_area) {
     saveZones.clear(); // Empty old save zones
 
     // Check collisions with each save zone
-    for (const Polygon &zone: gamePtr->getLevel()->getZones(ZoneType::SAVE)) {
-        if (checkSATCollision(broad_phase_area, zone)) {
-            saveZones.push_back(zone);
+    for (const AABB &aabb: gamePtr->getLevel()->getZones(AABBType::SAVE)) {
+        if (checkAABBCollision(broad_phase_area, aabb.getRect())) {
+            saveZones.push_back(aabb);
+        }
+    }
+}
+
+void BroadPhaseManager::checkToggleGravityZones(const SDL_FRect &broad_phase_area) {
+    toggleGravityZones.clear(); // Empty old toggle gravity zones
+
+    // Check collisions with each toggle gravity zone
+    for (const AABB &aabb: gamePtr->getLevel()->getZones(AABBType::TOGGLE_GRAVITY)) {
+        if (checkAABBCollision(broad_phase_area, aabb.getRect())) {
+            toggleGravityZones.push_back(aabb);
+        }
+    }
+}
+
+void BroadPhaseManager::checkIncreaseFallSpeedZones(const SDL_FRect &broad_phase_area) {
+    increaseFallSpeedZones.clear(); // Empty old increase fall speed zones
+
+    // Check collisions with each increase fall speed zone
+    for (const AABB &aabb: gamePtr->getLevel()->getZones(AABBType::INCREASE_FALL_SPEED)) {
+        if (checkAABBCollision(broad_phase_area, aabb.getRect())) {
+            increaseFallSpeedZones.push_back(aabb);
         }
     }
 }
@@ -67,7 +97,7 @@ void BroadPhaseManager::checkDeathZones(const std::vector<Point>& broad_phase_ar
     deathZones.clear(); // Empty old death zones
 
     // Check collisions with each save zone
-    for (const Polygon &zone: gamePtr->getLevel()->getZones(ZoneType::DEATH)) {
+    for (const Polygon &zone: gamePtr->getLevel()->getZones(PolygonType::DEATH)) {
         if (checkSATCollision(broad_phase_area, zone)) {
             deathZones.push_back(zone);
         }
@@ -78,7 +108,7 @@ void BroadPhaseManager::checkObstacles(const std::vector<Point> &broad_phase_are
     obstacles.clear(); // Empty old death zones
 
     // Check collisions with each obstacle
-    for (const Polygon &obstacle: gamePtr->getLevel()->getZones(ZoneType::COLLISION)) {
+    for (const Polygon &obstacle: gamePtr->getLevel()->getZones(PolygonType::COLLISION)) {
         if (checkSATCollision(broad_phase_area, obstacle)) {
             obstacles.push_back(obstacle);
         }
@@ -153,7 +183,9 @@ void BroadPhaseManager::broadPhase() {
     std::vector<Point> broad_phase_area_vertices = gamePtr->getCamera()->getBroadPhaseAreaVertices();
     SDL_FRect broad_phase_area_bounding_box = gamePtr->getCamera()->getBroadPhaseArea();
 
-    checkSavesZones(broad_phase_area_vertices);
+    checkSavesZones(broad_phase_area_bounding_box);
+    checkToggleGravityZones(broad_phase_area_bounding_box);
+    checkIncreaseFallSpeedZones(broad_phase_area_bounding_box);
     checkDeathZones(broad_phase_area_vertices);
     checkObstacles(broad_phase_area_vertices);
     check1DMovingPlatforms(broad_phase_area_bounding_box);

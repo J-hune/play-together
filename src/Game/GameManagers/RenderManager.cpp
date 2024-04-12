@@ -109,7 +109,7 @@ void RenderManager::render() {
 
         level->renderAsteroids(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderPlatforms(renderer, camera_point); // Draw the platforms
         level->renderItemsDebug(renderer, camera_point); // Draw the items
 
         // Draw the characters

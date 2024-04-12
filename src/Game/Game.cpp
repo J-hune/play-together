@@ -236,8 +236,8 @@ void Game::narrowPhase() {
         handleCollisionsWithSpeedPowerUp(&character, &level, broadPhaseManager->getSpeedPowerUp());
 
         handleCollisionsWithSaveZones(character, level, broadPhaseManager->getSaveZones()); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
-        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
+        handleCollisionsWithToggleGravityZones(character, broadPhaseManager->getToggleGravityZones()); // Handle collisions with toggle gravity zones
+        handleCollisionsWithIncreaseFallSpeedZones(character, broadPhaseManager->getIncreaseFallSpeedZones()); // Handle collisions with increase fall speed zones
 
         // Handle collisions with death zones and camera borders
         if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())

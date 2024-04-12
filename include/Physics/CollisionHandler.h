@@ -46,7 +46,7 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
  * @param player The player object.
  * @param platforms Vector of WeightPlatform.
  */
-void handleCollisionsWithWeightPlatform(Player *player, std::vector<WeightPlatform> platforms, Level *level);
+void handleCollisionsWithWeightPlatform(Player *player, const std::vector<WeightPlatform> &platforms, Level *level);
 
 /**
  * @brief Handles collisions between the player and other players.

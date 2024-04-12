@@ -19,22 +19,28 @@ public:
     void handleEvent(const SDL_Event &e);
     void render();
 
-    void updateTextTexture(SDL_Renderer *renderer, SDL_Texture *textTexture, std::string text);
+    void moveCursor(int x, int y);
+    void renderCursor();
+    int getTextWidth();
+    void moveCursorLeft();
+    void moveCursorRight();
 
     std::string getText() const { return text; }
     void setText(std::string t);
+    void emptyText();
 
 private:
-    SDL_Rect box = {200,500,400,50};
+    SDL_Rect box = {200,400,400,50};
     std::string text;
     TTF_Font* font = TTF_OpenFont("assets/font/arial.ttf", 24);
     SDL_Color textColor = {255,255,255,255};
-    SDL_Color bgColor  = {210, 204, 207, 0};
-    bool cursorVisible = true;
+    SDL_Color bgColor  = {255, 255, 255, 255};
+    SDL_Point cursorPosition = {0,0};
     bool clicked = false;
     SDL_Event *event;
-    SDL_Texture* textTexture;
+    //SDL_Texture* textTexture = nullptr;
     SDL_Renderer* renderer;
+    SDL_Rect text_rect ;
 
 };
 

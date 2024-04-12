@@ -6,66 +6,132 @@
 #include "../../include/Game/TextBox.h"
 #include "../../dependencies/SDL2_gfx/SDL2_gfxPrimitives.h"
 
-void TextBox::updateTextTexture(SDL_Renderer *renderer, SDL_Texture *textTexture, std::string text) {
-    // Détruire la texture de texte actuelle
-    if (textTexture) {
-        std::cout << "il y a deja une texture" << std::endl;
-        SDL_DestroyTexture(textTexture);
-        textTexture = nullptr;
-    }
 
-    // Créer une nouvelle texture de texte avec le texte fourni
-    SDL_Surface *temp = TTF_RenderText_Solid(font, getText().c_str(), textColor);
-    if (temp) {
-        textTexture = SDL_CreateTextureFromSurface(renderer, temp);
-        SDL_FreeSurface(temp);
-        temp = nullptr;
-    }
-}
 void TextBox::setText(std::string t)
 {
     this->text += t;
 }
+void TextBox::emptyText()
+{
+    this->text.clear();
+}
+
 void TextBox::handleEvent(const SDL_Event &e) {
 
- if (e.type == SDL_TEXTINPUT ) {
-        // Ajouter le texte saisi à la TextBox
+    if (e.type == SDL_TEXTINPUT ) {
         setText(e.text.text);
-        updateTextTexture(renderer, textTexture, text);
-        std::cout << "Texte saisi : " << text << std::endl; // Afficher dans le terminal
+        std::cout << "Texte saisi : " << text << std::endl;
     } else if (e.type == SDL_KEYDOWN) {
-        // Gérer la suppression de caractères avec la touche retour arrière
         if (e.key.keysym.sym == SDLK_BACKSPACE && text.length() > 0) {
             text.pop_back();
             std::cout << "Texte après suppression : " << text << std::endl; // Afficher dans le terminal
-            updateTextTexture(renderer, textTexture, text);
+        }else if (e.key.keysym.sym == SDLK_LEFT) {
+            moveCursorLeft();
+        } else if (e.key.keysym.sym == SDLK_RIGHT) {
+            moveCursorRight();
         }
     }
 }
 
 void TextBox::render() {
+    SDL_Color backgroundColor = {125, 125, 125, 125};
+    SDL_Color textColor = {0, 0, 0, 255};
+    SDL_Color textColorInit = {0, 0, 0, 125};
 
-    //SDL_Rect inputBoxRect = {100,200,400,50};
-    SDL_SetRenderDrawColor(renderer, bgColor.r, bgColor.g, bgColor.b, bgColor.a);
-    SDL_RenderFillRect(renderer, &box);
+    std::string defaultText = "IP adress";
 
-    // Dessiner le texte
-    if (textTexture) {
-        int textWidth, textHeight;
-        SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
-        SDL_Rect textRect = {box.x + 5, box.y + (box.h - textHeight) / 2, textWidth, textHeight};
-        SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
-    }
+    std::string displayText = (!text.empty()) ? getText() : defaultText;
+    SDL_Color textColorFinal = (displayText == defaultText) ? textColorInit : textColor;
+    roundedBoxRGBA(
+            renderer,
+            static_cast<short>(box.x),
+            static_cast<short>(box.y),
+            static_cast<short>(box.x + box.w),
+            static_cast<short>(box.y + box.h),
+            0,
+            backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a
+    );
 
-    // Dessiner le curseur (optionnel)
-    if (cursorVisible && textTexture) {
-        int textWidth, textHeight;
-        SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
-        SDL_SetRenderDrawColor(renderer, 255, 255,255, 255);
-        SDL_RenderDrawLine(renderer, box.x + textWidth + 5, box.y + 5, box.x + textWidth + 5, box.y + box.h - 5);
+    SDL_Surface *textSurface = TTF_RenderUTF8_Blended(font, displayText.c_str(), textColorFinal);
+    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+    SDL_Rect textRect = {
+            box.x + box.w / 2 - textSurface->w / 2,
+            box.y + box.h / 2 - textSurface->h / 2,
+            textSurface->w, textSurface->h
+    };
+
+    SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
+    renderCursor();
+    SDL_SetTextInputRect(&textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+}
+
+void TextBox::moveCursor(int x, int y) {
+    cursorPosition.x = x - box.x;
+    cursorPosition.y = y - box.y;
+}
+
+void TextBox::moveCursorLeft() {
+    if (cursorPosition.x > 0) {
+        cursorPosition.x --;
     }
 }
 
+void TextBox::moveCursorRight() {
+    if (cursorPosition.x < text.length()) {
+        cursorPosition.x ++;
+    }
+}
+
+int TextBox::getTextWidth() {
+    int textWidth = 0;
+    if (!text.empty()) {
+        TTF_SizeUTF8(font, text.c_str(), &textWidth, nullptr);
+    }
+    return textWidth;
+}
+
+void TextBox::renderCursor() {
+
+    if (text.empty() || cursorPosition.x < 0 || cursorPosition.y < 0 || cursorPosition.x > box.w ||
+        cursorPosition.y > box.h) {
+        return;
+    }
+
+    bool showCursor = true;
+    int cursorToggleInterval = 500;
+    int lastToggleTime = SDL_GetTicks();
+
+    if (SDL_GetTicks() - lastToggleTime >= cursorToggleInterval)
+    {
+        showCursor = !showCursor;
+        lastToggleTime = SDL_GetTicks();
+    }
+
+    if (showCursor)
+    {
+        SDL_Rect CursorQuad = {200, 200, 10, 20};
+        SDL_Color cursorColor = {0,0,0,255};
+        SDL_RenderFillRect(renderer, &CursorQuad);
+        SDL_Surface* text_surface = TTF_RenderText_Blended(font, "|", cursorColor);
+        SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer, text_surface);
+        int textWidth = getTextWidth();
+        int	TexWidth = box.x + box.w / 2 + textWidth / 2;
+        int	TexHeight = box.y + box.h - 2;;
+        SDL_QueryTexture(pTexture,NULL,NULL, &TexWidth, &TexHeight);
+        SDL_Rect positionQuad = {box.x + box.w / 2 + textWidth / 2,box.y+10, TexWidth, TexHeight};
+        SDL_RenderCopy(renderer, pTexture, NULL, &positionQuad);
+
+        SDL_DestroyTexture(pTexture);
+        SDL_FreeSurface(text_surface);
+
+
+    }
+
+}
 
 
 TextBox::TextBox(SDL_Renderer *renderer, int x, int y, int width, int height) {

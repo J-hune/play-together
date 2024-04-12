@@ -160,6 +160,7 @@ void Menu::reset() {
     for (Button &button: aggregateButtons(buttons)) {
         button.reset();
     }
+
 }
 
 void Menu::onServerDisconnect() {
@@ -307,6 +308,11 @@ void Menu::handleDeleteSaveButton(Button &button) {
 }
 
 void Menu::handleNavigateToMainMenuButton(Button &button) {
+    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}])
+    {
+        text_input.emptyText();
+        std::cout << text_input.getText() << std::endl;
+    }
     setMenuAction(MenuAction::MAIN);
     button.reset();
 }

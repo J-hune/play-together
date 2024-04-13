@@ -136,5 +136,13 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
  */
 void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp, PlayerManager &playerManager);
 
+/**
+ * @brief Handles collisions between the player and coins items.
+ * @param player Reference to the player object.
+ * @param level Reference to the level object.
+ * @param coins Vector of Coin.
+ */
+void handleCollisionsWithCoins(Player *player, Level *level, std::vector<Coin> const &coins);
+
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

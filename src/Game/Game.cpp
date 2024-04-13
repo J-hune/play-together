@@ -327,6 +327,7 @@ void Game::narrowPhase() {
         // Handle collisions with items
         handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp, *playerManager);
         handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp, *playerManager);
+        handleCollisionsWithCoins(&character, &level, coins, *playerManager);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones

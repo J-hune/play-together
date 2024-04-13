@@ -16,8 +16,8 @@ SpeedPowerUp::SpeedPowerUp(float x, float y, float w, float h, bool fast) :
 
 /* METHODS */
 
-void SpeedPowerUp::applyEffect(Player &player) {
-    Item::applyEffect(player);
+void SpeedPowerUp::applyEffect(Player &player, PlayerManager &playerManager) {
+    Item::applyEffect(player, playerManager);
 
     // The item is a fast power-up
     if (fast) {

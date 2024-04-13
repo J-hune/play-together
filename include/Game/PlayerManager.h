@@ -29,6 +29,12 @@ public:
 
     /** METHODS **/
 
+
+    /**
+     * @brief Sets the best player based on score and updates their texture.
+     */
+    void setTheBestPlayer();
+
     /**
      * @brief Get the player with the given id.
      * @param id The id of the player to find.

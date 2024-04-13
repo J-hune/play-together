@@ -30,10 +30,11 @@ public:
     /* METHODS */
 
     /**
-     * @brief Apply the item's effect to a player.
-     * @param player The player the effect will be applied to.
-     */
-    void applyEffect(Player &player) override;
+    * @brief Apply the item's effect to a player.
+    * @param player The player the effect will be applied to.
+    * @param playerManager The manager responsible for handling player-related operations.
+    */
+    void applyEffect(Player &player,PlayerManager &playerManager) override;
 };
 
 

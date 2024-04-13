@@ -151,6 +151,11 @@ public:
      */
     [[nodiscard]] size_t getCurrentZoneID() const;
 
+    /**
+     * @brief Gets the player's current score.
+     * @return The player's score as an integer.
+     */
+    [[nodiscard]] int getScore() const;
 
     /** SPECIFIC ACCESSORS **/
 
@@ -344,7 +349,31 @@ public:
     void setMaxFallSpeed(float val);
 
 
+    /**
+     * @brief Sets the default texture for the player.
+     * @param newTexture The new default texture to set.
+     */
+    void setDefaultTexture(SDL_Texture* newTexture);
+
+
+    /**
+     * @brief Sets the medal texture for the player.
+     * @param newTexture The new medal texture to set.
+     */
+    void setMedalTexture(SDL_Texture* newTexture);
+
+
     /** PUBLIC METHODS **/
+
+    /**
+     * @brief Sets the player's sprite texture to the default texture.
+     */
+    void useDefaultTexture();
+
+    /**
+     * @brief Sets the player's sprite texture to the medal texture.
+     */
+    void useMedalTexture();
 
     /**
      * @brief Load all players textures.
@@ -465,6 +494,10 @@ private:
     static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
     static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
     static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
+    static SDL_Texture *spriteTexture1MedalPtr;/**< The medal's texture 1 of players */
+    static SDL_Texture *spriteTexture2MedalPtr;/**< The medal's texture 2 of players */
+    static SDL_Texture *spriteTexture3MedalPtr;/**< The medal's texture 3 of players */
+    static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
@@ -474,7 +507,8 @@ private:
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
 
-
+    SDL_Texture  *defaultTexture = nullptr;
+    SDL_Texture  *medalTexture = nullptr;
 
     /** PRIVATE METHODS **/
 

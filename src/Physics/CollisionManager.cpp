@@ -1,5 +1,5 @@
 #include "../../include/Physics/CollisionManager.h"
-
+#include <stdio.h>
 /**
  * @file CollisionManager.cpp
  * @brief Implements functions for collision detection and correction.

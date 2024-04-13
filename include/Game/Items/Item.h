@@ -4,6 +4,8 @@
 #include "../Player.h"
 #include "../../Sounds/SoundEffect.h"
 
+class PlayerManager;
+
 /**
  * @file Item.h
  * @brief Defines the item class responsible for item object.
@@ -81,10 +83,12 @@ public:
     /* METHODS */
 
     /**
-     * @brief Apply the item's effect to a player.
-     * @param player The player the effect will be applied to.
-     */
-    virtual void applyEffect(Player &player);
+    * @brief Apply the item's effect to a player.
+    * @param player The player the effect will be applied to.
+    * @param playerManager The manager responsible for handling player-related operations.
+    */
+    virtual void applyEffect(Player &player, PlayerManager &playerManager);
+
 
     /**
      * @brief Renders the collisions by drawing a rectangle..

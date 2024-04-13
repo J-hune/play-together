@@ -317,8 +317,8 @@ void Game::narrowPhase() {
         else handleCollisionsReversedMavity(character);
 
         // Handle collisions with items
-        handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
-        handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
+        handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp, *playerManager);
+        handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp, *playerManager);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones

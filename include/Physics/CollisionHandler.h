@@ -123,16 +123,18 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
  * @param player Reference to the player object.
  * @param level Reference to the level object.
  * @param sizePowerUp Vector of SizePowerUp.
+ * @param playerManager The manager responsible for handling player-related operations.
  */
-void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> &sizePowerUp);
+void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<SizePowerUp> &sizePowerUp, PlayerManager &playerManager);
 
 /**
  * @brief Handles collisions between the player and size power-up items.
  * @param player Reference to the player object.
  * @param level Reference to the level object.
  * @param speedPowerUp Vector of SizePowerUp.
+ * @param playerManager The manager responsible for handling player-related operations.
  */
-void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp);
+void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp, PlayerManager &playerManager);
 
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

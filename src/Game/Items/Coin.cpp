@@ -9,7 +9,7 @@
 SDL_Texture *Coin::baseSpriteTexturePtr = nullptr;
 Sprite Coin::sprite;
 
-Coin::Coin(float x, float y, float w, float h, int value) : Item(x, y, w, h), value(value) {
+Coin::Coin(float x, float y, float w, float h, int value) : Item(x, y, w, h, "coin.wav"), value(value) {
     spritePtr = &sprite;
 }
 
@@ -30,8 +30,9 @@ void Coin::setAnimation(Animation newAnimation) {
 
 /* METHODS */
 
-void Coin::applyEffect(Player &player) const {
+void Coin::applyEffect(Player &player, PlayerManager &playerManager) {
     player.addToScore(value);
+    Item::applyEffect(player, playerManager);
 }
 
 

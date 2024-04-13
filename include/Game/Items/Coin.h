@@ -9,9 +9,9 @@
  */
 class Coin : public Item {
 private:
-    static constexpr Animation gold = {0, 8, 100}; /**< Gold animation */
-    static constexpr Animation silver = {1, 8, 100}; /**< Silver animation */
-    static constexpr Animation bronze = {2, 8, 100}; /**< Bronze animation */
+    static constexpr Animation gold = {0, 8, 100, false}; /**< Gold animation */
+    static constexpr Animation silver = {1, 8, 100, false}; /**< Silver animation */
+    static constexpr Animation bronze = {2, 8, 100, false}; /**< Bronze animation */
 
     Sprite *spritePtr;
 
@@ -61,8 +61,9 @@ public:
     /**
      * @brief Apply the item's effect to a player.
      * @param player The player the effect will be applied to.
+     *  @param playerManager The manager responsible for handling player-related operations.
      */
-    void applyEffect(Player &player) const override;
+    void applyEffect(Player &player, PlayerManager &playerManager) override;
 };
 
 

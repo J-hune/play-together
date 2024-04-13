@@ -141,8 +141,9 @@ void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<
  * @param player Reference to the player object.
  * @param level Reference to the level object.
  * @param coins Vector of Coin.
+ * @param playerManager The manager responsible for handling player-related operations.
  */
-void handleCollisionsWithCoins(Player *player, Level *level, std::vector<Coin> const &coins);
+void handleCollisionsWithCoins(Player *player, Level *level, std::vector<Coin> &coins,PlayerManager &playerManager);
 
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

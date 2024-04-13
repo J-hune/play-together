@@ -47,9 +47,9 @@ bool Item::operator==(const Item &item) const {
 
 void Item::applyEffect(Player &player,PlayerManager &playerManager) {
     // Set the best player
-    playerManager.setTheBestPlayer();
     player.addToScore(5);
     collectSound.play(0, -1);
+    playerManager.setTheBestPlayer();
 }
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {

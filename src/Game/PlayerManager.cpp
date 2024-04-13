@@ -69,6 +69,8 @@ void PlayerManager::killPlayer(Player &player) {
     removePlayer(player);
     deadPlayers.emplace_back(player);
 }
+
+
 void PlayerManager::setTheBestPlayer(){
     if(!alivePlayers.empty()){
         int max = 0;
@@ -79,7 +81,6 @@ void PlayerManager::setTheBestPlayer(){
             player.useDefaultTexture();
             if (max<=player.getScore()){
                 max = player.getScore();
-                printf("Playermax : %d score =%d \n",player.getPlayerID(),player.getScore());
                 playerMax = &player;
             }
         }

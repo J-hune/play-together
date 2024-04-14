@@ -263,7 +263,7 @@ void Game::handleCollisionsNormalMavity(Player &player) {
     handleCollisionsWithWeightPlatform(&player, broadPhaseManager->getWeightPlatforms(), &level); // Handle collisions with weight platforms
 }
 
-void Game::handleCollisionsReversedMavity(Player &player) const {
+void Game::handleCollisionsReversedMavity(Player &player) {
     // Check obstacle collisions only if the player has moved
     if (player.hasMoved()) {
         handleCollisionsSelcatsbOhtiw(&player, broadPhaseManager->getObstacles());
@@ -272,6 +272,7 @@ void Game::handleCollisionsReversedMavity(Player &player) const {
     handleCollisionsD1mroftalPgnivoMhtiw(&player, broadPhaseManager->getMovingPlatforms1D()); // Handle collisions with 1D moving platforms
     handleCollisionsD2mroftalPgnivoMhtiw(&player, broadPhaseManager->getMovingPlatforms2D()); // Handle collisions with 2D moving platforms
     handleCollisionsMroftalPgnihctiwShtiw(&player, broadPhaseManager->getSwitchingPlatforms()); // Handle collisions with switching platforms
+    handleCollisionsMroftalPthgieWhtiw(&player, broadPhaseManager->getWeightPlatforms(), &level); // Handle collisions with weight platforms
 }
 
 void Game::handleAsteroidsCollisions() {

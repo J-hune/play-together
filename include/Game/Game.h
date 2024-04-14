@@ -229,7 +229,7 @@ private:
      * @brief Handles collisions between a player and every object when the mavity is reversed.
      * @param player The player to handle collisions for.
      */
-    void handleCollisionsReversedMavity(Player &player) const;
+    void handleCollisionsReversedMavity(Player &player);
 
     /**
      * @brief Main method that handle collisions for every player according to their mavity.

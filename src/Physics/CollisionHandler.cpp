@@ -133,7 +133,6 @@ void handleCollisionsWithWeightPlatform(Player *player, const std::vector<Weight
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
                 level->increaseWeightForPlatform(platform);
-
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
@@ -384,6 +383,33 @@ void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<Swi
             // If the collision is with the roof, the player is on a platform
             if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
                 player->setIsOnPlatform(true);
+            }
+            // If the collision is with the wall, the player can't move
+            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setCanMove(false);
+            }
+        }
+    }
+}
+
+void handleCollisionsMroftalPthgieWhtiw(Player *player, const std::vector<WeightPlatform> &platforms, Level *level) {
+
+    // Check for collisions with each switching platform
+    for (const WeightPlatform &platform: platforms) {
+        // Check if a collision is detected
+        if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
+
+            correctAABBCollision(player, platform.getBoundingBox()); // Correct the collision
+
+            // If the collision is with the roof, the player is on a platform
+            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setIsOnPlatform(true);
+                level->decreaseWeightForPlatform(platform);
+            }
+            // If the collision is with the ground, the player is can't jump anymore
+            if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setIsJumping(false);
+                player->setMoveY(0);
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {

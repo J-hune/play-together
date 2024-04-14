@@ -49,6 +49,10 @@ void WeightPlatform::increaseWeight() {
     weight++;
 }
 
+void WeightPlatform::decreaseWeight() {
+    weight--;
+}
+
 
 /* METHODS */
 

@@ -45,6 +45,7 @@ void handleCollisionsWithSwitchingPlatform(Player *player, const std::vector<Swi
  * @brief Handles collisions between a player and weight platforms.
  * @param player The player object.
  * @param platforms Vector of WeightPlatform.
+ * @param level Reference to the level object.
  */
 void handleCollisionsWithWeightPlatform(Player *player, const std::vector<WeightPlatform> &platforms, Level *level);
 
@@ -120,6 +121,14 @@ void handleCollisionsD2mroftalPgnivoMhtiw(Player *player, const std::vector<Movi
  * @param platforms Vector of switchingPlatform.
  */
 void handleCollisionsMroftalPgnihctiwShtiw(Player *player, const std::vector<SwitchingPlatform> &platforms);
+
+/**
+ * @brief Handles collisions between a player and weight platforms when mavity is reversed.
+ * @param player The player object.
+ * @param platforms Vector of WeightPlatform.
+ * @param level Reference to the level object.
+ */
+void handleCollisionsMroftalPthgieWhtiw(Player *player, const std::vector<WeightPlatform> &platforms, Level *level);
 
 
 

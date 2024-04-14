@@ -93,6 +93,11 @@ public:
      */
     void increaseWeight();
 
+    /**
+    * @brief Decrease the weight of the platform by 1.
+    */
+    void decreaseWeight();
+
 
     /* METHODS */
 

@@ -9,6 +9,6 @@
         {"x": 0, "y": -70, "width": 80, "height": 20, "bpm": 60, "steps": [[20, -100], [120, -100], [220, -100]], "texture": 0}
     ],
     "weightPlatforms": [
-        {"x": -110, "y": 15, "width": 80, "height": 20, "stepDistance": 50, "texture": 1}
+        {"x": -150, "y": 15, "width": 80, "height": 20, "stepDistance": 50, "texture": 1}
     ]
 }

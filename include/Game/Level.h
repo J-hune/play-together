@@ -208,6 +208,12 @@ public:
     void increaseWeightForPlatform(const WeightPlatform &platform);
 
     /**
+     * @brief Decrease the weight of a platform in weightPlatforms attribute.
+     * @param platform The platform to decrease the weight.
+     */
+    void decreaseWeightForPlatform(const WeightPlatform &platform);
+
+    /**
      * @brief Remove an item from sizePowerUp attribute.
      * @param item The item to remove.
      */

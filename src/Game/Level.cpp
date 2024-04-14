@@ -124,6 +124,14 @@ void Level::increaseWeightForPlatform(const WeightPlatform &platform) {
     }
 }
 
+void Level::decreaseWeightForPlatform(const WeightPlatform &platform) {
+    // Search the platform and decrease its weight
+    auto it = std::ranges::find(weightPlatforms, platform);
+    if (it != weightPlatforms.end()) {
+        it->decreaseWeight();
+    }
+}
+
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
     // Search the item and remove it
     auto it = std::ranges::find(sizePowerUp, item);

@@ -24,6 +24,7 @@ Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHe
         : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+    setSpriteTextureByID(playerID);
 }
 
 
@@ -336,12 +337,7 @@ void Player::useMedalTexture(){
 };
 
 void Player::setSpriteTextureByID(int id) {
-    if (id == 0) { // Base texture
-        sprite.setTexture(*baseSpriteTexturePtr);
-        defaultTexture = baseSpriteTexturePtr;
-        medalTexture = baseSpriteTexturePtr;
-    }
-    else if (id == 1){ // Texture 1
+    if (id == 1){ // Texture 1
         sprite.setTexture(*spriteTexture1Ptr);
         defaultTexture = spriteTexture1Ptr;
         medalTexture = spriteTexture1MedalPtr;
@@ -360,6 +356,11 @@ void Player::setSpriteTextureByID(int id) {
         sprite.setTexture(*spriteTexture4Ptr);
         defaultTexture = spriteTexture4Ptr;
         medalTexture = spriteTexture4MedalPtr;
+    }
+    else {
+        sprite.setTexture(*baseSpriteTexturePtr);
+        defaultTexture = baseSpriteTexturePtr;
+        medalTexture = baseSpriteTexturePtr;
     }
 }
 

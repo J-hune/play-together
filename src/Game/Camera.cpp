@@ -56,12 +56,9 @@ void Camera::setY(float val) {
     y = val;
 }
 
-void Camera::setIsShaking(bool state) {
-    isShaking = state;
-}
-
-void Camera::toggleIsShaking() {
-    isShaking = !isShaking;
+void Camera::setShake(int time) {
+    shakeTime = time;
+    lastShakeUpdate = SDL_GetTicks();
 }
 
 
@@ -87,6 +84,38 @@ void Camera::initializePosition(Point camera_point) {
     // The point is on the top of the area
     else if (camera_point.y < y + area.y) {
         y -= (y + area.y) - camera_point.y;
+    }
+}
+
+void Camera::makeCameraShake() {
+    // Creating a random number generator
+    std::random_device rd;
+    std::minstd_rand gen(rd()); // Using the Linear Congruential Generator
+
+    // Defining uniform distributions for generating random boolean and float values
+    std::uniform_int_distribution rand_bool(0, 1);
+    std::uniform_real_distribution<float> rand_float(0.0, 1.0);
+
+    // Calculating target offsets for camera shake
+    float targetX = rand_float(gen) * shakeAmplitude;
+    float targetY = rand_float(gen) * shakeAmplitude;
+
+    // Applying camera shake by randomly adding or subtracting target offsets
+    rand_bool(gen) ? x += targetX : x -= targetX;
+    rand_bool(gen) ? y += targetY : y -= targetY;
+}
+
+void Camera::checkShake() {
+    // Shake for a given time
+    if (shakeTime > 0) {
+        makeCameraShake();
+        shakeTime -= SDL_GetTicks() - lastShakeUpdate;
+        lastShakeUpdate = SDL_GetTicks();
+        if (shakeTime < 0) shakeTime = 0;
+    }
+    // Shake indefinitely
+    else if (shakeTime < 0) {
+        makeCameraShake();
     }
 }
 
@@ -117,25 +146,7 @@ void Camera::applyMovement(Point camera_point, double delta_time) {
         y += (camera_point.y - area_top) * blend - 0.1F;
     }
 
-    if (isShaking) makeCameraShake();
-}
-
-void Camera::makeCameraShake() {
-    // Creating a random number generator
-    std::random_device rd;
-    std::minstd_rand gen(rd()); // Using the Linear Congruential Generator
-
-    // Defining uniform distributions for generating random boolean and float values
-    std::uniform_int_distribution rand_bool(0, 1);
-    std::uniform_real_distribution<float> rand_float(0.0, 1.0);
-
-    // Calculating target offsets for camera shake
-    float targetX = rand_float(gen) * shakeAmplitude;
-    float targetY = rand_float(gen) * shakeAmplitude;
-
-    // Applying camera shake by randomly adding or subtracting target offsets
-    rand_bool(gen) ? x += targetX : x -= targetX;
-    rand_bool(gen) ? y += targetY : y -= targetY;
+    checkShake();
 }
 
 void Camera::renderCameraPoint(SDL_Renderer *renderer, Point camera_point) const {

@@ -301,6 +301,7 @@ void Game::handleAsteroidsCollisions() {
             const Polygon& obstacle = *obstacleIt;
             if (checkSATCollision(asteroid.getVertices(), obstacle)) {
                 alreadyExplode = true;
+                camera.setShake(250);
                 break; // No need to check further obstacles if asteroid already exploded
             }
             ++obstacleIt;

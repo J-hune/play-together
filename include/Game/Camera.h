@@ -19,13 +19,33 @@ const float DISTANCE_OUT_MAP_BEFORE_DEATH = 500;
  * @brief Represents the camera logic including movement and shaking.
  */
 class Camera {
+private:
+    /* ATTRIBUTES */
+
+    float x = 0; /**< The x-coordinate of the camera's position */
+    float y = 0; /**< The y-coordinate of the camera's position */
+    float w = SCREEN_WIDTH; /**< The width of the camera */
+    float h = SCREEN_HEIGHT; /**< The height of the camera */
+
+    /**< Rectangle for camera "not moving area" */
+    SDL_FRect area = {w / 5.f,
+                      h / 5.f,
+                      w - (w / 2.f) - w / 5.f,
+                      h - (h / 5.f) - h / 5.f};
+
+    float lerpSmoothingFactor = 11;
+    int shakeTime = 0; /**< The time to shake the camera, positives is the time to shake, 0 is not shaking, negatives shakes indefinitely */
+    Uint32 lastShakeUpdate = SDL_GetTicks(); /**< The time of the last shake update */
+    float shakeAmplitude = 2; /**< The amplitude of the camera shake */
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     Camera();
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Return the x attribute.
@@ -70,7 +90,7 @@ public:
     [[nodiscard]] std::vector<Point> getBroadPhaseAreaVertices() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
     * @brief Set the x attribute.
@@ -85,20 +105,13 @@ public:
     void setY(float val);
 
     /**
-     * @brief Set the isShaking attribute.
-     * @param state The new state of the isShaking attribute.
-     * @see toggleIsShaking for a similar operation.
+     * @brief Sets the camera shake for a given time.
+     * @param time The time to shake the camera in milliseconds.
      */
-    void setIsShaking(bool state);
-
-    /**
-     * @brief Toggle the isShaking attribute.
-     * @see setIsShaking() for a similar operation.
-     */
-    void toggleIsShaking();
+    void setShake(int time);
 
 
-    /** PUBLIC METHODS **/
+    /* METHODS */
 
     /**
      * @brief Initialize the camera position according to players positions.
@@ -128,25 +141,11 @@ public:
 
 
 private:
-    /** ATTRIBUTES **/
 
-    float x = 0; /**< The x-coordinate of the camera's position */
-    float y = 0; /**< The y-coordinate of the camera's position */
-    float w = SCREEN_WIDTH; /**< The width of the camera */
-    float h = SCREEN_HEIGHT; /**< The height of the camera */
-
-    /**< Rectangle for camera "not moving area" */
-    SDL_FRect area = {w / 5.f,
-                      h / 5.f,
-                      w - (w / 2.f) - w / 5.f,
-                      h - (h / 5.f) - h / 5.f};
-
-    float lerpSmoothingFactor = 11;
-    bool isShaking = false; /**< Flag indicating if the camera is currently shaking */
-    float shakeAmplitude = 2; /**< The amplitude of the camera shake */
-
-
-    /** PRIVATE METHODS **/
+    /**
+     * @brief Check if the camera should shake.
+     */
+    void checkShake();
 
     /**
      * @brief Applies a shake movement to the camera .

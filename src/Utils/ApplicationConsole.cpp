@@ -198,12 +198,12 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(true);
+        gamePtr->getCamera()->setShake(-1);
         gamePtr->setEnablePlatformsMovement(true);
         std::cout << "Enabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(true);
+        gamePtr->getCamera()->setShake(-1);
         std::cout << "Enabling camera shaking.\n";
     }
     else if (option == "platforms") {
@@ -227,12 +227,12 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(false);
+        gamePtr->getCamera()->setShake(0);
         gamePtr->setEnablePlatformsMovement(false);
         std::cout << "Disabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(false);
+        gamePtr->getCamera()->setShake(0);
         std::cout << "Disabling camera shaking.\n";
     }
     else if (option == "platforms") {

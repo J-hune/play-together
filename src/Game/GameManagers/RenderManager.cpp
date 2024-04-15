@@ -131,7 +131,6 @@ void RenderManager::render() {
         // Draw the characters
         for (Player const& player : players) {
             player.renderDebug(renderer, camera_point);
-            player.renderDebug(renderer, camera_point);
         }
     }
 

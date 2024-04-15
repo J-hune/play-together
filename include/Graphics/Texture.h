@@ -16,11 +16,10 @@ constexpr char SPRITES_DIRECTORY[] = "assets/sprites/";
  * @class Texture
  * @brief Represents a Texture in a 2D game.
  */
-
-
 class Texture {
 private:
-    // Texture attributes
+    /* ATTRIBUTES */
+
     SDL_Texture *texturePtr; /**< The texture of the sprite. */
     SDL_Rect sizeRect = {0, 0, 0, 0}; /**< The square representing the size of the texture. */
     SDL_RendererFlip flipHorizontal = SDL_FLIP_NONE; /**< If the sprite is flipped horizontally. */

@@ -6,6 +6,7 @@
  * @brief Implements the MovingPlatform2D class responsible for moving platforms logic.
  */
 
+
 /* CONSTRUCTORS */
 
 MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start)

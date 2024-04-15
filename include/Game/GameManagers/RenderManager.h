@@ -4,6 +4,12 @@
 #include <SDL_render.h>
 #include "../Game.h"
 
+/**
+ * @file RenderManager.h
+ * @brief Defines the RenderManager class responsible for rendering the game.
+ */
+
+
 class RenderManager {
 private:
     SDL_Renderer *renderer; /**< The SDL_Renderer to render the game. */

@@ -5,6 +5,7 @@
  * @brief Implements the Layer class responsible for background and foreground texture logic.
  */
 
+
 /* CONSTRUCTORS */
 
 Layer::Layer(SDL_Texture &texture, int layer) : Texture(texture), layer(layer) {

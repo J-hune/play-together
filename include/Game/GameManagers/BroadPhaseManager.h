@@ -3,9 +3,16 @@
 
 #include "../Game.h"
 
+/**
+ * @file BroadPhaseManager.h
+ * @brief Defines the BroadPhaseManager class responsible for the collision broad phase.
+ */
+
 
 class BroadPhaseManager {
 private:
+    /* ATTRIBUTES */
+
     Game *gamePtr; /**< A pointer to the game object. */
 
     // ZONES

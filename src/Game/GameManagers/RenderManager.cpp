@@ -5,6 +5,7 @@
  * @brief Implements the RenderManager class responsible for rendering the game.
  */
 
+
 /* CONSTRUCTORS */
 
 std::vector<TTF_Font*> RenderManager::fonts;

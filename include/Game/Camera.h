@@ -27,11 +27,10 @@ private:
     float w = SCREEN_WIDTH; /**< The width of the camera */
     float h = SCREEN_HEIGHT; /**< The height of the camera */
 
-    /**< Rectangle for camera "not moving area" */
     SDL_FRect area = {w / 5.f,
                       h / 5.f,
                       w - (w / 2.f) - w / 5.f,
-                      h - (h / 5.f) - h / 5.f};
+                      h - (h / 5.f) - h / 5.f}; /**< Rectangle for camera "not moving area" */
 
     float lerpSmoothingFactor = 11;
 

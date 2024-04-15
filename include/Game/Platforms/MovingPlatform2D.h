@@ -25,18 +25,18 @@ private:
     float h; /**< The height of the platform. */
     Texture texture; /**< The texture of the platform. */
     float speed; /**< The speed of the platform. */
-    float moveX = 0; /**< The number of pixel the platform has moved on the x-axis*/
-    float moveY = 0; /**< The number of pixel the platform has moved on the y-axis*/
+    float moveX = 0; /**< The number of pixel the platform has moved on the x-axis. */
+    float moveY = 0; /**< The number of pixel the platform has moved on the y-axis. */
 
     const Point left; /**< A Point representing the minimum position of the platform. */
     const Point right; /**< A Point representing the maximum position of the platform. */
     float ratio; /**< The ratio of pixel displacement between x-axis and y-axis. */
     bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
-    float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom */
-    float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom */
+    float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom. */
+    float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
 
-    float smoothingLimit = 3; /**< The smoothing limit of the platform movement */
+    float smoothingLimit = 3; /**< The smoothing limit of the platform movement. */
 
 
 public:

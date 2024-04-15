@@ -5,6 +5,7 @@
  * @brief Implements the InputManager class responsible for handling the input events.
  */
 
+
 /* CONSTRUCTOR */
 
 InputManager::InputManager(Game *game) : gamePtr(game) {}
@@ -99,7 +100,7 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
         case SDL_SCANCODE_SPACE:
-            // If the player is dead ignore
+            // If the player is dead, ignore
             if (player == nullptr) break;
 
             // If the coyote time is passed and the player is not already in a jump
@@ -152,7 +153,7 @@ void InputManager::sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMaskPtr
         // Send the new keyboard state mask to the server
         Mediator::sendPlayerUpdate(currentKeyboardStateMask);
 
-        // Update the last keyboard state mask and the last send time
+        // Update the last keyboard state mask and the last send-time
         *lastKeyboardStateMaskPtr = currentKeyboardStateMask;
     }
 }

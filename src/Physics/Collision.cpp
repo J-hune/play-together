@@ -1,4 +1,4 @@
-#include "../../include/Physics/CollisionManager.h"
+#include "../../include/Physics/Collision.h"
 
 /**
  * @file CollisionManager.cpp

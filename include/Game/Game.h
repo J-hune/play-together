@@ -9,13 +9,14 @@
 #include <cmath>
 #include <algorithm>
 #include <SDL_ttf.h>
-#include "../Physics/CollisionHandler.h"
+#include "GameManagers/PlayerCollisionManager.h"
 #include "../Utils/Mediator.h"
 #include "GameManagers/InputManager.h"
 #include "GameManagers/RenderManager.h"
 #include "GameManagers/SaveManager.h"
 #include "GameManagers/PlayerManager.h"
 #include "GameManagers/BroadPhaseManager.h"
+#include "GameManagers/EventCollisionManager.h"
 
 
 /**
@@ -23,12 +24,15 @@
  * @brief Defines the Game class responsible for handling the main game logic.
  */
 
-// Forward declaration of InputManager, CollisionHandler
+// Forward declaration of managers
 class InputManager;
 class RenderManager;
 class SaveManager;
-class PlayerManager;
 class BroadPhaseManager;
+class PlayerManager;
+class PlayerCollisionManager;
+class EventCollisionManager;
+
 
 /**
  * @class Game
@@ -36,12 +40,12 @@ class BroadPhaseManager;
  */
 class Game {
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, bool *quitFlag);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Returns the current game state.
@@ -74,6 +78,12 @@ public:
     [[nodiscard]] PlayerManager &getPlayerManager();
 
     /**
+     * @brief Returns the broad phase manager of the game.
+     * @return A pointer of BroadPhaseManager object representing the broad phase manager of the game.
+     */
+    [[nodiscard]] BroadPhaseManager &getBroadPhaseManager();
+
+    /**
      * @brief Returns the camera of the game.
      * @return A pointer of Camera object representing the camera of the game.
      */
@@ -99,7 +109,7 @@ public:
     [[nodiscard]] int getEffectiveFrameRate() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the level attribute.
@@ -125,7 +135,7 @@ public:
     void switchMavity();
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Initializes the game by loading the level and the character.
@@ -172,7 +182,7 @@ public:
     void exitGame();
 
 private:
-    /** ATTRIBUTES **/
+    /* ATTRIBUTES */
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
@@ -180,8 +190,11 @@ private:
     std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
     std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
     std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
-    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
     std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
+    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
+    std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
+    std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
+
 
     int frameRate = 60; /**< The refresh rate of the game. */
     const int tickRate = 30; /**< The tick rate of the game. */
@@ -200,7 +213,7 @@ private:
     bool enable_platforms_movement = true;
 
 
-    /** PRIVATE METHODS **/
+    /* PRIVATE METHODS */
 
     /**
      * @brief Applies the movement to all players in the game.
@@ -215,26 +228,8 @@ private:
     void calculatePlayersMovement(double deltaTime);
 
     /**
-     * @brief Handles collisions between the asteroid and obstacles.
-     */
-    void handleAsteroidsCollisions();
-
-    /**
-     * @brief Handles collisions between a player and every object.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsNormalMavity(Player &player);
-
-    /**
-     * @brief Handles collisions between a player and every object when the mavity is reversed.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsReversedMavity(Player &player);
-
-    /**
      * @brief Main method that handle collisions for every player according to their mavity.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
-     * TODO: add collision behavior for moving objects
      */
     void narrowPhase();
 

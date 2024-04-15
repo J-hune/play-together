@@ -22,7 +22,7 @@ private:
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
     float stepDistance; /**< The distance between each step of the platform. */
-    float weight = 0; /**< The number of player on the platfrom. */
+    float weight = 0; /**< The number of player on the platform. */
     float lerpSmoothingFactor = 11; /**< The smoothing factor for the lerp calculation. */
     Texture texture; /**< The texture of the platform. */
 

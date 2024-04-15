@@ -1,12 +1,11 @@
 #include "../../include/Utils/ApplicationConsole.h"
 
-/** CONSTRUCTOR **/
+/* CONSTRUCTORS */
 
-// Constructor for ApplicationConsole, takes a pointer to the associated Game object.
 ApplicationConsole::ApplicationConsole(Game *game) : gamePtr(game) {}
 
 
-/** METHODS **/
+/* METHODS */
 
 // Runs the console in a loop, waiting for user input and executing commands.
 void ApplicationConsole::run() const {
@@ -93,7 +92,7 @@ void ApplicationConsole::displayHelp(int gameState) const {
 }
 
 
-/** GAME RUNNING COMMANDS METHODS **/
+/* GAME RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::teleportPlayer(const std::string &command) const {
     float x; float y;
@@ -255,7 +254,7 @@ void ApplicationConsole::toggleFPSRendering() const {
 }
 
 
-/** GAME NOT RUNNING COMMANDS METHODS **/
+/* GAME NOT RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::changeMaxFrameRate(const std::string& command) const {
     int fps;

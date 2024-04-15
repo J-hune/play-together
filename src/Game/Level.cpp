@@ -5,7 +5,8 @@
  * @brief Implements the Level class responsible for level object.
  */
 
-/** CONSTRUCTOR **/
+
+/* CONSTRUCTOR */
 
 Level::Level(const std::string &map_name, SDL_Renderer *renderer) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
@@ -27,7 +28,7 @@ Level::Level(const std::string &map_name, SDL_Renderer *renderer) {
 }
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 int Level::getWorldID() const {
     return worldID;
@@ -106,7 +107,7 @@ short Level::getLastCheckpoint() const {
 }
 
 
-/** MUTATORS **/
+/* MUTATORS */
 
 void Level::setLastCheckpoint(short checkpoint) {
     lastCheckpoint = checkpoint;
@@ -149,7 +150,7 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
     // Loop to generate asteroids until the desired number is reached

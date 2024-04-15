@@ -5,6 +5,7 @@
  * @brief Implements the MovingPlatform1D class responsible for moving platforms logic.
  */
 
+
 /* CONSTRUCTORS */
 
 MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, const Texture& texture, float speed, float min, float max, bool start, bool axis)

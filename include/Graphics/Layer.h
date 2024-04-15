@@ -6,6 +6,15 @@
 #include "../Game/Point.h"
 
 
+/**
+ * @file Layer.h
+ * @brief Defines the Layer class representing a layered texture in a 2D game.
+ */
+
+/**
+ * @class Layer
+ * @brief Represents a layered texture in a 2D game.
+ */
 class Layer : public Texture {
 private:
     /* ATTRIBUTES */

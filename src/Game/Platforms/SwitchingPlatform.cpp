@@ -5,6 +5,7 @@
  * @brief Implements the SwitchingPlatform class responsible for switching platform logic.
  */
 
+
 /* CONSTRUCTORS */
 
 SwitchingPlatform::SwitchingPlatform(float x, float y, float w, float h, const Texture& texture, Uint32 bpm, std::vector<Point> steps)

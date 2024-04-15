@@ -5,6 +5,7 @@
  * @brief Implements the Sprite class responsible for handling sprite logic.
  */
 
+
 /* CONSTRUCTORS */
 
 Sprite::Sprite(SDL_Texture &texture, Animation animation, int width, int height) :

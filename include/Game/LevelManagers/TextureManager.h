@@ -8,6 +8,11 @@
 #include <filesystem>
 #include "../Level.h"
 
+/**
+ * @file TextureManager.h
+ * @brief Defines the TextureManager class responsible for loading textures.
+ */
+
 
 // Forward declaration of Level
 class Level;
@@ -24,7 +29,6 @@ private:
     Level *levelPtr; /**< A pointer to the level object. */
 
 public:
-
     /* CONSTRUCTORS */
 
     explicit TextureManager(Level *level);

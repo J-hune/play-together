@@ -11,7 +11,7 @@ Camera::Camera() {
     // Create the camera seed
     std::random_device rd;
     seed = std::mt19937(rd());
-};
+}
 
 
 /* ACCESSORS */

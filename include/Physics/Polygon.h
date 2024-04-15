@@ -25,13 +25,20 @@ enum class PolygonType {
  * @brief Represents a polygon in 2D space.
  */
 class Polygon {
+private:
+    /* ATTRIBUTES */
+
+    std::vector<Point> vertices; /**< The vertices of the polygon. */
+    PolygonType type; /**< The type of the zone. */
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
     Polygon(const std::vector<Point> &vertices, PolygonType type);
 
 
-/** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Get the vertices of the polygon.
@@ -46,7 +53,7 @@ public:
     [[nodiscard]] PolygonType getType() const;
 
 
-    /** PUBLIC METHODS **/
+    /* METHODS */
 
     /**
      * @brief Checks if a polygon is convex.
@@ -56,13 +63,6 @@ public:
     [[nodiscard]] bool isConvex() const;
 
 private:
-    /** ATTRIBUTES **/
-
-    std::vector<Point> vertices; /**< The vertices of the polygon. */
-    PolygonType type; /**< The type of the zone. */
-
-
-    /** PRIVATE METHODS **/
 
     /**
      * @brief Calculate the distance between two points.

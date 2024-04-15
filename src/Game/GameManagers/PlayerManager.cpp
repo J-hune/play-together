@@ -2,8 +2,9 @@
 
 /**
  * @file PlayerManager.cpp
- * @brief Implements the PlayerManager class responsible for handling the players in the game.
+ * @brief Implements the PlayerManager class responsible for handling players in the game.
  */
+
 
 /* CONSTRUCTOR */
 
@@ -76,7 +77,7 @@ void PlayerManager::respawnPlayer(Player &player) {
         deadPlayers.erase(deadPlayers.begin() + index);
     }
 
-    // Add the player to the alive players list
+    // Add the player to the alivePlayers vector
     alivePlayers.push_back(player);
 
     // Teleport the player to the last checkpoint

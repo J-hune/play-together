@@ -5,6 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+
 // Initialize textures pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
@@ -13,7 +14,7 @@ SDL_Texture *Player::spriteTexture3Ptr = nullptr;
 SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
 
-/** CONSTRUCTORS **/
+/* CONSTRUCTORS */
 
 Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
         : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
@@ -22,7 +23,7 @@ Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHe
 }
 
 
-/** BASIC ACCESSORS **/
+/* BASIC ACCESSORS */
 
 int Player::getPlayerID() const {
     return playerID;
@@ -101,7 +102,7 @@ size_t Player::getCurrentZoneID() const {
 }
 
 
-/** SPECIFIC ACCESSORS **/
+/* SPECIFIC ACCESSORS */
 
 std::vector<Point> Player::getVertices() const {
     // Return the vertices of the player's bounding box.
@@ -191,7 +192,7 @@ SDL_FRect Player::getBoundingBoxNextFrame() const {
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Player::setX(float val) {
     x = val;
@@ -281,7 +282,7 @@ void Player::setMaxFallSpeed(float val) {
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture

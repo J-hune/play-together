@@ -5,14 +5,27 @@
 #include "../Player.h"
 #include "../Game.h"
 
+/**
+ * @file InputManager.h
+ * @brief Defines the InputManager class responsible for handling the input events.
+ */
+
+
 class InputManager {
+private:
+    /* ATTRIBUTES */
+
+    Game *gamePtr; /**< A pointer to the game object. */
+
+
 public:
 
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
+
     explicit InputManager(Game *game);
 
 
-    /** METHODS **/
+    /* METHODS */
 
     void handleKeyboardEvents();
 
@@ -21,13 +34,13 @@ public:
     void handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &keyEvent) const;
 
 private:
-    Game *gamePtr; /**< A pointer to the game object. */
 
     /**
      * @brief Sends the keyboard state to the network.
      * @param lastKeyboardStateMask The last keyboard state mask.
      */
     void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask) const;
+
 };
 
 #endif //PLAY_TOGETHER_INPUTMANAGER_H

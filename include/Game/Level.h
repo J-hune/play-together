@@ -28,9 +28,8 @@ constexpr char MAPS_DIRECTORY[] = "assets/maps/";
  * @brief Defines the Level class responsible for level object.
  */
 
-// Forward declaration of TextureManager and LoadManager
+// Forward declaration of TextureManager
 class TextureManager;
-class LoadManager;
 
 
 /**

@@ -15,13 +15,11 @@
  */
 class SizePowerUp : public Item {
 private:
-
     /* ATTRIBUTES */
 
     bool grow; /**< Flag indicating whether the power-up grow or shrink the player. */
 
 public:
-
     /* CONSTRUCTORS */
 
     SizePowerUp(float x, float y, float w, float h, bool grow);

@@ -34,6 +34,13 @@ private:
                       h - (h / 5.f) - h / 5.f};
 
     float lerpSmoothingFactor = 11;
+
+    // SHAKING ATTRIBUTES
+    std::mt19937 seed; /**< The random number generator */
+    std::uniform_int_distribution<int> rand_bool{0, 1}; /**< The random boolean generator */
+    std::uniform_real_distribution<float> rand_float{0.0, 1.0}; /**< The random float generator */
+    float shakeX = 0; /**< The x-coordinate of the camera's shake */
+    float shakeY = 0; /**< The y-coordinate of the camera's shake */
     int shakeTime = 0; /**< The time to shake the camera, positives is the time to shake, 0 is not shaking, negatives shakes indefinitely */
     Uint32 lastShakeUpdate = SDL_GetTicks(); /**< The time of the last shake update */
     float shakeAmplitude = 2; /**< The amplitude of the camera shake */
@@ -72,6 +79,12 @@ public:
     [[nodiscard]] float getH() const;
 
     /**
+     * @brief Return the rendering point of the camera.
+     * @return A Point representing the rendering point.
+     */
+    [[nodiscard]] Point getRenderingPoint() const;
+
+    /**
      * @brief Return the bounding box of the camera.
      * @return A SDL_FRect representing the bounding box.
      */
@@ -107,8 +120,9 @@ public:
     /**
      * @brief Sets the camera shake for a given time.
      * @param time The time to shake the camera in milliseconds.
+     * @param amplitude The amplitude of the shake, default is 2.
      */
-    void setShake(int time);
+    void setShake(int time, float amplitude = 2);
 
 
     /* METHODS */

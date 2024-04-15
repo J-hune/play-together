@@ -94,10 +94,7 @@ void RenderManager::render() {
     PlayerManager &playerManager = gamePtr->getPlayerManager();
     std::vector<Player> &players = playerManager.getAlivePlayers();
 
-    Point camera_point {
-            gamePtr->getCamera()->getX(),
-            gamePtr->getCamera()->getY()
-    };
+    Point camera_point = gamePtr->getCamera()->getRenderingPoint();
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);

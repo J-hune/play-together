@@ -8,17 +8,14 @@
 
 /* CONSTRUCTOR */
 
-Level::Level(const std::string &map_name, SDL_Renderer *renderer) {
+Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager *textureManager) : textureManagerPtr(textureManager) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
-
-    // Initialize managers
-    textureManager = std::make_unique<TextureManager>(this);
 
     loadMapProperties(map_name);
 
-    // Load textures
-    textureManager->loadMiddlegroundTexture(renderer);
-    if (textureManager->getReloadTexture()) textureManager->loadWorldTextures(renderer);
+    // Load textures if needed
+    if (textureManager->getWorldID() != worldID) textureManager->loadWorldTextures(renderer, worldID);
+    textureManager->loadMiddlegroundTexture(renderer, mapID);
 
     // Load map environment
     loadEnvironmentFromMap(map_name);
@@ -316,7 +313,6 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     file >> j;
     file.close();
 
-    textureManager->setReloadTexture(worldID != j["worldID"]);
     worldID = j["worldID"];
     mapID = j["levelID"];
     mapName = j["name"];
@@ -355,8 +351,8 @@ void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
     file >> j;
     file.close();
 
-    const std::vector<SDL_Texture*>& background_textures = textureManager->getBackgrounds();
-    const std::vector<SDL_Texture*>& foreground_textures = textureManager->getForegrounds();
+    const std::vector<SDL_Texture*>& background_textures = textureManagerPtr->getBackgrounds();
+    const std::vector<SDL_Texture*>& foreground_textures = textureManagerPtr->getForegrounds();
 
     // Load background layers
     for (const auto& layer : j["backgroundLayers"]) {
@@ -366,7 +362,7 @@ void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
     }
 
     // Load middle ground layer
-    middleground = Layer(*textureManager->getMiddleground(), 1);
+    middleground = Layer(*textureManagerPtr->getMiddleground(), 1);
 
     // Load foreground layers
     for (const auto& layer : j["foregroundLayers"]) {
@@ -472,7 +468,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     file >> j;
     file.close();
 
-    const std::vector<Texture> &textures = textureManager->getPlatforms();
+    const std::vector<Texture> &textures = textureManagerPtr->getPlatforms();
 
     // Load all 1D moving platforms
     for (const auto &platform : j["movingPlatforms1D"]) {

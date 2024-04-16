@@ -6,7 +6,8 @@
 #include <string>
 #include <iostream>
 #include <filesystem>
-#include "../Level.h"
+#include "../../Graphics/Texture.h"
+
 
 /**
  * @file TextureManager.h
@@ -14,37 +15,31 @@
  */
 
 
-// Forward declaration of Level
-class Level;
 
 class TextureManager {
 private:
-    bool reloadTexture = true; /**< Flag indicating if the world textures must be reloaded. */
+    int worldID = -1; /**< Represents the ID of the world from which textures are loaded. */
 
     std::vector<Texture> platforms; /**< Collection of Texture representing the platforms. */
     std::vector<SDL_Texture*> backgrounds; /**< Collection of SDL_Texture representing the background textures. */
     SDL_Texture *middleground; /**< SDL_Texture representing the middle ground texture. */
     std::vector<SDL_Texture*> foregrounds; /**< Collection of SDL_Texture representing the foreground textures. */
 
-    Level *levelPtr; /**< A pointer to the level object. */
+
 
 public:
     /* CONSTRUCTORS */
 
-    explicit TextureManager(Level *level);
+    TextureManager() = default;
 
 
     /* ACCESSORS */
 
-    [[nodiscard]] bool getReloadTexture() const;
+    [[nodiscard]] int getWorldID() const;
     [[nodiscard]] std::vector<Texture>& getPlatforms();
     [[nodiscard]] std::vector<SDL_Texture*>& getBackgrounds();
     [[nodiscard]] SDL_Texture* getMiddleground();
     [[nodiscard]] std::vector<SDL_Texture*>& getForegrounds();
-
-    /* MUTATORS */
-
-    void setReloadTexture(bool state);
 
 
     /* METHODS */
@@ -52,15 +47,17 @@ public:
     /**
      * @brief Load the middleground texture.
      * @param renderer Represents the renderer of the game.
+     * @param level_id Represents the ID of the level.
      * @return True if the texture was loaded successfully, false otherwise.
      */
-    bool loadMiddlegroundTexture(SDL_Renderer *renderer);
+    bool loadMiddlegroundTexture(SDL_Renderer *renderer, int level_id);
 
     /**
      * @brief Load the textures of the world.
      * @param renderer Represents the renderer of the game.
+     * @param world_id Represents the ID of the world to load.
      */
-    void loadWorldTextures(SDL_Renderer *renderer);
+    void loadWorldTextures(SDL_Renderer *renderer, int world_id);
 
 private:
 

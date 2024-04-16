@@ -14,6 +14,7 @@ Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quit
     // Initialize managers
     inputManager = std::make_unique<InputManager>(this);
     renderManager = std::make_unique<RenderManager>(renderer, this);
+    textureManager = std::make_unique<TextureManager>();
     saveManager = std::make_unique<SaveManager>(this);
     broadPhaseManager = std::make_unique<BroadPhaseManager>(this);
     playerManager = std::make_unique<PlayerManager>(this);
@@ -34,6 +35,10 @@ GameState Game::getGameState() const {
 
 InputManager &Game::getInputManager() {
     return *inputManager;
+}
+
+TextureManager &Game::getTextureManager() {
+    return *textureManager;
 }
 
 RenderManager &Game::getRenderManager() {
@@ -72,7 +77,7 @@ int Game::getEffectiveFrameRate() const {
 /* MODIFIERS */
 
 void Game::setLevel(std::string const &map_name) {
-    level = Level(map_name, renderer);
+    level = Level(map_name, renderer, textureManager.get());
 }
 
 void Game::setEnablePlatformsMovement(bool state) {
@@ -91,7 +96,7 @@ void Game::initializeHostedGame(int slot) {
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
-        level = Level("diversity", renderer);
+        level = Level("diversity", renderer, textureManager.get());
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
 

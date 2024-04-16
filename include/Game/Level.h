@@ -17,7 +17,7 @@
 #include "Items/SpeedPowerUp.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
-#include "LevelManagers/TextureManager.h"
+#include "GameManagers/TextureManager.h"
 
 
 // Define constants for directories and file names
@@ -27,10 +27,6 @@ constexpr char MAPS_DIRECTORY[] = "assets/maps/";
  * @file Level.h
  * @brief Defines the Level class responsible for level object.
  */
-
-// Forward declaration of TextureManager
-class TextureManager;
-
 
 /**
  * @class Level
@@ -48,10 +44,8 @@ private:
     std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
     std::vector<Music> musics; /**< Represents the musics of the map. */
 
-    // MANAGERS
-    std::unique_ptr<TextureManager> textureManager; /**< Load manager for handling loading events. */
-
     // GRAPHICS
+    TextureManager *textureManagerPtr; /**< A pointer to the game texture manager. */
     std::vector<Layer> backgrounds; /**< Collection of layers representing the backgrounds, arranged from farthest to nearest. */
     Layer middleground; /**< Layer representing the middle ground. */
     std::vector<Layer> foregrounds; /**< Collection of layers representing the foregrounds, arranged from farthest to nearest */
@@ -86,7 +80,7 @@ private:
 public:
     /* CONSTRUCTORS */
 
-    explicit Level(const std::string &map_name, SDL_Renderer *renderer);
+    explicit Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager *textureManagerPtr);
     Level() = default;
 
 

@@ -9,9 +9,11 @@
 #include <cmath>
 #include <algorithm>
 #include <SDL_ttf.h>
-#include "GameManagers/PlayerCollisionManager.h"
 #include "../Utils/Mediator.h"
+#include "Level.h"
+#include "GameManagers/PlayerCollisionManager.h"
 #include "GameManagers/InputManager.h"
+#include "GameManagers/TextureManager.h"
 #include "GameManagers/RenderManager.h"
 #include "GameManagers/SaveManager.h"
 #include "GameManagers/PlayerManager.h"
@@ -60,8 +62,14 @@ public:
     [[nodiscard]] InputManager &getInputManager();
 
     /**
-     * @brief Returns the render object of the game.
-     * @return A pointer of Renderer object representing the render object of the game.
+     * @brief Returns the texture manager of the game.
+     * @return A pointer of TextureManager representing the render manager of the game.
+     */
+    [[nodiscard]] TextureManager &getTextureManager();
+
+    /**
+     * @brief Returns the render manager of the game.
+     * @return A pointer of RenderManager representing the render manager of the game.
      */
     [[nodiscard]] RenderManager &getRenderManager();
 
@@ -93,7 +101,7 @@ public:
      * @brief Get the level object.
      * @return The level object.
      */
-    [[nodiscard]] Level *getLevel();
+    [[nodiscard]] Level* getLevel();
 
     /**
      *
@@ -188,6 +196,7 @@ private:
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
 
     std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
+    std::unique_ptr<TextureManager> textureManager; /**< Texture manager for handling texture loading. */
     std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
     std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
     std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
@@ -206,8 +215,6 @@ private:
     Level level; /**< The level object */
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
-
-    int worldID = 1; /**< Represents the ID of the current world. */
 
     // Debug variables used for the application console
     bool enable_platforms_movement = true;

@@ -29,3 +29,9 @@ void SizePowerUp::applyEffect(Player &player) {
         player.setH(player.getH() / 2);
     }
 }
+
+void SizePowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    Item::renderDebug(renderer, camera);
+}

@@ -79,13 +79,20 @@ public:
     /* METHODS */
 
     /**
-     * @brief Apply the item's effect to a player.
-     * @param player The player the effect will be applied to.
-     */
+    * @brief Apply the item's effect to a player.
+    * @param player The player the effect will be applied to.
+    */
     virtual void applyEffect(Player &player);
 
     /**
-     * @brief Renders the collisions by drawing a rectangle..
+     * @brief Pure virtual method to renders the item's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    virtual void render(SDL_Renderer *renderer, Point camera) = 0;
+
+    /**
+     * @brief Renders the collisions by drawing a rectangle.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */

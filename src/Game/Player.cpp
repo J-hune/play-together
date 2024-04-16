@@ -13,6 +13,11 @@ SDL_Texture *Player::spriteTexture2Ptr = nullptr;
 SDL_Texture *Player::spriteTexture3Ptr = nullptr;
 SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
+SDL_Texture *Player::spriteTexture1MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture2MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture3MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
+
 
 /* CONSTRUCTORS */
 
@@ -20,6 +25,7 @@ Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHe
         : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
 
     sprite = Sprite(*baseSpriteTexturePtr, Player::idle, 24, 18);
+    setSpriteTextureByID(playerID);
 }
 
 
@@ -99,6 +105,10 @@ bool Player::getIsJumping() const {
 
 size_t Player::getCurrentZoneID() const {
     return currentZoneID;
+}
+
+int Player::getScore() const {
+    return score;
 }
 
 
@@ -281,31 +291,78 @@ void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
 }
 
+void Player::setDefaultTexture(SDL_Texture* newTexture) {
+    defaultTexture = newTexture;
+}
+void Player::setMedalTexture(SDL_Texture* newTexture) {
+    medalTexture = newTexture;
+}
+
+
 
 /* METHODS */
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture
     baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player.png");
+
+    // Player 1
     spriteTexture1Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1.png");
+    spriteTexture1MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1Medal.png");
+
+    //Player 2
     spriteTexture2Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2.png");
+    spriteTexture2MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2Medal.png");
+
+    //Player 3
     spriteTexture3Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3.png");
+    spriteTexture3MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3Medal.png");
+
+    //Player 4
     spriteTexture4Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4.png");
+    spriteTexture4MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4Medal.png");
 
     // Check errors
-    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {
+    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr || spriteTexture1MedalPtr == nullptr || spriteTexture2MedalPtr == nullptr || spriteTexture3MedalPtr == nullptr || spriteTexture4MedalPtr == nullptr) {
         return false; // Return failure
     }
 
     return true; // Return success
 }
 
+void Player::useDefaultTexture() {
+    sprite.setTexture(*defaultTexture);
+}
+void Player::useMedalTexture(){
+    sprite.setTexture(*medalTexture);
+};
+
 void Player::setSpriteTextureByID(int id) {
-    if (id == 0) sprite.setTexture(*baseSpriteTexturePtr); // Base texture
-    else if (id == 1) sprite.setTexture(*spriteTexture1Ptr); // Texture 1
-    else if (id == 2) sprite.setTexture(*spriteTexture2Ptr); // Texture 2
-    else if (id == 3) sprite.setTexture(*spriteTexture3Ptr); // Texture 3
-    else if (id == 4) sprite.setTexture(*spriteTexture4Ptr); // Texture 4
+    if (id == 1){ // Texture 1
+        sprite.setTexture(*spriteTexture1Ptr);
+        defaultTexture = spriteTexture1Ptr;
+        medalTexture = spriteTexture1MedalPtr;
+    }
+    else if (id == 2){ // Texture 2
+        sprite.setTexture(*spriteTexture2Ptr);
+        defaultTexture = spriteTexture2Ptr;
+        medalTexture = spriteTexture2MedalPtr;
+    }
+    else if (id == 3) { // Texture 3
+        sprite.setTexture(*spriteTexture3Ptr);
+        defaultTexture = spriteTexture3Ptr;
+        medalTexture = spriteTexture3MedalPtr;
+    }
+    else if (id == 4) { // Texture 4
+        sprite.setTexture(*spriteTexture4Ptr);
+        defaultTexture = spriteTexture4Ptr;
+        medalTexture = spriteTexture4MedalPtr;
+    }
+    else {
+        sprite.setTexture(*baseSpriteTexturePtr);
+        defaultTexture = baseSpriteTexturePtr;
+        medalTexture = baseSpriteTexturePtr;
+    }
 }
 
 void Player::teleportPlayer(float newX, float newY) {

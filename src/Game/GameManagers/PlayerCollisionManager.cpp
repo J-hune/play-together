@@ -378,9 +378,9 @@ void PlayerCollisionManager::handleCollisionsWithIncreaseFallSpeedZones(Player &
     }
 }
 
-void PlayerCollisionManager::handleCollisionsWithSizePowerUp(Player *player) {
+void PlayerCollisionManager::handleCollisionsWithSizePowerUps(Player *player) {
     // Check for collisions with each item
-    for (SizePowerUp &item : gamePtr->getBroadPhaseManager().getSizePowerUp()) {
+    for (SizePowerUp &item : gamePtr->getBroadPhaseManager().getSizePowerUps()) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);
@@ -389,13 +389,24 @@ void PlayerCollisionManager::handleCollisionsWithSizePowerUp(Player *player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisionsWithSpeedPowerUp(Player *player) {
+void PlayerCollisionManager::handleCollisionsWithSpeedPowerUps(Player *player) {
     // Check for collisions with each item
-    for (SpeedPowerUp &item : gamePtr->getBroadPhaseManager().getSpeedPowerUp()) {
+    for (SpeedPowerUp &item : gamePtr->getBroadPhaseManager().getSpeedPowerUps()) {
         // If a collision is detected, apply item's effect to the player and erase it
         if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
             item.applyEffect(*player);
             gamePtr->getLevel()->removeItemFromSpeedPowerUp(item);
+        }
+    }
+}
+
+void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
+    // Check for collisions with each item
+    for (Coin &item : gamePtr->getBroadPhaseManager().getCoins()) {
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item.getBoundingBox())) {
+            item.applyEffect(*player);
+            gamePtr->getLevel()->removeItemFromCoins(item);
         }
     }
 }
@@ -422,8 +433,9 @@ void PlayerCollisionManager::handleCollisions() {
         }
 
         // Handle collisions with items
-        handleCollisionsWithSizePowerUp(&player);
-        handleCollisionsWithSpeedPowerUp(&player);
+        handleCollisionsWithSizePowerUps(&player);
+        handleCollisionsWithSpeedPowerUps(&player);
+        handleCollisionsWithCoins(&player);
 
         handleCollisionsWithSaveZones(player); // Handle collisions with save zones
         handleCollisionsWithToggleGravityZones(player); // Handle collisions with toggle gravity zones

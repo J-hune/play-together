@@ -31,6 +31,7 @@ private:
     // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
 
 
 public:
@@ -51,8 +52,9 @@ public:
     [[nodiscard]] std::vector<MovingPlatform2D> &getMovingPlatforms2D();
     [[nodiscard]] std::vector<SwitchingPlatform> &getSwitchingPlatforms();
     [[nodiscard]] std::vector<WeightPlatform> &getWeightPlatforms();
-    [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUp();
-    [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUp();
+    [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUps();
+    [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUps();
+    [[nodiscard]] std::vector<Coin> &getCoins();
 
 
     /* METHODS */
@@ -75,7 +77,8 @@ private:
     void check2DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void checkSwitchingPlatforms(const SDL_FRect& broad_phase_area);
     void checkWeightPlatforms(const SDL_FRect& broad_phase_area);
-    void checkPowerUp(const SDL_FRect& broad_phase_area);
+    void checkPowerUps(const SDL_FRect& broad_phase_area);
+    void checkCoins(const SDL_FRect& broad_phase_area);
 
 };
 

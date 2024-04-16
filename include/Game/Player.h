@@ -21,6 +21,76 @@ const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
  * @brief Represents a player in a 2D game with position, speed, and dimensions.
  */
 class Player {
+private:
+    /* ATTRIBUTES */
+
+    int playerID; /**< The ID of the player */
+    short SpriteID = -1; /**< The character ID (sprite) of the player */
+
+    // CHARACTERISTIC ATTRIBUTES
+    float x; /**< The x-coordinate of the player's position. (in pixels) */
+    float y; /**< The y-coordinate of the player's position. */
+    float width; /**< The width of the player. (in pixels) */
+    float height; /**< The height of the player. */
+    Sprite sprite; /**< The sprite of the player. */
+    int score = 0;
+
+    // X-AXIS MOVEMENT ATTRIBUTES
+    float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
+    bool wantToMoveRight = false; /**< If the player pressed a key to move right */
+    bool wantToMoveLeft = false; /**< If the player pressed a key to move left */
+    float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right, 0 for not moving) */
+    float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
+    bool canMove = true; /**< If the player can move */
+    float speed = 1;
+    float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
+    float initialSpeedCurveX = 0.3f; /**< The initial speed curve factor used for acceleration when the player starts moving. A lower value results in slower initial acceleration. */
+    float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
+    float decelerationFactorX = 3.0f; /**< The deceleration factor controlling how quickly the player's speed curve decreases when not moving. A higher value results in faster deceleration. */
+    float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
+    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
+
+    // Y-AXIS MOVEMENT ATTRIBUTES
+    float moveY = 0; /**< Vertical movement of the player during this frame. */
+    float mavity = 30.f; /**< Gravity acceleration. */
+    bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
+    bool jumpLock = false; /**< Flag indicating whether the player has already jumped. */
+    float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
+    bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
+    bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
+    Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
+    float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
+    float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
+    float maxFallSpeed = 600.f; /**< Maximum falling speed of the player. */
+    float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
+    float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
+    Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
+    float jumpVelocity = 0; /**< Current velocity of the player's jump. */
+    size_t currentZoneID = 0; /**< The ID of the current zone the player is in. */
+
+    // LOADED TEXTURES
+    static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
+    static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
+    static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
+    static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
+    static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
+    static SDL_Texture *spriteTexture1MedalPtr;/**< The medal's texture 1 of players */
+    static SDL_Texture *spriteTexture2MedalPtr;/**< The medal's texture 2 of players */
+    static SDL_Texture *spriteTexture3MedalPtr;/**< The medal's texture 3 of players */
+    static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
+
+    // SPRITE ANIMATIONS
+    static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
+    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
+    static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
+    static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
+    static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
+    static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
+
+    SDL_Texture  *defaultTexture = nullptr;
+    SDL_Texture  *medalTexture = nullptr;
+
+
 public:
 
     /* CONSTRUCTORS */
@@ -150,6 +220,11 @@ public:
      */
     [[nodiscard]] size_t getCurrentZoneID() const;
 
+    /**
+     * @brief Gets the player's current score.
+     * @return The player's score as an integer.
+     */
+    [[nodiscard]] int getScore() const;
 
     /* SPECIFIC ACCESSORS */
 
@@ -343,7 +418,31 @@ public:
     void setMaxFallSpeed(float val);
 
 
+    /**
+     * @brief Sets the default texture for the player.
+     * @param newTexture The new default texture to set.
+     */
+    void setDefaultTexture(SDL_Texture* newTexture);
+
+
+    /**
+     * @brief Sets the medal texture for the player.
+     * @param newTexture The new medal texture to set.
+     */
+    void setMedalTexture(SDL_Texture* newTexture);
+
+
     /* PUBLIC METHODS */
+
+    /**
+     * @brief Sets the player's sprite texture to the default texture.
+     */
+    void useDefaultTexture();
+
+    /**
+     * @brief Sets the player's sprite texture to the medal texture.
+     */
+    void useMedalTexture();
 
     /**
      * @brief Load all players textures.
@@ -413,67 +512,6 @@ public:
 
 
 private:
-    /* ATTRIBUTES */
-    int playerID; /**< The ID of the player */
-    short SpriteID = -1; /**< The character ID (sprite) of the player */
-
-    // CHARACTERISTIC ATTRIBUTES
-    float x; /**< The x-coordinate of the player's position. (in pixels) */
-    float y; /**< The y-coordinate of the player's position. */
-    float width; /**< The width of the player. (in pixels) */
-    float height; /**< The height of the player. */
-    Sprite sprite; /**< The sprite of the player. */
-    int score = 0;
-
-    // X-AXIS MOVEMENT ATTRIBUTES
-    float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
-    bool wantToMoveRight = false; /**< If the player pressed a key to move right */
-    bool wantToMoveLeft = false; /**< If the player pressed a key to move left */
-    float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right, 0 for not moving) */
-    float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
-    bool canMove = true; /**< If the player can move */
-    float speed = 1;
-    float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
-    float initialSpeedCurveX = 0.3f; /**< The initial speed curve factor used for acceleration when the player starts moving. A lower value results in slower initial acceleration. */
-    float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
-    float decelerationFactorX = 3.0f; /**< The deceleration factor controlling how quickly the player's speed curve decreases when not moving. A higher value results in faster deceleration. */
-    float speedCurveX = 1; /**< The speed curve attribute that is multiplied to player's x-axis movement */
-    float sprintMultiplier = 1.0f; /**< The factor to adjust the player's speed when sprinting. */
-
-    // Y-AXIS MOVEMENT ATTRIBUTES
-    float moveY = 0; /**< Vertical movement of the player during this frame. */
-    float mavity = 30.f; /**< Gravity acceleration. */
-    bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
-    bool jumpLock = false; /**< Flag indicating whether the player has already jumped. */
-    float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
-    bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
-    bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
-    Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
-    float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
-    float jumpMaxDuration = 0.2f; /**< Maximum duration of the player's jump. */
-    float maxFallSpeed = 600.f; /**< Maximum falling speed of the player. */
-    float fallSpeedFactor = 75.0f; /**< Factor to adjust the player's fall speed. */
-    float coyoteTime = 0.15f; /**< Time window in seconds during which the player can still jump after starting to fall. */
-    Uint64 jumpStartTime = 0; /**< Timestamp of the start of the player's jump. */
-    float jumpVelocity = 0; /**< Current velocity of the player's jump. */
-    size_t currentZoneID = 0; /**< The ID of the current zone the player is in. */
-
-    // LOADED TEXTURES
-    static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
-    static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
-    static SDL_Texture *spriteTexture2Ptr; /**< The texture 2 of players */
-    static SDL_Texture *spriteTexture3Ptr; /**< The texture 3 of players */
-    static SDL_Texture *spriteTexture4Ptr; /**< The texture 4 of players */
-
-    // SPRITE ANIMATIONS
-    static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
-    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
-    static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
-    static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
-    static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
-
-
 
     /* PRIVATE METHODS */
 

@@ -45,6 +45,7 @@ bool Item::operator==(const Item &item) const {
 /* METHODS */
 
 void Item::applyEffect(Player &player) {
+    // Set the best player
     player.addToScore(5);
     collectSound.play(0, -1);
 }

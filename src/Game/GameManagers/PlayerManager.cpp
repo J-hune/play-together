@@ -71,6 +71,26 @@ void PlayerManager::killPlayer(Player &player) {
     deadPlayers.emplace_back(player);
 }
 
+
+void PlayerManager::setTheBestPlayer(){
+    if(!alivePlayers.empty()){
+        int max = 0;
+        Player *playerMax = &alivePlayers[0];
+
+        // Find player with the highest score
+        for (Player &player: alivePlayers) {
+            player.useDefaultTexture();
+            if (max<=player.getScore()){
+                max = player.getScore();
+                playerMax = &player;
+            }
+        }
+
+        // Update texture for the best player
+        (*playerMax).useMedalTexture();
+    }
+}
+
 void PlayerManager::respawnPlayer(Player &player) {
     // Remove the player from the dead players list
     if (int index = findPlayerIndexById(player.getPlayerID()); index != -1) {

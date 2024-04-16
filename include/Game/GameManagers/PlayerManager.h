@@ -20,7 +20,7 @@ private:
 
 
 public:
-    /* CONSTRUCTOR */
+    /* CONSTRUCTORS */
 
     explicit PlayerManager(Game *game);
 
@@ -43,6 +43,11 @@ public:
 
 
     /* METHODS */
+
+    /**
+     * @brief Sets the best player based on scores and updates their texture.
+     */
+    void setTheBestPlayer();
 
     /**
      * @brief Get the player with the given id.

@@ -18,7 +18,7 @@
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
-
+#include "Items/Coin.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -75,6 +75,7 @@ private:
     // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
+    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
 
 
 public:
@@ -174,6 +175,11 @@ public:
     [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
 
     /**
+     * @brief Return the coins attribute.
+     * @return A vector of Coin.
+     */
+    [[nodiscard]] std::vector<Coin> getCoins() const;
+    /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.
      */
@@ -217,6 +223,12 @@ public:
      * @param item The item to remove.
      */
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
+
+    /**
+     * @brief Remove an item from coins attribute.
+     * @param item The item to remove.
+     */
+    void removeItemFromCoins(Coin const &item);
 
 
     /* PUBLIC METHODS */
@@ -301,6 +313,13 @@ public:
      * @param camera Represents the camera of the game.
      */
     void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the items by sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderItems(SDL_Renderer *renderer, Point camera);
 
     /**
      * @brief Renders the items by drawing rectangles.

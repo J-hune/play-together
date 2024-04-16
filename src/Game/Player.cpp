@@ -5,6 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+
 // Initialize textures pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
@@ -18,17 +19,17 @@ SDL_Texture *Player::spriteTexture3MedalPtr = nullptr;
 SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
 
 
-/** CONSTRUCTORS **/
+/* CONSTRUCTORS */
 
 Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
         : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
 
-    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, 24, 18);
     setSpriteTextureByID(playerID);
 }
 
 
-/** BASIC ACCESSORS **/
+/* BASIC ACCESSORS */
 
 int Player::getPlayerID() const {
     return playerID;
@@ -111,7 +112,7 @@ int Player::getScore() const {
 }
 
 
-/** SPECIFIC ACCESSORS **/
+/* SPECIFIC ACCESSORS */
 
 std::vector<Point> Player::getVertices() const {
     // Return the vertices of the player's bounding box.
@@ -201,7 +202,7 @@ SDL_FRect Player::getBoundingBoxNextFrame() const {
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Player::setX(float val) {
     x = val;
@@ -299,7 +300,7 @@ void Player::setMedalTexture(SDL_Texture* newTexture) {
 
 
 
-/** METHODS **/
+/* METHODS */
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture

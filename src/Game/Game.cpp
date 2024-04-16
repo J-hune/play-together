@@ -5,15 +5,21 @@
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-/** CONSTRUCTORS **/
+
+/* CONSTRUCTORS */
 
 Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag)
         : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag) {
 
+    // Initialize managers
     inputManager = std::make_unique<InputManager>(this);
     renderManager = std::make_unique<RenderManager>(renderer, this);
+    textureManager = std::make_unique<TextureManager>();
     saveManager = std::make_unique<SaveManager>(this);
+    broadPhaseManager = std::make_unique<BroadPhaseManager>(this);
     playerManager = std::make_unique<PlayerManager>(this);
+    playerCollisionManager = std::make_unique<PlayerCollisionManager>(this);
+    eventCollisionManager = std::make_unique<EventCollisionManager>(this);
 
     // Create the game seed
     std::random_device rd;
@@ -21,7 +27,7 @@ Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quit
 }
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 GameState Game::getGameState() const {
     return gameState;
@@ -29,6 +35,10 @@ GameState Game::getGameState() const {
 
 InputManager &Game::getInputManager() {
     return *inputManager;
+}
+
+TextureManager &Game::getTextureManager() {
+    return *textureManager;
 }
 
 RenderManager &Game::getRenderManager() {
@@ -43,12 +53,16 @@ PlayerManager &Game::getPlayerManager() {
     return *playerManager;
 }
 
+BroadPhaseManager &Game::getBroadPhaseManager() {
+    return *broadPhaseManager;
+}
+
 Camera *Game::getCamera() {
     return &camera;
 }
 
-Level &Game::getLevel() {
-    return level;
+Level *Game::getLevel() {
+    return &level;
 }
 
 int Game::getTickRate() const {
@@ -60,10 +74,10 @@ int Game::getEffectiveFrameRate() const {
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Game::setLevel(std::string const &map_name) {
-    level = Level(map_name);
+    level = Level(map_name, renderer, textureManager.get());
 }
 
 void Game::setEnablePlatformsMovement(bool state) {
@@ -75,14 +89,14 @@ void Game::setFrameRate(int fps) {
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 void Game::initializeHostedGame(int slot) {
     saveManager->setSlot(slot);
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
-        level = Level("diversity");
+        level = Level("diversity", renderer, textureManager.get());
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
 
@@ -122,11 +136,11 @@ void Game::update(double deltaTime, double ratio) {
 
     level.applyAsteroidsMovement(deltaTime);
 
-    // Apply players movement directly with the calculated ratio
+    // Apply player movement directly with the calculated ratio
     applyPlayersMovement(ratio);
 
     // Handle collisions
-    broadPhase();
+    broadPhaseManager->broadPhase();
     narrowPhase();
 
     camera.applyMovement(playerManager->getAveragePlayerPosition(), deltaTime);
@@ -170,7 +184,7 @@ void Game::run() {
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
 
-            // Calculate the ratio for applying players movement
+            // Calculate the ratio for applying player movement
             double ratio = static_cast<double>(frameTicks) / (static_cast<double>(frequency) / static_cast<double>(tickRate));
             update(deltaTime, ratio);
 
@@ -208,7 +222,7 @@ void Game::applyPlayersMovement(double ratio) {
 }
 
 void Game::switchMavity() {
-    // Change mavity for all player
+    // Change mavity for all players
     for (Player &character: playerManager->getAlivePlayers()) {
         character.setIsOnPlatform(false);
         character.getSprite()->toggleFlipVertical();
@@ -216,207 +230,10 @@ void Game::switchMavity() {
     }
 }
 
-void Game::broadPhase() {
-    // Empty old broad phase elements
-    saveZones.clear();
-    toggleGravityZones.clear();
-    increaseFallSpeedZones.clear();
-    deathZones.clear();
-    obstacles.clear();
-    movingPlatforms1D.clear();
-    movingPlatforms2D.clear();
-    switchingPlatforms.clear();
-    sizePowerUp.clear();
-    speedPowerUp.clear();
-    coins.clear();
-
-    std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
-    SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
-
-    // Check collisions with each save zone
-    for (const AABB &aabb: level.getZones(AABBType::SAVE)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            saveZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each toggle gravity zone
-    for (const AABB &aabb: level.getZones(AABBType::TOGGLE_GRAVITY)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            toggleGravityZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each increase fall speed zone
-    for (const AABB &aabb: level.getZones(AABBType::INCREASE_FALL_SPEED)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            increaseFallSpeedZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each death zone
-    for (const Polygon &zone: level.getZones(PolygonType::DEATH)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
-            deathZones.push_back(zone);
-        }
-    }
-
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getZones(PolygonType::COLLISION)) {
-        if (checkSATCollision(broadPhaseAreaVertices, obstacle)) {
-            obstacles.push_back(obstacle);
-        }
-    }
-
-    // Check for collisions with each 1D moving platforms
-    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms1D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each 2D moving platforms
-    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms2D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each switching platforms
-    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            switchingPlatforms.push_back(platform);
-        }
-    }
-
-    // Check for collisions with size power-up
-    for (const SizePowerUp &item: level.getSizePowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            sizePowerUp.push_back(item);
-        }
-    }
-
-    // Check for collisions with speed power-up
-    for (const SpeedPowerUp &item: level.getSpeedPowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            speedPowerUp.push_back(item);
-        }
-    }
-
-    // Check for collisions with coin
-    for (const Coin &item: level.getCoins()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            coins.push_back(item);
-        }
-    }
-}
-
 void Game::narrowPhase() {
-    // Check collisions with asteroids
-    handleAsteroidsCollisions();
-
-    // Handle collisions for all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.setCanMove(true);
-        character.setIsOnPlatform(false);
-
-        // Handle collisions according to player's mavity
-        if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
-        else handleCollisionsReversedMavity(character);
-
-        // Handle collisions with items
-        handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp, *playerManager);
-        handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp, *playerManager);
-        handleCollisionsWithCoins(&character, &level, coins, *playerManager);
-
-        handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
-        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
-
-        // Handle collisions with death zones and camera borders
-        if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
-            ||handleCollisionsWithDeathZones(character, deathZones))
-        {
-            playerManager->killPlayer(character);
-        }
-    }
+    eventCollisionManager->handleAsteroidsCollisions(); // Handle collisions for asteroids
+    playerCollisionManager->handleCollisions(); // Handle collisions for all players
 }
-
-
-/** COLLISION HANDLING **/
-
-void Game::handleCollisionsNormalMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
-    if (player.hasMoved()) {
-        handleCollisionsWithObstacles(&player, obstacles);
-    }
-
-    handleCollisionsWithMovingPlatform1D(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsWithMovingPlatform2D(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsWithSwitchingPlatform(&player, switchingPlatforms); // Handle collisions with switching platforms
-}
-
-void Game::handleCollisionsReversedMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
-    if (player.hasMoved()) {
-        handleCollisionsSelcatsbOhtiw(&player, obstacles);
-    }
-
-    handleCollisionsD1mroftalPgnivoMhtiw(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsD2mroftalPgnivoMhtiw(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsMroftalPgnihctiwShtiw(&player, switchingPlatforms); // Handle collisions with switching platforms
-}
-
-void Game::handleAsteroidsCollisions() {
-    std::vector<Asteroid> asteroids = level.getAsteroids();
-    const std::vector<Polygon>& collisionObstacles = level.getZones(PolygonType::COLLISION);
-
-    for (auto asteroidIt = asteroids.begin(); asteroidIt != asteroids.end();) {
-        Asteroid& asteroid = *asteroidIt;
-        bool alreadyExplode = false;
-        std::vector<Player>& characters = playerManager->getAlivePlayers();
-
-        // Check collisions with characters
-        auto characterIt = characters.begin();
-        while (!alreadyExplode && characterIt != characters.end()) {
-            Player& character = *characterIt;
-            if (checkAABBCollision(character.getBoundingBox(), asteroid.getBoundingBox())) {
-                alreadyExplode = true;
-                playerManager->killPlayer(character);
-            }
-            ++characterIt;
-        }
-
-        // Check collisions with obstacles
-        auto obstacleIt = collisionObstacles.begin();
-        while (!alreadyExplode && obstacleIt != collisionObstacles.end()) {
-            const Polygon& obstacle = *obstacleIt;
-            if (checkSATCollision(asteroid.getVertices(), obstacle)) {
-                alreadyExplode = true;
-                break; // No need to check further obstacles if asteroid already exploded
-            }
-            ++obstacleIt;
-        }
-
-        // Check if asteroid goes out of bounds
-        if (!alreadyExplode && asteroid.getY() > camera.getY() + camera.getH() - asteroid.getH()) {
-            alreadyExplode = true;
-        }
-
-        // Handle explosion or move to the next asteroid
-        if (alreadyExplode) {
-            asteroid.explode();
-            asteroidIt = asteroids.erase(asteroidIt); // Remove the asteroid and update the iterator
-        } else {
-            ++asteroidIt; // Move to the next asteroid
-        }
-    }
-
-    level.setAsteroids(asteroids);
-}
-
-/** END COLLISION HANDLING **/
-
 
 void Game::togglePause() {
     using enum GameState;

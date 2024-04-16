@@ -4,7 +4,7 @@
 #include <SDL.h>
 #include <cstdlib>
 #include <ranges>
-#include "../Point.h"
+#include "IPlatform.h"
 
 /**
  * @file MovingPlatform2D.h
@@ -15,38 +15,61 @@
  * @class MovingPlatform2D
  * @brief Represents a moving platform on two axis in a 2D game.
  */
-class MovingPlatform2D {
+class MovingPlatform2D : public IPlatform {
+private:
+    /* ATTRIBUTES */
+
+    float x; /**< The x-coordinate of the platform's position. */
+    float y; /**< The y-coordinate of the platform's position. */
+    float w; /**< The width of the platform. (in pixels) */
+    float h; /**< The height of the platform. */
+    Texture texture; /**< The texture of the platform. */
+    float speed; /**< The speed of the platform. */
+    float moveX = 0; /**< The number of pixel the platform has moved on the x-axis. */
+    float moveY = 0; /**< The number of pixel the platform has moved on the y-axis. */
+
+    const Point left; /**< A Point representing the minimum position of the platform. */
+    const Point right; /**< A Point representing the maximum position of the platform. */
+    float ratio; /**< The ratio of pixel displacement between x-axis and y-axis. */
+    bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
+    float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom. */
+    float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom. */
+    bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+
+    float smoothingLimit = 3; /**< The smoothing limit of the platform movement. */
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
-    MovingPlatform2D(float x, float y, float w, float h, float speed, Point left, Point right, bool start);
+    MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start);
 
 
-    /** BASIC ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Return the x attribute.
      * @return The value of the x attribute.
      */
-    [[nodiscard]] float getX() const;
+    [[nodiscard]] float getX() const override;
 
     /**
      * @brief Return the y attribute.
      * @return The value of the y attribute.
      */
-    [[nodiscard]] float getY() const;
+    [[nodiscard]] float getY() const override;
 
     /**
      * @brief Return the weight attribute.
      * @return The value of the weight attribute.
      */
-    [[nodiscard]] float getW() const;
+    [[nodiscard]] float getW() const override;
 
     /**
      * @brief Return the height attribute.
      * @return The value of the height attribute.
      */
-    [[nodiscard]] float getH() const;
+    [[nodiscard]] float getH() const override;
 
     /**
      * @brief Return the moveX attribute.
@@ -64,55 +87,49 @@ public:
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
-    [[nodiscard]] bool getIsMoving() const;
+    [[nodiscard]] bool getIsMoving() const override;
 
 
-    /** SPECIFIC ACCESSORS **/
+    /* SPECIFIC ACCESSORS */
 
     /**
      * @brief Get the bounding box of the platform.
      * @return SDL_Rect representing the platform box.
      */
-    [[nodiscard]] SDL_FRect getBoundingBox() const;
+    [[nodiscard]] SDL_FRect getBoundingBox() const override;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the isMoving attribute.
      * @param state The new state of the isMoving attribute.
      */
-    void setIsMoving(bool state);
+    void setIsMoving(bool state) override;
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Calculate the new position of the platform on x-axis and y-axis.
      * @param deltaTime The time elapsed since the last frame in seconds.
      */
-    void applyMovement(double deltaTime);
+    void applyMovement(double delta_time) override;
 
-private:
-    /** ATTRIBUTES **/
+    /**
+     * @brief Renders the platforms by drawing its textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera) const override;
 
-    float x; /**< The x-coordinate of the platform's position. */
-    float y; /**< The y-coordinate of the platform's position. */
-    float w; /**< The width of the platform. (in pixels) */
-    float h; /**< The height of the platform. */
-    float speed; /**< The speed of the platform. */
-    float moveX = 0; /**< The number of pixel the platform has moved on the x-axis*/
-    float moveY = 0; /**< The number of pixel the platform has moved on the y-axis*/
+    /**
+     * @brief Renders the platforms by its drawing its collision box.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderDebug(SDL_Renderer *renderer, Point camera) const override;
 
-    const Point left; /**< A Point representing the minimum position of the platform. */
-    const Point right; /**< A Point representing the maximum position of the platform. */
-    float ratio; /**< The ratio of pixel displacement between x-axis and y-axis. */
-    bool start; /**< The place where the platform start : 0 for left/top, 1 for right/down */
-    float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom */
-    float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom */
-    bool isMoving = true;
-
-    float smoothingLimit = 3; /**< The smoothing limit of the platform movement */
 };
 
 

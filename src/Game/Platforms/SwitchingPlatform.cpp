@@ -5,15 +5,14 @@
  * @brief Implements the SwitchingPlatform class responsible for switching platform logic.
  */
 
-/** CONSTRUCTORS **/
 
-SwitchingPlatform::SwitchingPlatform(float x, float y, float w, float h, Uint32 bpm, std::vector<Point> steps)
-        : x(x), y(y), w(w), h(h), bpm(bpm), steps(std::move(steps)) {
-    startTime = SDL_GetTicks(); // Get the current time
-}
+/* CONSTRUCTORS */
+
+SwitchingPlatform::SwitchingPlatform(float x, float y, float w, float h, const Texture& texture, Uint32 bpm, std::vector<Point> steps)
+        : x(x), y(y), w(w), h(h), texture(texture), bpm(bpm), steps(std::move(steps)) {}
 
 
-/** BASIC ACCESSORS **/
+/* ACCESSORS */
 
 float SwitchingPlatform::getX() const {
     return x;
@@ -35,24 +34,21 @@ bool SwitchingPlatform::getIsMoving() const {
     return isMoving;
 }
 
-
-/** SPECIFIC ACCESSORS **/
-
 SDL_FRect SwitchingPlatform::getBoundingBox() const {
     return {x, y, w, h};
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void SwitchingPlatform::setIsMoving(bool state) {
     isMoving = state;
 }
 
 
-/** METHODS **/
+/* METHODS */
 
-void SwitchingPlatform::applyMovement() {
+void SwitchingPlatform::applyMovement([[maybe_unused]] double delta_time) {
     Uint32 currentTime = SDL_GetTicks(); // Get the current time
 
     // Check if a beat has passed
@@ -65,4 +61,16 @@ void SwitchingPlatform::applyMovement() {
         x = steps[actualPoint].x;
         y = steps[actualPoint].y;
     }
+}
+
+void SwitchingPlatform::render(SDL_Renderer *renderer, Point camera) const {
+    SDL_Rect src_rect = texture.getSize();
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+}
+
+void SwitchingPlatform::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderFillRectF(renderer, &platform_rect);
 }

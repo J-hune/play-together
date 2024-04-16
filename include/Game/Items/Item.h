@@ -23,7 +23,6 @@ enum class ItemTypes {
  */
 class Item {
 private :
-
     /* ATTRIBUTES */
 
     float x; /**< The x-coordinate of the item's position. */
@@ -33,7 +32,6 @@ private :
     SoundEffect collectSound; /**< The sound effect associated to the item. */
 
 public:
-
     /* CONSTRUCTORS */
 
     Item(float X, float Y, float width, float height, const std::string& file_name);

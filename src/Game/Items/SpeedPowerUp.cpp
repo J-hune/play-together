@@ -5,8 +5,6 @@
  * @brief Implements the SpeedPowerUp class responsible for SpeedPowerUp object.
  */
 
-// Static member initialization
-
 
 /* CONSTRUCTORS */
 

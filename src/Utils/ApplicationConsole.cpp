@@ -1,12 +1,11 @@
 #include "../../include/Utils/ApplicationConsole.h"
 
-/** CONSTRUCTOR **/
+/* CONSTRUCTORS */
 
-// Constructor for ApplicationConsole, takes a pointer to the associated Game object.
 ApplicationConsole::ApplicationConsole(Game *game) : gamePtr(game) {}
 
 
-/** METHODS **/
+/* METHODS */
 
 // Runs the console in a loop, waiting for user input and executing commands.
 void ApplicationConsole::run() const {
@@ -93,7 +92,7 @@ void ApplicationConsole::displayHelp(int gameState) const {
 }
 
 
-/** GAME RUNNING COMMANDS METHODS **/
+/* GAME RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::teleportPlayer(const std::string &command) const {
     float x; float y;
@@ -198,12 +197,12 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(true);
+        gamePtr->getCamera()->setShake(-1);
         gamePtr->setEnablePlatformsMovement(true);
         std::cout << "Enabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(true);
+        gamePtr->getCamera()->setShake(-1);
         std::cout << "Enabling camera shaking.\n";
     }
     else if (option == "platforms") {
@@ -227,12 +226,12 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(false);
+        gamePtr->getCamera()->setShake(0);
         gamePtr->setEnablePlatformsMovement(false);
         std::cout << "Disabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(false);
+        gamePtr->getCamera()->setShake(0);
         std::cout << "Disabling camera shaking.\n";
     }
     else if (option == "platforms") {
@@ -255,7 +254,7 @@ void ApplicationConsole::toggleFPSRendering() const {
 }
 
 
-/** GAME NOT RUNNING COMMANDS METHODS **/
+/* GAME NOT RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::changeMaxFrameRate(const std::string& command) const {
     int fps;

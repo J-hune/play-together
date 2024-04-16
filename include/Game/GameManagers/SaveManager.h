@@ -2,22 +2,35 @@
 #define PLAY_TOGETHER_SAVEMANAGER_H
 
 #include <format>
-#include "Game.h"
+#include "../Game.h"
+
+/**
+ * @file SaveManager.h
+ * @brief Defines the SaveManager class responsible for saving and loading the game state.
+ */
+
 
 class SaveManager {
+private:
+    /* ATTRIBUTES */
+
+    Game *gamePtr; /**< A pointer to the game object. */
+    int slot = 0; /**< The slot number to save the game state to. */
+
+
 public:
 
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTOR */
 
     explicit SaveManager(Game *game);
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     void setSlot(int value);
 
 
-    /** METHODS **/
+    /* METHODS */
 
     /**
      * @brief Save the game state to a slot.
@@ -30,9 +43,6 @@ public:
      */
     bool loadGameState();
 
-private:
-    Game *gamePtr; /**< A pointer to the game object. */
-    int slot = 0; /**< The slot number to save the game state to. */
 };
 
 #endif //PLAY_TOGETHER_SAVEMANAGER_H

@@ -9,23 +9,32 @@
 #include <cmath>
 #include <algorithm>
 #include <SDL_ttf.h>
-#include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
-#include "InputManager.h"
-#include "RenderManager.h"
-#include "SaveManager.h"
-#include "PlayerManager.h"
+#include "Level.h"
+#include "GameManagers/PlayerCollisionManager.h"
+#include "GameManagers/InputManager.h"
+#include "GameManagers/TextureManager.h"
+#include "GameManagers/RenderManager.h"
+#include "GameManagers/SaveManager.h"
+#include "GameManagers/PlayerManager.h"
+#include "GameManagers/BroadPhaseManager.h"
+#include "GameManagers/EventCollisionManager.h"
+
 
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
  */
 
-// Forward declaration of InputManager, CollisionHandler
+// Forward declaration of managers
 class InputManager;
 class RenderManager;
 class SaveManager;
+class BroadPhaseManager;
 class PlayerManager;
+class PlayerCollisionManager;
+class EventCollisionManager;
+
 
 /**
  * @class Game
@@ -33,12 +42,12 @@ class PlayerManager;
  */
 class Game {
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, bool *quitFlag);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Returns the current game state.
@@ -53,8 +62,14 @@ public:
     [[nodiscard]] InputManager &getInputManager();
 
     /**
-     * @brief Returns the render object of the game.
-     * @return A pointer of Renderer object representing the render object of the game.
+     * @brief Returns the texture manager of the game.
+     * @return A pointer of TextureManager representing the render manager of the game.
+     */
+    [[nodiscard]] TextureManager &getTextureManager();
+
+    /**
+     * @brief Returns the render manager of the game.
+     * @return A pointer of RenderManager representing the render manager of the game.
      */
     [[nodiscard]] RenderManager &getRenderManager();
 
@@ -71,6 +86,12 @@ public:
     [[nodiscard]] PlayerManager &getPlayerManager();
 
     /**
+     * @brief Returns the broad phase manager of the game.
+     * @return A pointer of BroadPhaseManager object representing the broad phase manager of the game.
+     */
+    [[nodiscard]] BroadPhaseManager &getBroadPhaseManager();
+
+    /**
      * @brief Returns the camera of the game.
      * @return A pointer of Camera object representing the camera of the game.
      */
@@ -80,7 +101,7 @@ public:
      * @brief Get the level object.
      * @return The level object.
      */
-    [[nodiscard]] Level &getLevel();
+    [[nodiscard]] Level* getLevel();
 
     /**
      *
@@ -96,7 +117,7 @@ public:
     [[nodiscard]] int getEffectiveFrameRate() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the level attribute.
@@ -122,7 +143,7 @@ public:
     void switchMavity();
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Initializes the game by loading the level and the character.
@@ -169,15 +190,20 @@ public:
     void exitGame();
 
 private:
-    /** ATTRIBUTES **/
+    /* ATTRIBUTES */
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
 
     std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
+    std::unique_ptr<TextureManager> textureManager; /**< Texture manager for handling texture loading. */
     std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
     std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
+    std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
     std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
+    std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
+    std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
+
 
     int frameRate = 60; /**< The refresh rate of the game. */
     const int tickRate = 30; /**< The tick rate of the game. */
@@ -190,25 +216,11 @@ private:
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
-
-    // Broad phase attributes
-    std::vector<AABB> saveZones; /**< Collection of AABB representing save zones. */
-    std::vector<AABB> toggleGravityZones; /**< Collection of AABB representing toggle gravity zones. */
-    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABB representing increase fall speed zones. */
-    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
-    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
-
     // Debug variables used for the application console
     bool enable_platforms_movement = true;
 
 
-    /** PRIVATE METHODS **/
+    /* PRIVATE METHODS */
 
     /**
      * @brief Applies the movement to all players in the game.
@@ -223,31 +235,8 @@ private:
     void calculatePlayersMovement(double deltaTime);
 
     /**
-     * @brief Handles collisions between the asteroid and obstacles.
-     */
-    void handleAsteroidsCollisions();
-
-    /**
-     * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
-     */
-    void broadPhase();
-
-    /**
-     * @brief Handles collisions between a player and every object.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsNormalMavity(Player &player) const;
-
-    /**
-     * @brief Handles collisions between a player and every object when the mavity is reversed.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsReversedMavity(Player &player) const;
-
-    /**
      * @brief Main method that handle collisions for every player according to their mavity.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
-     * TODO: add collision behavior for moving objects
      */
     void narrowPhase();
 

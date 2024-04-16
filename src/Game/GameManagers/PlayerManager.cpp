@@ -1,9 +1,10 @@
-#include "../../include/Game/PlayerManager.h"
+#include "../../../include/Game/GameManagers/PlayerManager.h"
 
 /**
  * @file PlayerManager.cpp
- * @brief Implements the PlayerManager class responsible for handling the players in the game.
+ * @brief Implements the PlayerManager class responsible for handling players in the game.
  */
+
 
 /* CONSTRUCTOR */
 
@@ -96,14 +97,14 @@ void PlayerManager::respawnPlayer(Player &player) {
         deadPlayers.erase(deadPlayers.begin() + index);
     }
 
-    // Add the player to the alive players list
+    // Add the player to the alivePlayers vector
     alivePlayers.push_back(player);
 
     // Teleport the player to the last checkpoint
-    Level const &level = game->getLevel();
-    int last_checkpoint = level.getLastCheckpoint();
+    Level const *level = game->getLevel();
+    int last_checkpoint = level->getLastCheckpoint();
     size_t spawn_index = alivePlayers.size();
-    Point spawn_point = level.getSpawnPoints(last_checkpoint)[spawn_index];
+    Point spawn_point = level->getSpawnPoints(last_checkpoint)[spawn_index];
     player.setX(spawn_point.x);
     player.setY(spawn_point.y);
 }

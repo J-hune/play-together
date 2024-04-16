@@ -14,13 +14,11 @@
  */
 class SpeedPowerUp : public Item {
 private:
-
     /* ATTRIBUTES */
 
     bool fast; /**< Flag indicating whether the power-up makes the player faster or slower. */
 
 public:
-
     /* CONSTRUCTORS */
 
     SpeedPowerUp(float x, float y, float w, float h, bool fast);

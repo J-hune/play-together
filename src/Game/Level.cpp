@@ -5,19 +5,31 @@
  * @brief Implements the Level class responsible for level object.
  */
 
-/** CONSTRUCTOR **/
 
-Level::Level(const std::string &map_name) {
+/* CONSTRUCTOR */
+
+Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager *textureManager) : textureManagerPtr(textureManager) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
 
     loadMapProperties(map_name);
+
+    // Load textures if needed
+    if (textureManager->getWorldID() != worldID) textureManager->loadWorldTextures(renderer, worldID);
+    textureManager->loadMiddlegroundTexture(renderer, mapID);
+
+    // Load map environment
+    loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
     loadItemsFromMap(map_name);
 }
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
+
+int Level::getWorldID() const {
+    return worldID;
+}
 
 int Level::getMapID() const {
     return mapID;
@@ -75,6 +87,10 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
 }
 
+std::vector<WeightPlatform> Level::getWeightPlatforms() const {
+    return weightPlatforms;
+}
+
 std::vector<SizePowerUp> Level::getSizePowerUp() const {
     return sizePowerUp;
 }
@@ -92,7 +108,7 @@ short Level::getLastCheckpoint() const {
 }
 
 
-/** MUTATORS **/
+/* MUTATORS */
 
 void Level::setLastCheckpoint(short checkpoint) {
     lastCheckpoint = checkpoint;
@@ -100,6 +116,22 @@ void Level::setLastCheckpoint(short checkpoint) {
 
 void Level::setAsteroids(std::vector<Asteroid> const &value) {
     this->asteroids = value;
+}
+
+void Level::increaseWeightForPlatform(const WeightPlatform &platform) {
+    // Search the platform and increase its weight
+    auto it = std::ranges::find(weightPlatforms, platform);
+    if (it != weightPlatforms.end()) {
+        it->increaseWeight();
+    }
+}
+
+void Level::decreaseWeightForPlatform(const WeightPlatform &platform) {
+    // Search the platform and decrease its weight
+    auto it = std::ranges::find(weightPlatforms, platform);
+    if (it != weightPlatforms.end()) {
+        it->decreaseWeight();
+    }
 }
 
 void Level::removeItemFromSizePowerUp(SizePowerUp const &item) {
@@ -128,7 +160,7 @@ void Level::removeItemFromCoins(Coin const &item) {
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
     // Loop to generate asteroids until the desired number is reached
@@ -146,6 +178,22 @@ void Level::generateAsteroid(int nbAsteroid, Point camera, size_t seed) {
 
 void Level::addAsteroid(Asteroid const &asteroid) {
     asteroids.emplace_back(asteroid);
+}
+
+void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
+    for (const Layer &layer: backgrounds) {
+        layer.render(renderer, &camera);
+    }
+}
+
+void Level::renderMiddleground(SDL_Renderer *renderer, const Point camera) const {
+    middleground.render(renderer, &camera);
+}
+
+void Level::renderForegrounds(SDL_Renderer *renderer, const Point camera) const {
+    for (const Layer &layer: foregrounds) {
+        layer.render(renderer, &camera);
+    }
 }
 
 void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
@@ -203,27 +251,19 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
+void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+    for (const MovingPlatform1D &platform: movingPlatforms1D) platform.render(renderer, camera);
+    for (const MovingPlatform2D &platform: movingPlatforms2D) platform.render(renderer, camera);
+    for (const SwitchingPlatform &platform: switchingPlatforms) platform.render(renderer, camera);
+    for (const WeightPlatform &platform: weightPlatforms) platform.render(renderer, camera);
+}
+
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
-    // Draw the 1D moving platforms
-    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-    for (const MovingPlatform1D &platform: movingPlatforms1D) {
-        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platform_rect);
-    }
+    for (const MovingPlatform1D &platform: movingPlatforms1D) platform.renderDebug(renderer, camera);
+    for (const MovingPlatform2D &platform: movingPlatforms2D) platform.renderDebug(renderer, camera);
+    for (const SwitchingPlatform &platform: switchingPlatforms) platform.renderDebug(renderer, camera);
+    for (const WeightPlatform &platform: weightPlatforms) platform.renderDebug(renderer, camera);
 
-    // Draw the 2D moving platforms
-    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
-    for (const MovingPlatform2D &platform: movingPlatforms2D) {
-        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platform_rect);
-    }
-
-    // Draw the switching platforms
-    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
-    for (const SwitchingPlatform &platform: switchingPlatforms) {
-        SDL_FRect platform_rect = {platform.getX() - camera.x, platform.getY() - camera.y, platform.getW(), platform.getH()};
-        SDL_RenderFillRectF(renderer, &platform_rect);
-    }
 }
 
 void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
@@ -268,11 +308,19 @@ void Level::applyPlatformsMovement(double delta_time) {
 
     // Apply movement for switching platforms
     for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement();
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
+    }
+
+    // Apply movement for weight platforms
+    for (WeightPlatform &platform: weightPlatforms) {
+        if(platform.getIsMoving()) platform.applyMovement(delta_time);
     }
 }
 
+
 void Level::loadMapProperties(const std::string &map_file_name) {
+    musics.clear();
+
     std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/level.json";
     std::ifstream file(file_path);
 
@@ -285,16 +333,17 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     file >> j;
     file.close();
 
-    mapID = j["id"];
+    worldID = j["worldID"];
+    mapID = j["levelID"];
     mapName = j["name"];
 
     // Load spawn points
     for (const auto &spawn_point : j["spawnPoints"]) {
         spawnPoints.push_back({
-               Point(spawn_point[0][0], spawn_point[0][1]),
-               Point(spawn_point[1][0], spawn_point[1][1]),
-               Point(spawn_point[2][0], spawn_point[2][1]),
-               Point(spawn_point[3][0], spawn_point[3][1])
+            Point(spawn_point[0][0], spawn_point[0][1]),
+            Point(spawn_point[1][0], spawn_point[1][1]),
+            Point(spawn_point[2][0], spawn_point[2][1]),
+            Point(spawn_point[3][0], spawn_point[3][1])
         });
     }
 
@@ -304,6 +353,45 @@ void Level::loadMapProperties(const std::string &map_file_name) {
     }
 
     std::cout << "Level: Loaded map properties." << std::endl;
+}
+
+void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
+    backgrounds.clear();
+    foregrounds.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/environment.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the environment file. Please check the file path." << std::endl;
+        return;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    const std::vector<SDL_Texture*>& background_textures = textureManagerPtr->getBackgrounds();
+    const std::vector<SDL_Texture*>& foreground_textures = textureManagerPtr->getForegrounds();
+
+    // Load background layers
+    for (const auto& layer : j["backgroundLayers"]) {
+        int texture_id = layer["textureID"];
+        int layer_index = layer["layerIndex"];
+        backgrounds.emplace_back(*background_textures[texture_id], layer_index);
+    }
+
+    // Load middle ground layer
+    middleground = Layer(*textureManagerPtr->getMiddleground(), 1);
+
+    // Load foreground layers
+    for (const auto& layer : j["foregroundLayers"]) {
+        int texture_id = layer["textureID"];
+        int layer_index = layer["layerIndex"];
+        foregrounds.emplace_back(*foreground_textures[texture_id], layer_index);
+    }
+
+    std::cout << "Level: Loaded background, middleground and foreground layers." << std::endl;
 }
 
 int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<Polygon> &zones, PolygonType type) {
@@ -383,6 +471,11 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
+    movingPlatforms1D.clear();
+    movingPlatforms2D.clear();
+    switchingPlatforms.clear();
+    weightPlatforms.clear();
+
     std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/platforms.json";
     std::ifstream file(file_path);
 
@@ -395,6 +488,8 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     file >> j;
     file.close();
 
+    const std::vector<Texture> &textures = textureManagerPtr->getPlatforms();
+
     // Load all 1D moving platforms
     for (const auto &platform : j["movingPlatforms1D"]) {
         float x = platform["x"];
@@ -402,11 +497,12 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         float width = platform["width"];
         float height = platform["height"];
         float speed = platform["speed"];
-        float minX = platform["min"];
-        float maxX = platform["max"];
+        float min_x = platform["min"];
+        float max_x = platform["max"];
         bool start = platform["start"];
         bool axis = platform["axis"];
-        movingPlatforms1D.emplace_back(x, y, width, height, speed, minX, maxX, start, axis);
+        int texture_id = platform["texture"];
+        movingPlatforms1D.emplace_back(x, y, width, height, textures[texture_id], speed, min_x, max_x, start, axis);
     }
 
     // Load all 2D moving platforms
@@ -419,7 +515,8 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         Point left(platform["left"][0], platform["left"][1]);
         Point right(platform["right"][0], platform["right"][1]);
         bool start = platform["start"];
-        movingPlatforms2D.emplace_back(x, y, width, height, speed, left, right, start);
+        int texture_id = platform["texture"];
+        movingPlatforms2D.emplace_back(x, y, width, height, textures[texture_id], speed, left, right, start);
     }
 
     // Load all switching platforms
@@ -433,10 +530,22 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         for (const auto &step : platform["steps"]) {
             steps.emplace_back(step[0], step[1]);
         }
-        switchingPlatforms.emplace_back(x, y, width, height, bpm, steps);
+        int texture_id = platform["texture"];
+        switchingPlatforms.emplace_back(x, y, width, height, textures[texture_id], bpm, steps);
     }
 
-    std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms and " << switchingPlatforms.size() << " switching platforms." << std::endl;
+    // Load all weight platforms
+    for (const auto &platform : j["weightPlatforms"]) {
+        float x = platform["x"];
+        float y = platform["y"];
+        float width = platform["width"];
+        float height = platform["height"];
+        float stepDistance = platform["stepDistance"];
+        int texture_id = platform["texture"];
+        weightPlatforms.emplace_back(x, y, width, height, stepDistance, textures[texture_id]);
+    }
+
+    std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

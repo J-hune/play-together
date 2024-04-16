@@ -164,8 +164,8 @@ public:
     void setFrameRate(int frameRate);
 
     /**
-    * @brief Switch mavity between normal and reversed.
-    */
+     * @brief Switch mavity between normal and reversed.
+     */
     void switchMavity();
 
 
@@ -228,9 +228,10 @@ private:
 
     /**
      * @brief Main method that handle collisions for every player according to their mavity.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
      */
-    void narrowPhase();
+    void narrowPhase(double delta_time);
 
 };
 

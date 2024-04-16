@@ -328,7 +328,7 @@ void PlayerCollisionManager::handleCollisionsWithSaveZones(Player &player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &player) {
+void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &player, double delta_time) {
     const std::vector<AABB> &toggleGravityZones = gamePtr->getBroadPhaseManager().getToggleGravityZones();
 
     // Check collisions with each toggle gravity zone
@@ -348,7 +348,7 @@ void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &play
             player.toggleMavity();
             player.getSprite()->toggleFlipVertical();
 
-            float gravityOffset = toggleGravityZone.getHeight() / 5;
+            float gravityOffset = toggleGravityZone.getHeight() * static_cast<float>(delta_time) * 30;
             float currentMoveY = player.getMoveY();
             float newMoveY = (player.getMavity() < 0) ? std::max(currentMoveY, gravityOffset) : std::min(currentMoveY, -gravityOffset);
             player.setMoveY(newMoveY);
@@ -411,7 +411,7 @@ void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisions() {
+void PlayerCollisionManager::handleCollisions(double delta_time) {
     for (Player &player: gamePtr->getPlayerManager().getAlivePlayers()) {
         player.setCanMove(true);
         player.setIsOnPlatform(false);
@@ -438,7 +438,7 @@ void PlayerCollisionManager::handleCollisions() {
         handleCollisionsWithCoins(&player);
 
         handleCollisionsWithSaveZones(player); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(player); // Handle collisions with toggle gravity zones
+        handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
         handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
 
         // Handle collisions with death zones and camera borders

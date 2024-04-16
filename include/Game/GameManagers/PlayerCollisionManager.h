@@ -29,8 +29,9 @@ public:
 
     /**
      * @brief Handles all collisions for all players in the game.
+     * @param delta_time The time elapsed since the last frame.
      */
-    void handleCollisions();
+    void handleCollisions(double delta_time);
 
 
 
@@ -127,8 +128,9 @@ private:
     /**
      * @brief Handles collisions between the player and toggle gravity zones.
      * @param player The player object.
+     * @param delta_time The time elapsed since the last frame.
      */
-    void handleCollisionsWithToggleGravityZones(Player &player);
+    void handleCollisionsWithToggleGravityZones(Player &player, double delta_time);
 
     /**
      * @brief Handles collisions between the player and increase fall speed zones.

@@ -129,7 +129,7 @@ void Game::update(double delta_time) {
 
     // Handle collisions
     broadPhaseManager->broadPhase();
-    narrowPhase();
+    narrowPhase(delta_time);
     playerManager->setTheBestPlayer();
     if (!Mediator::isClientRunning()) level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
     renderManager->render();
@@ -215,9 +215,9 @@ void Game::switchMavity() {
     }
 }
 
-void Game::narrowPhase() {
+void Game::narrowPhase(double delta_time) {
     eventCollisionManager->handleAsteroidsCollisions(); // Handle collisions for asteroids
-    playerCollisionManager->handleCollisions(); // Handle collisions for all players
+    playerCollisionManager->handleCollisions(delta_time); // Handle collisions for all players
 }
 
 void Game::togglePause() {

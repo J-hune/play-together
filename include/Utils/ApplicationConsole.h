@@ -9,11 +9,17 @@
 
 /**
  * @Class Application
-    * @brief The ApplicationConsole class represent an interface for the developer to interact with the game.
+ * @brief The ApplicationConsole class represent an interface for the developer to interact with the game.
  */
 class ApplicationConsole {
+private:
+    /* ATTRIBUTES */
+
+    Game *gamePtr;  /**< Pointer to the associated Game object. */
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTOR */
 
     /**
      * @brief Constructs a ApplicationConsole object.
@@ -22,7 +28,7 @@ public:
     explicit ApplicationConsole(Game *game);
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Runs the console, allowing the user to input commands.
@@ -36,9 +42,6 @@ public:
     void executeCommand(const std::string &command) const;
 
 private:
-    /** ATTRIBUTES **/
-
-    Game *gamePtr;  /**< Pointer to the associated Game object. */
 
     /**
      * @brief Executes a command when the game is running.
@@ -53,7 +56,7 @@ private:
     void executeGameNotRunningCommand(const std::string &command) const;
 
 
-    /** COMMAND METHODS **/
+    /* COMMAND METHODS */
 
     void displayHelp(int gameState) const;
     void teleportPlayer(const std::string& command) const;

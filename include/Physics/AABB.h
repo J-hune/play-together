@@ -16,14 +16,24 @@ enum class AABBType {
 };
 
 class AABB {
+private:
+    /* ATTRIBUTES */
+
+    float x; /**< The x-coordinate of the AABB. */
+    float y; /**< The y-coordinate of the AABB. */
+    float width; /**< The width of the AABB. */
+    float height; /**< The height of the AABB. */
+    AABBType type; /**< The type of the AABB. */
+
+
 public:
 
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
     AABB(float x, float y, float width, float height, AABBType type);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Get the x-coordinate of the AABB.
@@ -59,7 +69,7 @@ public:
     [[nodiscard]] SDL_FRect getRect() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the x-coordinate of the AABB.
@@ -97,14 +107,6 @@ public:
      */
     void setPosition(const Point &position);
 
-private:
-    /** ATTRIBUTES **/
-
-    float x; /**< The x-coordinate of the AABB. */
-    float y; /**< The y-coordinate of the AABB. */
-    float width; /**< The width of the AABB. */
-    float height; /**< The height of the AABB. */
-    AABBType type; /**< The type of the AABB. */
 };
 
 

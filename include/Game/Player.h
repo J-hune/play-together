@@ -2,7 +2,6 @@
 #define PLAY_TOGETHER_PLAYER_H
 
 #include <vector>
-#include <SDL.h>
 #include <SDL_image.h>
 #include <map>
 #include "Point.h"
@@ -24,7 +23,7 @@ const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
 class Player {
 public:
 
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     /**
      * @brief Constructor for the Player class.
@@ -35,7 +34,7 @@ public:
     Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight);
 
 
-    /** BASIC ACCESSORS **/
+    /* BASIC ACCESSORS */
 
     /**
      * @brief Return the player ID.
@@ -152,7 +151,7 @@ public:
     [[nodiscard]] size_t getCurrentZoneID() const;
 
 
-    /** SPECIFIC ACCESSORS **/
+    /* SPECIFIC ACCESSORS */
 
     /**
      * @brief Gets the vertices of the player's bounding box.
@@ -228,7 +227,7 @@ public:
     }
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Sets the x attribute.
@@ -344,7 +343,7 @@ public:
     void setMaxFallSpeed(float val);
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Load all players textures.
@@ -414,7 +413,7 @@ public:
 
 
 private:
-    /** ATTRIBUTES **/
+    /* ATTRIBUTES */
     int playerID; /**< The ID of the player */
     short SpriteID = -1; /**< The character ID (sprite) of the player */
 
@@ -476,7 +475,7 @@ private:
 
 
 
-    /** PRIVATE METHODS **/
+    /* PRIVATE METHODS */
 
     /**
      * @brief Gets the vertices of the player's left collider.

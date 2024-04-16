@@ -1,16 +1,31 @@
 #ifndef PLAY_TOGETHER_PLAYERMANAGER_H
 #define PLAY_TOGETHER_PLAYERMANAGER_H
 
-#include "Game.h"
+#include "../Game.h"
+
+
+/**
+ * @file PlayerManager.h
+ * @brief Defines the PlayerManager class responsible for handling players in the game.
+ */
+
 
 class PlayerManager {
+private:
+    /* ATTRIBUTES */
+
+    Game *game;
+    std::vector<Player> alivePlayers;
+    std::vector<Player> deadPlayers;
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTOR */
 
     explicit PlayerManager(Game *game);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Get the players in the game.
@@ -27,7 +42,7 @@ public:
     [[nodiscard]] size_t getPlayerCount() const;
 
 
-    /** METHODS **/
+    /* METHODS */
 
     /**
      * @brief Get the player with the given id.
@@ -47,7 +62,7 @@ public:
      * @brief Get the average position of all players in the game.
      * @return A Point object representing the average position of all players in the game.
      */
-    Point getAveragePlayerPosition() const;
+    [[nodiscard]] Point getAveragePlayerPosition() const;
 
     /**
      * @brief Add a player to the game.
@@ -78,9 +93,6 @@ public:
      */
     void clearPlayers();
 
-private:
-    Game *game;
-    std::vector<Player> alivePlayers;
-    std::vector<Player> deadPlayers;
+
 };
 #endif //PLAY_TOGETHER_PLAYERMANAGER_H

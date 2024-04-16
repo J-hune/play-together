@@ -5,10 +5,11 @@
  * @brief Implements the MovingPlatform1D class responsible for moving platforms logic.
  */
 
-/** CONSTRUCTORS **/
 
-MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, float speed, float min, float max, bool start, bool axis)
-        : x(x), y(y), w(w), h(h), speed(speed), min(min), max(max), start(start), axis(axis) {
+/* CONSTRUCTORS */
+
+MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, const Texture& texture, float speed, float min, float max, bool start, bool axis)
+        : x(x), y(y), w(w), h(h), texture(texture), speed(speed), min(min), max(max), start(start), axis(axis) {
 
     // If the platform moves on x-axis
     if (!axis) {
@@ -23,7 +24,7 @@ MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, float spe
 }
 
 
-/** BASIC ACCESSORS **/
+/* ACCESSORS */
 
 float MovingPlatform1D::getX() const {
     return x;
@@ -53,26 +54,23 @@ bool MovingPlatform1D::getIsMoving() const {
     return isMoving;
 }
 
-
-/** SPECIFIC ACCESSORS **/
-
 SDL_FRect MovingPlatform1D::getBoundingBox() const {
     return {x, y, w, h};
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void MovingPlatform1D::setIsMoving(bool state) {
     isMoving = state;
 }
 
 
-/** METHODS **/
+/* METHODS */
 
-void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
+void MovingPlatform1D::applyXaxisMovement(double delta_time) {
     move = 150; // Add basic movement
-    move *= static_cast<float>(deltaTime); // Apply movement per second
+    move *= static_cast<float>(delta_time); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -90,10 +88,10 @@ void MovingPlatform1D::applyXaxisMovement(double deltaTime) {
     }
 }
 
-void MovingPlatform1D::applyYaxisMovement(double deltaTime) {
+void MovingPlatform1D::applyYaxisMovement(double delta_time) {
     move = 150; // Add basic movement
 
-    move *= static_cast<float>(deltaTime); // Apply movement per second
+    move *= static_cast<float>(delta_time); // Apply movement per second
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
@@ -111,6 +109,18 @@ void MovingPlatform1D::applyYaxisMovement(double deltaTime) {
     }
 }
 
-void MovingPlatform1D::applyMovement(double deltaTime) {
-    axis ? applyYaxisMovement(deltaTime) : applyXaxisMovement(deltaTime);
+void MovingPlatform1D::applyMovement(double delta_time) {
+    axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
+}
+
+void MovingPlatform1D::render(SDL_Renderer *renderer, Point camera) const {
+    SDL_Rect src_rect = texture.getSize();
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+}
+
+void MovingPlatform1D::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderFillRectF(renderer, &platform_rect);
 }

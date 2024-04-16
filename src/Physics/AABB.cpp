@@ -5,6 +5,7 @@
  * @brief Implements the Axis-Aligned Bounding Box class responsible for handling AABBs in 2D space.
  */
 
+
 /* CONSTRUCTOR */
 
 AABB::AABB(float x, float y, float width, float height, AABBType type) : x(x), y(y), width(width), height(height), type(type) {}

@@ -1,5 +1,6 @@
 {
-    "id": 2,
+    "worldID": 1,
+    "levelID": 2,
     "name": "assurance",
     "displayName": "Assurance",
     "spawnPoints": [

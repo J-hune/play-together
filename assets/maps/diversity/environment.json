@@ -1,0 +1,14 @@
+{
+    "backgroundLayers":  [
+        {"textureID" :  0, "layerIndex" :  -9},
+        {"textureID" :  1, "layerIndex" :  -8},
+        {"textureID" :  2, "layerIndex" :  -7},
+        {"textureID" :  3, "layerIndex" :  -6},
+        {"textureID" :  4, "layerIndex" :  -5},
+        {"textureID" :  5, "layerIndex" :  -4},
+        {"textureID" :  6, "layerIndex" :  -3},
+        {"textureID" :  7, "layerIndex" :  -2},
+        {"textureID" :  8, "layerIndex" :  -1}
+    ],
+    "foregroundLayers": []
+}

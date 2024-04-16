@@ -21,10 +21,10 @@ SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
 
 /* CONSTRUCTORS */
 
-Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
-        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
+Player::Player(int playerID, Point spawnPoint, float size)
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(BASE_WIDTH * size), height(BASE_HEIGHT * size), size(size) {
 
-    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, 24, 18);
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_WIDTH, BASE_HEIGHT);
     setSpriteTextureByID(playerID);
 }
 
@@ -53,6 +53,10 @@ float Player::getW() const {
 
 float Player::getH() const {
     return height;
+}
+
+float Player::getSize() const {
+    return size;
 }
 
 Sprite *Player::getSprite() {
@@ -212,12 +216,10 @@ void Player::setY(float val) {
     y = val;
 }
 
-void Player::setW(float val) {
-    width = val;
-}
-
-void Player::setH(float val) {
-    height = val;
+void Player::setSize(float val) {
+    size = val;
+    width = BASE_WIDTH * size;
+    height = BASE_HEIGHT * size;
 }
 
 void Player::setMoveX(float val) {
@@ -392,14 +394,14 @@ void Player::calculateXaxisMovement(double deltaTime) {
     if (wantedDirection != 0) {
         directionX = wantedDirection;
         if (directionX != previousDirectionX && speedCurveX != 0) {
-            // If direction changed, reset speed curve
+            // If the direction changed, reset the speed curve
             speedCurveX = initialSpeedCurveX;
         } else {
-            // Gradually increase speed curve for smooth acceleration
+            // Gradually increase the speed curve for smooth acceleration
             speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0));
         }
     } else {
-        // If no input, gradually decrease speed curve for smooth deceleration
+        // If no input, gradually decrease the speed curve for smooth deceleration
         speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0));
     }
 

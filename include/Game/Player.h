@@ -8,9 +8,6 @@
 #include "../Graphics/Animation.h"
 #include "../Graphics/Sprite.h"
 
-const int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
-const int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
-
 /**
  * @file Player.h
  * @brief Defines the Player class representing a player in a 2D game.
@@ -32,8 +29,13 @@ private:
     float y; /**< The y-coordinate of the player's position. */
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
+    float size = 2; /**< The size of the player. */
+    int score = 0; /**< The score of the player. */
+
+    // SPRITE ATTRIBUTES
     Sprite sprite; /**< The sprite of the player. */
-    int score = 0;
+    SDL_Texture  *defaultTexture = nullptr;
+    SDL_Texture  *medalTexture = nullptr;
 
     // X-AXIS MOVEMENT ATTRIBUTES
     float moveX = 0; /**< Player movement on x-axis during 'this' frame. */
@@ -87,8 +89,11 @@ private:
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
 
-    SDL_Texture  *defaultTexture = nullptr;
-    SDL_Texture  *medalTexture = nullptr;
+    // CONSTANTS
+    static constexpr int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
+    static constexpr int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
+    static constexpr int BASE_WIDTH = 24; /**< Constant for the base width of a player. */
+    static constexpr int BASE_HEIGHT = 18; /**< Constant for the base height of a player. */
 
 
 public:
@@ -101,7 +106,7 @@ public:
      * @param playerWidth Width of the player.
      * @param playerHeight Height of the player.
      */
-    Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight);
+    Player(int playerID, Point spawnPoint, float size);
 
 
     /* BASIC ACCESSORS */
@@ -141,6 +146,12 @@ public:
      * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const;
+
+    /**
+     * @brief Return the size attribute.
+     * @return The value of the size attribute.
+     */
+    [[nodiscard]] float getSize() const;
 
     /**
      * @brief Return the sprite attribute.
@@ -317,16 +328,10 @@ public:
     void setY(float val);
 
     /**
-     * @brief Sets the width attribute.
-     * @param val The new value of the width attribute.
+     * @brief Sets the size attribute and the width and height attributes accordingly.
+     * @param val The new value of the size attribute.
      */
-    void setW(float val);
-
-    /**
-     * @brief Sets the height attribute.
-     * @param val The new value of the height attribute.
-     */
-    void setH(float val);
+    void setSize(float val);
 
     /**
      * @brief Sets the moveX attribute.

@@ -103,7 +103,7 @@ void Game::initializeHostedGame(int slot) {
     // Add the initial player to the game
     Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[0];
 
-    Player initialPlayer(-1, spawnPoint, 48, 36);
+    Player initialPlayer(-1, spawnPoint, 2);
     camera.initializePosition(spawnPoint);
     music = level.getMusicById(0);
     music.play(-1);

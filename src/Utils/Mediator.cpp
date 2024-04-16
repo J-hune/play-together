@@ -139,7 +139,7 @@ int Mediator::handleClientConnect(int playerID) {
     size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
     Level *level = gamePtr->getLevel();
     Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
-    Player newPlayer(playerID, spawnPoint,48, 36);
+    Player newPlayer(playerID, spawnPoint, 2);
     gamePtr->getPlayerManager().addPlayer(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
@@ -199,7 +199,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
             Level *level = gamePtr->getLevel();
             Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
 
-            Player newPlayer(playerSocketID, spawnPoint, 48, 36);
+            Player newPlayer(playerSocketID, spawnPoint, 2);
             gamePtr->getPlayerManager().addPlayer(newPlayer);
         }
 
@@ -223,7 +223,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
 
                 Level const *level = gamePtr->getLevel();
                 Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
-                Player newPlayer(receivedPlayerID, spawnPoint, 48, 36);
+                Player newPlayer(receivedPlayerID, spawnPoint, 2);
                 if (player.contains("x")) newPlayer.setX(player["x"]);
                 if (player.contains("y")) newPlayer.setY(player["y"]);
                 if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);

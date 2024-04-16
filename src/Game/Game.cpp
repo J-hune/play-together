@@ -129,6 +129,7 @@ void Game::fixedUpdate() {
 
 void Game::update(double deltaTime, double ratio) {
     if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
+    level.applyTrapsMovement(deltaTime);
 
     if (!Mediator::isClientRunning()) {
         level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);

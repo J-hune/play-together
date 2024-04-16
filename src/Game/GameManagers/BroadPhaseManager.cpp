@@ -49,6 +49,10 @@ std::vector<WeightPlatform> &BroadPhaseManager::getWeightPlatforms() {
     return weightPlatforms;
 }
 
+std::vector<Crusher> &BroadPhaseManager::getCrushers() {
+    return crushers;
+}
+
 std::vector<SizePowerUp> &BroadPhaseManager::getSizePowerUps() {
     return sizePowerUp;
 }
@@ -163,6 +167,17 @@ void BroadPhaseManager::checkWeightPlatforms(const SDL_FRect &broad_phase_area) 
     }
 }
 
+void BroadPhaseManager::checkCrushers(const SDL_FRect &broad_phase_area) {
+    crushers.clear(); // Empty old crushers
+
+    // Check for collisions with each crusher
+    for (const Crusher &crusher: gamePtr->getLevel()->getCrushers()) {
+        if (checkAABBCollision(broad_phase_area, crusher.getBoundingBox())) {
+            crushers.push_back(crusher);
+        }
+    }
+}
+
 void BroadPhaseManager::checkPowerUps(const SDL_FRect &broad_phase_area) {
     sizePowerUp.clear(); // Empty old size power-up
     speedPowerUp.clear(); // Empty old speed power-up
@@ -207,6 +222,7 @@ void BroadPhaseManager::broadPhase() {
     check2DMovingPlatforms(broad_phase_area_bounding_box);
     checkSwitchingPlatforms(broad_phase_area_bounding_box);
     checkWeightPlatforms(broad_phase_area_bounding_box);
+    checkCrushers(broad_phase_area_bounding_box);
     checkPowerUps(broad_phase_area_bounding_box);
     checkCoins(broad_phase_area_bounding_box);
 

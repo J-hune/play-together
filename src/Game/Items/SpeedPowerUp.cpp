@@ -5,8 +5,6 @@
  * @brief Implements the SpeedPowerUp class responsible for SpeedPowerUp object.
  */
 
-// Static member initialization
-
 
 /* CONSTRUCTORS */
 
@@ -27,4 +25,10 @@ void SpeedPowerUp::applyEffect(Player &player) {
     else {
         player.setSpeed(player.getSpeed() * 0.5F);
     }
+}
+
+void SpeedPowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
+    Item::renderDebug(renderer, camera);
 }

@@ -6,10 +6,11 @@
  * @brief Implements the MovingPlatform2D class responsible for moving platforms logic.
  */
 
-/** CONSTRUCTORS **/
 
-MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, float speed, Point left, Point right, bool start)
-        : x(x), y(y), w(w), h(h), speed(speed), left(left), right(right),
+/* CONSTRUCTORS */
+
+MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start)
+        : x(x), y(y), w(w), h(h), texture(texture), speed(speed), left(left), right(right),
          ratio(std::abs((left.x - right.x) / (left.y - right.y))), start(start) {
 
     // If the platform starts to the min point
@@ -29,7 +30,7 @@ MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, float spe
 }
 
 
-/** BASIC ACCESSORS **/
+/* ACCESSORS */
 
 float MovingPlatform2D::getX() const {
     return x;
@@ -59,21 +60,19 @@ bool MovingPlatform2D::getIsMoving() const {
     return isMoving;
 }
 
-/** SPECIFIC ACCESSORS **/
-
 SDL_FRect MovingPlatform2D::getBoundingBox() const {
     return {x, y, w, h};
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void MovingPlatform2D::setIsMoving(bool state) {
     isMoving = state;
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 void MovingPlatform2D::applyMovement(double delta_time) {
     // Add basic movement
@@ -111,4 +110,16 @@ void MovingPlatform2D::applyMovement(double delta_time) {
         directionX = -1; // Change direction to right
         directionY = left.y - right.y > 0 ? 1 : -1;
     }
+}
+
+void MovingPlatform2D::render(SDL_Renderer *renderer, Point camera) const {
+    SDL_Rect src_rect = texture.getSize();
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+}
+
+void MovingPlatform2D::renderDebug(SDL_Renderer *renderer, Point camera) const {
+    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_RenderFillRectF(renderer, &platform_rect);
 }

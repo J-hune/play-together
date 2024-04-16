@@ -1,9 +1,10 @@
-#include "../../include/Game/PlayerManager.h"
+#include "../../../include/Game/GameManagers/PlayerManager.h"
 
 /**
  * @file PlayerManager.cpp
- * @brief Implements the PlayerManager class responsible for handling the players in the game.
+ * @brief Implements the PlayerManager class responsible for handling players in the game.
  */
+
 
 /* CONSTRUCTOR */
 
@@ -70,20 +71,40 @@ void PlayerManager::killPlayer(Player &player) {
     deadPlayers.emplace_back(player);
 }
 
+
+void PlayerManager::setTheBestPlayer(){
+    if(!alivePlayers.empty()){
+        int max = 0;
+        Player *playerMax = &alivePlayers[0];
+
+        // Find player with the highest score
+        for (Player &player: alivePlayers) {
+            player.useDefaultTexture();
+            if (max<=player.getScore()){
+                max = player.getScore();
+                playerMax = &player;
+            }
+        }
+
+        // Update texture for the best player
+        (*playerMax).useMedalTexture();
+    }
+}
+
 void PlayerManager::respawnPlayer(Player &player) {
     // Remove the player from the dead players list
     if (int index = findPlayerIndexById(player.getPlayerID()); index != -1) {
         deadPlayers.erase(deadPlayers.begin() + index);
     }
 
-    // Add the player to the alive players list
+    // Add the player to the alivePlayers vector
     alivePlayers.push_back(player);
 
     // Teleport the player to the last checkpoint
-    Level const &level = game->getLevel();
-    int last_checkpoint = level.getLastCheckpoint();
+    Level const *level = game->getLevel();
+    int last_checkpoint = level->getLastCheckpoint();
     size_t spawn_index = alivePlayers.size();
-    Point spawn_point = level.getSpawnPoints(last_checkpoint)[spawn_index];
+    Point spawn_point = level->getSpawnPoints(last_checkpoint)[spawn_index];
     player.setX(spawn_point.x);
     player.setY(spawn_point.y);
 }

@@ -1,4 +1,4 @@
-#include "../../include/Game/SaveManager.h"
+#include "../../../include/Game/GameManagers/SaveManager.h"
 
 /**
  * @file SaveManager.cpp
@@ -21,7 +21,7 @@ void SaveManager::setSlot(int value) {
 /* METHODS */
 
 void SaveManager::saveGameState() {
-    Level const &level = gamePtr->getLevel();
+    Level const *level = gamePtr->getLevel();
 
     // Create a JSON object to store the game state
     using json = nlohmann::json;
@@ -45,8 +45,8 @@ void SaveManager::saveGameState() {
 
 
     game_state_json["date"] = ss.str();
-    game_state_json["level"] = level.getMapName();
-    game_state_json["lastCheckpoint"] = level.getLastCheckpoint();
+    game_state_json["level"] = level->getMapName();
+    game_state_json["lastCheckpoint"] = level->getLastCheckpoint();
 
     // Save the player state
     std::string save_file_name = std::format("saves/slot_{}.json", slot);
@@ -95,9 +95,9 @@ bool SaveManager::loadGameState() {
         json game_state_json = json::parse(buffer.str());
 
         // Load the game state
-        Level &level = gamePtr->getLevel();
-        level = Level(game_state_json["level"]);
-        level.setLastCheckpoint(game_state_json["lastCheckpoint"]);
+        Level *level = gamePtr->getLevel();
+        *level = Level(game_state_json["level"], gamePtr->getRenderManager().getRenderer(), &gamePtr->getTextureManager());
+        level->setLastCheckpoint(game_state_json["lastCheckpoint"]);
 
         std::cout << "SaveManager: Loaded game from slot " << slot << std::endl;
         return true;

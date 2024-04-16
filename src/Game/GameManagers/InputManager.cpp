@@ -1,9 +1,10 @@
-#include "../../include/Game/InputManager.h"
+#include "../../../include/Game/GameManagers/InputManager.h"
 
 /**
  * @file InputManager.cpp
  * @brief Implements the InputManager class responsible for handling the input events.
  */
+
 
 /* CONSTRUCTOR */
 
@@ -96,7 +97,7 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_UP:
         case SDL_SCANCODE_W:
         case SDL_SCANCODE_SPACE:
-            // If the player is dead ignore
+            // If the player is dead, ignore
             if (player == nullptr) break;
 
             // If the coyote time is passed and the player is not already in a jump
@@ -118,7 +119,7 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
             gamePtr->switchMavity(); // Switch mavity for all players
             break;
         case SDL_SCANCODE_M:
-            if (gamePtr->getLevel().getMapID() == 1) gamePtr->setLevel("assurance");
+            if (gamePtr->getLevel()->getMapID() == 1) gamePtr->setLevel("assurance");
             else gamePtr->setLevel("diversity");
             break;
         case SDL_SCANCODE_LSHIFT:
@@ -149,7 +150,7 @@ void InputManager::sendKeyboardStateToNetwork() {
         // Send the new keyboard state mask to the server
         Mediator::sendPlayerUpdate(currentKeyboardStateMask);
 
-        // Update the last keyboard state mask and the last send time
+        // Update the last keyboard state mask and the last send-time
         lastKeyboardStateMask = currentKeyboardStateMask;
     }
 }

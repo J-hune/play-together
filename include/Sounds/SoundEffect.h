@@ -26,7 +26,6 @@ private:
     int volume = 20; /**< The sound volume. */
 
 public:
-    /* ATTRIBUTES */
 
     static int masterVolume; /**< The master volume. */
 

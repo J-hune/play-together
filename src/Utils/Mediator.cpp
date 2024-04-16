@@ -117,9 +117,9 @@ void Mediator::save() {
 }
 
 void Mediator::getGameProperties(nlohmann::json &properties) {
-    Level level = gamePtr->getLevel();
-    properties["mapName"] = level.getMapName();
-    properties["lastCheckpoint"] = level.getLastCheckpoint();
+    Level *level = gamePtr->getLevel();
+    properties["mapName"] = level->getMapName();
+    properties["lastCheckpoint"] = level->getLastCheckpoint();
 }
 
 std::vector<Player> const &Mediator::getAlivePlayers() {
@@ -141,9 +141,9 @@ int Mediator::handleClientConnect(int playerID) {
     // Get the player's position id based on his position in the players list
 
     size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
-    Level level = gamePtr->getLevel();
-    Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
-    Player newPlayer(playerID, spawnPoint,48, 36);
+    Level *level = gamePtr->getLevel();
+    Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
+    Player newPlayer(playerID, spawnPoint, 2);
     gamePtr->getPlayerManager().addPlayer(newPlayer);
 
     std::cout << "Mediator: Player " << playerID << " connected" << std::endl;
@@ -221,10 +221,10 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
 
             // Get the player's spawn point based on his position in the players list
             size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
-            Level level = gamePtr->getLevel();
-            Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
+            Level *level = gamePtr->getLevel();
+            Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
 
-            Player newPlayer(playerSocketID, spawnPoint, 48, 36);
+            Player newPlayer(playerSocketID, spawnPoint, 2);
             gamePtr->getPlayerManager().addPlayer(newPlayer);
         }
 
@@ -246,9 +246,9 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
             for (const auto &player : playersArray) {
                 int receivedPlayerID = player["playerID"];
 
-                Level const &level = gamePtr->getLevel();
-                Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[spawnIndex];
-                Player newPlayer(receivedPlayerID, spawnPoint, 48, 36);
+                Level const *level = gamePtr->getLevel();
+                Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
+                Player newPlayer(receivedPlayerID, spawnPoint, 2);
                 if (player.contains("x")) newPlayer.setX(player["x"]);
                 if (player.contains("y")) newPlayer.setY(player["y"]);
                 if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
@@ -265,7 +265,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         else if (messageType == "asteroidCreation") {
             // Create a new asteroid with the received properties
             Asteroid asteroid(message["x"], message["y"], message["speed"], message["h"], message["w"], message["angle"]);
-            gamePtr->getLevel().addAsteroid(asteroid);
+            gamePtr->getLevel()->addAsteroid(asteroid);
         }
 
         else {

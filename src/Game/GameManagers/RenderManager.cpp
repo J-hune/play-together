@@ -1,9 +1,10 @@
-#include "../../include/Game/RenderManager.h"
+#include "../../../include/Game/GameManagers/RenderManager.h"
 
 /**
  * @file RenderManager.cpp
  * @brief Implements the RenderManager class responsible for rendering the game.
  */
+
 
 /* CONSTRUCTORS */
 
@@ -20,7 +21,10 @@ RenderManager::RenderManager(SDL_Renderer *renderer, Game *game) : renderer(rend
         std::cerr << "Error loading asteroid textures" << std::endl;
         exit(1);
     }
-
+    if(!Coin::loadTexture(*renderer)){
+        std::cerr << "Error loading coin textures" << std::endl;
+        exit(1);
+    }
     // Load the fonts
     TTF_Font *font16 = TTF_OpenFont("assets/font/arial.ttf", 16);
     TTF_Font *font24 = TTF_OpenFont("assets/font/arial.ttf", 24);
@@ -37,6 +41,10 @@ RenderManager::RenderManager(SDL_Renderer *renderer, Game *game) : renderer(rend
 
 
 /* ACCESSORS */
+
+SDL_Renderer* RenderManager::getRenderer() {
+    return renderer;
+}
 
 std::vector<TTF_Font *> &RenderManager::getFonts() {
     return fonts;
@@ -86,41 +94,43 @@ void RenderManager::toggleRenderFps() {
 /* METHODS */
 
 void RenderManager::render() {
-    Level &level = gamePtr->getLevel();
+    Level *level = gamePtr->getLevel();
     PlayerManager &playerManager = gamePtr->getPlayerManager();
     std::vector<Player> &players = playerManager.getAlivePlayers();
 
-    Point camera_point {
-            gamePtr->getCamera()->getX(),
-            gamePtr->getCamera()->getY()
-    };
+    Point camera_point = gamePtr->getCamera()->getRenderingPoint();
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
     // Render textures
     if (render_textures) {
-        level.renderAsteroids(renderer, camera_point); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
-        level.renderItemsDebug(renderer, camera_point); // Draw the items
+        // Draw the environment
+        level->renderBackgrounds(renderer, camera_point); // Draw the background
+
+        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatforms(renderer, camera_point); // Draw the platforms
+        level->renderItems(renderer, camera_point); // Draw the items
 
         // Draw the characters
         for (Player &player : players) {
             player.render(renderer, camera_point);
         }
+
+        level->renderMiddleground(renderer, camera_point); // Draw the middleground
+        level->renderForegrounds(renderer, camera_point); // Draw the foreground
     }
 
     // Render collision boxes
     else {
-        level.renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
-        level.renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level.renderPlatformsDebug(renderer, camera_point); // Draw the platforms
-        level.renderItemsDebug(renderer, camera_point); // Draw the items
+        level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
+        level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderItemsDebug(renderer, camera_point); // Draw the items
 
         // Draw the characters
         for (Player const& player : players) {
-            player.renderDebug(renderer, camera_point);
             player.renderDebug(renderer, camera_point);
         }
     }

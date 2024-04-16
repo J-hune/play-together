@@ -2,17 +2,40 @@
 #define PLAY_TOGETHER_RENDERMANAGER_H
 
 #include <SDL_render.h>
-#include "Game.h"
+#include "../Game.h"
+
+/**
+ * @file RenderManager.h
+ * @brief Defines the RenderManager class responsible for rendering the game.
+ */
+
 
 class RenderManager {
-    public:
+private:
+    SDL_Renderer *renderer; /**< The SDL_Renderer to render the game. */
+    Game *gamePtr; /**< A pointer to the game object. */
+    static std::vector<TTF_Font *> fonts; /**< A vector of TTF_Font objects for rendering text. */
 
-    /** CONSTRUCTOR **/
+    // Debug rendering attributes
+    bool render_textures = true;
+    bool render_camera_point = false;
+    bool render_camera_area = false;
+    bool render_player_colliders = false;
+    bool render_fps = false;
+
+
+public:
+
+    /* CONSTRUCTORS */
+
     RenderManager(SDL_Renderer *renderer, Game *game);
 
-    /** ACCESSORS **/
+
+    /* ACCESSORS */
+    SDL_Renderer* getRenderer();
     static std::vector<TTF_Font *> &getFonts();
 
+    /* MUTATORS */
     void setRenderTextures(bool renderTextures);
     void setRenderCameraPoint(bool renderCameraPoint);
     void setRenderCameraArea(bool renderCameraArea);
@@ -26,23 +49,12 @@ class RenderManager {
     void toggleRenderFps();
 
 
-    /** METHODS **/
+    /* METHODS */
 
     /**
      * @brief Renderer the game.
      */
     void render();
 
-
-private:
-    SDL_Renderer *renderer; /**< The SDL_Renderer to render the game. */
-    Game *gamePtr; /**< A pointer to the game object. */
-    static std::vector<TTF_Font *> fonts; /**< A vector of TTF_Font objects for rendering text. */
-
-    bool render_textures = true;
-    bool render_camera_point = false;
-    bool render_camera_area = false;
-    bool render_player_colliders = false;
-    bool render_fps = false;
 };
 #endif //PLAY_TOGETHER_RENDERMANAGER_H

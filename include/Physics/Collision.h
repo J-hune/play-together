@@ -1,5 +1,5 @@
-#ifndef PLAY_TOGETHER_COLLISIONMANAGER_H
-#define PLAY_TOGETHER_COLLISIONMANAGER_H
+#ifndef PLAY_TOGETHER_COLLISION_H
+#define PLAY_TOGETHER_COLLISION_H
 
 #include <SDL.h>
 #include <numeric>
@@ -65,4 +65,4 @@ void correctAABBCollision(Player *player, const SDL_FRect &obstacle);
 void correctSATCollision(Player *player, const Polygon &obstacle);
 
 
-#endif //PLAY_TOGETHER_COLLISIONMANAGER_H
+#endif //PLAY_TOGETHER_COLLISION_H

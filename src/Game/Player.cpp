@@ -5,6 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+
 // Initialize textures pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
@@ -12,17 +13,23 @@ SDL_Texture *Player::spriteTexture2Ptr = nullptr;
 SDL_Texture *Player::spriteTexture3Ptr = nullptr;
 SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
+SDL_Texture *Player::spriteTexture1MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture2MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture3MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
 
-/** CONSTRUCTORS **/
 
-Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
-        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
+/* CONSTRUCTORS */
 
-    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+Player::Player(int playerID, Point spawnPoint, float size)
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(BASE_WIDTH * size), height(BASE_HEIGHT * size), size(size) {
+
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_WIDTH, BASE_HEIGHT);
+    setSpriteTextureByID(playerID);
 }
 
 
-/** BASIC ACCESSORS **/
+/* BASIC ACCESSORS */
 
 int Player::getPlayerID() const {
     return playerID;
@@ -46,6 +53,10 @@ float Player::getW() const {
 
 float Player::getH() const {
     return height;
+}
+
+float Player::getSize() const {
+    return size;
 }
 
 Sprite *Player::getSprite() {
@@ -100,8 +111,12 @@ size_t Player::getCurrentZoneID() const {
     return currentZoneID;
 }
 
+int Player::getScore() const {
+    return score;
+}
 
-/** SPECIFIC ACCESSORS **/
+
+/* SPECIFIC ACCESSORS */
 
 std::vector<Point> Player::getVertices() const {
     // Return the vertices of the player's bounding box.
@@ -191,7 +206,7 @@ SDL_FRect Player::getBoundingBoxNextFrame() const {
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Player::setX(float val) {
     x = val;
@@ -201,12 +216,10 @@ void Player::setY(float val) {
     y = val;
 }
 
-void Player::setW(float val) {
-    width = val;
-}
-
-void Player::setH(float val) {
-    height = val;
+void Player::setSize(float val) {
+    size = val;
+    width = BASE_WIDTH * size;
+    height = BASE_HEIGHT * size;
 }
 
 void Player::setMoveX(float val) {
@@ -284,31 +297,78 @@ void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
 }
 
+void Player::setDefaultTexture(SDL_Texture* newTexture) {
+    defaultTexture = newTexture;
+}
+void Player::setMedalTexture(SDL_Texture* newTexture) {
+    medalTexture = newTexture;
+}
 
-/** METHODS **/
+
+
+/* METHODS */
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture
     baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player.png");
+
+    // Player 1
     spriteTexture1Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1.png");
+    spriteTexture1MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1Medal.png");
+
+    //Player 2
     spriteTexture2Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2.png");
+    spriteTexture2MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2Medal.png");
+
+    //Player 3
     spriteTexture3Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3.png");
+    spriteTexture3MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3Medal.png");
+
+    //Player 4
     spriteTexture4Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4.png");
+    spriteTexture4MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4Medal.png");
 
     // Check errors
-    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {
+    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr || spriteTexture1MedalPtr == nullptr || spriteTexture2MedalPtr == nullptr || spriteTexture3MedalPtr == nullptr || spriteTexture4MedalPtr == nullptr) {
         return false; // Return failure
     }
 
     return true; // Return success
 }
 
+void Player::useDefaultTexture() {
+    sprite.setTexture(*defaultTexture);
+}
+void Player::useMedalTexture(){
+    sprite.setTexture(*medalTexture);
+};
+
 void Player::setSpriteTextureByID(int id) {
-    if (id == 0) sprite.setTexture(*baseSpriteTexturePtr); // Base texture
-    else if (id == 1) sprite.setTexture(*spriteTexture1Ptr); // Texture 1
-    else if (id == 2) sprite.setTexture(*spriteTexture2Ptr); // Texture 2
-    else if (id == 3) sprite.setTexture(*spriteTexture3Ptr); // Texture 3
-    else if (id == 4) sprite.setTexture(*spriteTexture4Ptr); // Texture 4
+    if (id == 1){ // Texture 1
+        sprite.setTexture(*spriteTexture1Ptr);
+        defaultTexture = spriteTexture1Ptr;
+        medalTexture = spriteTexture1MedalPtr;
+    }
+    else if (id == 2){ // Texture 2
+        sprite.setTexture(*spriteTexture2Ptr);
+        defaultTexture = spriteTexture2Ptr;
+        medalTexture = spriteTexture2MedalPtr;
+    }
+    else if (id == 3) { // Texture 3
+        sprite.setTexture(*spriteTexture3Ptr);
+        defaultTexture = spriteTexture3Ptr;
+        medalTexture = spriteTexture3MedalPtr;
+    }
+    else if (id == 4) { // Texture 4
+        sprite.setTexture(*spriteTexture4Ptr);
+        defaultTexture = spriteTexture4Ptr;
+        medalTexture = spriteTexture4MedalPtr;
+    }
+    else {
+        sprite.setTexture(*baseSpriteTexturePtr);
+        defaultTexture = baseSpriteTexturePtr;
+        medalTexture = baseSpriteTexturePtr;
+    }
 }
 
 void Player::teleportPlayer(float newX, float newY) {
@@ -338,14 +398,14 @@ void Player::calculateXaxisMovement(double delta_time) {
     if (wantedDirection != 0) {
         directionX = wantedDirection;
         if (directionX != previousDirectionX && speedCurveX != 0) {
-            // If direction changed, reset speed curve
+            // If the direction changed, reset the speed curve
             speedCurveX = initialSpeedCurveX;
         } else {
-            // Gradually increase speed curve for smooth acceleration
+            // Gradually increase the speed curve for smooth acceleration
             speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * delta_time, 1.0));
         }
     } else {
-        // If no input, gradually decrease speed curve for smooth deceleration
+        // If no input, gradually decrease the speed curve for smooth deceleration
         speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * delta_time, 0.0));
     }
 

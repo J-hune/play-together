@@ -2,17 +2,31 @@
 #define PLAY_TOGETHER_INPUTMANAGER_H
 
 #include <SDL_events.h>
-#include "Player.h"
-#include "Game.h"
+#include "../Player.h"
+#include "../Game.h"
+
+/**
+ * @file InputManager.h
+ * @brief Defines the InputManager class responsible for handling the input events.
+ */
+
 
 class InputManager {
+private:
+    /* ATTRIBUTES */
+
+    Game *gamePtr; /**< A pointer to the game object. */
+    uint16_t lastKeyboardStateMask = 0; /**< The last keyboard state mask. */
+
+
 public:
 
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
+
     explicit InputManager(Game *game);
 
 
-    /** METHODS **/
+    /* METHODS */
 
     /**
      * @brief Handles the keyboard events.
@@ -44,8 +58,13 @@ public:
     void sendSyncCorrectionToNetwork() const;
 
 private:
-    Game *gamePtr; /**< A pointer to the game object. */
-    uint16_t lastKeyboardStateMask = 0; /**< The last keyboard state mask. */
+
+    /**
+     * @brief Sends the keyboard state to the network.
+     * @param lastKeyboardStateMask The last keyboard state mask.
+     */
+    void sendKeyboardStateToNetwork(uint16_t *lastKeyboardStateMask) const;
+
 };
 
 #endif //PLAY_TOGETHER_INPUTMANAGER_H

@@ -1,5 +1,4 @@
 #include "../../../include/Game/Items/Item.h"
-#include "../../../include/Game/PlayerManager.h"
 
 /**
  * @file Item.cpp
@@ -45,11 +44,10 @@ bool Item::operator==(const Item &item) const {
 
 /* METHODS */
 
-void Item::applyEffect(Player &player,PlayerManager &playerManager) {
+void Item::applyEffect(Player &player) {
     // Set the best player
     player.addToScore(5);
     collectSound.play(0, -1);
-    playerManager.setTheBestPlayer();
 }
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {

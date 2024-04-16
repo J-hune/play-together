@@ -86,7 +86,7 @@ void PlayerManager::setTheBestPlayer(){
             }
         }
 
-        // Update texture for best player
+        // Update texture for the best player
         (*playerMax).useMedalTexture();
     }
 }

@@ -14,7 +14,9 @@ SizePowerUp::SizePowerUp(float x, float y, float w, float h, bool grow) :
 
 /* METHODS */
 
-void SizePowerUp::applyEffect(Player &player,PlayerManager &playerManager) {
+void SizePowerUp::applyEffect(Player &player) {
+    Item::applyEffect(player);
+
     // The item is a growth power-up
     if (grow) {
         player.setY(player.getY() - (player.getH() * 2 - player.getH())); // Move player up to avoid collision with ground
@@ -26,5 +28,10 @@ void SizePowerUp::applyEffect(Player &player,PlayerManager &playerManager) {
         player.setW(player.getW() / 2);
         player.setH(player.getH() / 2);
     }
-    Item::applyEffect(player, playerManager);
+}
+
+void SizePowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    Item::renderDebug(renderer, camera);
 }

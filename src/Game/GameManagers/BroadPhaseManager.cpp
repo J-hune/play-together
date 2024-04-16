@@ -49,12 +49,16 @@ std::vector<WeightPlatform> &BroadPhaseManager::getWeightPlatforms() {
     return weightPlatforms;
 }
 
-std::vector<SizePowerUp> &BroadPhaseManager::getSizePowerUp() {
+std::vector<SizePowerUp> &BroadPhaseManager::getSizePowerUps() {
     return sizePowerUp;
 }
 
-std::vector<SpeedPowerUp> &BroadPhaseManager::getSpeedPowerUp() {
+std::vector<SpeedPowerUp> &BroadPhaseManager::getSpeedPowerUps() {
     return speedPowerUp;
+}
+
+std::vector<Coin> &BroadPhaseManager::getCoins() {
+    return coins;
 }
 
 
@@ -159,7 +163,7 @@ void BroadPhaseManager::checkWeightPlatforms(const SDL_FRect &broad_phase_area) 
     }
 }
 
-void BroadPhaseManager::checkPowerUp(const SDL_FRect &broad_phase_area) {
+void BroadPhaseManager::checkPowerUps(const SDL_FRect &broad_phase_area) {
     sizePowerUp.clear(); // Empty old size power-up
     speedPowerUp.clear(); // Empty old speed power-up
 
@@ -178,6 +182,17 @@ void BroadPhaseManager::checkPowerUp(const SDL_FRect &broad_phase_area) {
     }
 }
 
+void BroadPhaseManager::checkCoins(const SDL_FRect &broad_phase_area) {
+    coins.clear(); // Empty old coins
+
+    // Check for collisions with coins
+    for (const Coin &coin: gamePtr->getLevel()->getCoins()) {
+        if (checkAABBCollision(broad_phase_area, coin.getBoundingBox())) {
+            coins.push_back(coin);
+        }
+    }
+}
+
 void BroadPhaseManager::broadPhase() {
 
     std::vector<Point> broad_phase_area_vertices = gamePtr->getCamera()->getBroadPhaseAreaVertices();
@@ -192,6 +207,7 @@ void BroadPhaseManager::broadPhase() {
     check2DMovingPlatforms(broad_phase_area_bounding_box);
     checkSwitchingPlatforms(broad_phase_area_bounding_box);
     checkWeightPlatforms(broad_phase_area_bounding_box);
-    checkPowerUp(broad_phase_area_bounding_box);
+    checkPowerUps(broad_phase_area_bounding_box);
+    checkCoins(broad_phase_area_bounding_box);
 
 }

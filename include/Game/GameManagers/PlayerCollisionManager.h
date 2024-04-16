@@ -140,13 +140,22 @@ private:
      * @brief Handles collisions between the player and size power-up items.
      * @param player Reference to the player object.
      */
-    void handleCollisionsWithSizePowerUp(Player *player);
+    void handleCollisionsWithSizePowerUps(Player *player);
 
     /**
      * @brief Handles collisions between the player and size power-up items.
      * @param player Reference to the player object.
      */
-    void handleCollisionsWithSpeedPowerUp(Player *player);
+    void handleCollisionsWithSpeedPowerUps(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and coins items.
+     * @param player Reference to the player object.
+     * @param level Reference to the level object.
+     * @param coins Vector of Coin.
+     * @param playerManager The manager responsible for handling player-related operations.
+     */
+    void handleCollisionsWithCoins(Player *player);
 
 };
 

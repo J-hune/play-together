@@ -21,7 +21,7 @@ RenderManager::RenderManager(SDL_Renderer *renderer, Game *game) : renderer(rend
         std::cerr << "Error loading asteroid textures" << std::endl;
         exit(1);
     }
-    if(!Coin::loadTextures(*renderer)){
+    if(!Coin::loadTexture(*renderer)){
         std::cerr << "Error loading coin textures" << std::endl;
         exit(1);
     }
@@ -111,7 +111,7 @@ void RenderManager::render() {
         level->renderAsteroids(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
         level->renderPlatforms(renderer, camera_point); // Draw the platforms
-        level->renderItemsDebug(renderer, camera_point); // Draw the items
+        level->renderItems(renderer, camera_point); // Draw the items
 
         // Draw the characters
         for (Player &player : players) {

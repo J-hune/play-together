@@ -6,53 +6,52 @@
  */
 
 // Initialize texture pointers
-SDL_Texture *Coin::baseSpriteTexturePtr = nullptr;
+SDL_Texture *Coin::spriteTexturePtr = nullptr;
 Sprite Coin::sprite;
+
+
+/* CONSTRUCTORS */
 
 Coin::Coin(float x, float y, float w, float h, int value) : Item(x, y, w, h, "coin.wav"), value(value) {
     spritePtr = &sprite;
 }
 
 
-/* BASIC ACCESSORS **/
+/* ACCESSORS */
 
 int Coin::getValue() const {
     return value;
 }
 
+
+/* MUTATORS */
+
 void Coin::setValue(int newValue) {
     value = newValue;
 }
 
-void Coin::setAnimation(Animation newAnimation) {
-    sprite.setAnimation(newAnimation);
-}
 
 /* METHODS */
 
-void Coin::applyEffect(Player &player, PlayerManager &playerManager) {
-    player.addToScore(value);
-    Item::applyEffect(player, playerManager);
-}
-
-
-bool Coin::loadTextures(SDL_Renderer &renderer) {
+bool Coin::loadTexture(SDL_Renderer &renderer) {
     // Load players' sprite texture
-    baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/items/coins.png");
+    spriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/items/coins.png");
 
     // Check errors
-    if (baseSpriteTexturePtr == nullptr) {
+    if (spriteTexturePtr == nullptr) {
         return false; // Return failure
     }
-    sprite = Sprite(Coin::gold,*baseSpriteTexturePtr,16,16);
+    sprite = Sprite(*spriteTexturePtr, Coin::gold, 16, 16);
     return true; // Return success
 }
 
-void Coin::updateSprite() {
-    sprite.updateAnimation(); // Update sprite animation
+void Coin::applyEffect(Player &player) {
+    Item::applyEffect(player);
+    player.addToScore(value);
 }
 
-void Coin::render(SDL_Renderer *renderer, Point camera) const {
+void Coin::render(SDL_Renderer *renderer, Point camera) {
+    sprite.updateAnimation();
     SDL_Rect srcRect = (*spritePtr).getSrcRect();
     SDL_FRect itemRect = {getX() - camera.x, getY() - camera.y, getWidth(), getHeight()};
     SDL_RenderCopyExF(renderer, (*spritePtr).getTexture(), &srcRect, &itemRect, 0.0, nullptr, (*spritePtr).getFlip());

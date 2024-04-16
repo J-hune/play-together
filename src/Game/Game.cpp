@@ -143,6 +143,8 @@ void Game::update(double deltaTime, double ratio) {
     broadPhaseManager->broadPhase();
     narrowPhase();
 
+    playerManager->setTheBestPlayer();
+
     camera.applyMovement(playerManager->getAveragePlayerPosition(), deltaTime);
     renderManager->render();
 }

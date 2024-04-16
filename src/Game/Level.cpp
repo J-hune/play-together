@@ -266,26 +266,25 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
 
 }
 
+void Level::renderItems(SDL_Renderer *renderer, Point camera) {
+    for (SizePowerUp &item : sizePowerUp) item.render(renderer, camera); // Draw the size power-ups
+    for (SpeedPowerUp &item : speedPowerUp) item.render(renderer, camera); // Draw the speed power-ups
+    for (Coin &item : coins) item.render(renderer, camera); // Draw the coins
+}
+
 void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
 
     // Draw the size power-ups
     SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
-    for (const SizePowerUp &item : sizePowerUp) {
-        item.renderDebug(renderer, camera);
-    }
+    for (const SizePowerUp &item : sizePowerUp) item.renderDebug(renderer, camera);
 
     // Draw the speed power-ups
-    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
-    for (const SpeedPowerUp &item : speedPowerUp) {
-        item.renderDebug(renderer, camera);
-    }
+    SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
+    for (const SpeedPowerUp &item : speedPowerUp) item.renderDebug(renderer, camera);
 
-    Coin::updateSprite();
-    // Draw the coin
-    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
-    for (const Coin &item : coins) {
-        item.render(renderer, camera);
-    }
+    // Draw the coins
+    SDL_SetRenderDrawColor(renderer, 255, 255, 64, 255);
+    for (const Coin &item : coins) item.renderDebug(renderer, camera);
 }
 
 void Level::applyAsteroidsMovement(double delta_time) {

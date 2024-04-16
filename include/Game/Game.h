@@ -41,6 +41,37 @@ class EventCollisionManager;
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
  */
 class Game {
+private:
+    /* ATTRIBUTES */
+
+    SDL_Window *window; /**< SDL window for rendering. */
+    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+
+    std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
+    std::unique_ptr<TextureManager> textureManager; /**< Texture manager for handling texture loading. */
+    std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
+    std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
+    std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
+    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
+    std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
+    std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
+
+
+    int frameRate = 60; /**< The refresh rate of the game. */
+    const int tickRate = 30; /**< The tick rate of the game. */
+    int effectiveFrameFps = frameRate; /**< The effective fps. */
+
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
+    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    Camera camera; /**< The camera object */
+    Level level; /**< The level object */
+    Music music; /**< Represents the music that is currently played in the game. */
+    size_t seed;
+
+    // Debug variables used for the application console
+    bool enable_platforms_movement = true;
+
+
 public:
     /* CONSTRUCTORS */
 
@@ -153,7 +184,7 @@ public:
 
     /**
      * @brief Initializes a client game by loading the level and setting music.
-     * @param slot The save slot to use when loading the game. (0 by default)
+     * @param last_checkpoint The checkpoint to start from.
      */
     void initializeClientGame(const std::string& map_name, short last_checkpoint);
 
@@ -189,36 +220,8 @@ public:
      */
     void exitGame();
 
+
 private:
-    /* ATTRIBUTES */
-
-    SDL_Window *window; /**< SDL window for rendering. */
-    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-
-    std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
-    std::unique_ptr<TextureManager> textureManager; /**< Texture manager for handling texture loading. */
-    std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
-    std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
-    std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
-    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
-    std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
-    std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
-
-
-    int frameRate = 60; /**< The refresh rate of the game. */
-    const int tickRate = 30; /**< The tick rate of the game. */
-    int effectiveFrameFps = frameRate; /**< The effective fps. */
-
-    GameState gameState = GameState::STOPPED; /**< The current game state. */
-    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
-    Camera camera; /**< The camera object */
-    Level level; /**< The level object */
-    Music music; /**< Represents the music that is currently played in the game. */
-    size_t seed;
-
-    // Debug variables used for the application console
-    bool enable_platforms_movement = true;
-
 
     /* PRIVATE METHODS */
 

@@ -30,9 +30,15 @@ public:
     /**
     * @brief Apply the item's effect to a player.
     * @param player The player the effect will be applied to.
-    * @param playerManager The manager responsible for handling player-related operations.
     */
-    void applyEffect(Player &player,PlayerManager &playerManager) override;
+    void applyEffect(Player &player) override;
+
+    /**
+     * @brief Renders the power-up's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera) override;
 };
 
 

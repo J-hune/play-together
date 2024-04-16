@@ -315,6 +315,13 @@ public:
     void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
+     * @brief Renders the items by sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderItems(SDL_Renderer *renderer, Point camera);
+
+    /**
      * @brief Renders the items by drawing rectangles.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.

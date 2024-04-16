@@ -4,8 +4,6 @@
 #include "../Player.h"
 #include "../../Sounds/SoundEffect.h"
 
-class PlayerManager;
-
 /**
  * @file Item.h
  * @brief Defines the item class responsible for item object.
@@ -83,13 +81,18 @@ public:
     /**
     * @brief Apply the item's effect to a player.
     * @param player The player the effect will be applied to.
-    * @param playerManager The manager responsible for handling player-related operations.
     */
-    virtual void applyEffect(Player &player, PlayerManager &playerManager);
-
+    virtual void applyEffect(Player &player);
 
     /**
-     * @brief Renders the collisions by drawing a rectangle..
+     * @brief Pure virtual method to renders the item's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    virtual void render(SDL_Renderer *renderer, Point camera) = 0;
+
+    /**
+     * @brief Renders the collisions by drawing a rectangle.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */

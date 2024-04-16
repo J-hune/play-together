@@ -14,7 +14,8 @@ SpeedPowerUp::SpeedPowerUp(float x, float y, float w, float h, bool fast) :
 
 /* METHODS */
 
-void SpeedPowerUp::applyEffect(Player &player, PlayerManager &playerManager) {
+void SpeedPowerUp::applyEffect(Player &player) {
+    Item::applyEffect(player);
 
     // The item is a fast power-up
     if (fast) {
@@ -24,5 +25,10 @@ void SpeedPowerUp::applyEffect(Player &player, PlayerManager &playerManager) {
     else {
         player.setSpeed(player.getSpeed() * 0.5F);
     }
-    Item::applyEffect(player, playerManager);
+}
+
+void SpeedPowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
+    Item::renderDebug(renderer, camera);
 }

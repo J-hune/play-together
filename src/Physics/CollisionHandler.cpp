@@ -388,3 +388,17 @@ void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<
         }
     }
 }
+
+void handleCollisionsWithItem (Player *player, Level *level, std::vector<std::reference_wrapper<Item>> &itemsN){
+    auto items = level->getItems();
+    // Check for collisions with each item
+    for (auto item = items.begin(); item != items.end(); ++item)  {
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item->get().getBoundingBox())) {
+            std::cout<<"check :"<<item->get().getBoundingBox().x<<item->get().getBoundingBox().y<<" with p "<<player->getBoundingBox().x<<player->getBoundingBox().y<<std::endl;
+            item->get().applyEffect(*player);
+            level->removeItem(item->get());
+        }
+    }
+
+}

@@ -44,10 +44,10 @@ bool Item::operator==(const Item &item) const {
 
 /* METHODS */
 
-void Item::applyEffect(Player &player) {
+/*void Item::applyEffect(Player &player) {
     player.addToScore(5);
     collectSound.play(0, -1);
-}
+}*/
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_FRect itemRect = {x - camera.x, y - camera.y, width, height};

@@ -15,7 +15,7 @@ SizePowerUp::SizePowerUp(float x, float y, float w, float h, bool grow) :
 /* METHODS */
 
 void SizePowerUp::applyEffect(Player &player) {
-    Item::applyEffect(player);
+    //Item::applyEffect(player);
 
     // The item is a growth power-up
     if (grow) {

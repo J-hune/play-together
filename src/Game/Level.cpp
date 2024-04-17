@@ -83,6 +83,10 @@ std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
     return speedPowerUp;
 }
 
+std::vector<std::reference_wrapper<Item>> Level::getItems() const {
+    return items;
+}
+
 short Level::getLastCheckpoint() const {
     return lastCheckpoint;
 }
@@ -111,6 +115,16 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
     auto it = std::ranges::find(speedPowerUp, item);
     if (it != speedPowerUp.end()) {
         speedPowerUp.erase(it);
+    }
+}
+
+void Level::removeItem(Item const &item) {
+    // Search the item and remove it
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        if (&it->get() == &item) {
+            items.erase(it);
+            break; // Found and removed the item, exit the loop
+        }
     }
 }
 
@@ -422,6 +436,7 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
 void Level::loadItemsFromMap(const std::string &mapFileName) {
     sizePowerUp.clear();
     speedPowerUp.clear();
+    items.clear();
 
     std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/items.json";
     std::ifstream file(file_path);
@@ -442,6 +457,8 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         float height = item["height"];
         bool grow = item["grow"];
         sizePowerUp.emplace_back(x, y, width, height, grow);
+        SizePowerUp spu(x, y, width, height, grow);
+        items.emplace_back(spu);
     }
 
     // Load all SizePowerUp items
@@ -452,7 +469,9 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         float height = item["height"];
         bool fast = item["fast"];
         speedPowerUp.emplace_back(x, y, width, height, fast);
+        SpeedPowerUp spu(x, y, width, height, fast);
+        items.emplace_back(spu);
     }
-
+    std::cout << "Level: Loaded  items " << items.size() <<std::endl;
     std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up and " << speedPowerUp.size() << " speed power-up." << std::endl;
 }

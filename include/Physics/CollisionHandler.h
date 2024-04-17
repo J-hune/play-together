@@ -134,5 +134,6 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
  */
 void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp);
 
+void handleCollisionsWithItem(Player *player, Level *level, std::vector<std::reference_wrapper<Item>> &items);
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

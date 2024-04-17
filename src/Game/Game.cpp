@@ -228,6 +228,7 @@ void Game::broadPhase() {
     switchingPlatforms.clear();
     sizePowerUp.clear();
     speedPowerUp.clear();
+    items.clear();
 
     std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
     SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
@@ -301,6 +302,21 @@ void Game::broadPhase() {
             speedPowerUp.push_back(item);
         }
     }
+/*
+    // Check for collisions
+    for (const Item &item: level.getItems()) {
+        if (!checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
+            items.push_back(item);
+        }
+    }
+    std::cout<<"I'm the problem"<<std::endl;
+
+    for (auto item = level.getItems().begin(); item != level.getItems().end(); ++item)  {
+        if (!checkAABBCollision(broadPhaseAreaBoundingBox, item->get().getBoundingBox())){
+            items.push_back(item->get());
+        }
+    }
+    std::cout<<"I'm not the problem"<<std::endl; */
 }
 
 void Game::narrowPhase() {
@@ -317,8 +333,9 @@ void Game::narrowPhase() {
         else handleCollisionsReversedMavity(character);
 
         // Handle collisions with items
-        handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
-        handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
+        //handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
+        //handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
+        handleCollisionsWithItem(&character, &level, items);
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones

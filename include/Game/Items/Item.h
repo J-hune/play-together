@@ -84,7 +84,7 @@ public:
      * @brief Apply the item's effect to a player.
      * @param player The player the effect will be applied to.
      */
-    virtual void applyEffect(Player &player);
+    virtual void applyEffect(Player &player) = 0;
 
     /**
      * @brief Renders the collisions by drawing a rectangle..

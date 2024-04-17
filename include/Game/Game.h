@@ -202,7 +202,7 @@ private:
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
-
+    std::vector<std::reference_wrapper<Item>> items;
     // Debug variables used for the application console
     bool enable_platforms_movement = true;
 

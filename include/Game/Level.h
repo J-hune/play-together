@@ -114,6 +114,8 @@ public:
      */
     [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
 
+    [[nodiscard]] std::vector<std::reference_wrapper<Item>> getItems() const;
+
     /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.
@@ -147,6 +149,7 @@ public:
      */
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
+    void removeItem(Item const &item);
 
     /** PUBLIC METHODS **/
 
@@ -236,6 +239,7 @@ private:
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
 
+    std::vector<std::reference_wrapper<Item>> items;
 
     /** PRIVATE METHODS **/
 

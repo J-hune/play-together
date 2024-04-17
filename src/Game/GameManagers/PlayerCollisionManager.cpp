@@ -155,10 +155,10 @@ void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) 
 bool PlayerCollisionManager::handleCollisionsWithCameraBorders(const SDL_FRect player) {
     const SDL_FRect &camera = gamePtr->getCamera()->getBoundingBox();
 
-    return player.x < camera.x - DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.x + player.w > camera.x + camera.w + DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.y < camera.y - DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.y > camera.y + camera.h + DISTANCE_OUT_MAP_BEFORE_DEATH;
+    return player.x < camera.x - DISTANCE_OUT_MAP_BEFORE_DEATH                           // Left border
+           || player.x + player.w > camera.x + camera.w + DISTANCE_OUT_MAP_BEFORE_DEATH  // Right border
+           || player.y < camera.y - DISTANCE_OUT_MAP_BEFORE_DEATH                        // Top border
+           || player.y + player.h > camera.y + camera.h + DISTANCE_OUT_MAP_BEFORE_DEATH; // Bottom border
 }
 
 bool PlayerCollisionManager::handleCollisionsWithDeathZones(const Player &player) {
@@ -276,39 +276,41 @@ void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
 
 void PlayerCollisionManager::handleCollisions(double delta_time) {
     for (Player &player: gamePtr->getPlayerManager().getAlivePlayers()) {
-        player.setCanMove(true);
-        player.setIsGrounded(false);
-        player.setIsOnPlatform(false);
-
-        if (player.hasMoved()) handleCollisionsWithObstacles(&player); // Handle collisions with obstacles
-
-        // Handle collisions with platforms
-        handleCollisionsWithMovingPlatform1D(&player);
-        handleCollisionsWithMovingPlatform2D(&player);
-        handleCollisionsWithSwitchingPlatform(&player);
-        handleCollisionsWithWeightPlatform(&player);
-
-        // Check if the player leaves a platform (this is what we call in French "bidouillage")
-        if (player.getWasOnPlatform() && !player.getIsOnPlatform()) {
-            player.setWasOnPlatform(false);
-            player.setMoveY(0);
-        }
-        player.setWasOnPlatform(player.getIsOnPlatform());
-
-        // Handle collisions with items
-        handleCollisionsWithSizePowerUps(&player);
-        handleCollisionsWithSpeedPowerUps(&player);
-        handleCollisionsWithCoins(&player);
-
-        handleCollisionsWithSaveZones(player); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
-        handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
-
-        // Handle collisions with death zones and camera borders
+        // Handle collisions with death zones and camera borders to check if the player dies
         if (handleCollisionsWithCameraBorders(player.getBoundingBox())
             || handleCollisionsWithDeathZones(player))
         {
             gamePtr->getPlayerManager().killPlayer(player);
+        }
+        // Check every other collision if the player is alive
+        else {
+            player.setCanMove(true);
+            player.setIsGrounded(false);
+            player.setIsOnPlatform(false);
+
+            if (player.hasMoved()) handleCollisionsWithObstacles(&player); // Handle collisions with obstacles
+
+            // Handle collisions with platforms
+            handleCollisionsWithMovingPlatform1D(&player);
+            handleCollisionsWithMovingPlatform2D(&player);
+            handleCollisionsWithSwitchingPlatform(&player);
+            handleCollisionsWithWeightPlatform(&player);
+
+            // Check if the player leaves a platform (this is what we call in French "bidouillage")
+            if (player.getWasOnPlatform() && !player.getIsOnPlatform()) {
+                player.setWasOnPlatform(false);
+                player.setMoveY(0);
+            }
+            player.setWasOnPlatform(player.getIsOnPlatform());
+
+            // Handle collisions with items
+            handleCollisionsWithSizePowerUps(&player);
+            handleCollisionsWithSpeedPowerUps(&player);
+            handleCollisionsWithCoins(&player);
+
+            handleCollisionsWithSaveZones(player); // Handle collisions with save zones
+            handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
+            handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
         }
     }
 }

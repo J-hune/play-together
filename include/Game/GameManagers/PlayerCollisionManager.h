@@ -69,43 +69,6 @@ private:
      */
     void handleCollisionsWithWeightPlatform(Player *player);
 
-
-    /* PLAYER REVERSED MAVITY */
-
-    /**
-     * @brief Handles collisions between a player and obstacles when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsSelcatsbOhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and 1D moving platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsD1mroftalPgnivoMhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and 2D moving platforms when mavity is reversed.
-     * @param player The player object.
-     */
-     void handleCollisionsD2mroftalPgnivoMhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and switching platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsMroftalPgnihctiwShtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and weight platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsMroftalPthgieWhtiw(Player *player);
-
-
-
-    /* COLLISIONS UNRELATED TO MAVITY */
-
     /**
      * @brief Handles collisions between the player and camera borders.
      * @return True if the player dies, false otherwise.

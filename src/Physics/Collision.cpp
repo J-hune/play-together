@@ -454,7 +454,6 @@ void correctAABBCollision(Player *player, const SDL_FRect &obstacle) {
         if (player->getDirectionY() == -1) moveY = (obstacle.y + obstacle.h) - playerBoundingBox.y;
         else moveY = -((playerBoundingBox.y + playerBoundingBox.h) - obstacle.y);
         player->setY(player->getY() + moveY);
-        player->setMoveY(0);
     }
 }
 
@@ -619,7 +618,7 @@ void correctSATCollision(Player *player, const Polygon &obstacle) {
 
     // COLLISION ANALYSIS
 
-    // Check if the x-axis movement is concerned by the collision
+    // Check if the collision concerns the x-axis movement
     std::vector<Point> playerVertices = {{x, y - moveY},
                                          {x + w, y - moveY},
                                          {x + w, y - moveY + h},
@@ -629,7 +628,7 @@ void correctSATCollision(Player *player, const Polygon &obstacle) {
         xaxis = true;
     }
 
-    // Check if the y-axis movement is concerned by the collision
+    // Check if the collision concerns the y-axis movement
     playerVertices = {{x - moveX, y},
                       {x - moveX + w, y},
                       {x - moveX + w, y + h},

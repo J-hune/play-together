@@ -224,24 +224,24 @@ void Game::run() {
 
 void Game::calculatePlayersMovement(double delta_time) {
     // Apply movement to all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.calculateMovement(delta_time);
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.calculateMovement(delta_time);
     }
 }
 
 void Game::applyPlayersMovement(double delta_time) {
     // Apply movement for all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.applyMovement(delta_time);
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.applyMovement(delta_time);
     }
 }
 
 void Game::switchMavity() {
     // Change mavity for all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.setIsOnPlatform(false);
-        character.getSprite()->toggleFlipVertical();
-        character.toggleMavity();
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.setIsGrounded(false);
+        player.getSprite()->toggleFlipVertical();
+        player.toggleMavity();
     }
 }
 

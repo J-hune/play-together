@@ -21,6 +21,7 @@ private:
     float y = startY; /**< The y-coordinate of the platform's position. */
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
+    float move = 0; /**< The number of pixel the platform has moved */
     float stepDistance; /**< The distance between each step of the platform. */
     float weight = 0; /**< The number of player on the platform. */
     float lerpSmoothingFactor = 11; /**< The smoothing factor for the lerp calculation. */
@@ -66,6 +67,12 @@ public:
      * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const override;
+
+    /**
+     * @brief Return the move attribute.
+     * @return The value of the move attribute.
+     */
+    [[nodiscard]] float getMove() const;
 
     /**
      * @brief Return the isMoving attribute.

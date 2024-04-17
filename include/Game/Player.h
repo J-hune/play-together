@@ -66,7 +66,7 @@ private:
     bool wantToJump = false; /**< Flag indicating whether the player has requested to jump. */
     bool jumpLock = false; /**< Flag indicating whether the player has already jumped. */
     float directionY = 0; /**< Current vertical direction of the player (-1 for up, 1 for down, 0 for no movement). */
-    bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a platform. */
+    bool isGrounded = false; /**< Flag indicating whether the player is currently on a ground. */
     bool isJumping = false; /**< Flag indicating whether the player is currently in a jump. */
     Uint32 lastTimeOnPlatform = SDL_GetTicks(); /**< Timestamp of the last time the player was on a platform. */
     float jumpInitialVelocity = 525.f; /**< Initial velocity of the player's jump. */
@@ -77,6 +77,8 @@ private:
     float jumpStartHeight = 0; /**< Current height of the player's jump. */
     float jumpVelocity = 0; /**< Current velocity of the player's jump. */
     size_t currentZoneID = 0; /**< The ID of the current zone the player is in. */
+    bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a weight platform. */
+    bool wasOnPlatform = false; /**< Flag indicating whether the player was on a weight platform during the last frame. */
 
     // LOADED TEXTURES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
@@ -162,6 +164,12 @@ public:
     [[nodiscard]] float getSize() const;
 
     /**
+     * @brief Gets the player's current score.
+     * @return The player's score as an integer.
+     */
+    [[nodiscard]] int getScore() const;
+
+    /**
      * @brief Return the sprite attribute.
      * @return A pointer of a sprite object representing the sprite of the player.
      */
@@ -222,10 +230,10 @@ public:
     [[nodiscard]] int getDirectionY() const;
 
     /**
-     * @brief Return the isOnPlatform attribute.
-     * @return The value of the isOnPlatform attribute
+     * @brief Return the isGrounded attribute.
+     * @return The value of the isGrounded attribute
      */
-    [[nodiscard]] bool getIsOnPlatform() const;
+    [[nodiscard]] bool getIsGrounded() const;
 
     /**
      * @brief Return the isJumping attribute.
@@ -240,10 +248,18 @@ public:
     [[nodiscard]] size_t getCurrentZoneID() const;
 
     /**
-     * @brief Gets the player's current score.
-     * @return The player's score as an integer.
+     * @brief Return the isOnPlatform attribute.
+     * @return The current state of isOnPlatform.
      */
-    [[nodiscard]] int getScore() const;
+    [[nodiscard]] bool getIsOnPlatform() const;
+
+    /**
+     * @brief Return the wasOnPlatform attribute.
+     * @return The current state of wasOnPlatform.
+     */
+    [[nodiscard]] bool getWasOnPlatform() const;
+
+
 
     /* SPECIFIC ACCESSORS */
 
@@ -390,10 +406,10 @@ public:
     void setSprint(bool state);
 
     /**
-     * @brief Sets the isOnPlatform attribute.
-     * @param state The new value of the isOnPlatform attribute.
+     * @brief Sets the isGrounded attribute.
+     * @param state The new value of the isGrounded attribute.
      */
-    void setIsOnPlatform(bool state);
+    void setIsGrounded(bool state);
 
     /**
      * @brief Sets the wantToJump attribute.
@@ -429,6 +445,18 @@ public:
      * @param id The zone ID to set.
      */
     void setCurrentZoneID(size_t id);
+
+    /**
+     * @brief Set the isOnPlatform attribute.
+     * @param state The new value of the isOnPlatform attribute.
+     */
+    void setIsOnPlatform(bool state);
+
+    /**
+     * @brief Set the wasOnWeightPlatform attribute.
+     * @param state The new value of the wasOnWeightPlatform attribute.
+     */
+    void setWasOnPlatform(bool state);
 
     /**
      * @brief Set the mavity attribute.

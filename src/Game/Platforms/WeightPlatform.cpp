@@ -30,6 +30,10 @@ float WeightPlatform::getH() const {
     return h;
 }
 
+float WeightPlatform::getMove() const {
+    return move;
+}
+
 bool WeightPlatform::getIsMoving() const {
     return isMoving;
 }
@@ -60,7 +64,8 @@ void WeightPlatform::applyMovement(double delta_time) {
     if (isMoving) {
         auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
         float targetY = startY + weight * stepDistance;
-        y = std::lerp(y, targetY, blend);
+        move = std::lerp(y, targetY, blend) - y;
+        y += move;
         weight = 0; // Reset weight
     }
 }

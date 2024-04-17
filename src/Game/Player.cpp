@@ -59,6 +59,10 @@ float Player::getSize() const {
     return size;
 }
 
+int Player::getScore() const {
+    return score;
+}
+
 Sprite *Player::getSprite() {
     return &sprite;
 }
@@ -99,8 +103,8 @@ int Player::getDirectionY() const {
     return (int)directionY;
 }
 
-bool Player::getIsOnPlatform() const {
-    return isOnPlatform;
+bool Player::getIsGrounded() const {
+    return isGrounded;
 }
 
 bool Player::getIsJumping() const {
@@ -111,8 +115,12 @@ size_t Player::getCurrentZoneID() const {
     return currentZoneID;
 }
 
-int Player::getScore() const {
-    return score;
+bool Player::getIsOnPlatform() const {
+    return isOnPlatform;
+}
+
+bool Player::getWasOnPlatform() const {
+    return wasOnPlatform;
 }
 
 
@@ -160,21 +168,33 @@ std::vector<Point> Player::getRightColliderVertices() const {
 }
 
 std::vector<Point> Player::getGroundColliderVertices() const {
-    return {
+    if (mavity > 0) return {
             {x, y + height},
             {x + width, y + height},
             {x + width, y + height + 1},
             {x, y + height + 1}
     };
+    else return {
+                {x, y - 1},
+                {x + width, y - 1},
+                {x + width, y},
+                {x, y}
+        };
 }
 
 std::vector<Point> Player::getRoofColliderVertices() const {
-    return {
+    if (mavity > 0) return {
             {x, y - 1},
             {x + width, y - 1},
             {x + width, y},
             {x, y}
     };
+    else return {
+                {x, y + height},
+                {x + width, y + height},
+                {x + width, y + height + 1},
+                {x, y + height + 1}
+        };
 }
 
 SDL_FRect Player::getHorizontalColliderBoundingBox() const {
@@ -190,11 +210,13 @@ SDL_FRect Player::getRightColliderBoundingBox() const {
 }
 
 SDL_FRect Player::getGroundColliderBoundingBox() const {
-    return {x, y + height, width, 1};
+    if (mavity > 0) return  {x, y + height, width, 1};
+    else return {x, y - 1, width, 1};
 }
 
 SDL_FRect Player::getRoofColliderBoundingBox() const {
-    return {x, y - 1, width, 1};
+    if (mavity > 0) return {x, y - 1, width, 1};
+    else return {x, y + height, width, 1};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -258,8 +280,8 @@ void Player::setSprint(bool state) {
     }
 }
 
-void Player::setIsOnPlatform(bool state) {
-    isOnPlatform = state;
+void Player::setIsGrounded(bool state) {
+    isGrounded = state;
     if (state) {
         lastTimeOnPlatform = SDL_GetTicks();
     }
@@ -295,6 +317,14 @@ void Player::setCurrentZoneID(size_t id) {
 
 void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
+}
+
+void Player::setIsOnPlatform(bool state) {
+    isOnPlatform = state;
+}
+
+void Player::setWasOnPlatform(bool state) {
+    wasOnPlatform = state;
 }
 
 void Player::setDefaultTexture(SDL_Texture* newTexture) {
@@ -381,7 +411,7 @@ void Player::addToScore(int val) {
 }
 
 bool Player::canJump() const {
-    return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
+    return isGrounded || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
 }
 
 void Player::calculateXaxisMovement(double delta_time) {
@@ -452,7 +482,7 @@ void Player::calculateYaxisMovement(double delta_time) {
     }
 
     // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
-    else if (!isOnPlatform)  {
+    else if (!isGrounded)  {
         moveY += static_cast<float>(fallSpeedFactor * mavity * delta_time * delta_time);
         if (mavity > 0) {
             moveY = std::min(moveY, static_cast<float>(maxFallSpeed * delta_time));

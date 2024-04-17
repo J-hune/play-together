@@ -93,18 +93,20 @@ SOCKET TCPServer::waitForConnection() {
     struct sockaddr_in clientAddr = {};
     socklen_t clientLen = sizeof(clientAddr);
 
-    // Check if the maximum number of clients has been reached
+    std::cout << "TCPServer: Waiting for new client connection" << std::endl;
+    SOCKET clientSocket = accept(socketFileDescriptor, (struct sockaddr *) &clientAddr, &clientLen);
+    if (clientSocket == INVALID_SOCKET) return INVALID_SOCKET;
+
+    // Check if the maximum number of clients has been reached, if so, close the connection
     clientAddressesMutexPtr->lock();
     if (clientAddressesPtr->size() >= maxClients) {
+        clientAddressesMutexPtr->unlock();
+
+        closesocket(clientSocket);
         std::cout << "TCPServer: Maximum number of clients reached" << std::endl;
         return INVALID_SOCKET;
     }
     clientAddressesMutexPtr->unlock();
-
-    std::cout << "TCPServer: Waiting for new client connection" << std::endl;
-    SOCKET clientSocket = accept(socketFileDescriptor, (struct sockaddr *) &clientAddr, &clientLen);
-
-    if (clientSocket == INVALID_SOCKET) return INVALID_SOCKET;
 
     std::string clientIp = inet_ntoa(clientAddr.sin_addr);
     std::cout << "TCPServer: New client connected from " << clientIp << ":" << ntohs(clientAddr.sin_port) << std::endl;

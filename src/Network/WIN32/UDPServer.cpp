@@ -111,7 +111,7 @@ std::string UDPServer::receive(sockaddr_in& clientAddress, int timeoutMillisecon
 void UDPServer::handleMessage() {
     std::cout << "UDPServer: Handling incoming messages..." << std::endl;
 
-    while (!stopRequested) {
+    while (!stopRequested && socketFileDescriptor != INVALID_SOCKET) {
         // Receive message with timeout
         struct sockaddr_in clientAddress = {};
         std::string message = receive(clientAddress, 200); // 1 second timeout

@@ -55,7 +55,7 @@ void UDPClient::start() {
 
 void UDPClient::handleMessages() const {
     std::cout << "UDPClient: Handling incoming messages..." << std::endl;
-    while (!stopRequested) {
+    while (!stopRequested && socketFileDescriptor != INVALID_SOCKET) {
         std::string receivedMessage = receive(200);
 
         if (!receivedMessage.empty()) {

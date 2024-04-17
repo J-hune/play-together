@@ -101,6 +101,7 @@ int TCPServer::waitForConnection() {
     if (clientAddressesPtr->size() >= maxClients) {
         clientAddressesMutexPtr->unlock();
 
+        send(clientSocket, "DISCONNECT");
         close(clientSocket);
         std::cout << "TCPServer: Maximum number of clients reached" << std::endl;
         return -1;

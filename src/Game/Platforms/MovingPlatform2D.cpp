@@ -75,40 +75,45 @@ void MovingPlatform2D::setIsMoving(bool state) {
 /* METHODS */
 
 void MovingPlatform2D::applyMovement(double delta_time) {
-    // Add basic movement
-    moveX = 150;
-    moveY = 150;
+    if (isMoving) {
+        // Add basic movement
+        moveX = 150;
+        moveY = 150;
 
-    // Calculate x-axis movement
-    moveX *= static_cast<float>(delta_time); // Apply movement per second
-    moveX *= speed; // Apply speed
-    moveX *= directionX; // Apply direction
+        // Calculate x-axis movement
+        moveX *= static_cast<float>(delta_time); // Apply movement per second
+        moveX *= speed; // Apply speed
+        moveX *= directionX; // Apply direction
 
-    // Calculate y-axis movement
-    moveY *= static_cast<float>(delta_time); // Apply movement per second
-    moveY *= speed; // Apply speed
-    moveY *= directionY; // Apply direction
+        // Calculate y-axis movement
+        moveY *= static_cast<float>(delta_time); // Apply movement per second
+        moveY *= speed; // Apply speed
+        moveY *= directionY; // Apply direction
 
-    // Apply ratio
-    ratio > 1 ? moveY /= ratio : moveX *= ratio;
+        // Apply ratio
+        ratio > 1 ? moveY /= ratio : moveX *= ratio;
 
-    // Apply movement to the platform
-    x += moveX;
-    y += moveY;
+        // Apply movement to the platform
+        x += moveX;
+        y += moveY;
 
-    // If the platform has reached its minimum point
-    if (x < left.x) {
-        x = left.x;
-        y = left.y;
-        directionX = 1; // Change direction to left
-        directionY = left.y - right.y > 0 ? -1 : 1;
-    }
-    // If the platform has reached its maximum point
+        // If the platform has reached its minimum point
+        if (x < left.x) {
+            x = left.x;
+            y = left.y;
+            directionX = 1; // Change direction to left
+            directionY = left.y - right.y > 0 ? -1 : 1;
+        }
+            // If the platform has reached its maximum point
 
-    else if (x + w > right.x) {
-        x = right.x - w;
-        directionX = -1; // Change direction to right
-        directionY = left.y - right.y > 0 ? 1 : -1;
+        else if (x + w > right.x) {
+            x = right.x - w;
+            directionX = -1; // Change direction to right
+            directionY = left.y - right.y > 0 ? 1 : -1;
+        }
+    } else{
+        moveX = 0;
+        moveY = 0;
     }
 }
 

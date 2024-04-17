@@ -394,7 +394,7 @@ bool checkSATCollisionTunneling(Player *player, const Polygon &obstacle) {
     if (player->getMoveX() == 0 && player->getMoveY() != 0) {
         return checkSATCollisionTunnelingOnYAxis(player, obstacle);
     }
-    // The player has moved on both axis
+    // The player has moved on both axes
     else if (player->getMoveX() != 0 && player->getMoveY() != 0) {
         return checkSATCollisionTunnelingOnBothAxis(player, obstacle);
     }
@@ -422,14 +422,14 @@ void correctAABBCollision(Player *player, const SDL_FRect &obstacle) {
 
     // COLLISION ANALYSIS
 
-    // Check if the x-axis movement is concerned by the collision
+    // Check if the collision concerns the x-axis movement
     SDL_FRect playerBoundingBox = {x, y - moveY, player->getW(), player->getH()};
 
     if (checkAABBCollision(playerBoundingBox, obstacle)) {
         xaxis = true;
     }
 
-    // Check if the y-axis movement is concerned by the collision
+    // Check if the collision concerns the y-axis movement
     playerBoundingBox.x = x - moveX;
     playerBoundingBox.y = y;
 
@@ -447,12 +447,14 @@ void correctAABBCollision(Player *player, const SDL_FRect &obstacle) {
         if (player->getDirectionX() == -1) moveX = (obstacle.x + obstacle.w) - playerBoundingBox.x;
         else moveX = -((playerBoundingBox.x + playerBoundingBox.w) - obstacle.x);
         player->setX(player->getX() + moveX);
+        player->setMoveX(0);
     }
-    // If the collision is on y-axis
-    else if (!xaxis && yaxis) {
+    // The collision is on y-axis
+    else {
         if (player->getDirectionY() == -1) moveY = (obstacle.y + obstacle.h) - playerBoundingBox.y;
         else moveY = -((playerBoundingBox.y + playerBoundingBox.h) - obstacle.y);
         player->setY(player->getY() + moveY);
+        player->setMoveY(0);
     }
 }
 

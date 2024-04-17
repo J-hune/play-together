@@ -49,17 +49,19 @@ void SwitchingPlatform::setIsMoving(bool state) {
 /* METHODS */
 
 void SwitchingPlatform::applyMovement([[maybe_unused]] double delta_time) {
-    Uint32 currentTime = SDL_GetTicks(); // Get the current time
+    if (isMoving) {
+        Uint32 currentTime = SDL_GetTicks(); // Get the current time
 
-    // Check if a beat has passed
-    if (currentTime - startTime > (60000 / bpm)) {
+        // Check if a beat has passed
+        if (currentTime - startTime > (60000 / bpm)) {
 
-        startTime = currentTime; // Reset the time
-        actualPoint = (actualPoint + 1) % (int)steps.size(); // Move on to the next point
+            startTime = currentTime; // Reset the time
+            actualPoint = (actualPoint + 1) % (int) steps.size(); // Move on to the next point
 
-        // Apply the movement
-        x = steps[actualPoint].x;
-        y = steps[actualPoint].y;
+            // Apply the movement
+            x = steps[actualPoint].x;
+            y = steps[actualPoint].y;
+        }
     }
 }
 

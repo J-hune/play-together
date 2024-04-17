@@ -70,9 +70,6 @@ private:
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
-    // Debug variables used for the application console
-    bool enable_platforms_movement = true;
-
 
 public:
     /* CONSTRUCTORS */
@@ -150,12 +147,6 @@ public:
      * @param map_name The name of the new map.
      */
     void setLevel(std::string const &map_name);
-
-    /**
-     * @brief Set a new state to enable_platforms_movement
-     * @param state the state of enable_platforms_movement
-     */
-    void setEnablePlatformsMovement(bool state);
 
     /**
      * @brief Set the frame rate of the game.

@@ -198,7 +198,7 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
 
     if (option == "all") {
         gamePtr->getCamera()->setShake(-1);
-        gamePtr->setEnablePlatformsMovement(true);
+        gamePtr->getLevel()->togglePlatformsMovement(true);
         std::cout << "Enabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
@@ -206,7 +206,7 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
         std::cout << "Enabling camera shaking.\n";
     }
     else if (option == "platforms") {
-        gamePtr->setEnablePlatformsMovement(true);
+        gamePtr->getLevel()->togglePlatformsMovement(true);
         std::cout << "Enabling platforms movement.\n";
     }
     else {
@@ -227,7 +227,7 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
 
     if (option == "all") {
         gamePtr->getCamera()->setShake(0);
-        gamePtr->setEnablePlatformsMovement(false);
+        gamePtr->getLevel()->togglePlatformsMovement(false);
         std::cout << "Disabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
@@ -235,7 +235,7 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
         std::cout << "Disabling camera shaking.\n";
     }
     else if (option == "platforms") {
-        gamePtr->setEnablePlatformsMovement(false);
+        gamePtr->getLevel()->togglePlatformsMovement(false);
         std::cout << "Disabling platforms' movement.\n";
     }
     else {

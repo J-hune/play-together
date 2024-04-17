@@ -76,10 +76,6 @@ void Game::setLevel(std::string const &map_name) {
     level = Level(map_name, renderer, textureManager.get());
 }
 
-void Game::setEnablePlatformsMovement(bool state) {
-    enable_platforms_movement = state;
-}
-
 void Game::setFrameRate(int fps) {
     this->frameRate = fps;
 }
@@ -122,7 +118,7 @@ void Game::update(double delta_time) {
     inputManager->handleKeyboardEvents();
     calculatePlayersMovement(delta_time);
 
-    if (enable_platforms_movement) level.applyPlatformsMovement(delta_time);
+    level.applyPlatformsMovement(delta_time);
     level.applyAsteroidsMovement(delta_time);
     applyPlayersMovement(delta_time);
     camera.applyMovement(playerManager->getAveragePlayerPosition(), delta_time);

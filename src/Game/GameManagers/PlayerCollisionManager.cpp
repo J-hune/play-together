@@ -57,7 +57,6 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 if (!platform.getAxis()) player->setX(player->getX() + platform.getMove());
-                else player->setY(player->getY() + platform.getMove());
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
@@ -86,7 +85,6 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform2D(Player *player
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 player->setX(player->getX() + platform.getMoveX());
-                player->setY(player->getY() + platform.getMoveY());
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
@@ -196,7 +194,6 @@ void PlayerCollisionManager::handleCollisionsD1mroftalPgnivoMhtiw(Player *player
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 if (!platform.getAxis()) player->setX(player->getX() + platform.getMove());
-                else player->setY(player->getY() + platform.getMove());
             }
             // If collision detected with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
@@ -224,7 +221,6 @@ void PlayerCollisionManager::handleCollisionsD2mroftalPgnivoMhtiw(Player *player
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 player->setX(player->getX() + platform.getMoveX());
-                player->setY(player->getY() + platform.getMoveY());
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {

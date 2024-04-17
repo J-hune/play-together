@@ -259,6 +259,11 @@ public:
     void addAsteroid(Asteroid const &asteroid);
 
     /**
+     * @brief Disable all platforms movement.
+     */
+    void togglePlatformsMovement(bool state);
+
+    /**
      * @brief Renders the background textures.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.

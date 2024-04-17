@@ -180,6 +180,13 @@ void Level::addAsteroid(Asteroid const &asteroid) {
     asteroids.emplace_back(asteroid);
 }
 
+void Level::togglePlatformsMovement(bool state){
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.setIsMoving(state);
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.setIsMoving(state);
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.setIsMoving(state);
+    for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
+}
+
 void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
     for (const Layer &layer: backgrounds) {
         layer.render(renderer, &camera);
@@ -295,25 +302,10 @@ void Level::applyAsteroidsMovement(double delta_time) {
 }
 
 void Level::applyPlatformsMovement(double delta_time) {
-    // Apply movement for 1D platforms
-    for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for 2D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for switching platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for weight platforms
-    for (WeightPlatform &platform: weightPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
+    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
 }
 
 

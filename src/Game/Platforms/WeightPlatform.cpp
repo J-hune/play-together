@@ -57,10 +57,12 @@ void WeightPlatform::decreaseWeight() {
 /* METHODS */
 
 void WeightPlatform::applyMovement(double delta_time) {
-    auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
-    float targetY = startY + weight * stepDistance;
-    y = lerp(y, targetY, blend);
-    weight = 0; // Reset weight
+    if (isMoving) {
+        auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
+        float targetY = startY + weight * stepDistance;
+        y = lerp(y, targetY, blend);
+        weight = 0; // Reset weight
+    }
 }
 
 void WeightPlatform::render(SDL_Renderer *renderer, Point camera) const {

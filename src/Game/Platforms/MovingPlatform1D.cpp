@@ -110,7 +110,9 @@ void MovingPlatform1D::applyYaxisMovement(double delta_time) {
 }
 
 void MovingPlatform1D::applyMovement(double delta_time) {
-    axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
+    if (isMoving) {
+        axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
+    } else move = 0;
 }
 
 void MovingPlatform1D::render(SDL_Renderer *renderer, Point camera) const {

@@ -47,7 +47,7 @@ private:
     // GRAPHICS
     TextureManager *textureManagerPtr; /**< A pointer to the game texture manager. */
     std::vector<Layer> backgrounds; /**< Collection of layers representing the backgrounds, arranged from farthest to nearest. */
-    Layer middleground; /**< Layer representing the middle ground. */
+    Texture middleground; /**< Layer representing the middle ground. */
     std::vector<Layer> foregrounds; /**< Collection of layers representing the foregrounds, arranged from farthest to nearest */
 
     // ZONES

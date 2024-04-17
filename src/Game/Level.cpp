@@ -194,7 +194,9 @@ void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const 
 }
 
 void Level::renderMiddleground(SDL_Renderer *renderer, const Point camera) const {
-    middleground.render(renderer, &camera);
+    SDL_Rect src_rect = middleground.getSize();
+    SDL_FRect layer_rect_1 = { -40 - camera.x, -350 - camera.y, static_cast<float>(src_rect.w), static_cast<float>(src_rect.h)}; // TODO: change static values to 0
+    SDL_RenderCopyExF(renderer, middleground.getTexture(), &src_rect, &layer_rect_1, 0.0, nullptr, SDL_FLIP_NONE);
 }
 
 void Level::renderForegrounds(SDL_Renderer *renderer, const Point camera) const {
@@ -373,7 +375,7 @@ void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
     }
 
     // Load middle ground layer
-    middleground = Layer(*textureManagerPtr->getMiddleground(), 1);
+    middleground = Texture(*textureManagerPtr->getMiddleground());
 
     // Load foreground layers
     for (const auto& layer : j["foregroundLayers"]) {

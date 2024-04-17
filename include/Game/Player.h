@@ -453,8 +453,8 @@ public:
     void setIsOnPlatform(bool state);
 
     /**
-     * @brief Set the wasOnWeightPlatform attribute.
-     * @param state The new value of the wasOnWeightPlatform attribute.
+     * @brief Set the wasOnPlatform attribute.
+     * @param state The new value of the wasOnPlatform attribute.
      */
     void setWasOnPlatform(bool state);
 

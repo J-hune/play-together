@@ -20,7 +20,7 @@ class Texture {
 private:
     /* ATTRIBUTES */
 
-    SDL_Texture *texturePtr; /**< The texture of the sprite. */
+    SDL_Texture *texturePtr = nullptr; /**< The texture of the sprite. */
     SDL_Rect sizeRect = {0, 0, 0, 0}; /**< The square representing the size of the texture. */
     SDL_RendererFlip flipHorizontal = SDL_FLIP_NONE; /**< If the sprite is flipped horizontally. */
     SDL_RendererFlip flipVertical = SDL_FLIP_NONE; /**< If the sprite is flipped vertically. */

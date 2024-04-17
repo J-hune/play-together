@@ -118,7 +118,6 @@ SOCKET TCPServer::waitForConnection() {
     // Notify the mediator of the new client connection
     Mediator::handleClientConnect(static_cast<int>(clientSocket));
     sendGameProperties(clientSocket);
-    sendPlayerList(clientSocket);
     relayClientConnection(clientSocket);
 
     return clientSocket;
@@ -274,33 +273,6 @@ bool TCPServer::sendGameProperties(SOCKET clientSocket) const {
     return send(clientSocket, message.dump());
 }
 
-bool TCPServer::sendPlayerList(SOCKET clientSocket) const {
-    using json = nlohmann::json;
-
-    // Create JSON message
-    json message;
-    message["messageType"] = "playerList";
-    message["players"] = json::array();
-
-    // Add all connected clients to the player list
-    for (std::vector<Player> players = Mediator::getAlivePlayers(); auto& player : players) {
-        int playerID = player.getPlayerID();
-        if (playerID == -1) playerID = 0; // The server player has ID 0
-        if (playerID == static_cast<int>(clientSocket)) playerID = -1; // The client itself has ID -1
-
-        // Replace the client socket with -1 for the client itself
-        json playerInfo;
-        playerInfo["playerID"] = playerID;
-        playerInfo["x"] = player.getX();
-        playerInfo["y"] = player.getY();
-        playerInfo["moveX"] = player.getMoveX();
-        playerInfo["moveY"] = player.getMoveY();
-
-        message["players"].push_back(playerInfo);
-    }
-
-    return send(clientSocket, message.dump());
-}
 
 bool TCPServer::relayClientConnection(SOCKET clientSocket) const {
     using json = nlohmann::json;

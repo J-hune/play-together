@@ -8,8 +8,8 @@
 
 /* CONSTRUCTORS */
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag)
-        : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag) {
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag, MessageQueue *messageQueue)
+        : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag), messageQueue(messageQueue) {
 
     // Initialize managers
     inputManager = std::make_unique<InputManager>(this);
@@ -107,9 +107,32 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::initializeClientGame(const std::string& map_name, short last_checkpoint) {
+void Game::loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players) {
     setLevel(map_name);
     level.setLastCheckpoint(last_checkpoint);
+
+    // Add all players to the game (including the local player)
+    size_t spawnIndex = 0;
+    for (const auto &player: players) {
+        int receivedPlayerID = player["playerID"];
+
+        Point spawnPoint = level.getSpawnPoints(last_checkpoint)[spawnIndex];
+        Player newPlayer(receivedPlayerID, spawnPoint, 2);
+        if (player.contains("x")) newPlayer.setX(player["x"]);
+        if (player.contains("y")) newPlayer.setY(player["y"]);
+        if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
+        if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
+
+        if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
+        else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
+
+        playerManager->addPlayer(newPlayer);
+        spawnIndex++;
+
+        // Enter the game loop
+        Mediator::setDisplayMenu(false);
+    }
+
     music = level.getMusicById(0);
     music.play(-1);
 }
@@ -144,6 +167,17 @@ void Game::run() {
 
     // Game loop
     while (gameState != GameState::STOPPED) {
+
+        // Process messages from other threads in the queue
+        if (!messageQueue->empty()) {
+            auto [mainMessage, parameters] = messageQueue->pop();
+
+            if (mainMessage == "InitializeClientGame") {
+                nlohmann::json message = nlohmann::json::parse(parameters[0]);
+                loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+            }
+        }
+
         // Calculate delta time for game logic
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
         Uint64 frameTicks = currentFrameTime - lastFrameTime;

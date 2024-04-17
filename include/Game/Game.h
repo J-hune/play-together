@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <SDL_ttf.h>
 #include "../Utils/Mediator.h"
+#include "../Utils/MessageQueue.h"
 #include "Level.h"
 #include "GameManagers/PlayerCollisionManager.h"
 #include "GameManagers/InputManager.h"
@@ -65,6 +66,7 @@ private:
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    MessageQueue *messageQueue; /**< The message queue for communication between threads. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
     Music music; /**< Represents the music that is currently played in the game. */
@@ -74,7 +76,7 @@ private:
 public:
     /* CONSTRUCTORS */
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag, MessageQueue *messageQueue);
 
 
     /* ACCESSORS */
@@ -169,10 +171,12 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
-     * @brief Initializes a client game by loading the level and setting music.
-     * @param last_checkpoint The checkpoint to start from.
+     * @brief Initializes a new game by loading the level data received from the server.
+     * @param map_name The name of the map to load.
+     * @param last_checkpoint The last checkpoint reached.
+     * @param players The list of players to load.
      */
-    void initializeClientGame(const std::string& map_name, short last_checkpoint);
+    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players);
 
     /**
      * @brief Updates the game logic.

@@ -6,6 +6,7 @@
 // Define the static member variables
 Game *Mediator::gamePtr = nullptr;
 Menu *Mediator::menuPtr = nullptr;
+MessageQueue *Mediator::messageQueuePtr = nullptr;
 NetworkManager *Mediator::networkManagerPtr = nullptr;
 std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> Mediator::playersKeyStates;
 const std::array<SDL_Scancode, 7> Mediator::keyMapping = {
@@ -26,6 +27,10 @@ void Mediator::setGamePtr(Game *game) {
 
 void Mediator::setMenuPtr(Menu *menu) {
     Mediator::menuPtr = menu;
+}
+
+void Mediator::setMessageQueuePtr(MessageQueue *messageQueue) {
+    Mediator::messageQueuePtr = messageQueue;
 }
 
 void Mediator::setNetworkManagerPtr(NetworkManager *networkManager) {
@@ -117,7 +122,7 @@ void Mediator::save() {
 }
 
 void Mediator::getGameProperties(nlohmann::json &properties) {
-    Level *level = gamePtr->getLevel();
+    Level const *level = gamePtr->getLevel();
     properties["mapName"] = level->getMapName();
     properties["lastCheckpoint"] = level->getLastCheckpoint();
 }
@@ -141,7 +146,7 @@ int Mediator::handleClientConnect(int playerID) {
     // Get the player's position id based on his position in the players list
 
     size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
-    Level *level = gamePtr->getLevel();
+    Level const *level = gamePtr->getLevel();
     Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
     Player newPlayer(playerID, spawnPoint, 2);
     gamePtr->getPlayerManager().addPlayer(newPlayer);
@@ -221,7 +226,7 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
 
             // Get the player's spawn point based on his position in the players list
             size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
-            Level *level = gamePtr->getLevel();
+            Level const *level = gamePtr->getLevel();
             Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
 
             Player newPlayer(playerSocketID, spawnPoint, 2);
@@ -237,29 +242,9 @@ void Mediator::handleMessages(int protocol, const std::string &rawMessage, int p
         }
 
         else if (messageType == "gameProperties") {
-            gamePtr->initializeClientGame(message["mapName"], message["lastCheckpoint"]);
-        }
-
-        else if (messageType == "playerList") {
-            json playersArray = message["players"];
-            size_t spawnIndex = gamePtr->getPlayerManager().getPlayerCount();
-            for (const auto &player : playersArray) {
-                int receivedPlayerID = player["playerID"];
-
-                Level const *level = gamePtr->getLevel();
-                Point spawnPoint = level->getSpawnPoints(level->getLastCheckpoint())[spawnIndex];
-                Player newPlayer(receivedPlayerID, spawnPoint, 2);
-                if (player.contains("x")) newPlayer.setX(player["x"]);
-                if (player.contains("y")) newPlayer.setY(player["y"]);
-                if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
-                if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
-
-                if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
-                else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
-
-                gamePtr->getPlayerManager().addPlayer(newPlayer);
-                spawnIndex++;
-            }
+            // Load the texture of the map and initialize the game
+            messageQueuePtr->push("InitializeClientGame", {rawMessage});
+            menuPtr->setMenuAction(MenuAction::MAIN);
         }
 
         else if (messageType == "asteroidCreation") {

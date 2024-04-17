@@ -5,6 +5,7 @@
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
 #include "../include/Network/NetworkManager.h"
+#include "../include/Utils/MessageQueue.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 #ifdef DEVELOPMENT_MODE
@@ -84,12 +85,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Initialize game objects
     bool quit = false;
 
-    Game game(window, renderer, maxFrameRate, &quit);
-    Menu menu(renderer, &quit, "menu.mp3");
+    MessageQueue messageQueue;
+    Game game(window, renderer, maxFrameRate, &quit, &messageQueue);
+    Menu menu(renderer, &quit, "menu.mp3", &messageQueue);
     NetworkManager networkManager;
     ApplicationConsole console(&game);
 
     // Initialize pointers for communication between objects
+    Mediator::setMessageQueuePtr(&messageQueue);
     Mediator::setGamePtr(&game);
     Mediator::setMenuPtr(&menu);
     Mediator::setNetworkManagerPtr(&networkManager);
@@ -127,6 +130,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         // Clear the screen
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
+
+        if (!messageQueue.empty()) {
+            auto [mainMessage, parameters] = messageQueue.pop();
+
+            if (mainMessage == "InitializeClientGame") {
+                nlohmann::json message = nlohmann::json::parse(parameters[0]);
+                game.loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+            }
+        }
 
         // If the game should start
         if (!menu.isDisplayingMenu()) {

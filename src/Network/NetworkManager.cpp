@@ -149,6 +149,15 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     // Otherwise, the game is local only (development mode)
 }
 
+void NetworkManager::sendSyncCorrection(nlohmann::json &message) {
+    // Send the correction message to all clients
+    std::scoped_lock<std::mutex> lock(clientAddressesMutex);
+
+    for (const auto& [clientId, clientAddress] : clientAddresses) {
+        udpServer.sendSyncCorrection(static_cast<int>(clientId), clientAddress, message);
+    }
+}
+
 void NetworkManager::sendAsteroidCreation(Asteroid const &asteroid) const {
     // Create a message with the asteroid properties
     using json = nlohmann::json;

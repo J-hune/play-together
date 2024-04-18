@@ -5,9 +5,11 @@
 #include <SDL.h>
 #include <array>
 #include <unordered_map>
+
+#include "MessageQueue.h"
 #include "../Game/Player.h"
-#include "../../dependencies/json.hpp"
 #include "../Game/Events/Asteroid.h"
+#include "../../dependencies/json.hpp"
 
 // Forward declarations
 class Game;
@@ -30,6 +32,16 @@ enum class GameState {
  * All communication between these components goes through the Mediator.
  */
 class Mediator {
+private:
+    /** ATTRIBUTES **/
+
+    static Game *gamePtr; /**< Pointer to the associated Game object. */
+    static Menu *menuPtr; /**< Pointer to the associated Menu object. */
+    static MessageQueue *messageQueuePtr; /**< Pointer to the associated MessageQueue object. */
+    static NetworkManager *networkManagerPtr; /**< Pointer to the associated NetworkManager object. */
+    static const std::array<SDL_Scancode, 7> keyMapping;
+    static std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> playersKeyStates; // Map of player ID to key states
+
 public:
     /** CONSTRUCTORS **/
 
@@ -51,6 +63,12 @@ public:
     static void setMenuPtr(Menu *menuPtr);
 
     /**
+     * @brief Sets the pointer to the associated MessageQueue object.
+     * @param messageQueuePtr The pointer to the MessageQueue object.
+     */
+    static void setMessageQueuePtr(MessageQueue *messageQueuePtr);
+
+    /**
      * @brief Sets the pointer to the associated NetworkManager object.
      * @param networkManagerPtr The pointer to the NetworkManager object.
      */
@@ -67,6 +85,7 @@ public:
     static void stopServers();
     static void stopClients();
     static void sendPlayerUpdate(uint16_t keyboardStateMask);
+    static void sendSyncCorrection(nlohmann::json &message);
     static void sendAsteroidCreation(Asteroid const &asteroid);
 
     // Menu methods
@@ -82,7 +101,7 @@ public:
     static void stop();
     static void save();
     static void getGameProperties(nlohmann::json &properties);
-    static std::vector<Player> getCharacters();
+    static std::vector<Player> const &getAlivePlayers();
 
     // Other methods
     /**
@@ -119,16 +138,9 @@ public:
     static void decodeKeyboardStateMask(uint16_t mask, std::array<int, SDL_NUM_SCANCODES> &keyStates);
 
 private:
-    /** ATTRIBUTES **/
-
-    static Game *gamePtr; /**< Pointer to the associated Game object. */
-    static Menu *menuPtr; /**< Pointer to the associated Menu object. */
-    static NetworkManager *networkManagerPtr; /**< Pointer to the associated NetworkManager object. */
-    static const std::array<SDL_Scancode, 7> keyMapping;
-    static std::unordered_map<int, std::unordered_map<SDL_Scancode, bool>> playersKeyStates; // Map of player ID to key states
+    /** PRIVATE METHODS **/
 
     static void handleKeyboardState(Player *player, std::array<int, SDL_NUM_SCANCODES> &keyStates);
-
 };
 
 #endif //PLAY_TOGETHER_MEDIATOR_H

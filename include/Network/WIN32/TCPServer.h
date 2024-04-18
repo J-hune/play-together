@@ -84,13 +84,6 @@ public:
     bool sendGameProperties(SOCKET clientSocket) const;
 
     /**
-     * @brief Sends the list of players to the specified client.
-     * @param clientSocket The client socket file descriptor.
-     * @return
-     */
-    bool sendPlayerList(SOCKET clientSocket) const;
-
-    /**
      * Relay the client connection to all clients.
      * @param clientSocket The client socket file descriptor
      * @return

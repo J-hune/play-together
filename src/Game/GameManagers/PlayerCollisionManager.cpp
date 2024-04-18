@@ -12,7 +12,6 @@ PlayerCollisionManager::PlayerCollisionManager(Game *game) : gamePtr(game) {}
 
 
 /* METHODS */
-/* NORMAL MAVITY */
 
 void PlayerCollisionManager::handleCollisionsWithObstacles(Player *player) {
     // Check collisions with each obstacle
@@ -24,17 +23,20 @@ void PlayerCollisionManager::handleCollisionsWithObstacles(Player *player) {
 
             // If the collision is with the roof, the player can't jump anymore
             if (checkSATCollision(player->getRoofColliderVertices(), obstacle)) {
+                player->setRoofCollider(true);
                 player->setIsJumping(false);
                 player->setMoveY(0);
             }
-            // If the collision is with the ground, the player is on a platform
-            if (!player->getIsOnPlatform() && checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
-                player->setIsOnPlatform(true);
+            // If the collision is with the ground, the player is on the ground
+            if (!player->getIsGrounded() && checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
             }
-            // If the collision is with the wall, the player can't move
-            if (player->getCanMove() && checkSATCollision(player->getHorizontalColliderVertices(), obstacle)) {
-                player->setCanMove(false);
-            }
+        }
+        // If the collision is with the wall, the player can't move
+        if (player->getCanMove() && checkSATCollision(player->getHorizontalColliderVertices(), obstacle)) {
+            player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
+            player->setCanMove(false);
         }
     }
 }
@@ -49,11 +51,14 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player
 
             // If the collision is with the roof, the player can't jump anymore
             if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setRoofCollider(true);
                 player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 if (!platform.getAxis()) player->setX(player->getX() + platform.getMove());
@@ -61,6 +66,7 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+                player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
                 player->setCanMove(false);
             }
         }
@@ -78,11 +84,14 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform2D(Player *player
 
             // If the collision is with the roof, the player can't jump anymore
             if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setRoofCollider(true);
                 player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
                 player->setIsOnPlatform(true);
                 // Add platform velocity to the player
                 player->setX(player->getX() + platform.getMoveX());
@@ -90,6 +99,7 @@ void PlayerCollisionManager::handleCollisionsWithMovingPlatform2D(Player *player
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+                player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
                 player->setCanMove(false);
             }
         }
@@ -107,15 +117,19 @@ void PlayerCollisionManager::handleCollisionsWithSwitchingPlatform(Player *playe
 
             // If the collision is with the roof, the player can't jump anymore
             if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setRoofCollider(true);
                 player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
                 player->setIsOnPlatform(true);
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+                player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
                 player->setCanMove(false);
             }
         }
@@ -123,7 +137,6 @@ void PlayerCollisionManager::handleCollisionsWithSwitchingPlatform(Player *playe
 }
 
 void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) {
-
     // Check for collisions with each switching platform
     for (const WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
         // Check if a collision is detected
@@ -133,169 +146,34 @@ void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) 
 
             // If the collision is with the roof, the player can't jump anymore
             if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setRoofCollider(true);
                 player->setIsJumping(false);
                 player->setMoveY(0);
             }
             // If the collision is with the ground, the player is on a platform
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
                 player->setIsOnPlatform(true);
-                gamePtr->getLevel()->increaseWeightForPlatform(platform);
+                if (player->getMavity() > 0) gamePtr->getLevel()->increaseWeightForPlatform(platform);
+                else gamePtr->getLevel()->decreaseWeightForPlatform(platform);
             }
             // If the collision is with the wall, the player can't move
             if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
+                player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
                 player->setCanMove(false);
             }
         }
     }
 }
-
-
-/* REVERSED MAVITY */
-
-void PlayerCollisionManager::handleCollisionsSelcatsbOhtiw(Player *player) {
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: gamePtr->getBroadPhaseManager().getObstacles()) {
-        // Check if a collision is detected
-        if (checkSATCollision(player->getVertices(), obstacle)) {
-
-            correctSATCollision(player, obstacle); // Correct the collision
-
-            // If the collision is with the ground, the player can't jump anymore
-            if (checkSATCollision(player->getGroundColliderVertices(), obstacle)) {
-                player->setIsJumping(false);
-                player->setMoveY(0);
-            }
-            // If the collision is with the roof, the player is on a platform
-            if (checkSATCollision(player->getRoofColliderVertices(), obstacle)) {
-                player->setIsOnPlatform(true);
-
-            }
-            // If the collision is with the wall, the player can't move
-            if (player->getCanMove() && checkSATCollision(player->getHorizontalColliderVertices(), obstacle)) {
-                player->setCanMove(false);
-            }
-        }
-    }
-}
-
-void PlayerCollisionManager::handleCollisionsD1mroftalPgnivoMhtiw(Player *player) {
-    // Check for collisions with each 1D moving platforms
-    for (const MovingPlatform1D &platform: gamePtr->getBroadPhaseManager().getMovingPlatforms1D()) {
-        // Check if a collision is detected
-        if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
-
-            correctAABBCollision(player, platform.getBoundingBox()); // Correct the collision
-
-            // If the collision is with the ground, the player can't jump anymore
-            if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsJumping(false);
-                player->setMoveY(0);
-            }
-            // If collision detected with the roof, the player is on the platform
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(true);
-                // Add platform velocity to the player
-                if (!platform.getAxis()) player->setX(player->getX() + platform.getMove());
-                else player->setY(player->getY() + platform.getMove());
-            }
-            // If collision detected with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-    }
-}
-
-void PlayerCollisionManager::handleCollisionsD2mroftalPgnivoMhtiw(Player *player) {
-    // Check for collisions with each 2D moving platform
-    for (const MovingPlatform2D &platform: gamePtr->getBroadPhaseManager().getMovingPlatforms2D()) {
-        // Check if a collision is detected
-        if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
-
-            correctAABBCollision(player, platform.getBoundingBox()); // Correct the collision
-
-            // If the collision is with the ground, the player can't jump anymore
-            if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsJumping(false);
-                player->setMoveY(0);
-            }
-            // If the collision is with the roof, the player is on a platform
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(true);
-                // Add platform velocity to the player
-                player->setX(player->getX() + platform.getMoveX());
-                player->setY(player->getY() + platform.getMoveY());
-            }
-            // If the collision is with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-    }
-}
-
-void PlayerCollisionManager::handleCollisionsMroftalPgnihctiwShtiw(Player *player) {
-    // Check for collisions with each switching platform
-    for (const SwitchingPlatform &platform: gamePtr->getBroadPhaseManager().getSwitchingPlatforms()) {
-        // Check if a collision is detected
-        if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
-
-            correctAABBCollision(player, platform.getBoundingBox()); // Correct the collision
-
-            // If the collision is with the ground, the player can't jump anymore
-            if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsJumping(false);
-                player->setMoveY(0);
-            }
-            // If the collision is with the roof, the player is on a platform
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(true);
-            }
-            // If the collision is with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-    }
-}
-
-void PlayerCollisionManager::handleCollisionsMroftalPthgieWhtiw(Player *player) {
-
-    // Check for collisions with each switching platform
-    for (const WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
-        // Check if a collision is detected
-        if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
-
-            correctAABBCollision(player, platform.getBoundingBox()); // Correct the collision
-
-            // If the collision is with the roof, the player is on a platform
-            if (checkAABBCollision(player->getRoofColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsOnPlatform(true);
-                gamePtr->getLevel()->decreaseWeightForPlatform(platform);
-            }
-            // If the collision is with the ground, the player can't jump anymore
-            if (checkAABBCollision(player->getGroundColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setIsJumping(false);
-                player->setMoveY(0);
-            }
-            // If the collision is with the wall, the player can't move
-            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), platform.getBoundingBox())) {
-                player->setCanMove(false);
-            }
-        }
-    }
-}
-
-
-/* COLLISIONS UNRELATED TO MAVITY */
 
 bool PlayerCollisionManager::handleCollisionsWithCameraBorders(const SDL_FRect player) {
     const SDL_FRect &camera = gamePtr->getCamera()->getBoundingBox();
 
-    return player.x < camera.x - DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.x + player.w > camera.x + camera.w + DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.y < camera.y - DISTANCE_OUT_MAP_BEFORE_DEATH
-           || player.y > camera.y + camera.h + DISTANCE_OUT_MAP_BEFORE_DEATH;
+    return player.x < camera.x - DISTANCE_OUT_MAP_BEFORE_DEATH                           // Left border
+           || player.x + player.w > camera.x + camera.w + DISTANCE_OUT_MAP_BEFORE_DEATH  // Right border
+           || player.y < camera.y - DISTANCE_OUT_MAP_BEFORE_DEATH                        // Top border
+           || player.y + player.h > camera.y + camera.h + DISTANCE_OUT_MAP_BEFORE_DEATH; // Bottom border
 }
 
 bool PlayerCollisionManager::handleCollisionsWithDeathZones(const Player &player) {
@@ -328,7 +206,7 @@ void PlayerCollisionManager::handleCollisionsWithSaveZones(Player &player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &player) {
+void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &player, double delta_time) {
     const std::vector<AABB> &toggleGravityZones = gamePtr->getBroadPhaseManager().getToggleGravityZones();
 
     // Check collisions with each toggle gravity zone
@@ -348,7 +226,7 @@ void PlayerCollisionManager::handleCollisionsWithToggleGravityZones(Player &play
             player.toggleMavity();
             player.getSprite()->toggleFlipVertical();
 
-            float gravityOffset = toggleGravityZone.getHeight() + 4.f;
+            float gravityOffset = toggleGravityZone.getHeight() * static_cast<float>(delta_time) * 30;
             float currentMoveY = player.getMoveY();
             float newMoveY = (player.getMavity() < 0) ? std::max(currentMoveY, gravityOffset) : std::min(currentMoveY, -gravityOffset);
             player.setMoveY(newMoveY);
@@ -411,41 +289,49 @@ void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisions() {
+void PlayerCollisionManager::handleCollisions(double delta_time) {
     for (Player &player: gamePtr->getPlayerManager().getAlivePlayers()) {
-        player.setCanMove(true);
-        player.setIsOnPlatform(false);
+        player.updateCollisionBox();
 
-        // Handle collisions according to player's mavity
-        if (player.getMavity() > 0) {
-            if (player.hasMoved()) handleCollisionsWithObstacles(&player); // Handle collisions with obstacles
-            handleCollisionsWithMovingPlatform1D(&player); // Handle collisions with 1D moving platforms
-            handleCollisionsWithMovingPlatform2D(&player); // Handle collisions with 2D moving platforms
-            handleCollisionsWithSwitchingPlatform(&player); // Handle collisions with switching platforms
-            handleCollisionsWithWeightPlatform(&player); // Handle collisions with weight platforms
-        }
-        else {
-            if (player.hasMoved()) handleCollisionsSelcatsbOhtiw(&player); // Handle collisions with obstacles
-            handleCollisionsD1mroftalPgnivoMhtiw(&player); // Handle collisions with 1D moving platforms
-            handleCollisionsD2mroftalPgnivoMhtiw(&player); // Handle collisions with 2D moving platforms
-            handleCollisionsMroftalPgnihctiwShtiw(&player); // Handle collisions with switching platforms
-            handleCollisionsMroftalPthgieWhtiw(&player); // Handle collisions with weight platforms
-        }
-
-        // Handle collisions with items
-        handleCollisionsWithSizePowerUps(&player);
-        handleCollisionsWithSpeedPowerUps(&player);
-        handleCollisionsWithCoins(&player);
-
-        handleCollisionsWithSaveZones(player); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(player); // Handle collisions with toggle gravity zones
-        handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
-
-        // Handle collisions with death zones and camera borders
+        // Handle collisions with death zones and camera borders to check if the player dies
         if (handleCollisionsWithCameraBorders(player.getBoundingBox())
             || handleCollisionsWithDeathZones(player))
         {
             gamePtr->getPlayerManager().killPlayer(player);
+        }
+        // Check every other collision if the player is alive
+        else {
+            player.setLeftCollider(false);
+            player.setRightCollider(false);
+            player.setRoofCollider(false);
+            player.setGroundCollider(false);
+            player.setCanMove(true);
+            player.setIsGrounded(false);
+            player.setIsOnPlatform(false);
+
+            if (player.hasMoved()) handleCollisionsWithObstacles(&player); // Handle collisions with obstacles
+
+            // Handle collisions with platforms
+            handleCollisionsWithMovingPlatform1D(&player);
+            handleCollisionsWithMovingPlatform2D(&player);
+            handleCollisionsWithSwitchingPlatform(&player);
+            handleCollisionsWithWeightPlatform(&player);
+
+            // Check if the player leaves a platform (this is what we call in French "bidouillage")
+            if (player.getWasOnPlatform() && !player.getIsOnPlatform()) {
+                player.setWasOnPlatform(false);
+                player.setMoveY(0);
+            }
+            player.setWasOnPlatform(player.getIsOnPlatform());
+
+            // Handle collisions with items
+            handleCollisionsWithSizePowerUps(&player);
+            handleCollisionsWithSpeedPowerUps(&player);
+            handleCollisionsWithCoins(&player);
+
+            handleCollisionsWithSaveZones(player); // Handle collisions with save zones
+            handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
+            handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
         }
     }
 }

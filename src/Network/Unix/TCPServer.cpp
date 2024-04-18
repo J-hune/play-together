@@ -92,18 +92,21 @@ int TCPServer::waitForConnection() {
     struct sockaddr_in clientAddr = {};
     socklen_t clientLen = sizeof(clientAddr);
 
-    // Check if the maximum number of clients has been reached
+    std::cout << "TCPServer: Waiting for new client connection" << std::endl;
+    int clientSocket = accept(socketFileDescriptor, (struct sockaddr *) &clientAddr, &clientLen);
+    if (clientSocket == -1) return -1;
+
+    // Check if the maximum number of clients has been reached, if so, close the connection
     clientAddressesMutexPtr->lock();
     if (clientAddressesPtr->size() >= maxClients) {
+        clientAddressesMutexPtr->unlock();
+
+        send(clientSocket, "DISCONNECT");
+        close(clientSocket);
         std::cout << "TCPServer: Maximum number of clients reached" << std::endl;
         return -1;
     }
     clientAddressesMutexPtr->unlock();
-
-    std::cout << "TCPServer: Waiting for new client connection" << std::endl;
-    int clientSocket = accept(socketFileDescriptor, (struct sockaddr *) &clientAddr, &clientLen);
-
-    if (clientSocket == -1) return -1;
 
     std::string clientIp = inet_ntoa(clientAddr.sin_addr);
     std::cout << "TCPServer: New client connected from " << clientIp << ":" << ntohs(clientAddr.sin_port) << std::endl;
@@ -117,7 +120,6 @@ int TCPServer::waitForConnection() {
     // Notify the mediator of the new client connection
     Mediator::handleClientConnect(clientSocket);
     sendGameProperties(clientSocket);
-    sendPlayerList(clientSocket);
     relayClientConnection(clientSocket);
 
     return clientSocket;
@@ -262,19 +264,9 @@ bool TCPServer::sendGameProperties(int clientSocket) const {
     message["messageType"] = "gameProperties";
     Mediator::getGameProperties(message);
 
-    return send(clientSocket, message.dump());
-}
-
-bool TCPServer::sendPlayerList(int clientSocket) const {
-    using json = nlohmann::json;
-
-    // Create JSON message
-    json message;
-    message["messageType"] = "playerList";
-    message["players"] = json::array();
-
     // Add all connected clients to the player list
-    for (std::vector<Player> players = Mediator::getCharacters(); const auto &player : players) {
+    message["players"] = json::array();
+    for (std::vector<Player> players = Mediator::getAlivePlayers(); const auto &player : players) {
         int playerID = player.getPlayerID();
         if (playerID == -1) playerID = 0; // The server player has ID 0
         if (playerID == clientSocket) playerID = -1; // The client itself has ID -1

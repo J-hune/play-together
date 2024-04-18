@@ -111,7 +111,7 @@ std::string UDPServer::receive(sockaddr_in& clientAddress, int timeoutMillisecon
 void UDPServer::handleMessage() {
     std::cout << "UDPServer: Handling incoming messages..." << std::endl;
 
-    while (!stopRequested) {
+    while (!stopRequested && socketFileDescriptor != -1) {
         // Receive message with timeout
         struct sockaddr_in clientAddress;
         std::string message = receive(clientAddress, 200); // 1 second timeout
@@ -141,6 +141,30 @@ void UDPServer::handleMessage() {
     }
 
     std::cout << "UDPServer: Stopping message handling" << std::endl;
+}
+
+bool UDPServer::sendSyncCorrection(int clientSocket, sockaddr_in address, nlohmann::json &message) const {
+    using json = nlohmann::json;
+
+    // Add each player's position and movement to the message
+    message["players"] = json::array();
+
+    for (const Player &player : Mediator::getAlivePlayers()) {
+        json playerData;
+
+        int playerID = player.getPlayerID();
+        if (playerID == -1) playerID = 0; // The server player has ID 0
+        if (playerID == clientSocket) playerID = -1; // The client itself has ID -1
+
+        playerData["playerID"] = playerID;
+        playerData["x"] = player.getX();
+        playerData["y"] = player.getY();
+        playerData["moveX"] = player.getMoveX();
+        playerData["moveY"] = player.getMoveY();
+        message["players"].push_back(playerData);
+    }
+
+    return send(address, message.dump());
 }
 
 // Stop the server

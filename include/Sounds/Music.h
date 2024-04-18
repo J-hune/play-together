@@ -32,7 +32,6 @@ public:
 
     Music() = default;
     explicit Music(const std::string& file_name);
-    ~Music();
 
 
     /* METHODS */

@@ -29,8 +29,9 @@ public:
 
     /**
      * @brief Handles all collisions for all players in the game.
+     * @param delta_time The time elapsed since the last frame.
      */
-    void handleCollisions();
+    void handleCollisions(double delta_time);
 
 
 
@@ -68,43 +69,6 @@ private:
      */
     void handleCollisionsWithWeightPlatform(Player *player);
 
-
-    /* PLAYER REVERSED MAVITY */
-
-    /**
-     * @brief Handles collisions between a player and obstacles when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsSelcatsbOhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and 1D moving platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsD1mroftalPgnivoMhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and 2D moving platforms when mavity is reversed.
-     * @param player The player object.
-     */
-     void handleCollisionsD2mroftalPgnivoMhtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and switching platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsMroftalPgnihctiwShtiw(Player *player);
-
-    /**
-     * @brief Handles collisions between a player and weight platforms when mavity is reversed.
-     * @param player The player object.
-     */
-    void handleCollisionsMroftalPthgieWhtiw(Player *player);
-
-
-
-    /* COLLISIONS UNRELATED TO MAVITY */
-
     /**
      * @brief Handles collisions between the player and camera borders.
      * @return True if the player dies, false otherwise.
@@ -127,8 +91,9 @@ private:
     /**
      * @brief Handles collisions between the player and toggle gravity zones.
      * @param player The player object.
+     * @param delta_time The time elapsed since the last frame.
      */
-    void handleCollisionsWithToggleGravityZones(Player &player);
+    void handleCollisionsWithToggleGravityZones(Player &player, double delta_time);
 
     /**
      * @brief Handles collisions between the player and increase fall speed zones.

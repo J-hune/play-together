@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <SDL_ttf.h>
 #include "../Utils/Mediator.h"
+#include "../Utils/MessageQueue.h"
 #include "Level.h"
 #include "GameManagers/PlayerCollisionManager.h"
 #include "GameManagers/InputManager.h"
@@ -43,6 +44,9 @@ class EventCollisionManager;
 class Game {
 private:
     /* ATTRIBUTES */
+    static constexpr float effectiveFrameRateUpdateIntervalSeconds = 1.0f;
+    static constexpr float networkInputSendIntervalSeconds = 1.0f / 60.0f;
+    static constexpr float networkSyncCorrectionIntervalSeconds = 0.50f;
 
     SDL_Window *window; /**< SDL window for rendering. */
     SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
@@ -58,24 +62,21 @@ private:
 
 
     int frameRate = 60; /**< The refresh rate of the game. */
-    const int tickRate = 30; /**< The tick rate of the game. */
     int effectiveFrameFps = frameRate; /**< The effective fps. */
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    MessageQueue *messageQueue; /**< The message queue for communication between threads. */
     Camera camera; /**< The camera object */
     Level level; /**< The level object */
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
-    // Debug variables used for the application console
-    bool enable_platforms_movement = true;
-
 
 public:
     /* CONSTRUCTORS */
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag, MessageQueue *messageQueue);
 
 
     /* ACCESSORS */
@@ -135,13 +136,6 @@ public:
     [[nodiscard]] Level* getLevel();
 
     /**
-     *
-     * @brief Get the tick rate of the game.
-     * @return The tick rate of the game.
-     */
-    [[nodiscard]] int getTickRate() const;
-
-    /**
      * @brief Get the frame rate of the game.
      * @return The frame rate of the game.
      */
@@ -157,20 +151,14 @@ public:
     void setLevel(std::string const &map_name);
 
     /**
-     * @brief Set a new state to enable_platforms_movement
-     * @param state the state of enable_platforms_movement
-     */
-    void setEnablePlatformsMovement(bool state);
-
-    /**
      * @brief Set the frame rate of the game.
      * @param frameRate The frame rate to set.
      */
     void setFrameRate(int frameRate);
 
     /**
-    * @brief Switch mavity between normal and reversed.
-    */
+     * @brief Switch mavity between normal and reversed.
+     */
     void switchMavity();
 
 
@@ -183,22 +171,18 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
-     * @brief Initializes a client game by loading the level and setting music.
-     * @param last_checkpoint The checkpoint to start from.
+     * @brief Initializes a new game by loading the level data received from the server.
+     * @param map_name The name of the map to load.
+     * @param last_checkpoint The last checkpoint reached.
+     * @param players The list of players to load.
      */
-    void initializeClientGame(const std::string& map_name, short last_checkpoint);
-
-    /**
-     * @brief Updates the game logic in a fixed time step.
-     */
-    void fixedUpdate();
+    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players);
 
     /**
      * @brief Updates the game logic.
-     * @param deltaTime The time elapsed since the last frame in seconds.
-     * @param ratio The ratio of the movement to apply.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void update(double deltaTime, double ratio);
+    void update(double delta_time);
 
     /**
      * @brief Runs the game loop.
@@ -227,21 +211,22 @@ private:
 
     /**
      * @brief Applies the movement to all players in the game.
-     * @param ratio The ratio of the movement to apply.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyPlayersMovement(double ratio);
+    void applyPlayersMovement(double delta_time);
 
     /**
      * @brief Calculates the movement of all players in the game.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void calculatePlayersMovement(double deltaTime);
+    void calculatePlayersMovement(double delta_time);
 
     /**
      * @brief Main method that handle collisions for every player according to their mavity.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
      */
-    void narrowPhase();
+    void narrowPhase(double delta_time);
 
 };
 

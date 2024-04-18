@@ -5,6 +5,7 @@
 #include "../include/Graphics/Button.h"
 #include "../include/Game/Menu.h"
 #include "../include/Network/NetworkManager.h"
+#include "../include/Utils/MessageQueue.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 #ifdef DEVELOPMENT_MODE
@@ -84,12 +85,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     // Initialize game objects
     bool quit = false;
 
-    Game game(window, renderer, maxFrameRate, &quit);
-    Menu menu(renderer, &quit, "menu.mp3");
+    MessageQueue messageQueue;
+    Game game(window, renderer, maxFrameRate, &quit, &messageQueue);
+    Menu menu(renderer, &quit, "menu.mp3", &messageQueue);
     NetworkManager networkManager;
     ApplicationConsole console(&game);
 
     // Initialize pointers for communication between objects
+    Mediator::setMessageQueuePtr(&messageQueue);
     Mediator::setGamePtr(&game);
     Mediator::setMenuPtr(&menu);
     Mediator::setNetworkManagerPtr(&networkManager);
@@ -116,17 +119,26 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         }
 
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
-        float deltaTime = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(SDL_GetPerformanceFrequency());
+        float delta_time = static_cast<float>(currentFrameTime - lastFrameTime) / static_cast<float>(SDL_GetPerformanceFrequency());
         lastFrameTime = currentFrameTime;
 
         // Limit the frame rate
-        if (deltaTime < 1000.0f / static_cast<float>(maxFrameRate)) {
-            SDL_Delay(static_cast<Uint32>((1000.0f / static_cast<float>(maxFrameRate)) - deltaTime));
+        if (delta_time < 1000.0f / static_cast<float>(maxFrameRate)) {
+            SDL_Delay(static_cast<Uint32>((1000.0f / static_cast<float>(maxFrameRate)) - delta_time));
         }
 
         // Clear the screen
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
+
+        if (!messageQueue.empty()) {
+            auto [mainMessage, parameters] = messageQueue.pop();
+
+            if (mainMessage == "InitializeClientGame") {
+                nlohmann::json message = nlohmann::json::parse(parameters[0]);
+                game.loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+            }
+        }
 
         // If the game should start
         if (!menu.isDisplayingMenu()) {

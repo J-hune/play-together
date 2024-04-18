@@ -20,7 +20,8 @@ std::vector<Button> aggregateButtons(const std::map<GameStateKey, std::vector<Bu
 
 /** CONSTRUCTOR **/
 
-Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name) : renderer(renderer), quitPtr(quit), music(music_file_name) {
+Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name, MessageQueue *messageQueue)
+        : renderer(renderer), quitPtr(quit), music(music_file_name), messageQueue(messageQueue) {
     std::vector<TTF_Font *> fonts = RenderManager::getFonts();
 
     // Create menu buttons
@@ -268,13 +269,11 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
     button.reset();
 }
 
-void Menu::handleJoinHostedGameButton(Button &button) {
+void Menu::handleJoinHostedGameButton(Button &button) const {
     Mediator::stopServers();
     Music::stop();
     try {
         Mediator::startClients();
-        displayMenu = false;
-        setMenuAction(MenuAction::MAIN);
     } catch (const TCPError &e) {
         std::cerr << "(TCPError) " << e.what() << std::endl;
     } catch (const UDPError &e) {

@@ -8,8 +8,13 @@
 
 /* CONSTRUCTORS */
 
-MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, const Texture& texture, float speed, float min, float max, bool start, bool axis)
-        : x(x), y(y), w(w), h(h), texture(texture), speed(speed), min(min), max(max), start(start), axis(axis) {
+MovingPlatform1D::MovingPlatform1D(float x, float y, float size, float speed, float min, float max, bool start, bool axis, const Texture& texture)
+        : x(x), y(y), size(size), speed(speed), min(min), max(max), start(start), axis(axis), texture(texture) {
+
+    // Set the size
+    textureOffsets = {texture.getOffsets().x * size, texture.getOffsets().y * size, texture.getOffsets().w * size, texture.getOffsets().h * size};
+    w = static_cast<float>(texture.getSize().w) * size - (textureOffsets.x + textureOffsets.w);
+    h = static_cast<float>(texture.getSize().h) * size - (textureOffsets.y + textureOffsets.h);
 
     // If the platform moves on x-axis
     if (!axis) {
@@ -20,7 +25,7 @@ MovingPlatform1D::MovingPlatform1D(float x, float y, float w, float h, const Tex
         this->y = start ? max - h : min; // If the platform starts up or down
     }
 
-    direction = start ? -1 : 1; // If the platform starts left/up, the direction is right/down, and vice-versa
+    direction = start ? -1 : 1; // If the platform starts left/up, the direction is right/down
 }
 
 
@@ -110,12 +115,14 @@ void MovingPlatform1D::applyYaxisMovement(double delta_time) {
 }
 
 void MovingPlatform1D::applyMovement(double delta_time) {
-    axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
+    if (isMoving) {
+        axis ? applyYaxisMovement(delta_time) : applyXaxisMovement(delta_time);
+    } else move = 0;
 }
 
 void MovingPlatform1D::render(SDL_Renderer *renderer, Point camera) const {
     SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
     SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
 }
 

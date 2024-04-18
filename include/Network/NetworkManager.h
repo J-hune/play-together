@@ -84,6 +84,12 @@ public:
     void sendPlayerUpdate(uint16_t keyboardStateMask) const;
 
     /**
+     * @brief Sends the sync correction to all clients (UDP).
+     * @param message The message to send.
+     */
+    void sendSyncCorrection(nlohmann::json &message);
+
+    /**
      * @brief Sends the creation of an asteroid to all clients (UDP).
      * @param asteroid The asteroid to create.
      */

@@ -1,6 +1,7 @@
 #ifndef PLAY_TOGETHER_LAYER_H
 #define PLAY_TOGETHER_LAYER_H
 
+#include <iostream>
 #include <cmath>
 #include "Texture.h"
 #include "../Game/Point.h"
@@ -19,7 +20,7 @@ class Layer : public Texture {
 private:
     /* ATTRIBUTES */
 
-    int layer; /**< The index of the layer, 1 is the middleground, 0 is static, negatives are background, positives are foreground. */
+    int layer; /**< The index of the layer, 1/-1 follows the middleground, negatives are background, positives are foreground. */
     float ratio; /**< The ratio of the layer. */
 
 public:

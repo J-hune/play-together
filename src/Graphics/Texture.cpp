@@ -27,6 +27,10 @@ SDL_FRect Texture::getOffsets() const {
     return offsets;
 }
 
+SDL_RendererFlip Texture::getFlipHorizontal() const {
+    return flipHorizontal;
+}
+
 SDL_RendererFlip Texture::getFlip() const {
     return static_cast<SDL_RendererFlip>(flipVertical + flipHorizontal);
 }

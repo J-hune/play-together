@@ -52,7 +52,7 @@ private:
     float directionX = 0; /**< The current direction of the player (-1 for left, 1 for right, 0 for not moving) */
     float previousDirectionX = 0; /**< The direction of the player on the x-axis during the previous frame */
     bool canMove = true; /**< If the player can move */
-    float speed = 1;
+    float speed = 1; /**< The speed of the player */
     float baseMovementX = 500; /**< The base movement speed of the player on the x-axis, independent of acceleration or deceleration factors. */
     float initialSpeedCurveX = 0.3f; /**< The initial speed curve factor used for acceleration when the player starts moving. A lower value results in slower initial acceleration. */
     float accelerationFactorX = 4.0f; /**< The acceleration factor controlling how quickly the player's speed curve increases when moving. A higher value results in faster acceleration. */
@@ -80,6 +80,12 @@ private:
     bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a weight platform. */
     bool wasOnPlatform = false; /**< Flag indicating whether the player was on a weight platform during the last frame. */
 
+    // COLLIDERS
+    bool leftCollider = false; /**< Flag indicating whether the player's left collider is active. */
+    bool rightCollider = false; /**< Flag indicating whether the player's right collider is active. */
+    bool groundCollider = false; /**< Flag indicating whether the player's ground collider is active. */
+    bool roofCollider = false; /**< Flag indicating whether the player's roof collider is active. */
+
     // LOADED TEXTURES
     static SDL_Texture *baseSpriteTexturePtr; /**< The base texture of a player */
     static SDL_Texture *spriteTexture1Ptr; /**< The texture 1 of players */
@@ -90,6 +96,15 @@ private:
     static SDL_Texture *spriteTexture2MedalPtr;/**< The medal's texture 2 of players */
     static SDL_Texture *spriteTexture3MedalPtr;/**< The medal's texture 3 of players */
     static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
+
+    // TEXTURES OFFSETS
+    SDL_FRect textureOffsets = normalOffsets; /**< The offsets of the player's sprite */
+    SDL_FRect normalOffsets = baseNormalOffsets; /**< The normal offsets of the player's sprite */
+    SDL_FRect runOffsets = baseRunOffsets; /**< The run offsets of the player's sprite */
+    float spriteWidth = BASE_SPRITE_WIDTH; /**< The width of the player's sprite */
+    float spriteHeight = BASE_SPRITE_HEIGHT; /**< The height of the player's sprite */
+    static constexpr SDL_FRect baseNormalOffsets = {6, 1, 3, 0}; /**< The normal offsets of the player's sprite */
+    static constexpr SDL_FRect baseRunOffsets = {6, 4, 0, 0}; /**< The run offsets of the player's sprite */
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
@@ -102,8 +117,8 @@ private:
     // CONSTANTS
     static constexpr int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
     static constexpr int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
-    static constexpr int BASE_WIDTH = 24; /**< Constant for the base width of a player. */
-    static constexpr int BASE_HEIGHT = 18; /**< Constant for the base height of a player. */
+    static constexpr int BASE_SPRITE_WIDTH = 24; /**< Constant for the base width of a player. */
+    static constexpr int BASE_SPRITE_HEIGHT = 18; /**< Constant for the base height of a player. */
 
 
 public:
@@ -464,6 +479,30 @@ public:
      */
     void setMaxFallSpeed(float val);
 
+    /**
+     * @brief Set the ground collider attribute.
+     * @param state The new state of the ground collider.
+     */
+    void setLeftCollider(bool state);
+
+    /**
+     * @brief Set the right collider attribute.
+     * @param state The new state of the right collider.
+     */
+    void setRightCollider(bool state);
+
+    /**
+     * @brief Set the roof collider attribute.
+     * @param state The new state of the roof collider.
+     */
+    void setRoofCollider(bool state);
+
+    /**
+     * @brief Set the ground collider attribute.
+     * @param state The new state of the ground collider.
+     */
+    void setGroundCollider(bool state);
+
 
     /**
      * @brief Sets the default texture for the player.
@@ -523,6 +562,11 @@ public:
      * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
      */
     void calculateMovement(double delta_time);
+
+    /**
+     * @brief Update the player's collision box according to its current sprite animation.
+     */
+    void updateCollisionBox();
 
     /**
      * @brief Checks if the player has moved by checking moveX and moveY attributes.

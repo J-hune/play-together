@@ -72,7 +72,11 @@ void TextureManager::loadPlatformTextures(SDL_Renderer &renderer) {
     for (int i = 0; i < file_count; i++) {
         std::string file_path = std::format("{}platform_{}.png", folder_path, i); // Get the file path
         SDL_Texture *new_texture = IMG_LoadTexture(&renderer, file_path.c_str());
-        SDL_FRect texture_offsets = {j["offsets"][i][0], j["offsets"][i][1], j["offsets"][i][2], j["offsets"][i][3]};
+        float x = j["offsets"][i][0];
+        float y = j["offsets"][i][1];
+        float w = j["offsets"][i][2];
+        float h = j["offsets"][i][3];
+        SDL_FRect texture_offsets = {x, y, x + w, y + h};
         platforms.emplace_back(*new_texture, texture_offsets);
     }
 

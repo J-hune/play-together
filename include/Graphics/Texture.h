@@ -55,6 +55,12 @@ public:
     [[nodiscard]] SDL_FRect getOffsets() const;
 
     /**
+     * @brief Return the flipHorizontal attribute.
+     * @return A SDL_RendererFlip representing flip value for the renderer.
+     */
+    [[nodiscard]] SDL_RendererFlip getFlipHorizontal() const;
+
+    /**
      * @brief Return the combination of flipVertical and flipHorizontal attributes.
      * @return A SDL_RenderFlip representing flip value for the renderer.
      */

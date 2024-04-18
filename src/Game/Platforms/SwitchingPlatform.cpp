@@ -13,8 +13,8 @@ SwitchingPlatform::SwitchingPlatform(float x, float y, float size, Uint32 bpm, s
 
     // Set the size
     textureOffsets = {texture.getOffsets().x * size, texture.getOffsets().y * size, texture.getOffsets().w * size, texture.getOffsets().h * size};
-    w = static_cast<float>(texture.getSize().w) * size - (- textureOffsets.x + textureOffsets.w);
-    h = static_cast<float>(texture.getSize().h) * size - (- textureOffsets.y + textureOffsets.h);
+    w = static_cast<float>(texture.getSize().w) * size - (textureOffsets.x + textureOffsets.w);
+    h = static_cast<float>(texture.getSize().h) * size - (textureOffsets.y + textureOffsets.h);
 }
 
 
@@ -73,7 +73,7 @@ void SwitchingPlatform::applyMovement([[maybe_unused]] double delta_time) {
 
 void SwitchingPlatform::render(SDL_Renderer *renderer, Point camera) const {
     SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x + textureOffsets.x, y - camera.y + textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
+    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
     SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
 }
 

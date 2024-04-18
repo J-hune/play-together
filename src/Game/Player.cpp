@@ -22,10 +22,11 @@ SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
 /* CONSTRUCTORS */
 
 Player::Player(int playerID, Point spawnPoint, float size)
-        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(BASE_WIDTH * size), height(BASE_HEIGHT * size), size(size) {
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), size(size) {
 
-    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_WIDTH, BASE_HEIGHT);
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_SPRITE_WIDTH, BASE_SPRITE_HEIGHT);
     setSpriteTextureByID(playerID);
+    setSize(size);
 }
 
 
@@ -240,8 +241,12 @@ void Player::setY(float val) {
 
 void Player::setSize(float val) {
     size = val;
-    width = BASE_WIDTH * size;
-    height = BASE_HEIGHT * size;
+    normalOffsets = {baseNormalOffsets.x * size, baseNormalOffsets.y * size, baseNormalOffsets.w * size, baseNormalOffsets.h * size};
+    runOffsets = {baseRunOffsets.x * size, baseRunOffsets.y * size, baseRunOffsets.w * size, baseRunOffsets.h * size};
+    spriteWidth = BASE_SPRITE_WIDTH * size;
+    spriteHeight = BASE_SPRITE_HEIGHT * size;
+
+    updateCollisionBox();
 }
 
 void Player::setMoveX(float val) {
@@ -317,6 +322,22 @@ void Player::setCurrentZoneID(size_t id) {
 
 void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
+}
+
+void Player::setLeftCollider(bool state) {
+    leftCollider = state;
+}
+
+void Player::setRightCollider(bool state) {
+    rightCollider = state;
+}
+
+void Player::setRoofCollider(bool state) {
+    roofCollider = state;
+}
+
+void Player::setGroundCollider(bool state) {
+    groundCollider = state;
 }
 
 void Player::setIsOnPlatform(bool state) {
@@ -501,6 +522,61 @@ void Player::calculateMovement(double delta_time) {
     calculateYaxisMovement(delta_time);
 }
 
+void Player::updateCollisionBox() {
+    updateSpriteAnimation();
+    updateSpriteOrientation();
+
+    // Normal texture offsets
+    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk) {
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            textureOffsets.x = normalOffsets.x;
+            textureOffsets.w = normalOffsets.w;
+        }
+        else {
+            x -= textureOffsets.x - normalOffsets.w;
+            textureOffsets.x = normalOffsets.w;
+            textureOffsets.w = normalOffsets.x;
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            y -= textureOffsets.y - normalOffsets.y;
+            textureOffsets.y = normalOffsets.y;
+            textureOffsets.h = normalOffsets.h;
+        } else {
+            textureOffsets.y = normalOffsets.h;
+            textureOffsets.h = normalOffsets.y;
+        }
+    }
+    // Run texture offsets
+    else if (sprite.getAnimation() == run || sprite.getAnimation() == sneak) {
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            if (rightCollider) x -= textureOffsets.w - runOffsets.w;
+            textureOffsets.x = runOffsets.x;
+            textureOffsets.w = runOffsets.w;
+        }
+        else {
+            if (!leftCollider) x -= textureOffsets.x - runOffsets.w;
+            textureOffsets.x = runOffsets.w;
+            textureOffsets.w = runOffsets.x;
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            y -= textureOffsets.y - runOffsets.y;
+            textureOffsets.y = runOffsets.y;
+            textureOffsets.h = runOffsets.h;
+        } else {
+            textureOffsets.y = runOffsets.h;
+            textureOffsets.h = runOffsets.y;
+        }
+    }
+
+    // Update collision box
+    width = spriteWidth - (textureOffsets.x + textureOffsets.w);
+    height = spriteHeight - (textureOffsets.y + textureOffsets.h);
+}
+
 bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
@@ -563,14 +639,16 @@ void Player::updateSpriteOrientation() {
 
 
 void Player::render(SDL_Renderer *renderer, Point camera) {
-    // Update sprite
-    updateSpriteAnimation();
-    updateSpriteOrientation();
     sprite.updateAnimation();
-
     SDL_Rect srcRect = sprite.getSrcRect();
-    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
-    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());
+
+    float x_rect = x - camera.x - textureOffsets.x;
+    float y_rect = y - camera.y - textureOffsets.y;
+    float w_rect = width + textureOffsets.x + textureOffsets.w;
+    float h_rect = height + textureOffsets.y + textureOffsets.h;
+
+    SDL_FRect player_rect = {x_rect, y_rect, w_rect, h_rect};
+    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &player_rect, 0.0, nullptr, sprite.getFlip());
 }
 
 void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {

@@ -103,8 +103,8 @@ private:
     SDL_FRect runOffsets = baseRunOffsets; /**< The run offsets of the player's sprite */
     float spriteWidth = BASE_SPRITE_WIDTH; /**< The width of the player's sprite */
     float spriteHeight = BASE_SPRITE_HEIGHT; /**< The height of the player's sprite */
-    static constexpr SDL_FRect baseNormalOffsets = {6, 1, 3, 0}; /**< The normal offsets of the player's sprite */
-    static constexpr SDL_FRect baseRunOffsets = {6, 4, 0, 0}; /**< The run offsets of the player's sprite */
+    SDL_FRect baseNormalOffsets; /**< The base normal offsets of the player's sprite */
+    SDL_FRect baseRunOffsets; /**< The base run offsets of the player's sprite */
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */

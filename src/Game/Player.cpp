@@ -399,27 +399,38 @@ void Player::setSpriteTextureByID(int id) {
         sprite.setTexture(*spriteTexture1Ptr);
         defaultTexture = spriteTexture1Ptr;
         medalTexture = spriteTexture1MedalPtr;
+        baseNormalOffsets = {4, 1, 5, 0};
+        baseRunOffsets = {6, 4, 0, 0};
     }
     else if (id == 2){ // Texture 2
         sprite.setTexture(*spriteTexture2Ptr);
         defaultTexture = spriteTexture2Ptr;
         medalTexture = spriteTexture2MedalPtr;
+        baseNormalOffsets = {6, 1, 3, 0};
+        baseRunOffsets = {6, 4, 0, 0};
     }
     else if (id == 3) { // Texture 3
         sprite.setTexture(*spriteTexture3Ptr);
         defaultTexture = spriteTexture3Ptr;
         medalTexture = spriteTexture3MedalPtr;
+        baseNormalOffsets = {4, 1, 5, 0};
+        baseRunOffsets = {6, 4, 0, 0};
     }
     else if (id == 4) { // Texture 4
         sprite.setTexture(*spriteTexture4Ptr);
         defaultTexture = spriteTexture4Ptr;
         medalTexture = spriteTexture4MedalPtr;
+        baseNormalOffsets = {4, 1, 5, 0};
+        baseRunOffsets = {6, 4, 0, 0};
     }
     else {
         sprite.setTexture(*baseSpriteTexturePtr);
         defaultTexture = baseSpriteTexturePtr;
         medalTexture = baseSpriteTexturePtr;
+        baseNormalOffsets = {4, 1, 5, 0};
+        baseRunOffsets = {6, 4, 0, 0};
     }
+    setSize(size);
 }
 
 void Player::teleportPlayer(float newX, float newY) {

@@ -9,9 +9,14 @@
 
 /* CONSTRUCTORS */
 
-MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start)
-        : x(x), y(y), w(w), h(h), texture(texture), speed(speed), left(left), right(right),
-         ratio(std::abs((left.x - right.x) / (left.y - right.y))), start(start) {
+MovingPlatform2D::MovingPlatform2D(float x, float y, float size, float speed, Point left, Point right, bool start, const Texture& texture)
+        : x(x), y(y), size(size), speed(speed), left(left), right(right),
+         ratio(std::abs((left.x - right.x) / (left.y - right.y))), start(start), texture(texture) {
+
+    // Set the size
+    textureOffsets = {texture.getOffsets().x * size, texture.getOffsets().y * size, texture.getOffsets().w * size, texture.getOffsets().h * size};
+    w = static_cast<float>(texture.getSize().w) * size - (- textureOffsets.x + textureOffsets.w);
+    h = static_cast<float>(texture.getSize().h) * size - (- textureOffsets.y + textureOffsets.h);
 
     // If the platform starts to the min point
     if (!start) {
@@ -119,7 +124,7 @@ void MovingPlatform2D::applyMovement(double delta_time) {
 
 void MovingPlatform2D::render(SDL_Renderer *renderer, Point camera) const {
     SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_FRect platform_rect = {x - camera.x + textureOffsets.x, y - camera.y + textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
     SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
 }
 

@@ -25,7 +25,7 @@ private:
     float y; /**< The y-coordinate of the platform's position. */
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
-    Texture texture; /**< The texture of the platform. */
+    float size; /**< The size of the platform. */
     float speed; /**< The speed of the platform. */
     float move = 0; /**< The number of pixel the platform has moved */
 
@@ -35,13 +35,15 @@ private:
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
-
     float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
+
+    Texture texture; /**< The texture of the platform. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
 
 public:
     /* CONSTRUCTOR */
 
-    MovingPlatform1D(float x, float y, float w, float h, const Texture& texture, float speed, float min, float max, bool start, bool axis);
+    MovingPlatform1D(float x, float y, float size, float speed, float min, float max, bool start, bool axis, const Texture& texture);
 
 
     /* ACCESSORS */

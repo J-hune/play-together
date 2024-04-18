@@ -23,7 +23,7 @@ private:
     float y; /**< The y-coordinate of the platform's position. */
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
-    Texture texture; /**< The texture of the platform. */
+    float size; /**< The size of the platform. */
     float speed; /**< The speed of the platform. */
     float moveX = 0; /**< The number of pixel the platform has moved on the x-axis. */
     float moveY = 0; /**< The number of pixel the platform has moved on the y-axis. */
@@ -38,11 +38,14 @@ private:
 
     float smoothingLimit = 3; /**< The smoothing limit of the platform movement. */
 
+    Texture texture; /**< The texture of the platform. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
+
 
 public:
     /* CONSTRUCTORS */
 
-    MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start);
+    MovingPlatform2D(float x, float y, float size, float speed, Point left, Point right, bool start, const Texture& texture);
 
 
     /* ACCESSORS */

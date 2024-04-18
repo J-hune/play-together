@@ -42,21 +42,40 @@ void TextureManager::loadPlatformTextures(SDL_Renderer &renderer) {
     platforms.clear();
 
     std::string folder_path = std::format("{}world_{}/platforms/", TEXTURES_DIRECTORY, worldID); // Get the folder path
+    std::string properties_file_path = std::string(folder_path) + "/properties.json";
+    std::ifstream file(properties_file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "TextureManager: Unable to open the properties file. Please check the file path." << std::endl;
+        exit(1);
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
 
     // Count the number of files in the folder
     int file_count = 0;
     for (const auto& entry : std::filesystem::directory_iterator(folder_path)) {
-        if (std::filesystem::is_regular_file(entry)) {
+        if (std::filesystem::is_regular_file(entry) && entry.path().extension() == ".png") {
             file_count++;
         }
     }
 
-    // Load all the textures of the backgrounds
+    // Check if every texture has its properties
+    if (file_count > static_cast<int>(j["offsets"].size())) {
+        std::cerr << "TextureManager: Missing properties for a platform. Please check the properties file." << std::endl;
+        exit(1);
+    }
+
+    // Load all the textures of the platforms
     for (int i = 0; i < file_count; i++) {
         std::string file_path = std::format("{}platform_{}.png", folder_path, i); // Get the file path
         SDL_Texture *new_texture = IMG_LoadTexture(&renderer, file_path.c_str());
-        platforms.emplace_back(*new_texture);
+        SDL_FRect texture_offsets = {j["offsets"][i][0], j["offsets"][i][1], j["offsets"][i][2], j["offsets"][i][3]};
+        platforms.emplace_back(*new_texture, texture_offsets);
     }
+
 }
 
 bool TextureManager::loadBackgroundTextures(SDL_Renderer &renderer) {
@@ -114,4 +133,6 @@ void TextureManager::loadWorldTextures(SDL_Renderer *renderer, int world_id) {
     loadPlatformTextures(*renderer);
     loadBackgroundTextures(*renderer);
     loadForegroundTextures(*renderer);
+
+    std::cout << "TextureManager: Loaded world textures." << std::endl;
 }

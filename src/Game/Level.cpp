@@ -487,55 +487,51 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     for (const auto &platform : j["movingPlatforms1D"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float speed = platform["speed"];
         float min_x = platform["min"];
         float max_x = platform["max"];
         bool start = platform["start"];
         bool axis = platform["axis"];
         int texture_id = platform["texture"];
-        movingPlatforms1D.emplace_back(x, y, width, height, textures[texture_id], speed, min_x, max_x, start, axis);
+        movingPlatforms1D.emplace_back(x, y, size, speed, min_x, max_x, start, axis, textures[texture_id]);
     }
 
     // Load all 2D moving platforms
     for (const auto &platform : j["movingPlatforms2D"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float speed = platform["speed"];
         Point left(platform["left"][0], platform["left"][1]);
         Point right(platform["right"][0], platform["right"][1]);
         bool start = platform["start"];
         int texture_id = platform["texture"];
-        movingPlatforms2D.emplace_back(x, y, width, height, textures[texture_id], speed, left, right, start);
+        movingPlatforms2D.emplace_back(x, y, size, speed, left, right, start, textures[texture_id]);
     }
 
     // Load all switching platforms
     for (const auto &platform : j["switchingPlatforms"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         Uint32 bpm = platform["bpm"];
         std::vector<Point> steps;
         for (const auto &step : platform["steps"]) {
             steps.emplace_back(step[0], step[1]);
         }
         int texture_id = platform["texture"];
-        switchingPlatforms.emplace_back(x, y, width, height, textures[texture_id], bpm, steps);
+        switchingPlatforms.emplace_back(x, y, size, bpm, steps, textures[texture_id]);
     }
 
     // Load all weight platforms
     for (const auto &platform : j["weightPlatforms"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float stepDistance = platform["stepDistance"];
         int texture_id = platform["texture"];
-        weightPlatforms.emplace_back(x, y, width, height, stepDistance, textures[texture_id]);
+        weightPlatforms.emplace_back(x, y, size, stepDistance, textures[texture_id]);
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;

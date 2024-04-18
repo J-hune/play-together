@@ -1,6 +1,7 @@
 #include "../../include/Game/Menu.h"
 #include "../../include/Network/TCPError.h"
 #include "../../include/Network/UDPError.h"
+#include "../../include/Game/TextBox.h"
 
 /** FUNCTIONS **/
 
@@ -99,6 +100,9 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_nam
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(save_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(remove_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(main_menu_button4);
+
+    auto text_input = TextBox(renderer, 200,500,400,50);
+    textInputs[{GameState::STOPPED, MenuAction::PLAY}].push_back(text_input);
 }
 
 
@@ -143,6 +147,10 @@ void Menu::render() {
     for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
+    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}])
+    {
+        text_input.render();
+    }
 }
 
 void Menu::reset() {
@@ -153,6 +161,7 @@ void Menu::reset() {
     for (Button &button: aggregateButtons(buttons)) {
         button.reset();
     }
+
 }
 
 void Menu::onServerDisconnect() {
@@ -171,6 +180,11 @@ void Menu::handleEvent(const SDL_Event &event) {
         if (button.isButtonClicked()) {
             handleButtonAction(button);
         }
+    }
+    auto &current_text_inputs = textInputs[{Mediator::getGameState(), getCurrentMenuAction()}];
+    for (TextBox &text_input: current_text_inputs)
+    {
+        text_input.handleEvent(event);
     }
 }
 
@@ -293,6 +307,11 @@ void Menu::handleDeleteSaveButton(Button &button) {
 }
 
 void Menu::handleNavigateToMainMenuButton(Button &button) {
+    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}])
+    {
+        text_input.emptyText();
+        std::cout << text_input.getText() << std::endl;
+    }
     setMenuAction(MenuAction::MAIN);
     button.reset();
 }

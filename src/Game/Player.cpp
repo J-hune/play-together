@@ -601,16 +601,18 @@ void Player::updateCollisionBox() {
         }
         // Check vertical orientation
         if (mavity > 0) {
-            y -= textureOffsets.y - normalOffsets.y;
+            if (lastAnimationIsRunType) y -= textureOffsets.y - normalOffsets.y;
             textureOffsets.y = normalOffsets.y;
             textureOffsets.h = normalOffsets.h;
         } else {
             textureOffsets.y = normalOffsets.h;
             textureOffsets.h = normalOffsets.y;
         }
+
+        lastAnimationIsRunType = false;
     }
     // Run texture offsets
-    else if (sprite.getAnimation() == run || sprite.getAnimation() == sneak) {
+    else if (sprite.getAnimation() == sneak || sprite.getAnimation() == run) {
         // Check horizontal orientation
         if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
             if (rightCollider) x -= textureOffsets.w - runOffsets.w;
@@ -624,13 +626,15 @@ void Player::updateCollisionBox() {
         }
         // Check vertical orientation
         if (mavity > 0) {
-            y -= textureOffsets.y - runOffsets.y;
+            if (!lastAnimationIsRunType) y -= textureOffsets.y - runOffsets.y;
             textureOffsets.y = runOffsets.y;
             textureOffsets.h = runOffsets.h;
         } else {
             textureOffsets.y = runOffsets.h;
             textureOffsets.h = runOffsets.y;
         }
+
+        lastAnimationIsRunType = true;
     }
 
     // Update collision box

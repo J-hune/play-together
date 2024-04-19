@@ -83,6 +83,10 @@ void InputManager::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &key
             }
             player->setWantToMoveRight(false); // Disable right movement
             break;
+        case SDL_SCANCODE_F:
+            if (player == nullptr) break;
+            player->hitAction(false);
+            break;
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
             player->setSprint(false);
@@ -114,6 +118,10 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_D:
             if (player == nullptr) break;
             player->setWantToMoveRight(true);
+            break;
+        case SDL_SCANCODE_F:
+            if (player == nullptr) break;
+            player->hitAction(true);
             break;
         case SDL_SCANCODE_G:
             gamePtr->switchMavity(); // Switch mavity for all players

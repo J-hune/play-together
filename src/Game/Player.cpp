@@ -26,7 +26,6 @@ Player::Player(int playerID, Point spawnPoint, float size)
 
     sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_SPRITE_WIDTH, BASE_SPRITE_HEIGHT);
     setSpriteTextureByID(playerID);
-    setSize(size);
 }
 
 
@@ -198,6 +197,15 @@ std::vector<Point> Player::getRoofColliderVertices() const {
         };
 }
 
+std::vector<Point> Player::getHitZoneVertices() const {
+    return {
+            {x + hitZone.x, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y + hitZone.h},
+            {x + hitZone.x, y + hitZone.y + hitZone.h}
+    };
+}
+
 SDL_FRect Player::getHorizontalColliderBoundingBox() const {
     return directionX == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
 }
@@ -218,6 +226,10 @@ SDL_FRect Player::getGroundColliderBoundingBox() const {
 SDL_FRect Player::getRoofColliderBoundingBox() const {
     if (mavity > 0) return {x, y - 1, width, 1};
     else return {x, y + height, width, 1};
+}
+
+SDL_FRect Player::getHitZoneBoundingBox() const {
+    return {x + hitZone.x, y + hitZone.y, hitZone.w, hitZone.h};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -241,6 +253,8 @@ void Player::setY(float val) {
 
 void Player::setSize(float val) {
     size = val;
+    baseHitZone = {BASE_HIT_ZONE.x * size, BASE_HIT_ZONE.y * size, BASE_HIT_ZONE.w * size, BASE_HIT_ZONE.h * size};
+    hitZone = baseHitZone;
     normalOffsets = {baseNormalOffsets.x * size, baseNormalOffsets.y * size, baseNormalOffsets.w * size, baseNormalOffsets.h * size};
     runOffsets = {baseRunOffsets.x * size, baseRunOffsets.y * size, baseRunOffsets.w * size, baseRunOffsets.h * size};
     spriteWidth = BASE_SPRITE_WIDTH * size;
@@ -392,7 +406,7 @@ void Player::useDefaultTexture() {
 }
 void Player::useMedalTexture(){
     sprite.setTexture(*medalTexture);
-};
+}
 
 void Player::setSpriteTextureByID(int id) {
     if (id == 1){ // Texture 1
@@ -440,6 +454,18 @@ void Player::teleportPlayer(float newX, float newY) {
 
 void Player::addToScore(int val) {
     score += val;
+}
+
+void Player::hitAction(bool state) {
+    if (!state) {
+        hitLock = false;
+    } else if (!hitLock) {
+        isHitting = true;
+        sprite.setAnimation(hit);
+        hitLock = true;
+        hitTimer = HIT_TIME;
+        lastHitTimeUpdate = SDL_GetTicks();
+    }
 }
 
 bool Player::canJump() const {
@@ -533,12 +559,36 @@ void Player::calculateMovement(double delta_time) {
     calculateYaxisMovement(delta_time);
 }
 
+void Player::updateHitZone() {
+    if (hitTimer > 0) {
+        hitTimer -= static_cast<int>(SDL_GetTicks() - lastHitTimeUpdate);
+        lastHitTimeUpdate = SDL_GetTicks();
+
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            hitZone.x = baseHitZone.x;
+        } else {
+            hitZone.x = - (baseHitZone.w - (width - baseHitZone.x));
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            hitZone.y = baseHitZone.y;
+        } else {
+            hitZone.y = - (baseHitZone.h - (height - baseHitZone.y));
+        }
+
+        if (hitTimer <= 0) {
+            isHitting = false;
+        }
+    }
+}
+
 void Player::updateCollisionBox() {
     updateSpriteAnimation();
     updateSpriteOrientation();
 
     // Normal texture offsets
-    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk) {
+    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk || sprite.getAnimation() == hit) {
         // Check horizontal orientation
         if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
             textureOffsets.x = normalOffsets.x;
@@ -586,6 +636,8 @@ void Player::updateCollisionBox() {
     // Update collision box
     width = spriteWidth - (textureOffsets.x + textureOffsets.w);
     height = spriteHeight - (textureOffsets.y + textureOffsets.h);
+
+    updateHitZone();
 }
 
 bool Player::hasMoved() const {
@@ -669,36 +721,48 @@ void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
 }
 
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
-    //Draw the right collider
+    // Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = getRightColliderVertices();
-    for (size_t i = 0; i < vertexRight.size(); ++i) {
-        const auto &vertex1 = vertexRight[i];
-        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+    std::vector<Point> vertex_right = getRightColliderVertices();
+    for (size_t i = 0; i < vertex_right.size(); ++i) {
+        const auto &vertex1 = vertex_right[i];
+        const auto &vertex2 = vertex_right[(i + 1) % vertex_right.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the left collider
+    // Draw the left collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = getLeftColliderVertices();
-    for (size_t i = 0; i < vertexLeft.size(); ++i) {
-        const auto &vertex1 = vertexLeft[i];
-        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+    std::vector<Point> vertex_left = getLeftColliderVertices();
+    for (size_t i = 0; i < vertex_left.size(); ++i) {
+        const auto &vertex1 = vertex_left[i];
+        const auto &vertex2 = vertex_left[(i + 1) % vertex_left.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the roof collider
+    // Draw the roof collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = getRoofColliderVertices();
-    for (size_t i = 0; i < vertex.size(); ++i) {
-        const auto &vertex1 = vertex[i];
-        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+    std::vector<Point> vertex_roof = getRoofColliderVertices();
+    for (size_t i = 0; i < vertex_roof.size(); ++i) {
+        const auto &vertex1 = vertex_roof[i];
+        const auto &vertex2 = vertex_roof[(i + 1) % vertex_roof.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the ground collider
+    // Draw the ground collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = getGroundColliderVertices();
-    for (size_t i = 0; i < vertexGround.size(); ++i) {
-        const auto &vertex1 = vertexGround[i];
-        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+    std::vector<Point> vertex_ground = getGroundColliderVertices();
+    for (size_t i = 0; i < vertex_ground.size(); ++i) {
+        const auto &vertex1 = vertex_ground[i];
+        const auto &vertex2 = vertex_ground[(i + 1) % vertex_ground.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+
+    // Draw the hitting collider
+    if (isHitting) {
+        SDL_SetRenderDrawColor(renderer, 230, 0, 0, 255);
+        std::vector<Point> vertex_hit_zone = getHitZoneVertices();
+        for (size_t i = 0; i < vertex_hit_zone.size(); ++i) {
+            const auto &vertex1 = vertex_hit_zone[i];
+            const auto &vertex2 = vertex_hit_zone[(i + 1) % vertex_hit_zone.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x,
+                                vertex2.y - camera.y);
+        }
     }
 }

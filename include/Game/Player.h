@@ -108,6 +108,7 @@ private:
     static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
 
     // TEXTURES OFFSETS
+    bool lastAnimationIsRunType = false; /**< Flag indicating whether the last animation was a run animation. */
     SDL_FRect textureOffsets = normalOffsets; /**< The offsets of the player's sprite */
     SDL_FRect normalOffsets = baseNormalOffsets; /**< The normal offsets of the player's sprite */
     SDL_FRect runOffsets = baseRunOffsets; /**< The run offsets of the player's sprite */

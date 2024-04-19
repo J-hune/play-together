@@ -19,6 +19,7 @@
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
 #include "Items/Coin.h"
+#include "Traps/Crusher.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -71,6 +72,9 @@ private:
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of SwitchingPlatform representing switching platforms. */
     std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
+
+    // TRAPS
+    std::vector<Crusher> crushers; /**< Collection of Crusher representing crushers. */
 
     // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
@@ -163,6 +167,12 @@ public:
     [[nodiscard]] std::vector<WeightPlatform> getWeightPlatforms() const;
 
     /**
+     * @brief Return the crushers attribute.
+     * @return A vector of Crusher.
+     */
+    [[nodiscard]] std::vector<Crusher> getCrushers() const;
+
+    /**
      * @brief Return the sizePowerUp attribute.
      * @return A vector of SizePowerUp.
      */
@@ -247,6 +257,13 @@ public:
     void applyPlatformsMovement(double delta_time);
 
     /**
+     * @brief Applies the movement of every traps in the level.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @return Returns true if a crusher reach the end of his down movement to make camera shake, false otherwise.
+     */
+    bool applyTrapsMovement(double delta_time);
+
+    /**
      * @brief Generates a specified number of asteroids in the game.
      * @param nbAsteroid The number of asteroids must have in the game.
      */
@@ -320,6 +337,20 @@ public:
     void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
+     * @brief Renders the crushers by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderTraps(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the crushers by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderTrapsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
      * @brief Renders the items by sprites.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -380,6 +411,12 @@ private:
      * @param map_file_name Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &map_file_name);
+
+    /**
+     * @brief Load the traps from a map.
+     * @param map_file_name Represents the name of the map.
+     */
+    void loadTrapsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the items from a map.

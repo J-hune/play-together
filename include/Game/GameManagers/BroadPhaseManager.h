@@ -28,6 +28,9 @@ private:
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
 
+    // TRAPS
+    std::vector<Crusher> crushers; /**< Collection of Crusher representing crushers. */
+
     // ITEMS
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
@@ -52,6 +55,7 @@ public:
     [[nodiscard]] std::vector<MovingPlatform2D> &getMovingPlatforms2D();
     [[nodiscard]] std::vector<SwitchingPlatform> &getSwitchingPlatforms();
     [[nodiscard]] std::vector<WeightPlatform> &getWeightPlatforms();
+    [[nodiscard]] std::vector<Crusher> &getCrushers();
     [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUps();
     [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUps();
     [[nodiscard]] std::vector<Coin> &getCoins();
@@ -77,6 +81,7 @@ private:
     void check2DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void checkSwitchingPlatforms(const SDL_FRect& broad_phase_area);
     void checkWeightPlatforms(const SDL_FRect& broad_phase_area);
+    void checkCrushers(const SDL_FRect& broad_phase_area);
     void checkPowerUps(const SDL_FRect& broad_phase_area);
     void checkCoins(const SDL_FRect& broad_phase_area);
 

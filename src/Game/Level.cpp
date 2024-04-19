@@ -21,6 +21,7 @@ Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager
     loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
+    loadTrapsFromMap(map_name);
     loadItemsFromMap(map_name);
 }
 
@@ -91,6 +92,10 @@ std::vector<WeightPlatform> Level::getWeightPlatforms() const {
     return weightPlatforms;
 }
 
+std::vector<Crusher> Level::getCrushers() const {
+    return crushers;
+}
+
 std::vector<SizePowerUp> Level::getSizePowerUp() const {
     return sizePowerUp;
 }
@@ -152,11 +157,10 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
 
 void Level::removeItemFromCoins(Coin const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < coins.size() && item != coins[i]) {
-        i++;
+    auto it = std::ranges::find(coins, item);
+    if (it != coins.end()) {
+        coins.erase(it);
     }
-    coins.erase(coins.begin() + i);
 }
 
 
@@ -185,6 +189,31 @@ void Level::togglePlatformsMovement(bool state){
     for (MovingPlatform2D &platform: movingPlatforms2D) platform.setIsMoving(state);
     for (SwitchingPlatform &platform: switchingPlatforms) platform.setIsMoving(state);
     for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
+}
+
+void Level::applyAsteroidsMovement(double delta_time) {
+    // Apply movement to all players
+    for (Asteroid &asteroid: asteroids) {
+        asteroid.applyMovement(delta_time);
+    }
+}
+
+void Level::applyPlatformsMovement(double delta_time) {
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
+    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
+}
+
+bool Level::applyTrapsMovement(double delta_time) {
+    bool check = false;
+
+    // Apply movement to all crushers
+    for (Crusher &crusher: crushers) {
+        if (crusher.applyMovement(delta_time)) check = true;
+    }
+
+    return check;
 }
 
 void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
@@ -275,6 +304,14 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
 
 }
 
+void Level::renderTraps(SDL_Renderer *renderer, Point camera) const {
+    for (const Crusher &crusher: crushers) crusher.render(renderer, camera); // Draw the crushers
+}
+
+void Level::renderTrapsDebug(SDL_Renderer *renderer, Point camera) const {
+    for (const Crusher &crusher: crushers) crusher.renderDebug(renderer, camera); // Draw the crushers
+}
+
 void Level::renderItems(SDL_Renderer *renderer, Point camera) {
     for (SizePowerUp &item : sizePowerUp) item.render(renderer, camera); // Draw the size power-ups
     for (SpeedPowerUp &item : speedPowerUp) item.render(renderer, camera); // Draw the speed power-ups
@@ -295,21 +332,6 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 255, 64, 255);
     for (const Coin &item : coins) item.renderDebug(renderer, camera);
 }
-
-void Level::applyAsteroidsMovement(double delta_time) {
-    // Apply movement to all players
-    for (Asteroid &asteroid: asteroids) {
-        asteroid.applyMovement(delta_time);
-    }
-}
-
-void Level::applyPlatformsMovement(double delta_time) {
-    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
-    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
-}
-
 
 void Level::loadMapProperties(const std::string &map_file_name) {
     musics.clear();
@@ -535,6 +557,39 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
+}
+
+void Level::loadTrapsFromMap(const std::string &mapFileName) {
+    crushers.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/traps.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the traps file. Please check the file path." << std::endl;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    const std::vector<Texture> &textures = textureManagerPtr->getCrushers();
+
+    // Load all crushers
+    for (const auto &crusher : j["crushers"]) {
+        float x = crusher["x"];
+        float y = crusher["y"];
+        float size = crusher["size"];
+        float min = crusher["min"];
+        float max = crusher["max"];
+        Uint32 moveUpTime = crusher["moveUpTime"];
+        Uint32 waitUpTime = crusher["waitUpTime"];
+        Uint32 waitDownTime = crusher["waitDownTime"];
+        int texture_id = crusher["texture"];
+        crushers.emplace_back(x, y, size, min, max, moveUpTime, waitUpTime, waitDownTime, textures[texture_id]);
+    }
+
+    std::cout << "Level: Loaded " << crushers.size() << " crushers." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

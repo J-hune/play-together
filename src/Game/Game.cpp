@@ -140,6 +140,7 @@ void Game::loadLevel(const std::string &map_name, short last_checkpoint, const n
 void Game::update(double delta_time) {
     inputManager->handleKeyboardEvents();
     calculatePlayersMovement(delta_time);
+    if (level.applyTrapsMovement(delta_time)) camera.setShake(150);
 
     level.applyPlatformsMovement(delta_time);
     level.applyAsteroidsMovement(delta_time);

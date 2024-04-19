@@ -70,6 +70,13 @@ private:
     void handleCollisionsWithWeightPlatform(Player *player);
 
     /**
+     * @brief Handles collisions between the player and crushers.
+     * @param player The player object.
+     * @return True if the player dies, false otherwise.
+     */
+    bool handleCollisionsWithCrushers(Player *player);
+
+    /**
      * @brief Handles collisions between the player and camera borders.
      * @return True if the player dies, false otherwise.
      */

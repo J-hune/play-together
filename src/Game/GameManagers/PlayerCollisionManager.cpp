@@ -167,6 +167,45 @@ void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) 
     }
 }
 
+bool PlayerCollisionManager::handleCollisionsWithCrushers(Player *player) {
+    // Check for collisions with each crusher
+    for (Crusher const &crusher : gamePtr->getBroadPhaseManager().getCrushers()) {
+        // Check if a collision is detected
+            if (checkAABBCollision(player->getBoundingBox(), crusher.getBoundingBox())) {
+                // If the player is being crushed, return true to kill him
+                if (crusher.getIsCrushing() && checkAABBCollision(player->getBoundingBox(), crusher.getCrushingZoneBoundingBox())) {
+                    return true;
+                }
+                // If the player is not being crushed, correct the collision
+                else {
+
+                    correctAABBCollision(player, crusher.getBoundingBox());
+
+                    // If the collision is with the roof, the player can't jump anymore
+                    if (checkAABBCollision(player->getRoofColliderBoundingBox(), crusher.getBoundingBox())) {
+                        player->setRoofCollider(true);
+                        player->setIsJumping(false);
+                        player->setMoveY(0);
+                    }
+                    // If the collision is with the ground, the player is on a platform
+                    if (checkAABBCollision(player->getGroundColliderBoundingBox(), crusher.getBoundingBox())) {
+                        player->setGroundCollider(true);
+                        player->setIsGrounded(true);
+                        player->setIsOnPlatform(true);
+                        player->setMoveY(0);
+                    }
+                    // If the collision is with the wall, the player can't move
+                    if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), crusher.getBoundingBox())) {
+                        player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
+                        player->setCanMove(false);
+                    }
+                }
+            }
+        }
+
+    return false;
+}
+
 bool PlayerCollisionManager::handleCollisionsWithCameraBorders(const SDL_FRect player) {
     const SDL_FRect &camera = gamePtr->getCamera()->getBoundingBox();
 
@@ -295,7 +334,8 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
 
         // Handle collisions with death zones and camera borders to check if the player dies
         if (handleCollisionsWithCameraBorders(player.getBoundingBox())
-            || handleCollisionsWithDeathZones(player))
+            || handleCollisionsWithDeathZones(player)
+            || handleCollisionsWithCrushers(&player))
         {
             gamePtr->getPlayerManager().killPlayer(player);
         }

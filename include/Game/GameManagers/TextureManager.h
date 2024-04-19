@@ -24,6 +24,7 @@ private:
     int worldID = -1; /**< Represents the ID of the world from which textures are loaded. */
 
     std::vector<Texture> platforms; /**< Collection of Texture representing the platforms. */
+    std::vector<Texture> crushers; /**< Collection of Texture representing the crusher textures. */
     std::vector<SDL_Texture*> backgrounds; /**< Collection of SDL_Texture representing the background textures. */
     SDL_Texture *middleground; /**< SDL_Texture representing the middle ground texture. */
     std::vector<SDL_Texture*> foregrounds; /**< Collection of SDL_Texture representing the foreground textures. */
@@ -40,6 +41,7 @@ public:
 
     [[nodiscard]] int getWorldID() const;
     [[nodiscard]] std::vector<Texture>& getPlatforms();
+    [[nodiscard]] std::vector<Texture>& getCrushers();
     [[nodiscard]] std::vector<SDL_Texture*>& getBackgrounds();
     [[nodiscard]] SDL_Texture* getMiddleground();
     [[nodiscard]] std::vector<SDL_Texture*>& getForegrounds();
@@ -66,8 +68,15 @@ private:
 
     /**
      * @brief Load the textures of the platforms.
+     * @param renderer Represents the renderer of the game.
      */
     void loadPlatformTextures(SDL_Renderer &renderer);
+
+    /**
+     * @brief Load the textures of the crushers.
+     * @param renderer Represents the renderer of the game.
+     */
+    void loadCrusherTextures(SDL_Renderer &renderer);
 
     /**
      * @brief Load the background textures.

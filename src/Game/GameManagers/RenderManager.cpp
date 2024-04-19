@@ -118,6 +118,7 @@ void RenderManager::render() {
 
         level->renderAsteroids(renderer, camera_point); // Draw the asteroids
         level->renderPlatforms(renderer, camera_point); // Draw the platforms
+        level->renderTraps(renderer, camera_point); // Draw the traps
 
         level->renderMiddleground(renderer, camera_point); // Draw the middleground
         level->renderForegrounds(renderer, camera_point); // Draw the foreground
@@ -128,12 +129,14 @@ void RenderManager::render() {
         level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
         level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderTrapsDebug(renderer, camera_point); // Draw the traps
         level->renderItemsDebug(renderer, camera_point); // Draw the items
 
         // Draw the characters
         for (Player const& player : players) {
             player.renderDebug(renderer, camera_point);
         }
+
     }
 
     // Render the fps counter

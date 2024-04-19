@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_TEXTURE_H
 
 #include <SDL.h>
+#include "../Game/Point.h"
 
 
 constexpr char TEXTURES_DIRECTORY[] = "assets/textures/";
@@ -20,8 +21,9 @@ class Texture {
 private:
     /* ATTRIBUTES */
 
-    SDL_Texture *texturePtr; /**< The texture of the sprite. */
+    SDL_Texture *texturePtr = nullptr; /**< The texture of the sprite. */
     SDL_Rect sizeRect = {0, 0, 0, 0}; /**< The square representing the size of the texture. */
+    SDL_FRect offsets; /**< The offset of the texture compared to the collision box. */
     SDL_RendererFlip flipHorizontal = SDL_FLIP_NONE; /**< If the sprite is flipped horizontally. */
     SDL_RendererFlip flipVertical = SDL_FLIP_NONE; /**< If the sprite is flipped vertically. */
 
@@ -29,7 +31,7 @@ public:
     /* CONSTRUCTORS */
 
     Texture() = default;
-    explicit Texture(SDL_Texture &texture);
+    explicit Texture(SDL_Texture &texture, SDL_FRect offsets = {0, 0, 0, 0});
 
 
     /* ACCESSORS */
@@ -42,9 +44,21 @@ public:
 
     /**
      * @brief Return the size attribute.
-     * @return A SDL_Rect representing the size of the sprite.
+     * @return A SDL_Rect representing the size of the texture.
      */
     [[nodiscard]] SDL_Rect getSize() const;
+
+    /**
+     * @brief Return the offsets attribute.
+     * @return A SDL_FRect representing the offsets of the texture.
+     */
+    [[nodiscard]] SDL_FRect getOffsets() const;
+
+    /**
+     * @brief Return the flipHorizontal attribute.
+     * @return A SDL_RendererFlip representing flip value for the renderer.
+     */
+    [[nodiscard]] SDL_RendererFlip getFlipHorizontal() const;
 
     /**
      * @brief Return the combination of flipVertical and flipHorizontal attributes.

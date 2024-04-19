@@ -21,17 +21,20 @@ private:
     float y = startY; /**< The y-coordinate of the platform's position. */
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
+    float size; /**< The size of the platform. */
+    float move = 0; /**< The number of pixel the platform has moved */
     float stepDistance; /**< The distance between each step of the platform. */
     float weight = 0; /**< The number of player on the platform. */
     float lerpSmoothingFactor = 11; /**< The smoothing factor for the lerp calculation. */
-    Texture texture; /**< The texture of the platform. */
-
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+
+    Texture texture; /**< The texture of the platform. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
 
 public:
     /* CONSTRUCTORS */
 
-    WeightPlatform(float x, float y, float w, float h, float stepDistance, const Texture& texture);
+    WeightPlatform(float x, float y, float size, float stepDistance, const Texture& texture);
 
     bool operator==(const WeightPlatform &item) const {
         return x == item.getX()
@@ -66,6 +69,12 @@ public:
      * @return The value of the height attribute.
      */
     [[nodiscard]] float getH() const override;
+
+    /**
+     * @brief Return the move attribute.
+     * @return The value of the move attribute.
+     */
+    [[nodiscard]] float getMove() const;
 
     /**
      * @brief Return the isMoving attribute.

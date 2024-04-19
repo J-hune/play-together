@@ -24,18 +24,21 @@ private:
     float y; /**< The y-coordinate of the platform's position. */
     float w; /**< The width of the platform. (in pixels) */
     float h; /**< The height of the platform. */
-    Texture texture; /**< The texture of the platform. */
+    float size; /**< The size of the platform. */
     double bpm; /**< The beat per minute of the platform. */
     Uint32 startTime = SDL_GetTicks(); /**< The time set at the beginning of every beat */
     int actualPoint = 0; /**< The current point the platform's position. */
     std::vector<Point> steps; /** Collection of Point representing every possible position of the platform. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
 
+    Texture texture; /**< The texture of the platform. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
+
 
 public:
     /* CONSTRUCTORS */
 
-    SwitchingPlatform(float x, float y, float w, float h, const Texture& texture, Uint32 bpm, std::vector<Point> steps);
+    SwitchingPlatform(float x, float y, float size, Uint32 bpm, std::vector<Point> steps, const Texture& texture);
 
 
     /* ACCESSORS */

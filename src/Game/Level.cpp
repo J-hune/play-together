@@ -184,6 +184,13 @@ void Level::addAsteroid(Asteroid const &asteroid) {
     asteroids.emplace_back(asteroid);
 }
 
+void Level::togglePlatformsMovement(bool state){
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.setIsMoving(state);
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.setIsMoving(state);
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.setIsMoving(state);
+    for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
+}
+
 void Level::applyAsteroidsMovement(double delta_time) {
     // Apply movement to all players
     for (Asteroid &asteroid: asteroids) {
@@ -192,25 +199,10 @@ void Level::applyAsteroidsMovement(double delta_time) {
 }
 
 void Level::applyPlatformsMovement(double delta_time) {
-    // Apply movement for 1D platforms
-    for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for 2D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for switching platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for weight platforms
-    for (WeightPlatform &platform: weightPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
+    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
 }
 
 void Level::applyTrapsMovement(double delta_time) {
@@ -227,7 +219,9 @@ void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const 
 }
 
 void Level::renderMiddleground(SDL_Renderer *renderer, const Point camera) const {
-    middleground.render(renderer, &camera);
+    SDL_Rect src_rect = middleground.getSize();
+    SDL_FRect layer_rect_1 = { -40 - camera.x, -350 - camera.y, static_cast<float>(src_rect.w), static_cast<float>(src_rect.h)}; // TODO: change static values to 0
+    SDL_RenderCopyExF(renderer, middleground.getTexture(), &src_rect, &layer_rect_1, 0.0, nullptr, SDL_FLIP_NONE);
 }
 
 void Level::renderForegrounds(SDL_Renderer *renderer, const Point camera) const {
@@ -399,7 +393,7 @@ void Level::loadEnvironmentFromMap(const std::string &map_file_name) {
     }
 
     // Load middle ground layer
-    middleground = Layer(*textureManagerPtr->getMiddleground(), 1);
+    middleground = Texture(*textureManagerPtr->getMiddleground());
 
     // Load foreground layers
     for (const auto& layer : j["foregroundLayers"]) {
@@ -511,55 +505,51 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     for (const auto &platform : j["movingPlatforms1D"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float speed = platform["speed"];
         float min_x = platform["min"];
         float max_x = platform["max"];
         bool start = platform["start"];
         bool axis = platform["axis"];
         int texture_id = platform["texture"];
-        movingPlatforms1D.emplace_back(x, y, width, height, textures[texture_id], speed, min_x, max_x, start, axis);
+        movingPlatforms1D.emplace_back(x, y, size, speed, min_x, max_x, start, axis, textures[texture_id]);
     }
 
     // Load all 2D moving platforms
     for (const auto &platform : j["movingPlatforms2D"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float speed = platform["speed"];
         Point left(platform["left"][0], platform["left"][1]);
         Point right(platform["right"][0], platform["right"][1]);
         bool start = platform["start"];
         int texture_id = platform["texture"];
-        movingPlatforms2D.emplace_back(x, y, width, height, textures[texture_id], speed, left, right, start);
+        movingPlatforms2D.emplace_back(x, y, size, speed, left, right, start, textures[texture_id]);
     }
 
     // Load all switching platforms
     for (const auto &platform : j["switchingPlatforms"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         Uint32 bpm = platform["bpm"];
         std::vector<Point> steps;
         for (const auto &step : platform["steps"]) {
             steps.emplace_back(step[0], step[1]);
         }
         int texture_id = platform["texture"];
-        switchingPlatforms.emplace_back(x, y, width, height, textures[texture_id], bpm, steps);
+        switchingPlatforms.emplace_back(x, y, size, bpm, steps, textures[texture_id]);
     }
 
     // Load all weight platforms
     for (const auto &platform : j["weightPlatforms"]) {
         float x = platform["x"];
         float y = platform["y"];
-        float width = platform["width"];
-        float height = platform["height"];
+        float size = platform["size"];
         float stepDistance = platform["stepDistance"];
         int texture_id = platform["texture"];
-        weightPlatforms.emplace_back(x, y, width, height, stepDistance, textures[texture_id]);
+        weightPlatforms.emplace_back(x, y, size, stepDistance, textures[texture_id]);
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;

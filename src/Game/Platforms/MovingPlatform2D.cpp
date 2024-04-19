@@ -9,9 +9,14 @@
 
 /* CONSTRUCTORS */
 
-MovingPlatform2D::MovingPlatform2D(float x, float y, float w, float h, const Texture& texture,float speed, Point left, Point right, bool start)
-        : x(x), y(y), w(w), h(h), texture(texture), speed(speed), left(left), right(right),
-         ratio(std::abs((left.x - right.x) / (left.y - right.y))), start(start) {
+MovingPlatform2D::MovingPlatform2D(float x, float y, float size, float speed, Point left, Point right, bool start, const Texture& texture)
+        : x(x), y(y), size(size), speed(speed), left(left), right(right),
+         ratio(std::abs((left.x - right.x) / (left.y - right.y))), start(start), texture(texture) {
+
+    // Set the size
+    textureOffsets = {texture.getOffsets().x * size, texture.getOffsets().y * size, texture.getOffsets().w * size, texture.getOffsets().h * size};
+    w = static_cast<float>(texture.getSize().w) * size - (textureOffsets.x + textureOffsets.w);
+    h = static_cast<float>(texture.getSize().h) * size - (textureOffsets.y + textureOffsets.h);
 
     // If the platform starts to the min point
     if (!start) {
@@ -75,46 +80,51 @@ void MovingPlatform2D::setIsMoving(bool state) {
 /* METHODS */
 
 void MovingPlatform2D::applyMovement(double delta_time) {
-    // Add basic movement
-    moveX = 150;
-    moveY = 150;
+    if (isMoving) {
+        // Add basic movement
+        moveX = 150;
+        moveY = 150;
 
-    // Calculate x-axis movement
-    moveX *= static_cast<float>(delta_time); // Apply movement per second
-    moveX *= speed; // Apply speed
-    moveX *= directionX; // Apply direction
+        // Calculate x-axis movement
+        moveX *= static_cast<float>(delta_time); // Apply movement per second
+        moveX *= speed; // Apply speed
+        moveX *= directionX; // Apply direction
 
-    // Calculate y-axis movement
-    moveY *= static_cast<float>(delta_time); // Apply movement per second
-    moveY *= speed; // Apply speed
-    moveY *= directionY; // Apply direction
+        // Calculate y-axis movement
+        moveY *= static_cast<float>(delta_time); // Apply movement per second
+        moveY *= speed; // Apply speed
+        moveY *= directionY; // Apply direction
 
-    // Apply ratio
-    ratio > 1 ? moveY /= ratio : moveX *= ratio;
+        // Apply ratio
+        ratio > 1 ? moveY /= ratio : moveX *= ratio;
 
-    // Apply movement to the platform
-    x += moveX;
-    y += moveY;
+        // Apply movement to the platform
+        x += moveX;
+        y += moveY;
 
-    // If the platform has reached its minimum point
-    if (x < left.x) {
-        x = left.x;
-        y = left.y;
-        directionX = 1; // Change direction to left
-        directionY = left.y - right.y > 0 ? -1 : 1;
-    }
-    // If the platform has reached its maximum point
+        // If the platform has reached its minimum point
+        if (x < left.x) {
+            x = left.x;
+            y = left.y;
+            directionX = 1; // Change direction to left
+            directionY = left.y - right.y > 0 ? -1 : 1;
+        }
+            // If the platform has reached its maximum point
 
-    else if (x + w > right.x) {
-        x = right.x - w;
-        directionX = -1; // Change direction to right
-        directionY = left.y - right.y > 0 ? 1 : -1;
+        else if (x + w > right.x) {
+            x = right.x - w;
+            directionX = -1; // Change direction to right
+            directionY = left.y - right.y > 0 ? 1 : -1;
+        }
+    } else{
+        moveX = 0;
+        moveY = 0;
     }
 }
 
 void MovingPlatform2D::render(SDL_Renderer *renderer, Point camera) const {
     SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
     SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
 }
 

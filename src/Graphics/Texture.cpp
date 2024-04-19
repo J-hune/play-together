@@ -8,7 +8,7 @@
 
 /* CONSTRUCTORS */
 
-Texture::Texture(SDL_Texture &texture) : texturePtr(&texture) {
+Texture::Texture(SDL_Texture &texture, SDL_FRect offsets) : texturePtr(&texture), offsets(offsets) {
     SDL_QueryTexture(&texture, nullptr, nullptr, &sizeRect.w, &sizeRect.h);
 }
 
@@ -21,6 +21,14 @@ SDL_Texture* Texture::getTexture() const {
 
 SDL_Rect Texture::getSize() const {
     return sizeRect;
+}
+
+SDL_FRect Texture::getOffsets() const {
+    return offsets;
+}
+
+SDL_RendererFlip Texture::getFlipHorizontal() const {
+    return flipHorizontal;
 }
 
 SDL_RendererFlip Texture::getFlip() const {

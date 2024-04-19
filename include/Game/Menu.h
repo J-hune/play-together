@@ -8,8 +8,9 @@
 #include <format>
 
 #include "../Graphics/Button.h"
-#include "Game.h"
 #include "../Utils/Mediator.h"
+#include "../Sounds/Music.h"
+#include "GameManagers/RenderManager.h"
 
 enum class MenuAction {
     MAIN,
@@ -32,6 +33,19 @@ struct GameStateKey {
  * @brief Represents the game menus including the main menu and pause menu
  */
 class Menu {
+private:
+    /** ATTRIBUTES **/
+
+    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+    bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
+    bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
+    MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
+    std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
+    Music music; /**< The music played when the menu is displayed. */
+    SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
+    SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
+    MessageQueue *messageQueue; /**< Pointer to the message queue for communication between objects. */
+
 public:
     /** CONSTRUCTOR **/
 
@@ -41,7 +55,7 @@ public:
      * @param quit A pointer to a boolean to control the game loop.
      * @param music_file_name Menu music file name.
      */
-    Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name);
+    Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_name, MessageQueue *messageQueue);
 
 
     /** ACCESSORS **/
@@ -109,17 +123,6 @@ public:
     void onServerDisconnect();
 
 private:
-    /** ATTRIBUTES **/
-
-    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
-    bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
-    MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
-    std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-    Music music; /**< The music played when the menu is displayed. */
-    SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
-    SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
-
     /** ACCESSORS **/
 
     /**
@@ -138,7 +141,7 @@ private:
     void handleSaveButton(Button &button) const;
     void handleStopButton(Button &button);
     void handleCreateOrLoadGameButton(Button &button);
-    void handleJoinHostedGameButton(Button &button);
+    void handleJoinHostedGameButton(Button &button) const;
     void handleDeleteSaveButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);
     void handleNavigateToPlayMenuButton(Button &button);

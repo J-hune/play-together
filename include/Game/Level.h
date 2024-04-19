@@ -48,7 +48,7 @@ private:
     // GRAPHICS
     TextureManager *textureManagerPtr; /**< A pointer to the game texture manager. */
     std::vector<Layer> backgrounds; /**< Collection of layers representing the backgrounds, arranged from farthest to nearest. */
-    Layer middleground; /**< Layer representing the middle ground. */
+    Texture middleground; /**< Layer representing the middle ground. */
     std::vector<Layer> foregrounds; /**< Collection of layers representing the foregrounds, arranged from farthest to nearest */
 
     // ZONES
@@ -252,7 +252,7 @@ public:
 
     /**
      * @brief Applies the movement of every platforms in the level.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
     void applyPlatformsMovement(double delta_time);
 
@@ -273,6 +273,11 @@ public:
      * @param asteroid The asteroid to add.
      */
     void addAsteroid(Asteroid const &asteroid);
+
+    /**
+     * @brief Disable all platforms movement.
+     */
+    void togglePlatformsMovement(bool state);
 
     /**
      * @brief Renders the background textures.

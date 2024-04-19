@@ -108,9 +108,7 @@ void RenderManager::render() {
         // Draw the environment
         level->renderBackgrounds(renderer, camera_point); // Draw the background
 
-        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
-        level->renderPlatforms(renderer, camera_point); // Draw the platforms
         level->renderItems(renderer, camera_point); // Draw the items
 
         // Draw the characters
@@ -118,6 +116,8 @@ void RenderManager::render() {
             player.render(renderer, camera_point);
         }
 
+        level->renderAsteroids(renderer, camera_point); // Draw the asteroids
+        level->renderPlatforms(renderer, camera_point); // Draw the platforms
         level->renderTraps(renderer, camera_point); // Draw the traps
 
         level->renderMiddleground(renderer, camera_point); // Draw the middleground

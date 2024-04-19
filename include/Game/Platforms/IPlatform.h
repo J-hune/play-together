@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <vector>
 #include <SDL_image.h>
+#include <cmath>
 #include "../Point.h"
 #include "../../Graphics/Texture.h"
 

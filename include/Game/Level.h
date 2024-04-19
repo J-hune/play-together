@@ -17,6 +17,7 @@
 #include "Items/SpeedPowerUp.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
+#include "Events/Rescue.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -119,6 +120,8 @@ public:
      * @return A short representing the last checkpoint reached by the player.
      */
     [[nodiscard]] short getLastCheckpoint() const;
+
+    [[nodiscard]] std::vector<Rescue> getRescue();
 
 
     /** MUTATORS **/
@@ -235,7 +238,7 @@ private:
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
-
+    std::vector<Rescue> rescueZones;/**Collection of areas where the players can come back*/
 
     /** PRIVATE METHODS **/
 
@@ -282,7 +285,7 @@ private:
      */
     void loadItemsFromMap(const std::string &map_file_name);
 
-
+    void loadRescueZonesFormMap(const std::string &map_file_name);
 };
 
 #endif //PLAY_TOGETHER_LEVEL_H

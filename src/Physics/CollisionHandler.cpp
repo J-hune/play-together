@@ -388,3 +388,14 @@ void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<
         }
     }
 }
+/*
+void handleCollisionWithRescue(Player* player,Level* level,std::vector<Player>& deadPlayers){
+    for(Rescue rescue : level->getRescue()) {
+        if(deadPlayers.empty()) break;
+        if (checkAABBCollision(player->getBoundingBox(), rescue.getBoundingBox())) {
+            for (Player p:deadPlayers) {
+
+            }
+        }
+    }
+}*/

@@ -68,12 +68,25 @@ void PlayerManager::removePlayer(const Player &player) {
 void PlayerManager::killPlayer(Player &player) {
     removePlayer(player);
     deadPlayers.emplace_back(player);
+    std::cout << "_______________________________" << std::endl;
+    //For each player, print the player's ID and score
+    std::cout << "APPEL DE LA METHODE KILL PLAYER" << std::endl;
+    for (Player const &deadPlayer: deadPlayers) {
+        std::cout << "Player ID: " << deadPlayer.getPlayerID() << std::endl;
+    }
+    std::cout << "_______________________________" << std::endl;
 }
 
 void PlayerManager::respawnPlayer(Player &player) {
     // Remove the player from the dead players list
     if (int index = findPlayerIndexById(player.getPlayerID()); index != -1) {
         deadPlayers.erase(deadPlayers.begin() + index);
+    }
+
+    //
+    auto it = std::find(deadPlayers.begin(), deadPlayers.end(),player);
+    if (it != deadPlayers.end()) {
+        deadPlayers.erase(it);
     }
 
     // Add the player to the alive players list

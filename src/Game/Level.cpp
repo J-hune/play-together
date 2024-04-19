@@ -14,6 +14,7 @@ Level::Level(const std::string &map_name) {
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
     loadItemsFromMap(map_name);
+    loadRescueZonesFormMap(map_name);
 }
 
 
@@ -83,6 +84,9 @@ std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
     return speedPowerUp;
 }
 
+std::vector<Rescue> Level::getRescue(){
+    return rescueZones;
+}
 short Level::getLastCheckpoint() const {
     return lastCheckpoint;
 }
@@ -456,3 +460,8 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
 
     std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up and " << speedPowerUp.size() << " speed power-up." << std::endl;
 }
+
+void Level::loadRescueZonesFormMap(const std::string &map_file_name){
+    rescueZones.emplace_back((Rescue (270,0,500,500,Point(250,50))));
+}
+

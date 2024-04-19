@@ -134,5 +134,6 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
  */
 void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp);
 
+void handleCollisionWithRescue(Player* player,Level* level,std::vector<Player>& deadPlayers);
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

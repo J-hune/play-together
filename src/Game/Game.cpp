@@ -330,6 +330,34 @@ void Game::narrowPhase() {
         {
             playerManager->killPlayer(character);
         }
+
+
+        //add the case that there are dead players and the remaining players entered the rescue Area
+        //if there are deads
+        if(!playerManager->getDeadPlayers().empty()){
+            std::cout << "_______________________________" << std::endl;
+            std::cout<<"in if :"<<playerManager->getDeadPlayers().size()<<std::endl;
+            //then handleCollisionWithRescue area
+            //handleCollisionWithRescue(character,level,*(playerManager->getDeadPlayers()));
+            for(Rescue rescue : level.getRescue()) {
+                std::cout<<"in the loop for rescue :"<<rescue.getW()<<std::endl;
+                if(playerManager->getDeadPlayers().empty()) break;
+                if (checkAABBCollision(character.getBoundingBox(), rescue.getBoundingBox())) {
+                    std::cout<<"in if for collision with character"<<std::endl;
+                    for (Player p:playerManager->getDeadPlayers()) {
+                            std::cout<<"in the for with player : "<<p.getPlayerID()<<std::endl;
+                            playerManager->respawnPlayer(p); //can modify the function and pass the rescue point too
+                            Point pos = rescue.getNextposition();
+                            p.teleportPlayer(pos.x,pos.y);
+                            std::cout<<"the player now is "<<p.getX()<<" "<<p.getY()<<std::endl;
+                            //p.setX(pos.x);
+                            //p.setY(pos.y);
+                    }
+                }
+                std::cout << "_______________________________" << std::endl;
+            }
+        }
+
     }
 }
 

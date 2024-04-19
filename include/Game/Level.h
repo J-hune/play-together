@@ -259,8 +259,9 @@ public:
     /**
      * @brief Applies the movement of every traps in the level.
      * @param deltaTime The time elapsed since the last frame in seconds.
+     * @return Returns true if a crusher reach the end of his down movement to make camera shake, false otherwise.
      */
-    void applyTrapsMovement(double delta_time);
+    bool applyTrapsMovement(double delta_time);
 
     /**
      * @brief Generates a specified number of asteroids in the game.
@@ -410,6 +411,12 @@ private:
      * @param map_file_name Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &map_file_name);
+
+    /**
+     * @brief Load the traps from a map.
+     * @param map_file_name Represents the name of the map.
+     */
+    void loadTrapsFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the items from a map.

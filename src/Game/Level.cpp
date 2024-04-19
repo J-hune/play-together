@@ -21,8 +21,8 @@ Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager
     loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
+    loadTrapsFromMap(map_name);
     loadItemsFromMap(map_name);
-    crushers.emplace_back(0, -575, 100, 250, -575, -400, 3, 1000, 250, textureManager->getPlatforms()[0]); // TODO: remove this line
 }
 
 
@@ -205,11 +205,15 @@ void Level::applyPlatformsMovement(double delta_time) {
     for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
 }
 
-void Level::applyTrapsMovement(double delta_time) {
+bool Level::applyTrapsMovement(double delta_time) {
+    bool check = false;
+
     // Apply movement to all crushers
     for (Crusher &crusher: crushers) {
-        if(crusher.getIsMoving()) crusher.applyMovement(delta_time);
+        if (crusher.applyMovement(delta_time)) check = true;
     }
+
+    return check;
 }
 
 void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
@@ -553,6 +557,39 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
+}
+
+void Level::loadTrapsFromMap(const std::string &mapFileName) {
+    crushers.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/traps.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the traps file. Please check the file path." << std::endl;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    const std::vector<Texture> &textures = textureManagerPtr->getCrushers();
+
+    // Load all crushers
+    for (const auto &crusher : j["crushers"]) {
+        float x = crusher["x"];
+        float y = crusher["y"];
+        float size = crusher["size"];
+        float min = crusher["min"];
+        float max = crusher["max"];
+        Uint32 moveUpTime = crusher["moveUpTime"];
+        Uint32 waitUpTime = crusher["waitUpTime"];
+        Uint32 waitDownTime = crusher["waitDownTime"];
+        int texture_id = crusher["texture"];
+        crushers.emplace_back(x, y, size, min, max, moveUpTime, waitUpTime, waitDownTime, textures[texture_id]);
+    }
+
+    std::cout << "Level: Loaded " << crushers.size() << " crushers." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

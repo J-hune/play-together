@@ -1,0 +1,5 @@
+{
+  "crushers": [
+    {"x": 0, "y": -575, "size": 0.5, "min": -750, "max": -570, "moveUpTime": 3, "waitUpTime": 1000, "waitDownTime": 250, "texture": 0}
+  ]
+}

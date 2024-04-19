@@ -14,6 +14,7 @@ private:
     float y; /**< The y-coordinate of the crusher's position. */
     float w; /**< The width of the crusher. (in pixels) */
     float h; /**< The height of the crusher. */
+    float size; /**< The size of the crusher. */
     const float min; /**< The minimum x-coordinate of the crusher's position. */
     const float max; /**< The maximum x-coordinate of the crusher's position. */
     const float pixelToMove = 100; /**< The number of pixels the crusher moves per second. */
@@ -30,13 +31,14 @@ private:
 
     // RENDERING ATTRIBUTES
     Texture texture; /**< The texture of the crusher. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the crusher adapted to the size. */
     SoundEffect crushingSound = SoundEffect("Traps/crushing.wav"); /**< The sound effect associated to the crusher. */
 
 
 public:
     /* CONSTRUCTORS */
 
-    Crusher(float x, float y, float w, float h, float min, float max, Uint32 moveUpTime, Uint32 waitUpTime, Uint32 waitDownTime, const Texture& texture);
+    Crusher(float x, float y, float size, float min, float max, Uint32 moveUpTime, Uint32 waitUpTime, Uint32 waitDownTime, const Texture& texture);
 
 
     /* ACCESSORS */
@@ -83,6 +85,12 @@ public:
      */
     [[nodiscard]] SDL_FRect getBoundingBox() const;
 
+    /**
+     * @brief Get the bounding box of the crusher's crushing zone.
+     * @return SDL_Rect representing the crusher's crushing zone box.
+     */
+    [[nodiscard]] SDL_FRect getCrushingZoneBoundingBox() const;
+
 
     /* MODIFIERS */
 
@@ -98,9 +106,10 @@ public:
     /**
      * @brief Calculate the new position of the crusher according.
      * @param delta_time Represents the time elapsed since the last update.
+     * @return Returns true if reach the end of his down movement to make camera shake, false otherwise.
      * @see applyUpMovement() and applyDownMovement() for sub-functions.
      */
-    void applyMovement(double delta_time);
+    bool applyMovement(double delta_time);
 
     /**
      * @brief Renders the crusher by drawing its textures.
@@ -129,9 +138,10 @@ private:
     /**
      * @brief Apply the movement of the crusher when it is going down.
      * @param delta_time Represents the time elapsed since the last update.
+     * @return Returns true if reach the end of his down movement to make camera shake, false otherwise.
      * @see applyMovement() for main use.
      */
-    void applyDownMovement(double delta_time);
+    bool applyDownMovement(double delta_time);
 };
 
 

@@ -2,9 +2,15 @@
 
 /* CONSTRUCTORS */
 
-Crusher::Crusher(float x, float y, float w, float h, float min, float max, Uint32 moveUpTime, Uint32 waitUpTime, Uint32 waitDownTime, const Texture& texture)
-        : x(x), y(y), w(w), h(h), min(min), max(max), pixelToMove(std::abs(max - min) / static_cast<float>(moveUpTime)),
-        moveUpTime(moveUpTime), waitUpTime(waitUpTime), waitDownTime(waitDownTime), texture(texture) {}
+Crusher::Crusher(float x, float y, float size, float min, float max, Uint32 moveUpTime, Uint32 waitUpTime, Uint32 waitDownTime, const Texture& texture)
+        : x(x), y(y), size(size), min(min), max(max), pixelToMove(std::abs(max - min) / static_cast<float>(moveUpTime)),
+        moveUpTime(moveUpTime), waitUpTime(waitUpTime), waitDownTime(waitDownTime), texture(texture) {
+
+    // Set the size
+    textureOffsets = {texture.getOffsets().x * size, texture.getOffsets().y * size, texture.getOffsets().w * size, texture.getOffsets().h * size};
+    w = static_cast<float>(texture.getSize().w) * size - (textureOffsets.x + textureOffsets.w);
+    h = static_cast<float>(texture.getSize().h) * size - (textureOffsets.y + textureOffsets.h);
+}
 
 
 /* ACCESSORS */
@@ -37,6 +43,10 @@ SDL_FRect Crusher::getBoundingBox() const {
     return {x, y, w, h};
 }
 
+SDL_FRect Crusher::getCrushingZoneBoundingBox() const {
+    return  {x + 1, y + h, w - 2, 1};
+}
+
 
 /* MODIFIERS */
 
@@ -63,11 +73,12 @@ void Crusher::applyUpMovement(double delta_time) {
     }
 }
 
-void Crusher::applyDownMovement(double delta_time) {
-    isCrushing = true;
-
+bool Crusher::applyDownMovement(double delta_time) {
     auto blend = static_cast<float>(1 - std::pow(0.5F, delta_time * 10));
     y += (y - min + 0.1F) * blend;
+
+    // The crusher can kill only if he reached the half of his down movement
+    if (y - min > (max - min) / 2) isCrushing = true;
 
     // The movement is finished
     if (y >= max) {
@@ -77,10 +88,15 @@ void Crusher::applyDownMovement(double delta_time) {
         crushingSound.play(0, -1);
         timer = static_cast<int>(waitDownTime);
         lastUpdate = SDL_GetTicks();
+        return true;
     }
+
+    return false;
 }
 
-void Crusher::applyMovement(double delta_time) {
+bool Crusher::applyMovement(double delta_time) {
+    bool check = false;
+
     if (isMoving) {
         // The crusher is in a waiting state
         if (timer > 0) {
@@ -90,17 +106,19 @@ void Crusher::applyMovement(double delta_time) {
         // The crusher is moving
         else {
             if (direction == 1) {
-                applyDownMovement(delta_time);
+                check = applyDownMovement(delta_time);
             } else {
                 applyUpMovement(delta_time);
             }
         }
     }
+
+    return check;
 }
 
 void Crusher::render(SDL_Renderer *renderer, Point camera) const {
     SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
     SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
 }
 

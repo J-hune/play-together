@@ -80,6 +80,16 @@ private:
     bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a weight platform. */
     bool wasOnPlatform = false; /**< Flag indicating whether the player was on a weight platform during the last frame. */
 
+    // HIT ATTRIBUTES
+    bool isHitting = false; /**< Flag indicating whether the player is currently hitting. */
+    bool hitLock = false; /**< Flag indicating whether the player has already hit. */
+    int hitTimer = 0; /**< The timer of the hit action. */
+    Uint32 lastHitTimeUpdate = 0; /**< The last time the player hit. */
+    SDL_FRect hitZone; /**< The hit zone of the player. */
+    SDL_FRect baseHitZone = BASE_HIT_ZONE; /**< The base hit zone of the player. */
+    static constexpr SDL_FRect BASE_HIT_ZONE = {6, 8, 14, 9}; /**< The rectangle of the hit zone (according to the player's x and y). */
+    static constexpr int HIT_TIME = 300; /**< The time the player will hit. */
+
     // COLLIDERS
     bool leftCollider = false; /**< Flag indicating whether the player's left collider is active. */
     bool rightCollider = false; /**< Flag indicating whether the player's right collider is active. */
@@ -110,7 +120,7 @@ private:
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
     static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
+    static constexpr Animation hit = {2, 3, 70, true}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
 
@@ -312,6 +322,13 @@ public:
     [[nodiscard]] std::vector<Point> getRoofColliderVertices() const;
 
     /**
+     * @brief Gets the vertices of the player's hit zone.
+     * @return A vector of Point representing the vertices.
+     * @see getHitZoneBoundingBox() to get the bounding box of the hit zone.
+     */
+    [[nodiscard]] std::vector<Point> getHitZoneVertices() const;
+
+    /**
      * @brief Gets the horizontal collider bounding box of the player's, based on its current direction.
      * @return SDL_Rect representing the bounding box.
      * @see getLeftColliderBoundingBox() and getRightColliderBoundingBox() for detailed usage.
@@ -331,6 +348,13 @@ public:
      * @see getRoofColliderVertices() to get the vertices of the roof collider.
      */
     [[nodiscard]] SDL_FRect getRoofColliderBoundingBox() const;
+
+    /**
+     * @brief Gets the hit zone of the player.
+     * @return SDL_Rect representing the hit zone.
+     * @see getHitZoneVertices() to get the vertices of the hit zone.
+     */
+    [[nodiscard]] SDL_FRect getHitZoneBoundingBox() const;
 
     /**
      * @brief Gets the bounding box of the player.
@@ -557,6 +581,12 @@ public:
     void addToScore(int val);
 
     /**
+     * @brief Active the hit action of the player.
+     * @param state True if the player press hit button, false otherwise.
+     */
+    void hitAction(bool state);
+
+    /**
      * @brief Calculate the new position of the player.
      * @param delta_time The time elapsed since the last frame in seconds.
      * @see calculateXaxisMovement() and calculateYaxisMovement() for sub-functions.
@@ -564,7 +594,8 @@ public:
     void calculateMovement(double delta_time);
 
     /**
-     * @brief Update the player's collision box according to its current sprite animation.
+     * @brief Update the player's collision boxes according to its current sprite animation.
+     * @see updateHitZone() for sub-function.
      */
     void updateCollisionBox();
 
@@ -664,6 +695,12 @@ private:
      * @param direction The current x-axis direction of the player.
      */
     void updateSpriteOrientation();
+
+    /**
+     * @brief Update the hit zone of the player.
+     * @see updateCollisionBox() for main use.
+     */
+    void updateHitZone();
 
 };
 

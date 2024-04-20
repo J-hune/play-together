@@ -63,6 +63,10 @@ int Player::getScore() const {
     return score;
 }
 
+int Player::getDeathCount() const {
+    return deathCount;
+}
+
 Sprite *Player::getSprite() {
     return &sprite;
 }
@@ -263,6 +267,10 @@ void Player::setSize(float val) {
     updateCollisionBox();
 }
 
+void Player::voidSetDeathCount(int val) {
+    deathCount = val;
+}
+
 void Player::setMoveX(float val) {
     moveX = val;
 }
@@ -454,6 +462,10 @@ void Player::teleportPlayer(float newX, float newY) {
 
 void Player::addToScore(int val) {
     score += val;
+}
+
+void Player::increaseDeathCount() {
+    deathCount++;
 }
 
 void Player::hitAction(bool state) {

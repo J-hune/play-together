@@ -67,6 +67,7 @@ void PlayerManager::removePlayer(const Player &player) {
 
 
 void PlayerManager::killPlayer(Player &player) {
+    player.increaseDeathCount();
     removePlayer(player);
     deadPlayers.emplace_back(player);
 }

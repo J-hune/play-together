@@ -60,9 +60,10 @@ private:
     std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
     std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
 
-
     int frameRate = 60; /**< The refresh rate of the game. */
     int effectiveFrameFps = frameRate; /**< The effective fps. */
+    Uint32 lastPlaytimeUpdate = SDL_GetTicks(); /**< The last time that playtime was updated. */
+    Uint32 playtime = 0; /**< The time in milliseconds elapsed since the game started. */
 
     GameState gameState = GameState::STOPPED; /**< The current game state. */
     bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
@@ -141,6 +142,12 @@ public:
      */
     [[nodiscard]] int getEffectiveFrameRate() const;
 
+    /**
+     * @brief Update and get the playtime of the game in milliseconds.
+     * @return The playtime of the game.
+     */
+    [[nodiscard]] Uint32 getPlaytime();
+
 
     /* MODIFIERS */
 
@@ -152,9 +159,15 @@ public:
 
     /**
      * @brief Set the frame rate of the game.
-     * @param frameRate The frame rate to set.
+     * @param fps The frame rate to set.
      */
-    void setFrameRate(int frameRate);
+    void setFrameRate(int fps);
+
+    /**
+     * @brief Set the playtime of the game.
+     * @param new_playtime The playtime to set.
+     */
+    void setPlaytime(Uint32 new_playtime);
 
     /**
      * @brief Switch mavity between normal and reversed.

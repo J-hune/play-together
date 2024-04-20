@@ -69,6 +69,12 @@ int Game::getEffectiveFrameRate() const {
     return effectiveFrameFps;
 }
 
+Uint32 Game::getPlaytime() {
+    playtime += SDL_GetTicks() - lastPlaytimeUpdate;
+    lastPlaytimeUpdate = SDL_GetTicks();
+    return playtime;
+}
+
 
 /* MODIFIERS */
 
@@ -77,7 +83,12 @@ void Game::setLevel(std::string const &map_name) {
 }
 
 void Game::setFrameRate(int fps) {
-    this->frameRate = fps;
+    frameRate = fps;
+}
+
+void Game::setPlaytime(Uint32 new_playtime) {
+    lastPlaytimeUpdate = SDL_GetTicks();
+    playtime = new_playtime;
 }
 
 
@@ -88,6 +99,7 @@ void Game::initializeHostedGame(int slot) {
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
+        setPlaytime(0);
         level = Level("diversity", renderer, textureManager.get());
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }

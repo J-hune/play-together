@@ -47,6 +47,31 @@ void SaveManager::saveGameState() {
     game_state_json["date"] = ss.str();
     game_state_json["level"] = level->getMapName();
     game_state_json["lastCheckpoint"] = level->getLastCheckpoint();
+    game_state_json["playtime"] = gamePtr->getPlaytime();
+
+    const std::vector<Player>& alivePlayers = gamePtr->getPlayerManager().getAlivePlayers();
+    const std::vector<Player>& deadPlayers = gamePtr->getPlayerManager().getDeadPlayers();
+    json players_json;
+
+    int total_score = 0;
+    for (const auto & player : alivePlayers) {
+        json player_data;
+        total_score += player.getScore();
+        player_data["score"] = player.getScore();
+        player_data["death"] = player.getDeathCount();
+        players_json["player" + std::to_string(player.getSpriteID())] = player_data;
+    }
+
+    for (const auto & player : deadPlayers) {
+        json player_data;
+        total_score += player.getScore();
+        player_data["score"] = player.getScore();
+        player_data["death"] = player.getDeathCount();
+        players_json["player" + std::to_string(player.getSpriteID())] = player_data;
+    }
+
+    game_state_json["players"] = players_json;
+    game_state_json["totalScore"] = total_score;
 
     // Save the player state
     std::string save_file_name = std::format("saves/slot_{}.json", slot);
@@ -98,6 +123,7 @@ bool SaveManager::loadGameState() {
         Level *level = gamePtr->getLevel();
         *level = Level(game_state_json["level"], gamePtr->getRenderManager().getRenderer(), &gamePtr->getTextureManager());
         level->setLastCheckpoint(game_state_json["lastCheckpoint"]);
+        gamePtr->setPlaytime(game_state_json["playtime"]);
 
         std::cout << "SaveManager: Loaded game from slot " << slot << std::endl;
         return true;

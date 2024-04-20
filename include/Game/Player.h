@@ -37,8 +37,11 @@ private:
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     float size = 2; /**< The size of the player. */
-    int score = 0; /**< The score of the player. */
     Buffer buffer = {0, 0}; /**< The buffer of the player */
+
+    // STATS
+    int score = 0; /**< The score of the player. */
+    int deathCount = 0; /**< The death count of the player. */
 
     // SPRITE ATTRIBUTES
     Sprite sprite; /**< The sprite of the player. */
@@ -194,6 +197,12 @@ public:
      * @return The player's score as an integer.
      */
     [[nodiscard]] int getScore() const;
+
+    /**
+     * @brief Gets the player's current death count.
+     * @return The player's death count as an integer.
+     */
+    [[nodiscard]] int getDeathCount() const;
 
     /**
      * @brief Return the sprite attribute.
@@ -398,6 +407,12 @@ public:
     void setSize(float val);
 
     /**
+     * @brief Sets the deathCount attribute, used when loading a game.
+     * @param val The new value of the deathCount attribute.
+     */
+    void voidSetDeathCount(int val);
+
+    /**
      * @brief Sets the moveX attribute.
      * @param val The new value of the moveX attribute.
      */
@@ -580,6 +595,11 @@ public:
      * @param val The value to add to the score.
      */
     void addToScore(int val);
+
+    /**
+     * @brief Increase the death count by one.
+     */
+    void increaseDeathCount();
 
     /**
      * @brief Active the hit action of the player.

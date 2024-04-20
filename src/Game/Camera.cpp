@@ -41,15 +41,15 @@ SDL_FRect Camera::getBoundingBox() const {
 }
 
 SDL_FRect Camera::getBroadPhaseArea() const {
-    return {x - 500, y - 500, w + 1000, h + 1000};
+    return {x - 1000, y - 1000, w + 2000, h + 2000};
 }
 
 std::vector<Point> Camera::getBroadPhaseAreaVertices() const {
     return {
-            {x - 500, y - 500},
-            {x + w + 1000, y - 500},
-            {x + w + 1000, y + h + 1000},
-            {x - 500, y + h + 1000}
+            {x - 1000, y - 1000},
+            {x + w + 2000, y - 1000},
+            {x + w + 2000, y + h + 2000},
+            {x - 1000, y + h + 2000}
     };
 }
 

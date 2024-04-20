@@ -52,7 +52,9 @@ SDL_FRect Crusher::getCrushingZoneBoundingBox() const {
 
 void Crusher::setIsMoving(bool state) {
     isMoving = state;
-    isCrushing = state;
+    if (!state) {
+        isCrushing = false;
+    }
 }
 
 
@@ -96,6 +98,7 @@ bool Crusher::applyDownMovement(double delta_time) {
 
 bool Crusher::applyMovement(double delta_time) {
     bool check = false;
+    printf("IS MOVING %d\n", isMoving);
 
     if (isMoving) {
         // The crusher is in a waiting state

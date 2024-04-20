@@ -146,13 +146,13 @@ public:
      * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
-    [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
+    [[nodiscard]] std::vector<MovingPlatform1D>& getMovingPlatforms1D();
 
     /**
      * @brief Return the movingPlatform2D attribute.
      * @return A vector of MovingPlatform2D.
      */
-    [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
+    [[nodiscard]] std::vector<MovingPlatform2D>& getMovingPlatforms2D();
 
     /**
      * @brief Return the switchingPlatforms attribute.
@@ -164,13 +164,13 @@ public:
      * @brief Return the weightPlatform attribute.
      * @return A vector of WeightPlatform.
      */
-    [[nodiscard]] std::vector<WeightPlatform> getWeightPlatforms() const;
+    [[nodiscard]] std::vector<WeightPlatform>& getWeightPlatforms();
 
     /**
      * @brief Return the crushers attribute.
      * @return A vector of Crusher.
      */
-    [[nodiscard]] std::vector<Crusher> getCrushers() const;
+    [[nodiscard]] std::vector<Crusher>& getCrushers();
 
     /**
      * @brief Return the sizePowerUp attribute.

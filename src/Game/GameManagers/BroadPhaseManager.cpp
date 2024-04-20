@@ -127,9 +127,12 @@ void BroadPhaseManager::check1DMovingPlatforms(const SDL_FRect &broad_phase_area
     movingPlatforms1D.clear(); // Empty old 1D moving platforms
 
     // Check for collisions with each 1D moving platform
-    for (const MovingPlatform1D &platform: gamePtr->getLevel()->getMovingPlatforms1D()) {
+    for (MovingPlatform1D &platform: gamePtr->getLevel()->getMovingPlatforms1D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
+            platform.setIsMoving(true);
             movingPlatforms1D.push_back(platform);
+        } else {
+            platform.setIsMoving(false);
         }
     }
 }
@@ -138,9 +141,12 @@ void BroadPhaseManager::check2DMovingPlatforms(const SDL_FRect &broad_phase_area
     movingPlatforms2D.clear(); // Empty old 2D moving platforms
 
     // Check for collisions with each 2D moving platform
-    for (const MovingPlatform2D &platform: gamePtr->getLevel()->getMovingPlatforms2D()) {
+    for (MovingPlatform2D &platform: gamePtr->getLevel()->getMovingPlatforms2D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
+            platform.setIsMoving(true);
             movingPlatforms2D.push_back(platform);
+        } else {
+            platform.setIsMoving(false);
         }
     }
 }
@@ -160,9 +166,12 @@ void BroadPhaseManager::checkWeightPlatforms(const SDL_FRect &broad_phase_area) 
     weightPlatforms.clear(); // Empty old weight platforms
 
     // Check for collisions with each weight platform
-    for (const WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
+    for (WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
+            platform.setIsMoving(true);
             weightPlatforms.push_back(platform);
+        } else {
+            platform.setIsMoving(false);
         }
     }
 }
@@ -171,9 +180,12 @@ void BroadPhaseManager::checkCrushers(const SDL_FRect &broad_phase_area) {
     crushers.clear(); // Empty old crushers
 
     // Check for collisions with each crusher
-    for (const Crusher &crusher: gamePtr->getLevel()->getCrushers()) {
+    for (Crusher &crusher: gamePtr->getLevel()->getCrushers()) {
         if (checkAABBCollision(broad_phase_area, crusher.getBoundingBox())) {
+            crusher.setIsMoving(true);
             crushers.push_back(crusher);
+        } else {
+            crusher.setIsMoving(false);
         }
     }
 }
@@ -225,5 +237,4 @@ void BroadPhaseManager::broadPhase() {
     checkCrushers(broad_phase_area_bounding_box);
     checkPowerUps(broad_phase_area_bounding_box);
     checkCoins(broad_phase_area_bounding_box);
-
 }

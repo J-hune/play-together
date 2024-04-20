@@ -76,11 +76,11 @@ std::vector<Asteroid> Level::getAsteroids() const {
     return asteroids;
 }
 
-std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
+std::vector<MovingPlatform1D>& Level::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
 
-std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
+std::vector<MovingPlatform2D>& Level::getMovingPlatforms2D() {
     return movingPlatforms2D;
 }
 
@@ -88,11 +88,11 @@ std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
     return switchingPlatforms;
 }
 
-std::vector<WeightPlatform> Level::getWeightPlatforms() const {
+std::vector<WeightPlatform>& Level::getWeightPlatforms() {
     return weightPlatforms;
 }
 
-std::vector<Crusher> Level::getCrushers() const {
+std::vector<Crusher>& Level::getCrushers() {
     return crushers;
 }
 

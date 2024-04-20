@@ -82,8 +82,8 @@ void ApplicationConsole::displayHelp(int gameState) const {
         std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
         std::cout << "show [all | camera_point | camera_area | player_colliders] - Show debug information\n";
         std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
-        std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
-        std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
+        std::cout << "enable [all | camera_shake | platforms | crushers] - Enable game mechanic\n";
+        std::cout << "disable [all | camera_shake | platforms | crushers] - Disable game mechanic\n";
         std::cout << "render - Toggle rendering between textures and collisions box\n";
     } else {
         std::cout << "ping - Test the console\n";
@@ -198,7 +198,10 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
 
     if (option == "all") {
         gamePtr->getCamera()->setShake(-1);
+        gamePtr->getBroadPhaseManager().setEnablePlatformsMovement(true);
+        gamePtr->getBroadPhaseManager().setEnableCrushersMovement(true);
         gamePtr->getLevel()->togglePlatformsMovement(true);
+        gamePtr->getLevel()->toggleCrushersMovement(true);
         std::cout << "Enabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
@@ -206,8 +209,14 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
         std::cout << "Enabling camera shaking.\n";
     }
     else if (option == "platforms") {
+        gamePtr->getBroadPhaseManager().setEnablePlatformsMovement(true);
         gamePtr->getLevel()->togglePlatformsMovement(true);
         std::cout << "Enabling platforms movement.\n";
+    }
+    else if (option == "crushers") {
+        gamePtr->getBroadPhaseManager().setEnableCrushersMovement(true);
+        gamePtr->getLevel()->toggleCrushersMovement(true);
+        std::cout << "Enabling crushers movement.\n";
     }
     else {
         std::cout << "Invalid option. Usage: enable [all | camera_shake | platforms]\n";
@@ -227,7 +236,10 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
 
     if (option == "all") {
         gamePtr->getCamera()->setShake(0);
+        gamePtr->getBroadPhaseManager().setEnablePlatformsMovement(false);
+        gamePtr->getBroadPhaseManager().setEnableCrushersMovement(false);
         gamePtr->getLevel()->togglePlatformsMovement(false);
+        gamePtr->getLevel()->toggleCrushersMovement(false);
         std::cout << "Disabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
@@ -235,8 +247,14 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
         std::cout << "Disabling camera shaking.\n";
     }
     else if (option == "platforms") {
+        gamePtr->getBroadPhaseManager().setEnablePlatformsMovement(false);
         gamePtr->getLevel()->togglePlatformsMovement(false);
         std::cout << "Disabling platforms' movement.\n";
+    }
+    else if (option == "crushers") {
+        gamePtr->getBroadPhaseManager().setEnableCrushersMovement(false);
+        gamePtr->getLevel()->toggleCrushersMovement(false);
+        std::cout << "Disabling crushers movement.\n";
     }
     else {
         std::cout << "Invalid option. Usage: disable [all | camera_shake | platforms]\n";

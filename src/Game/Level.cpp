@@ -191,6 +191,10 @@ void Level::togglePlatformsMovement(bool state){
     for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
 }
 
+void Level::toggleCrushersMovement(bool state){
+    for (Crusher &crusher: crushers) crusher.setIsMoving(state);
+}
+
 void Level::applyAsteroidsMovement(double delta_time) {
     // Apply movement to all players
     for (Asteroid &asteroid: asteroids) {

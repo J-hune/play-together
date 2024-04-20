@@ -66,6 +66,18 @@ std::vector<Coin> &BroadPhaseManager::getCoins() {
 }
 
 
+/* MODIFIERS */
+
+void BroadPhaseManager::setEnablePlatformsMovement(bool state) {
+    enable_platforms_movement = state;
+}
+
+void BroadPhaseManager::setEnableCrushersMovement(bool state) {
+    enable_crushers_movement = state;
+}
+
+
+
 /* METHODS */
 
 void BroadPhaseManager::checkSavesZones(const SDL_FRect& broad_phase_area) {
@@ -129,7 +141,7 @@ void BroadPhaseManager::check1DMovingPlatforms(const SDL_FRect &broad_phase_area
     // Check for collisions with each 1D moving platform
     for (MovingPlatform1D &platform: gamePtr->getLevel()->getMovingPlatforms1D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
-            platform.setIsMoving(true);
+            platform.setIsMoving(enable_platforms_movement);
             movingPlatforms1D.push_back(platform);
         } else {
             platform.setIsMoving(false);
@@ -143,7 +155,7 @@ void BroadPhaseManager::check2DMovingPlatforms(const SDL_FRect &broad_phase_area
     // Check for collisions with each 2D moving platform
     for (MovingPlatform2D &platform: gamePtr->getLevel()->getMovingPlatforms2D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
-            platform.setIsMoving(true);
+            platform.setIsMoving(enable_platforms_movement);
             movingPlatforms2D.push_back(platform);
         } else {
             platform.setIsMoving(false);
@@ -168,7 +180,7 @@ void BroadPhaseManager::checkWeightPlatforms(const SDL_FRect &broad_phase_area) 
     // Check for collisions with each weight platform
     for (WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
-            platform.setIsMoving(true);
+            platform.setIsMoving(enable_platforms_movement);
             weightPlatforms.push_back(platform);
         } else {
             platform.setIsMoving(false);
@@ -182,7 +194,7 @@ void BroadPhaseManager::checkCrushers(const SDL_FRect &broad_phase_area) {
     // Check for collisions with each crusher
     for (Crusher &crusher: gamePtr->getLevel()->getCrushers()) {
         if (checkAABBCollision(broad_phase_area, crusher.getBoundingBox())) {
-            crusher.setIsMoving(true);
+            crusher.setIsMoving(enable_crushers_movement);
             crushers.push_back(crusher);
         } else {
             crusher.setIsMoving(false);

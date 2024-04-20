@@ -276,9 +276,14 @@ public:
     void addAsteroid(Asteroid const &asteroid);
 
     /**
-     * @brief Disable all platforms movement.
+     * @brief Disable or enable all platforms movement.
      */
     void togglePlatformsMovement(bool state);
+
+    /**
+     * @brief Disable or enable all crushers movement.
+     */
+    void toggleCrushersMovement(bool state);
 
     /**
      * @brief Renders the background textures.

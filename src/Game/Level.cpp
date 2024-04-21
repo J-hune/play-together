@@ -92,6 +92,10 @@ std::vector<WeightPlatform>& Level::getWeightPlatforms() {
     return weightPlatforms;
 }
 
+std::vector<Treadmill>& Level::getTreadmills() {
+    return treadmills;
+}
+
 std::vector<Crusher>& Level::getCrushers() {
     return crushers;
 }
@@ -189,6 +193,7 @@ void Level::togglePlatformsMovement(bool state){
     for (MovingPlatform2D &platform: movingPlatforms2D) platform.setIsMoving(state);
     for (SwitchingPlatform &platform: switchingPlatforms) platform.setIsMoving(state);
     for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
+    for (Treadmill &treadmill: treadmills) treadmill.setIsMoving(state);
 }
 
 void Level::toggleCrushersMovement(bool state){
@@ -293,11 +298,12 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) {
     for (const MovingPlatform1D &platform: movingPlatforms1D) platform.render(renderer, camera);
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.render(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.render(renderer, camera);
     for (const WeightPlatform &platform: weightPlatforms) platform.render(renderer, camera);
+    for (Treadmill &treadmill: treadmills) treadmill.render(renderer, camera);
 }
 
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
@@ -305,6 +311,7 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.renderDebug(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.renderDebug(renderer, camera);
     for (const WeightPlatform &platform: weightPlatforms) platform.renderDebug(renderer, camera);
+    for (const Treadmill &treadmill: treadmills) treadmill.renderDebug(renderer, camera);
 
 }
 
@@ -558,6 +565,17 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         float stepDistance = platform["stepDistance"];
         int texture_id = platform["texture"];
         weightPlatforms.emplace_back(x, y, size, stepDistance, textures[texture_id]);
+    }
+
+    // Load all treadmills
+    for (const auto &treadmill : j["treadmills"]) {
+        float x = treadmill["x"];
+        float y = treadmill["y"];
+        float size = treadmill["size"];
+        float speed = treadmill["speed"];
+        float direction = treadmill["direction"];
+        Uint32 spriteSpeed = treadmill["spriteSpeed"];
+        treadmills.emplace_back(x, y, size, speed, direction, spriteSpeed);
     }
 
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;

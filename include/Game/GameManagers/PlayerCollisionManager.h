@@ -70,6 +70,12 @@ private:
     void handleCollisionsWithWeightPlatform(Player *player);
 
     /**
+     * @brief Handles collisions between a player and treadmills.
+     * @param player The player object.
+     */
+    void handleCollisionsWithTreadmills(Player *player);
+
+    /**
      * @brief Handles collisions between the player and crushers.
      * @param player The player object.
      * @return True if the player dies, false otherwise.

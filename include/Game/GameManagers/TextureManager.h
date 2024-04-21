@@ -10,6 +10,7 @@
 #include <format>
 #include "../../../dependencies/json.hpp"
 #include "../../Graphics/Texture.h"
+#include "../../../include/Game/Platforms/Treadmill.h"
 
 
 /**
@@ -26,7 +27,7 @@ private:
     std::vector<Texture> platforms; /**< Collection of Texture representing the platforms. */
     std::vector<Texture> crushers; /**< Collection of Texture representing the crusher textures. */
     std::vector<SDL_Texture*> backgrounds; /**< Collection of SDL_Texture representing the background textures. */
-    SDL_Texture *middleground; /**< SDL_Texture representing the middle ground texture. */
+    SDL_Texture *middleground = nullptr; /**< SDL_Texture representing the middle ground texture. */
     std::vector<SDL_Texture*> foregrounds; /**< Collection of SDL_Texture representing the foreground textures. */
 
 
@@ -53,9 +54,8 @@ public:
      * @brief Load the middleground texture.
      * @param renderer Represents the renderer of the game.
      * @param level_id Represents the ID of the level.
-     * @return True if the texture was loaded successfully, false otherwise.
      */
-    bool loadMiddlegroundTexture(SDL_Renderer *renderer, int level_id);
+    void loadMiddlegroundTexture(SDL_Renderer *renderer, int level_id);
 
     /**
      * @brief Load the textures of the world.
@@ -73,6 +73,12 @@ private:
     void loadPlatformTextures(SDL_Renderer &renderer);
 
     /**
+     * @brief Load the texture of the treadmills.
+     * @param renderer Represents the renderer of the game.
+     */
+    void loadTreadmillTexture(SDL_Renderer &renderer);
+
+    /**
      * @brief Load the textures of the crushers.
      * @param renderer Represents the renderer of the game.
      */
@@ -81,16 +87,14 @@ private:
     /**
      * @brief Load the background textures.
      * @param renderer Represents the renderer of the game.
-     * @return True if the textures were loaded successfully, false otherwise.
      */
-    bool loadBackgroundTextures(SDL_Renderer &renderer);
+    void loadBackgroundTextures(SDL_Renderer &renderer);
 
     /**
      * @brief Load the middleground textures.
      * @param renderer Represents the renderer of the game.
-     * @return True if the textures were loaded successfully, false otherwise.
      */
-    bool loadForegroundTextures(SDL_Renderer &renderer);
+    void loadForegroundTextures(SDL_Renderer &renderer);
 
 
 

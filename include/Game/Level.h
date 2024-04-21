@@ -13,13 +13,14 @@
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
 #include "Platforms/WeightPlatform.h"
+#include "Platforms/Treadmill.h"
+#include "Traps/Crusher.h"
 #include "Items/SizePowerUp.h"
 #include "Items/SpeedPowerUp.h"
+#include "Items/Coin.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
-#include "Items/Coin.h"
-#include "Traps/Crusher.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -72,6 +73,7 @@ private:
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of SwitchingPlatform representing switching platforms. */
     std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
+    std::vector<Treadmill> treadmills; /**< Collection of Treadmill representing treadmills. */
 
     // TRAPS
     std::vector<Crusher> crushers; /**< Collection of Crusher representing crushers. */
@@ -165,6 +167,12 @@ public:
      * @return A vector of WeightPlatform.
      */
     [[nodiscard]] std::vector<WeightPlatform>& getWeightPlatforms();
+
+    /**
+     * @brief Return the treadmills attribute.
+     * @return A vector of Treadmill.
+     */
+    [[nodiscard]] std::vector<Treadmill>& getTreadmills();
 
     /**
      * @brief Return the crushers attribute.
@@ -332,7 +340,7 @@ public:
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
-    void renderPlatforms(SDL_Renderer *renderer, Point camera) const;
+    void renderPlatforms(SDL_Renderer *renderer, Point camera);
 
     /**
      * @brief Renders the platforms by drawing collisions boxes.

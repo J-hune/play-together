@@ -138,7 +138,7 @@ void PlayerCollisionManager::handleCollisionsWithSwitchingPlatform(Player *playe
 
 void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) {
     // Check for collisions with each switching platform
-    for (const WeightPlatform &platform: gamePtr->getLevel()->getWeightPlatforms()) {
+    for (const WeightPlatform &platform: gamePtr->getBroadPhaseManager().getWeightPlatforms()) {
         // Check if a collision is detected
         if (checkAABBCollision(player->getBoundingBox(), platform.getBoundingBox())) {
 
@@ -165,6 +165,43 @@ void PlayerCollisionManager::handleCollisionsWithWeightPlatform(Player *player) 
             }
         }
     }
+}
+
+void PlayerCollisionManager::handleCollisionsWithTreadmills(Player *player) {
+    // Check for collisions with each treadmill
+    for (const Treadmill &treadmill: gamePtr->getBroadPhaseManager().getTreadmills()) {
+        // Check if a collision is detected
+        if (checkAABBCollision(player->getBoundingBox(), treadmill.getBoundingBox())) {
+
+            correctAABBCollision(player, treadmill.getBoundingBox()); // Correct the collision
+
+            // If the collision is with the roof, the player can't jump anymore
+            if (checkAABBCollision(player->getRoofColliderBoundingBox(), treadmill.getBoundingBox())) {
+                player->setRoofCollider(true);
+                player->setIsJumping(false);
+                player->setMoveY(0);
+            }
+            // If the collision is with the ground, the player is on a platform
+            if (checkAABBCollision(player->getGroundColliderBoundingBox(), treadmill.getBoundingBox())) {
+                player->setGroundCollider(true);
+                player->setIsGrounded(true);
+                player->setIsOnPlatform(true);
+
+                // Add treadmill velocity to the player
+                if (treadmill.getIsMoving()) {
+                    float move = treadmill.getSpeed() * treadmill.getDirection();
+                    if (player->getMavity() < 0) move *= -1; // Apply mavity
+                    player->setX(player->getX() + move);
+                }
+            }
+            // If the collision is with the wall, the player can't move
+            if (checkAABBCollision(player->getHorizontalColliderBoundingBox(), treadmill.getBoundingBox())) {
+                player->getDirectionX() > 0 ? player->setRightCollider(true) : player->setLeftCollider(true);
+                player->setCanMove(false);
+            }
+        }
+    }
+
 }
 
 bool PlayerCollisionManager::handleCollisionsWithCrushers(Player *player) {
@@ -356,6 +393,7 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             handleCollisionsWithMovingPlatform2D(&player);
             handleCollisionsWithSwitchingPlatform(&player);
             handleCollisionsWithWeightPlatform(&player);
+            handleCollisionsWithTreadmills(&player);
 
             // Check if the player leaves a platform (this is what we call in French "bidouillage")
             if (player.getWasOnPlatform() && !player.getIsOnPlatform()) {

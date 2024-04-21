@@ -10,5 +10,8 @@
     ],
     "weightPlatforms": [
         {"x": -150, "y": 15, "size": 0.25, "stepDistance": 50, "texture": 1}
+    ],
+    "treadmills": [
+        {"x": -400, "y": -300, "size": 2, "speed": 1, "direction": 1, "spriteSpeed":  24}
     ]
 }

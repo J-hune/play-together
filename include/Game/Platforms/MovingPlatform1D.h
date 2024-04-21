@@ -41,7 +41,7 @@ private:
     SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
 
 public:
-    /* CONSTRUCTOR */
+    /* CONSTRUCTORS */
 
     MovingPlatform1D(float x, float y, float size, float speed, float min, float max, bool start, bool axis, const Texture& texture);
 

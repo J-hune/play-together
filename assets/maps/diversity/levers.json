@@ -1,5 +1,9 @@
 {
   "treadmillLevers": [
-    {"x": -325, "y": 0, "size": 2.5, "isActivated": true, "type": 1, "platformsID": [0]}
+    {"x": -350, "y": 0, "size": 2.5, "isActivated": true, "type": 1, "platformsID": [0]},
+    {"x": -285, "y": 0, "size": 2.5, "isActivated": true, "type": 2, "platformsID": [0]}
+  ],
+  "platformLevers": [
+    {"x": 600, "y": 0, "size": 2.5, "isActivated": true,  "1DMovingPlatformsID": [0], "2DMovingPlatformsID": [0]}
   ]
 }

@@ -81,6 +81,10 @@ std::vector<TreadmillLever> Level::getTreadmillLevers() const {
     return treadmillLevers;
 }
 
+std::vector<PlatformLever> Level::getPlatformLevers() const {
+    return platformLevers;
+}
+
 std::vector<MovingPlatform1D>& Level::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
@@ -136,6 +140,14 @@ void Level::activateTreadmillLever(const TreadmillLever &lever) {
     // Search the lever and activate it
     auto it = std::ranges::find(treadmillLevers, lever);
     if (it != treadmillLevers.end()) {
+        it->toggleIsActivated();
+    }
+}
+
+void Level::activatePlatformLever(const PlatformLever &lever) {
+    // Search the lever and activate it
+    auto it = std::ranges::find(platformLevers, lever);
+    if (it != platformLevers.end()) {
         it->toggleIsActivated();
     }
 }
@@ -313,10 +325,12 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
 
 void Level::renderLevers(SDL_Renderer *renderer, Point camera) const {
     for (const TreadmillLever &lever : treadmillLevers) lever.render(renderer, camera);
+    for (const PlatformLever &lever : platformLevers) lever.render(renderer, camera);
 }
 
 void Level::renderLeversDebug(SDL_Renderer *renderer, Point camera) const {
     for (const TreadmillLever &lever : treadmillLevers) lever.renderDebug(renderer, camera);
+    for (const PlatformLever &lever : platformLevers) lever.renderDebug(renderer, camera);
 }
 
 void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) {
@@ -630,6 +644,25 @@ void Level::loadLeversFromMap(const std::string &map_file_name) {
         }
         treadmillLevers.emplace_back(x, y, size, is_activated, type, texture, platforms);
     }
+
+    // Load all platform levers
+    for (const auto &lever : j["platformLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        std::vector<MovingPlatform1D*> platforms_1D;
+        std::vector<MovingPlatform2D*> platforms_2D;
+        for (const auto &id : lever["1DMovingPlatformsID"]) {
+            platforms_1D.push_back(&movingPlatforms1D[id]);
+        }
+        for (const auto &id : lever["2DMovingPlatformsID"]) {
+            platforms_2D.push_back(&movingPlatforms2D[id]);
+        }
+        platformLevers.emplace_back(x, y, size, is_activated, texture, platforms_1D, platforms_2D);
+    }
+
 
     std::cout << "Level: Loaded " << treadmillLevers.size() << " treadmill levers." << std::endl;
 

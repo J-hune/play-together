@@ -23,6 +23,7 @@
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
 #include "Platforms/TreadmillLever.h"
+#include "Platforms/PlatformLever.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -72,6 +73,7 @@ private:
 
     // LEVERS
     std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
+    std::vector<PlatformLever> platformLevers; /**< Collection of PlatformLever representing platform levers. */
 
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
@@ -156,6 +158,12 @@ public:
     [[nodiscard]] std::vector<TreadmillLever> getTreadmillLevers() const;
 
     /**
+     * @brief Return the platformLevers attribute.
+     * @return A vector of PlatformLever.
+     */
+    [[nodiscard]] std::vector<PlatformLever> getPlatformLevers() const;
+
+    /**
      * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
@@ -234,6 +242,12 @@ public:
      * @param lever The lever to activate.
      */
     void activateTreadmillLever(const TreadmillLever &lever);
+
+    /**
+     * @brief Activate a lever from platformLevers.
+     * @param lever The lever to activate.
+     */
+    void activatePlatformLever(const PlatformLever &lever);
 
     /**
      * @brief Increase the weight of a platform in weightPlatforms attribute.

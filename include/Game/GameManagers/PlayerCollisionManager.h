@@ -52,6 +52,12 @@ private:
     void handleCollisionsWithTreadmillLevers(Player *player);
 
     /**
+     * @brief Handles collisions between a player and platform levers.
+     * @param player The player object.
+     */
+    void handleCollisionsWithPlatformLevers(Player *player);
+
+    /**
      * @brief Handles collisions between a player and 1D moving platforms.
      * @param player The player object.
      */

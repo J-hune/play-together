@@ -37,6 +37,10 @@ std::vector<TreadmillLever> &BroadPhaseManager::getTreadmillLevers() {
     return treadmillLevers;
 }
 
+std::vector<PlatformLever> &BroadPhaseManager::getPlatformLevers() {
+    return platformLevers;
+}
+
 std::vector<MovingPlatform1D> &BroadPhaseManager::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
@@ -154,16 +158,24 @@ void BroadPhaseManager::checkTreadmillLevers(const SDL_FRect &broad_phase_area) 
     }
 }
 
+void BroadPhaseManager::checkPlatformLevers(const SDL_FRect &broad_phase_area) {
+    platformLevers.clear(); // Empty old platform levers
+
+    // Check for collisions with each platform lever
+    for (const PlatformLever &lever: gamePtr->getLevel()->getPlatformLevers()) {
+        if (checkAABBCollision(broad_phase_area, lever.getBoundingBox())) {
+            platformLevers.push_back(lever);
+        }
+    }
+}
+
 void BroadPhaseManager::check1DMovingPlatforms(const SDL_FRect &broad_phase_area) {
     movingPlatforms1D.clear(); // Empty old 1D moving platforms
 
     // Check for collisions with each 1D moving platform
-    for (MovingPlatform1D &platform: gamePtr->getLevel()->getMovingPlatforms1D()) {
+    for (MovingPlatform1D const &platform: gamePtr->getLevel()->getMovingPlatforms1D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
-            platform.setIsMoving(enable_platforms_movement);
             movingPlatforms1D.push_back(platform);
-        } else {
-            platform.setIsMoving(false);
         }
     }
 }
@@ -172,12 +184,9 @@ void BroadPhaseManager::check2DMovingPlatforms(const SDL_FRect &broad_phase_area
     movingPlatforms2D.clear(); // Empty old 2D moving platforms
 
     // Check for collisions with each 2D moving platform
-    for (MovingPlatform2D &platform: gamePtr->getLevel()->getMovingPlatforms2D()) {
+    for (MovingPlatform2D const &platform: gamePtr->getLevel()->getMovingPlatforms2D()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
-            platform.setIsMoving(enable_platforms_movement);
             movingPlatforms2D.push_back(platform);
-        } else {
-            platform.setIsMoving(false);
         }
     }
 }
@@ -290,5 +299,6 @@ void BroadPhaseManager::broadPhase() {
     // Check hit collision only if a player is hitting
     if (player_is_hitting) {
         checkTreadmillLevers(broad_phase_area_bounding_box);
+        checkPlatformLevers(broad_phase_area_bounding_box);
     }
 }

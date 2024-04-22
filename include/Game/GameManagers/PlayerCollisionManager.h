@@ -58,6 +58,12 @@ private:
     void handleCollisionsWithPlatformLevers(Player *player);
 
     /**
+     * @brief Handles collisions between a player and crusher levers.
+     * @param player The player object.
+     */
+    void handleCollisionsWithCrusherLevers(Player *player);
+
+    /**
      * @brief Handles collisions between a player and 1D moving platforms.
      * @param player The player object.
      */

@@ -67,7 +67,20 @@ void PlayerCollisionManager::handleCollisionsWithPlatformLevers(Player *player) 
             }
         }
     }
+}
 
+void PlayerCollisionManager::handleCollisionsWithCrusherLevers(Player *player) {
+    // Check for collisions with each lever
+    for (const CrusherLever &lever: gamePtr->getBroadPhaseManager().getCrusherLevers()) {
+        // Check if a collision is detected
+        if (checkAABBCollision(player->getHitZoneBoundingBox(), lever.getBoundingBox())) {
+            // If the player is on the lever, activate it
+            if (checkAABBCollision(player->getGroundColliderBoundingBox(), lever.getBoundingBox())) {
+                gamePtr->getLevel()->activateCrusherLever(lever);
+                player->setIsHitting(false);
+            }
+        }
+    }
 }
 
 void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player) {
@@ -435,6 +448,7 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             if (player.getIsHitting()) {
                 handleCollisionsWithTreadmillLevers(&player);
                 handleCollisionsWithPlatformLevers(&player);
+                handleCollisionsWithCrusherLevers(&player);
             }
 
             // Handle collisions with items

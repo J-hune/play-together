@@ -21,8 +21,8 @@ Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager
     loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
-    loadLeversFromMap(map_name);
     loadTrapsFromMap(map_name);
+    loadLeversFromMap(map_name);
     loadItemsFromMap(map_name);
 }
 
@@ -83,6 +83,10 @@ std::vector<TreadmillLever> Level::getTreadmillLevers() const {
 
 std::vector<PlatformLever> Level::getPlatformLevers() const {
     return platformLevers;
+}
+
+std::vector<CrusherLever> Level::getCrusherLevers() const {
+    return crusherLevers;
 }
 
 std::vector<MovingPlatform1D>& Level::getMovingPlatforms1D() {
@@ -148,6 +152,14 @@ void Level::activatePlatformLever(const PlatformLever &lever) {
     // Search the lever and activate it
     auto it = std::ranges::find(platformLevers, lever);
     if (it != platformLevers.end()) {
+        it->toggleIsActivated();
+    }
+}
+
+void Level::activateCrusherLever(const CrusherLever &lever) {
+    // Search the lever and activate it
+    auto it = std::ranges::find(crusherLevers, lever);
+    if (it != crusherLevers.end()) {
         it->toggleIsActivated();
     }
 }
@@ -326,11 +338,13 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
 void Level::renderLevers(SDL_Renderer *renderer, Point camera) const {
     for (const TreadmillLever &lever : treadmillLevers) lever.render(renderer, camera);
     for (const PlatformLever &lever : platformLevers) lever.render(renderer, camera);
+    for (const CrusherLever &lever : crusherLevers) lever.render(renderer, camera);
 }
 
 void Level::renderLeversDebug(SDL_Renderer *renderer, Point camera) const {
     for (const TreadmillLever &lever : treadmillLevers) lever.renderDebug(renderer, camera);
     for (const PlatformLever &lever : platformLevers) lever.renderDebug(renderer, camera);
+    for (const CrusherLever &lever : crusherLevers) lever.renderDebug(renderer, camera);
 }
 
 void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) {
@@ -616,58 +630,6 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
 }
 
-void Level::loadLeversFromMap(const std::string &map_file_name) {
-    treadmillLevers.clear();
-
-    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/levers.json";
-    std::ifstream file(file_path);
-
-    if (!file.is_open()) {
-        std::cerr << "Level: Unable to open the levers file. Please check the file path." << std::endl;
-    }
-
-    nlohmann::json j;
-    file >> j;
-    file.close();
-
-    // Load all treadmill levers
-    for (const auto &lever : j["treadmillLevers"]) {
-        auto texture = Texture(textureManagerPtr->getLever());
-        float x = lever["x"];
-        float y = lever["y"];
-        float size = lever["size"];
-        bool is_activated = lever["isActivated"];
-        int type = lever["type"];
-        std::vector<Treadmill*> platforms;
-        for (const auto &id : lever["platformsID"]) {
-            platforms.push_back(&treadmills[id]);
-        }
-        treadmillLevers.emplace_back(x, y, size, is_activated, type, texture, platforms);
-    }
-
-    // Load all platform levers
-    for (const auto &lever : j["platformLevers"]) {
-        auto texture = Texture(textureManagerPtr->getLever());
-        float x = lever["x"];
-        float y = lever["y"];
-        float size = lever["size"];
-        bool is_activated = lever["isActivated"];
-        std::vector<MovingPlatform1D*> platforms_1D;
-        std::vector<MovingPlatform2D*> platforms_2D;
-        for (const auto &id : lever["1DMovingPlatformsID"]) {
-            platforms_1D.push_back(&movingPlatforms1D[id]);
-        }
-        for (const auto &id : lever["2DMovingPlatformsID"]) {
-            platforms_2D.push_back(&movingPlatforms2D[id]);
-        }
-        platformLevers.emplace_back(x, y, size, is_activated, texture, platforms_1D, platforms_2D);
-    }
-
-
-    std::cout << "Level: Loaded " << treadmillLevers.size() << " treadmill levers." << std::endl;
-
-}
-
 void Level::loadTrapsFromMap(const std::string &mapFileName) {
     crushers.clear();
 
@@ -699,6 +661,71 @@ void Level::loadTrapsFromMap(const std::string &mapFileName) {
     }
 
     std::cout << "Level: Loaded " << crushers.size() << " crushers." << std::endl;
+}
+
+void Level::loadLeversFromMap(const std::string &map_file_name) {
+    treadmillLevers.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/levers.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the levers file. Please check the file path." << std::endl;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    // Load all treadmill levers
+    for (const auto &lever : j["treadmillLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        int type = lever["type"];
+        std::vector<Treadmill*> platforms_pointers;
+        for (const auto &id : lever["platformsID"]) {
+            platforms_pointers.push_back(&treadmills[id]);
+        }
+        treadmillLevers.emplace_back(x, y, size, is_activated, type, texture, platforms_pointers);
+    }
+
+    // Load all platform levers
+    for (const auto &lever : j["platformLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        std::vector<MovingPlatform1D*> platforms_1D_pointers;
+        std::vector<MovingPlatform2D*> platforms_2D_pointers;
+        for (const auto &id : lever["1DMovingPlatformsID"]) {
+            platforms_1D_pointers.push_back(&movingPlatforms1D[id]);
+        }
+        for (const auto &id : lever["2DMovingPlatformsID"]) {
+            platforms_2D_pointers.push_back(&movingPlatforms2D[id]);
+        }
+        platformLevers.emplace_back(x, y, size, is_activated, texture, platforms_1D_pointers, platforms_2D_pointers);
+    }
+
+    // Load all crusher levers
+    for (const auto &lever : j["crusherLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        std::vector<Crusher*> crusher_pointers;
+        for (const auto &id : lever["crushersID"]) {
+            crusher_pointers.push_back(&crushers[id]);
+        }
+        crusherLevers.emplace_back(x, y, size, is_activated, texture, crusher_pointers);
+    }
+
+
+    std::cout << "Level: Loaded " << treadmillLevers.size() << " treadmill levers." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

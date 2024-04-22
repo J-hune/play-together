@@ -8,6 +8,11 @@
  * @file TreadmillLever.h
  * @brief Defines the TreadmillLever class representing a treadmill lever.
  */
+
+/**
+ * @class TreadmillLever
+ * @brief Represents a platform lever in a 2D game.
+ */
 class TreadmillLever : public Lever {
 private:
     /* ATTRIBUTES */

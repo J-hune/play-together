@@ -5,5 +5,8 @@
   ],
   "platformLevers": [
     {"x": 600, "y": 0, "size": 2.5, "isActivated": true,  "1DMovingPlatformsID": [0], "2DMovingPlatformsID": [0]}
+  ],
+  "crusherLevers": [
+    {"x": 170, "y": -400, "size": 2.5, "isActivated": true, "crushersID": [0]}
   ]
 }

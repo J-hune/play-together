@@ -41,6 +41,10 @@ std::vector<PlatformLever> &BroadPhaseManager::getPlatformLevers() {
     return platformLevers;
 }
 
+std::vector<CrusherLever> &BroadPhaseManager::getCrusherLevers() {
+    return crusherLevers;
+}
+
 std::vector<MovingPlatform1D> &BroadPhaseManager::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
@@ -169,6 +173,17 @@ void BroadPhaseManager::checkPlatformLevers(const SDL_FRect &broad_phase_area) {
     }
 }
 
+void BroadPhaseManager::checkCrusherLevers(const SDL_FRect &broad_phase_area) {
+    crusherLevers.clear(); // Empty old crusher levers
+
+    // Check for collisions with each crusher lever
+    for (const CrusherLever &lever: gamePtr->getLevel()->getCrusherLevers()) {
+        if (checkAABBCollision(broad_phase_area, lever.getBoundingBox())) {
+            crusherLevers.push_back(lever);
+        }
+    }
+}
+
 void BroadPhaseManager::check1DMovingPlatforms(const SDL_FRect &broad_phase_area) {
     movingPlatforms1D.clear(); // Empty old 1D moving platforms
 
@@ -231,12 +246,9 @@ void BroadPhaseManager::checkCrushers(const SDL_FRect &broad_phase_area) {
     crushers.clear(); // Empty old crushers
 
     // Check for collisions with each crusher
-    for (Crusher &crusher: gamePtr->getLevel()->getCrushers()) {
+    for (Crusher const &crusher: gamePtr->getLevel()->getCrushers()) {
         if (checkAABBCollision(broad_phase_area, crusher.getBoundingBox())) {
-            crusher.setIsMoving(enable_crushers_movement);
             crushers.push_back(crusher);
-        } else {
-            crusher.setIsMoving(false);
         }
     }
 }
@@ -300,5 +312,6 @@ void BroadPhaseManager::broadPhase() {
     if (player_is_hitting) {
         checkTreadmillLevers(broad_phase_area_bounding_box);
         checkPlatformLevers(broad_phase_area_bounding_box);
+        checkCrusherLevers(broad_phase_area_bounding_box);
     }
 }

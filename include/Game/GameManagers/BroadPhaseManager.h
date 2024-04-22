@@ -25,6 +25,7 @@ private:
     // LEVERS
     std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
     std::vector<PlatformLever> platformLevers; /**< Collection of PlatformLever representing platform levers. */
+    std::vector<CrusherLever> crusherLevers; /**< Collection of CrusherLever representing crusher levers. */
 
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
@@ -62,6 +63,7 @@ public:
     [[nodiscard]] std::vector<Polygon> &getObstacles();
     [[nodiscard]] std::vector<TreadmillLever> &getTreadmillLevers();
     [[nodiscard]] std::vector<PlatformLever> &getPlatformLevers();
+    [[nodiscard]] std::vector<CrusherLever> &getCrusherLevers();
     [[nodiscard]] std::vector<MovingPlatform1D> &getMovingPlatforms1D();
     [[nodiscard]] std::vector<MovingPlatform2D> &getMovingPlatforms2D();
     [[nodiscard]] std::vector<SwitchingPlatform> &getSwitchingPlatforms();
@@ -97,6 +99,7 @@ private:
     void checkObstacles(const std::vector<Point>& broad_phase_area);
     void checkTreadmillLevers(const SDL_FRect& broad_phase_area);
     void checkPlatformLevers(const SDL_FRect& broad_phase_area);
+    void checkCrusherLevers(const SDL_FRect& broad_phase_area);
     void check1DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void check2DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void checkSwitchingPlatforms(const SDL_FRect& broad_phase_area);

@@ -22,6 +22,9 @@ private:
     std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
     std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
 
+    // LEVERS
+    std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
+
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
@@ -56,6 +59,7 @@ public:
     [[nodiscard]] std::vector<AABB> &getIncreaseFallSpeedZones();
     [[nodiscard]] std::vector<Polygon> &getDeathZones();
     [[nodiscard]] std::vector<Polygon> &getObstacles();
+    [[nodiscard]] std::vector<TreadmillLever> &getTreadmillLevers();
     [[nodiscard]] std::vector<MovingPlatform1D> &getMovingPlatforms1D();
     [[nodiscard]] std::vector<MovingPlatform2D> &getMovingPlatforms2D();
     [[nodiscard]] std::vector<SwitchingPlatform> &getSwitchingPlatforms();
@@ -89,6 +93,7 @@ private:
     void checkIncreaseFallSpeedZones(const SDL_FRect& broad_phase_area);
     void checkDeathZones(const std::vector<Point>& broad_phase_area);
     void checkObstacles(const std::vector<Point>& broad_phase_area);
+    void checkTreadmillLevers(const SDL_FRect& broad_phase_area);
     void check1DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void check2DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void checkSwitchingPlatforms(const SDL_FRect& broad_phase_area);

@@ -1,0 +1,5 @@
+{
+  "treadmillLevers": [
+    {"x": -325, "y": 0, "size": 2.5, "isActivated": true, "type": 1, "platformsID": [0]}
+  ]
+}

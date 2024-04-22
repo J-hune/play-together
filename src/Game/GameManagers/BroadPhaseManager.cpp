@@ -33,6 +33,10 @@ std::vector<Polygon> &BroadPhaseManager::getObstacles() {
     return obstacles;
 }
 
+std::vector<TreadmillLever> &BroadPhaseManager::getTreadmillLevers() {
+    return treadmillLevers;
+}
+
 std::vector<MovingPlatform1D> &BroadPhaseManager::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
@@ -139,6 +143,17 @@ void BroadPhaseManager::checkObstacles(const std::vector<Point> &broad_phase_are
     }
 }
 
+void BroadPhaseManager::checkTreadmillLevers(const SDL_FRect &broad_phase_area) {
+    treadmillLevers.clear(); // Empty old treadmill levers
+
+    // Check for collisions with each treadmill lever
+    for (const TreadmillLever &lever: gamePtr->getLevel()->getTreadmillLevers()) {
+        if (checkAABBCollision(broad_phase_area, lever.getBoundingBox())) {
+            treadmillLevers.push_back(lever);
+        }
+    }
+}
+
 void BroadPhaseManager::check1DMovingPlatforms(const SDL_FRect &broad_phase_area) {
     movingPlatforms1D.clear(); // Empty old 1D moving platforms
 
@@ -196,12 +211,9 @@ void BroadPhaseManager::checkTreadmills(const SDL_FRect &broad_phase_area) {
     treadmills.clear(); // Empty old treadmills
 
     // Check for collisions with each treadmill
-    for (Treadmill &treadmill: gamePtr->getLevel()->getTreadmills()) {
+    for (Treadmill const &treadmill: gamePtr->getLevel()->getTreadmills()) {
         if (checkAABBCollision(broad_phase_area, treadmill.getBoundingBox())) {
-            treadmill.setIsMoving(enable_platforms_movement);
             treadmills.push_back(treadmill);
-        } else {
-            treadmill.setIsMoving(false);
         }
     }
 }
@@ -268,4 +280,15 @@ void BroadPhaseManager::broadPhase() {
     checkCrushers(broad_phase_area_bounding_box);
     checkPowerUps(broad_phase_area_bounding_box);
     checkCoins(broad_phase_area_bounding_box);
+
+    // Check if a player is hitting
+    bool player_is_hitting = false;
+    for (const Player &player: gamePtr->getPlayerManager().getAlivePlayers()) {
+        if (player.getIsHitting()) player_is_hitting = true;
+    }
+
+    // Check hit collision only if a player is hitting
+    if (player_is_hitting) {
+        checkTreadmillLevers(broad_phase_area_bounding_box);
+    }
 }

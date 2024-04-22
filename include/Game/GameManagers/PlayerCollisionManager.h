@@ -46,6 +46,12 @@ private:
     void handleCollisionsWithObstacles(Player *player);
 
     /**
+     * @brief Handles collisions between a player and treadmill levers.
+     * @param player The player object.
+     */
+    void handleCollisionsWithTreadmillLevers(Player *player);
+
+    /**
      * @brief Handles collisions between a player and 1D moving platforms.
      * @param player The player object.
      */

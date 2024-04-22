@@ -12,6 +12,10 @@ int TextureManager::getWorldID() const {
     return worldID;
 }
 
+SDL_Texture& TextureManager::getLever() {
+    return *lever;
+}
+
 std::vector<Texture>& TextureManager::getPlatforms() {
     return platforms;
 }
@@ -147,7 +151,16 @@ void TextureManager::loadCrusherTextures(SDL_Renderer &renderer) {
         SDL_FRect texture_offsets = {x, y, x + w, y + h};
         crushers.emplace_back(*new_texture, texture_offsets);
     }
+}
 
+void TextureManager::loadLeverTexture(SDL_Renderer &renderer) {
+    std::string file_path = std::format("{}world_{}/lever.png", TEXTURES_DIRECTORY, worldID); // Get the file path
+    lever = IMG_LoadTexture(&renderer, file_path.c_str());
+
+    if (lever == nullptr) {
+        std::cerr << "Error loading lever texture" << std::endl;
+        exit(1);
+    }
 }
 
 void TextureManager::loadBackgroundTextures(SDL_Renderer &renderer) {
@@ -210,6 +223,7 @@ void TextureManager::loadWorldTextures(SDL_Renderer *renderer, int world_id) {
     loadPlatformTextures(*renderer);
     loadTreadmillTexture(*renderer);
     loadCrusherTextures(*renderer);
+    loadLeverTexture(*renderer);
     loadBackgroundTextures(*renderer);
     loadForegroundTextures(*renderer);
 

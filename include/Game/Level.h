@@ -9,6 +9,7 @@
 #include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
+#include "Lever.h"
 #include "Platforms/MovingPlatform1D.h"
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
@@ -21,6 +22,7 @@
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
+#include "Platforms/TreadmillLever.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -67,6 +69,9 @@ private:
 
     // EVENTS
     std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
+
+    // LEVERS
+    std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
 
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
@@ -145,6 +150,12 @@ public:
     [[nodiscard]] std::vector<Asteroid> getAsteroids() const;
 
     /**
+     * @brief Return the treadmillLevers attribute.
+     * @return A vector of TreadmillLever.
+     */
+    [[nodiscard]] std::vector<TreadmillLever> getTreadmillLevers() const;
+
+    /**
      * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
@@ -217,6 +228,12 @@ public:
      * @param value Represents the asteroids attribute.
      */
     void setAsteroids(const std::vector<Asteroid> &value);
+
+    /**
+     * @brief Activate a lever from treadmillLevers.
+     * @param lever The lever to activate.
+     */
+    void activateTreadmillLever(const TreadmillLever &lever);
 
     /**
      * @brief Increase the weight of a platform in weightPlatforms attribute.
@@ -336,6 +353,20 @@ public:
     void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
+     * @brief Renders the levers by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderLevers(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the levers by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderLeversDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
      * @brief Renders the platforms by drawing textures.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
@@ -424,6 +455,12 @@ private:
      * @param map_file_name Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &map_file_name);
+
+    /**
+     * @brief Load the levers from a map.
+     * @param map_file_name Represents the name of the map.
+     */
+    void loadLeversFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the traps from a map.

@@ -41,6 +41,20 @@ void PlayerCollisionManager::handleCollisionsWithObstacles(Player *player) {
     }
 }
 
+void PlayerCollisionManager::handleCollisionsWithTreadmillLevers(Player *player) {
+    // Check for collisions with each lever
+    for (const TreadmillLever &lever: gamePtr->getBroadPhaseManager().getTreadmillLevers()) {
+        // Check if a collision is detected
+        if (checkAABBCollision(player->getHitZoneBoundingBox(), lever.getBoundingBox())) {
+            // If the player is on the lever, activate it
+            if (checkAABBCollision(player->getGroundColliderBoundingBox(), lever.getBoundingBox())) {
+                gamePtr->getLevel()->activateTreadmillLever(lever);
+                player->setIsHitting(false);
+            }
+        }
+    }
+}
+
 void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player) {
     // Check for collisions with each 1D moving platform
     for (const MovingPlatform1D &platform: gamePtr->getBroadPhaseManager().getMovingPlatforms1D()) {
@@ -401,6 +415,11 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
                 player.setMoveY(0);
             }
             player.setWasOnPlatform(player.getIsOnPlatform());
+
+            // Handle collisions with hit zone
+            if (player.getIsHitting()) {
+                handleCollisionsWithTreadmillLevers(&player);
+            }
 
             // Handle collisions with items
             handleCollisionsWithSizePowerUps(&player);

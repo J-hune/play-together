@@ -110,6 +110,7 @@ void RenderManager::render() {
 
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
         level->renderItems(renderer, camera_point); // Draw the items
+        level->renderLevers(renderer, camera_point); // Draw the levers
 
         // Draw the characters
         for (Player &player : players) {
@@ -128,6 +129,7 @@ void RenderManager::render() {
     else {
         level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderLeversDebug(renderer, camera_point); // Draw the levers
         level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
         level->renderTrapsDebug(renderer, camera_point); // Draw the traps
         level->renderItemsDebug(renderer, camera_point); // Draw the items

@@ -119,13 +119,14 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players) {
+void Game::loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &playersData,
+                     const nlohmann::json::array_t &movingPlatforms1DData, const nlohmann::json::array_t &movingPlatforms2DData,const nlohmann::json::array_t &crushersData) {
     setLevel(map_name);
     level.setLastCheckpoint(last_checkpoint);
 
     // Add all players to the game (including the local player)
     size_t spawnIndex = 0;
-    for (const auto &player: players) {
+    for (const auto &player: playersData) {
         int receivedPlayerID = player["playerID"];
 
         Point spawnPoint = level.getSpawnPoints(last_checkpoint)[spawnIndex];
@@ -143,6 +144,37 @@ void Game::loadLevel(const std::string &map_name, short last_checkpoint, const n
 
         // Enter the game loop
         Mediator::setDisplayMenu(false);
+    }
+
+    // For each 1D moving platform, set the position and direction
+    std::vector<MovingPlatform1D> movingPlatforms1D = level.getMovingPlatforms1D();
+    for (size_t i = 0; i < movingPlatforms1DData.size(); i++) {
+        const auto &platform = movingPlatforms1DData[i];
+        movingPlatforms1D[i].setX(platform["x"]);
+        movingPlatforms1D[i].setY(platform["y"]);
+        movingPlatforms1D[i].setMove(platform["move"]);
+        movingPlatforms1D[i].setDirection(platform["direction"]);
+    }
+
+    // For each 2D moving platform, set the position and direction
+    std::vector<MovingPlatform2D> &movingPlatforms2D = level.getMovingPlatforms2D();
+    for (size_t i = 0; i < movingPlatforms2DData.size(); i++) {
+        const auto &platform = movingPlatforms2DData[i];
+        movingPlatforms2D[i].setX(platform["x"]);
+        movingPlatforms2D[i].setY(platform["y"]);
+        movingPlatforms2D[i].setMoveX(platform["moveX"]);
+        movingPlatforms2D[i].setMoveY(platform["moveY"]);
+        movingPlatforms2D[i].setDirectionX(platform["directionX"]);
+        movingPlatforms2D[i].setDirectionY(platform["directionY"]);
+    }
+
+    // For each crusher, set the position and direction
+    std::vector<Crusher> &crushers = level.getCrushers();
+    for (size_t i = 0; i < crushersData.size(); i++) {
+        const auto &crusher = crushersData[i];
+        crushers[i].setX(crusher["x"]);
+        crushers[i].setY(crusher["y"]);
+        crushers[i].setDirection(crusher["direction"]);
     }
 
     music = level.getMusicById(0);
@@ -187,7 +219,14 @@ void Game::run() {
 
             if (mainMessage == "InitializeClientGame") {
                 nlohmann::json message = nlohmann::json::parse(parameters[0]);
-                loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+                loadLevel(
+                        message["mapName"],
+                        message["lastCheckpoint"],
+                        message["players"],
+                        message["platforms1D"],
+                        message["platforms2D"],
+                        message["crushers"]
+                );
             }
         }
 

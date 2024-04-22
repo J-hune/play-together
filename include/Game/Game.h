@@ -189,7 +189,8 @@ public:
      * @param last_checkpoint The last checkpoint reached.
      * @param players The list of players to load.
      */
-    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players);
+    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players,
+                   const nlohmann::json::array_t &movingPlatforms1D, const nlohmann::json::array_t &movingPlatforms2D, const nlohmann::json::array_t &crushers);
 
     /**
      * @brief Updates the game logic.

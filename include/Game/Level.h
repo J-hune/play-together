@@ -160,7 +160,7 @@ public:
      * @brief Return the switchingPlatforms attribute.
      * @return A vector of SwitchingPlatform.
      */
-    [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
+    [[nodiscard]] std::vector<SwitchingPlatform>& getSwitchingPlatforms();
 
     /**
      * @brief Return the weightPlatform attribute.

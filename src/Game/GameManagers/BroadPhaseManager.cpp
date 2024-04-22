@@ -171,7 +171,7 @@ void BroadPhaseManager::checkSwitchingPlatforms(const SDL_FRect &broad_phase_are
     switchingPlatforms.clear(); // Empty old switching platforms
 
     // Check for collisions with each switching platform
-    for (const SwitchingPlatform &platform: gamePtr->getLevel()->getSwitchingPlatforms()) {
+    for (SwitchingPlatform const &platform: gamePtr->getLevel()->getSwitchingPlatforms()) {
         if (checkAABBCollision(broad_phase_area, platform.getBoundingBox())) {
             switchingPlatforms.push_back(platform);
         }

@@ -5,6 +5,10 @@
 #include "../Point.h"
 #include "../../Sounds/SoundEffect.h"
 
+struct CrusherBuffer {
+    float deltaX;
+    float deltaY;
+};
 
 class Crusher {
 private:
@@ -21,6 +25,7 @@ private:
     float direction = 1; /**< The direction of the crusher's movement. */
     bool isCrushing = false; /**< Flag indicating if the crusher is currently crushing. */
     bool isMoving = true; /** Flag indicating if the crusher is currently moving. */
+    CrusherBuffer buffer = {0, 0}; /**< The buffer of the crusher */
 
     // TIME ATTRIBUTES
     int timer = 0; /**< The timer of the crusher. */
@@ -68,6 +73,12 @@ public:
     [[nodiscard]] float getH() const;
 
     /**
+     * @brief Return the direction attribute.
+     * @return The value of the direction attribute.
+     */
+    [[nodiscard]] float getDirection() const;
+
+    /**
      * @brief Return the isCrushing attribute.
      * @return The value of the isCrushing attribute.
      */
@@ -93,6 +104,30 @@ public:
 
 
     /* MODIFIERS */
+
+    /**
+     * @brief Set the x attribute.
+     * @param value The new value of the x attribute.
+     */
+    void setX(float value);
+
+    /**
+     * @brief Set the y attribute.
+     * @param value The new value of the y attribute.
+     */
+    void setY(float value);
+
+    /**
+     * @brief Set the direction attribute.
+     * @param value The new value of the direction attribute.
+     */
+    void setDirection(float value);
+
+    /**
+     * @brief Set the buffer attribute.
+     * @param value The new value of the buffer attribute.
+     */
+    void setBuffer(CrusherBuffer value);
 
     /**
      * @brief Set the isMoving attribute.

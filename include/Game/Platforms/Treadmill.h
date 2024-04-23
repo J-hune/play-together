@@ -26,6 +26,7 @@ private:
     float size; /**< The size of the treadmill. */
     float speed; /**< The speed of the treadmill. */
     float direction; /**< The current direction of the treadmill : -1 for left, 1 for right. */
+    float move = 0; /**< The distance the player will move on the treadmill. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
 
     // SPRITE ATTRIBUTES
@@ -84,6 +85,12 @@ public:
     [[nodiscard]] float getDirection() const;
 
     /**
+     * @brief Return the move attribute.
+     * @return The value of the move attribute.
+     */
+    [[nodiscard]] float getMove() const;
+
+    /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
@@ -118,6 +125,12 @@ public:
 
 
     /* METHODS */
+
+    /**
+     * @brief Calculate movement of the player on the treadmill.
+     * @param delta_time Represents the time elapsed since the last frame.
+     */
+    void calculateMovement(double delta_time);
 
     /**
      * @brief Renders the treadmill by drawing its sprite.

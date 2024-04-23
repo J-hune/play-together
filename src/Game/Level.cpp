@@ -249,6 +249,7 @@ void Level::applyPlatformsMovement(double delta_time) {
     for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
     for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
     for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
+    for (Treadmill &treadmill: treadmills) treadmill.calculateMovement(delta_time); // Calculate movement for treadmills
 }
 
 bool Level::applyTrapsMovement(double delta_time) {

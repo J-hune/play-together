@@ -231,7 +231,7 @@ void PlayerCollisionManager::handleCollisionsWithTreadmills(Player *player) {
 
                 // Add treadmill velocity to the player
                 if (treadmill.getIsMoving()) {
-                    float move = treadmill.getSpeed() * treadmill.getDirection();
+                    float move = treadmill.getMove();
                     if (player->getMavity() < 0) move *= -1; // Apply mavity
                     player->setX(player->getX() + move);
                 }

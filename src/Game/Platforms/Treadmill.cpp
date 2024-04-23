@@ -48,6 +48,11 @@ float Treadmill::getDirection() const {
     return direction;
 }
 
+float Treadmill::getMove() const {
+    printf("Move: %f\n", move);
+    return move;
+}
+
 bool Treadmill::getIsMoving() const {
     return isMoving;
 }
@@ -83,6 +88,18 @@ void Treadmill::setTexture(SDL_Texture *texturePtr) {
 }
 
 /* METHODS */
+
+void Treadmill::calculateMovement(double delta_time) {
+    if (isMoving) {
+        move = 64;
+        move *= speed;
+        move *= direction;
+        move *= static_cast<float>(delta_time);
+    } else {
+        move = 0;
+    }
+
+}
 
 void Treadmill::render(SDL_Renderer *renderer, Point camera) {
     if (isMoving) sprite.updateAnimation();

@@ -31,6 +31,10 @@ float Crusher::getH() const {
     return h;
 }
 
+float Crusher::getDirection() const {
+    return direction;
+}
+
 bool Crusher::getIsCrushing() const {
     return isCrushing;
 }
@@ -50,6 +54,22 @@ SDL_FRect Crusher::getCrushingZoneBoundingBox() const {
 
 /* MODIFIERS */
 
+void Crusher::setX(float value) {
+    x = value;
+}
+
+void Crusher::setY(float value) {
+    y = value;
+}
+
+void Crusher::setDirection(float value) {
+    direction = value;
+}
+
+void Crusher::setBuffer(CrusherBuffer value) {
+    buffer = value;
+}
+
 void Crusher::setIsMoving(bool state) {
     isMoving = state;
     if (!state) {
@@ -66,6 +86,11 @@ void Crusher::applyUpMovement(double delta_time) {
     float normal_movement = pixelToMove * static_cast<float>(delta_time);
     y -= std::min(smooth_movement, normal_movement);
 
+    // Apply a part of the buffer and decrease it accordingly
+    float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+    y+= bufferFraction * buffer.deltaY;
+    buffer.deltaY -= bufferFraction * buffer.deltaY;
+
     // The movement is finished
     if (y <= min) {
         y = min;
@@ -78,6 +103,11 @@ void Crusher::applyUpMovement(double delta_time) {
 bool Crusher::applyDownMovement(double delta_time) {
     auto blend = static_cast<float>(1 - std::pow(0.5F, delta_time * 10));
     y += (y - min + 0.1F) * blend;
+
+    // Apply a part of the buffer and decrease it accordingly
+    float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+    y += bufferFraction * buffer.deltaY;
+    buffer.deltaY -= bufferFraction * buffer.deltaY;
 
     // The crusher can kill only if he reached the half of his down movement
     if (y - min > (max - min) / 2) isCrushing = true;

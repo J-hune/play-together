@@ -27,6 +27,7 @@ private:
     float weight = 0; /**< The number of player on the platform. */
     float lerpSmoothingFactor = 11; /**< The smoothing factor for the lerp calculation. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on the screen. */
 
     Texture texture; /**< The texture of the platform. */
     SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
@@ -96,6 +97,12 @@ public:
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
     /**
      * @brief Increase the weight of the platform by 1.

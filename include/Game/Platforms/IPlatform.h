@@ -40,6 +40,7 @@ public:
 
     // MODIFIERS
     virtual void setIsMoving(bool state) = 0;
+    virtual void setIsOnScreen(bool state) = 0;
 
     // METHODS
     virtual void applyMovement(double delta_time) = 0;

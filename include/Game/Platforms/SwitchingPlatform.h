@@ -30,6 +30,7 @@ private:
     int actualPoint = 0; /**< The current point the platform's position. */
     std::vector<Point> steps; /** Collection of Point representing every possible position of the platform. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on the screen. */
 
     Texture texture; /**< The texture of the platform. */
     SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
@@ -87,6 +88,12 @@ public:
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
 
     /* PUBLIC METHODS */

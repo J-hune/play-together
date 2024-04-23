@@ -294,6 +294,12 @@ public:
      */
     [[nodiscard]] bool getWasOnPlatform() const;
 
+    /**
+     * @brief Return the isHitting attribute.
+     * @return The current state of the isHitting attribute.
+     */
+    [[nodiscard]] bool getIsHitting() const;
+
 
 
     /* SPECIFIC ACCESSORS */
@@ -518,6 +524,12 @@ public:
      * @param val The new value of the mavity attribute.
      */
     void setMaxFallSpeed(float val);
+
+    /**
+     * @brief Set the isHitting attribute.
+     * @param state The new value of the isHitting attribute.
+     */
+    void setIsHitting(bool state);
 
     /**
      * @brief Set the ground collider attribute.

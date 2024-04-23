@@ -42,6 +42,13 @@ bool Item::operator==(const Item &item) const {
 }
 
 
+/* MUTATORS */
+
+void Item::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
+
 /* METHODS */
 
 void Item::applyEffect(Player &player) {
@@ -51,6 +58,8 @@ void Item::applyEffect(Player &player) {
 }
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_FRect itemRect = {x - camera.x, y - camera.y, width, height};
-    SDL_RenderFillRectF(renderer, &itemRect);
+    if (isOnScreen) {
+        SDL_FRect itemRect = {x - camera.x, y - camera.y, width, height};
+        SDL_RenderFillRectF(renderer, &itemRect);
+    }
 }

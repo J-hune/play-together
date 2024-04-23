@@ -48,6 +48,11 @@ float Treadmill::getDirection() const {
     return direction;
 }
 
+float Treadmill::getMove() const {
+    printf("Move: %f\n", move);
+    return move;
+}
+
 bool Treadmill::getIsMoving() const {
     return isMoving;
 }
@@ -72,6 +77,10 @@ void Treadmill::setIsMoving(bool state) {
     isMoving = state;
 }
 
+void Treadmill::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
 void Treadmill::setTexture(SDL_Texture *texturePtr) {
     spriteTexturePtr = texturePtr;
 
@@ -84,15 +93,31 @@ void Treadmill::setTexture(SDL_Texture *texturePtr) {
 
 /* METHODS */
 
+void Treadmill::calculateMovement(double delta_time) {
+    if (isMoving && isOnScreen) {
+        move = 64;
+        move *= speed;
+        move *= direction;
+        move *= static_cast<float>(delta_time);
+    } else {
+        move = 0;
+    }
+
+}
+
 void Treadmill::render(SDL_Renderer *renderer, Point camera) {
-    if (isMoving) sprite.updateAnimation();
-    SDL_Rect srcRect = sprite.getSrcRect();
-    SDL_FRect treadmill_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &treadmill_rect, 0.0, nullptr, sprite.getFlip());
+    if (isOnScreen) {
+        if (isMoving) sprite.updateAnimation();
+        SDL_Rect srcRect = sprite.getSrcRect();
+        SDL_FRect treadmill_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &treadmill_rect, 0.0, nullptr, sprite.getFlip());
+    }
 }
 
 void Treadmill::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 154, 153, 150, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 154, 153, 150, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

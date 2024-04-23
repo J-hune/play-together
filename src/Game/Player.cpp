@@ -127,6 +127,9 @@ bool Player::getWasOnPlatform() const {
     return wasOnPlatform;
 }
 
+bool Player::getIsHitting() const {
+    return isHitting;
+}
 
 /* SPECIFIC ACCESSORS */
 
@@ -344,6 +347,11 @@ void Player::setCurrentZoneID(size_t id) {
 
 void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
+}
+
+void Player::setIsHitting(bool state) {
+    isHitting = state;
+    if (state) hitTimer = 0;
 }
 
 void Player::setLeftCollider(bool state) {

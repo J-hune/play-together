@@ -26,7 +26,9 @@ private:
     float size; /**< The size of the treadmill. */
     float speed; /**< The speed of the treadmill. */
     float direction; /**< The current direction of the treadmill : -1 for left, 1 for right. */
+    float move = 0; /**< The distance the player will move on the treadmill. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = false; /**< Flag indicating if the treadmill is on screen. */
 
     // SPRITE ATTRIBUTES
     static SDL_Texture *spriteTexturePtr; /**< The texture of treadmill. */
@@ -84,6 +86,12 @@ public:
     [[nodiscard]] float getDirection() const;
 
     /**
+     * @brief Return the move attribute.
+     * @return The value of the move attribute.
+     */
+    [[nodiscard]] float getMove() const;
+
+    /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
@@ -111,6 +119,12 @@ public:
     void setIsMoving(bool state);
 
     /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state);
+
+    /**
      * @brief Set the texture of the treadmill.
      * @param texturePtr The new texture of the treadmill.
      */
@@ -118,6 +132,12 @@ public:
 
 
     /* METHODS */
+
+    /**
+     * @brief Calculate movement of the player on the treadmill.
+     * @param delta_time Represents the time elapsed since the last frame.
+     */
+    void calculateMovement(double delta_time);
 
     /**
      * @brief Renders the treadmill by drawing its sprite.

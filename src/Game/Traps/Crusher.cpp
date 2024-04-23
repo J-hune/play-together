@@ -43,6 +43,10 @@ bool Crusher::getIsMoving() const {
     return isMoving;
 }
 
+bool Crusher::getIsOnScreen() const {
+    return isOnScreen;
+}
+
 SDL_FRect Crusher::getBoundingBox() const {
     return {x, y, w, h};
 }
@@ -75,6 +79,10 @@ void Crusher::setIsMoving(bool state) {
     if (!state) {
         isCrushing = false;
     }
+}
+
+void Crusher::setIsOnScreen(bool state) {
+    isOnScreen = state;
 }
 
 
@@ -129,7 +137,7 @@ bool Crusher::applyDownMovement(double delta_time) {
 bool Crusher::applyMovement(double delta_time) {
     bool check = false;
 
-    if (isMoving) {
+    if (isMoving && isOnScreen) {
         // The crusher is in a waiting state
         if (timer > 0) {
             timer -= static_cast<int>(SDL_GetTicks() - lastUpdate);
@@ -149,13 +157,17 @@ bool Crusher::applyMovement(double delta_time) {
 }
 
 void Crusher::render(SDL_Renderer *renderer, Point camera) const {
-    SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
-    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    if (isOnScreen) {
+        SDL_Rect src_rect = texture.getSize();
+        SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y,w + textureOffsets.w, h + textureOffsets.h};
+        SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    }
 }
 
 void Crusher::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 249, 190, 152, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 249, 190, 152, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

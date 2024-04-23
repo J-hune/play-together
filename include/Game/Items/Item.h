@@ -27,6 +27,7 @@ private :
     float y; /**< The y-coordinate of the item's position. */
     float width; /**< The width of the item. */
     float height; /**< The height of the item. */
+    bool isOnScreen = true; /**< Flag indicating if the item is on screen. */
     SoundEffect collectSound; /**< The sound effect associated to the item. */
 
 public:
@@ -74,6 +75,15 @@ public:
      * @return True if the items are equal, false otherwise.
      */
     bool operator==(const Item& item) const;
+
+
+    /* MUTATORS */
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state);
 
 
     /* METHODS */

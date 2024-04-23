@@ -26,6 +26,7 @@ private:
 
     std::vector<Texture> platforms; /**< Collection of Texture representing the platforms. */
     std::vector<Texture> crushers; /**< Collection of Texture representing the crusher textures. */
+    SDL_Texture *lever = nullptr; /**< SDL_Texture representing the lever texture. */
     std::vector<SDL_Texture*> backgrounds; /**< Collection of SDL_Texture representing the background textures. */
     SDL_Texture *middleground = nullptr; /**< SDL_Texture representing the middle ground texture. */
     std::vector<SDL_Texture*> foregrounds; /**< Collection of SDL_Texture representing the foreground textures. */
@@ -43,6 +44,7 @@ public:
     [[nodiscard]] int getWorldID() const;
     [[nodiscard]] std::vector<Texture>& getPlatforms();
     [[nodiscard]] std::vector<Texture>& getCrushers();
+    [[nodiscard]] SDL_Texture& getLever();
     [[nodiscard]] std::vector<SDL_Texture*>& getBackgrounds();
     [[nodiscard]] SDL_Texture* getMiddleground();
     [[nodiscard]] std::vector<SDL_Texture*>& getForegrounds();
@@ -83,6 +85,12 @@ private:
      * @param renderer Represents the renderer of the game.
      */
     void loadCrusherTextures(SDL_Renderer &renderer);
+
+    /**
+     * @brief Load the texture of the lever.
+     * @param renderer Represents the renderer of the game.
+     */
+    void loadLeverTexture(SDL_Renderer &renderer);
 
     /**
      * @brief Load the background textures.

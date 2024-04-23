@@ -22,6 +22,11 @@ private:
     std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
     std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
 
+    // LEVERS
+    std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
+    std::vector<PlatformLever> platformLevers; /**< Collection of PlatformLever representing platform levers. */
+    std::vector<CrusherLever> crusherLevers; /**< Collection of CrusherLever representing crusher levers. */
+
     // PLATFORMS
     std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
     std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
@@ -36,10 +41,6 @@ private:
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<Coin> coins; /**< Collection of Coin representing coins. */
-
-    // APPLICATION CONSOLE
-    bool enable_platforms_movement = true; /**< Flag to enable platform movement. */
-    bool enable_crushers_movement = true; /**< Flag to enable crusher movement. */
 
 
 public:
@@ -56,6 +57,9 @@ public:
     [[nodiscard]] std::vector<AABB> &getIncreaseFallSpeedZones();
     [[nodiscard]] std::vector<Polygon> &getDeathZones();
     [[nodiscard]] std::vector<Polygon> &getObstacles();
+    [[nodiscard]] std::vector<TreadmillLever> &getTreadmillLevers();
+    [[nodiscard]] std::vector<PlatformLever> &getPlatformLevers();
+    [[nodiscard]] std::vector<CrusherLever> &getCrusherLevers();
     [[nodiscard]] std::vector<MovingPlatform1D> &getMovingPlatforms1D();
     [[nodiscard]] std::vector<MovingPlatform2D> &getMovingPlatforms2D();
     [[nodiscard]] std::vector<SwitchingPlatform> &getSwitchingPlatforms();
@@ -65,12 +69,6 @@ public:
     [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUps();
     [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUps();
     [[nodiscard]] std::vector<Coin> &getCoins();
-
-
-    /* MODIFIERS */
-
-    void setEnablePlatformsMovement(bool state);
-    void setEnableCrushersMovement(bool state);
 
 
     /* METHODS */
@@ -89,6 +87,9 @@ private:
     void checkIncreaseFallSpeedZones(const SDL_FRect& broad_phase_area);
     void checkDeathZones(const std::vector<Point>& broad_phase_area);
     void checkObstacles(const std::vector<Point>& broad_phase_area);
+    void checkTreadmillLevers(const SDL_FRect& broad_phase_area);
+    void checkPlatformLevers(const SDL_FRect& broad_phase_area);
+    void checkCrusherLevers(const SDL_FRect& broad_phase_area);
     void check1DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void check2DMovingPlatforms(const SDL_FRect& broad_phase_area);
     void checkSwitchingPlatforms(const SDL_FRect& broad_phase_area);

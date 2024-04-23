@@ -28,6 +28,7 @@ private:
     float direction; /**< The current direction of the treadmill : -1 for left, 1 for right. */
     float move = 0; /**< The distance the player will move on the treadmill. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = false; /**< Flag indicating if the treadmill is on screen. */
 
     // SPRITE ATTRIBUTES
     static SDL_Texture *spriteTexturePtr; /**< The texture of treadmill. */
@@ -116,6 +117,12 @@ public:
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state);
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state);
 
     /**
      * @brief Set the texture of the treadmill.

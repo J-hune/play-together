@@ -1,4 +1,4 @@
-#include "../../../include/Game/Platforms/TreadmillLever.h"
+#include "../../../include/Game/Levers/TreadmillLever.h"
 
 /**
  * @file TreadmillLever.cpp

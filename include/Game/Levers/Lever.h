@@ -2,8 +2,8 @@
 #define PLAY_TOGETHER_LEVER_H
 
 #include <SDL_rect.h>
-#include "../Graphics/Texture.h"
-#include "../Sounds/SoundEffect.h"
+#include "../../Graphics/Texture.h"
+#include "../../Sounds/SoundEffect.h"
 
 /**
  * @file Lever.h
@@ -24,6 +24,7 @@ private:
     float h; /**< The height of the lever. */
     float size; /**< The size of the lever. */
     bool isActivated; /**< The state of the lever. */
+    bool isOnScreen = true; /**< Flag indicating if the lever is on screen. */
 
     Texture texture; /**< The texture of the lever. */
     SDL_FRect textureOffsets; /**< The texture offsets of the lever adapted to the size. */
@@ -83,6 +84,12 @@ public:
      * @param isActivated The new state of the lever.
      */
     void setIsActivated(bool isActivated);
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool isOnScreen);
 
     /**
      * @brief Toggle the state of the lever.

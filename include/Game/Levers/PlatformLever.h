@@ -1,9 +1,9 @@
 #ifndef PLAY_TOGETHER_PLATFORMLEVER_H
 #define PLAY_TOGETHER_PLATFORMLEVER_H
 
-#include "../Lever.h"
-#include "MovingPlatform1D.h"
-#include "MovingPlatform2D.h"
+#include "Lever.h"
+#include "../Platforms/MovingPlatform1D.h"
+#include "../Platforms/MovingPlatform2D.h"
 
 
 /**

@@ -1,4 +1,4 @@
-#include "../../../include/Game/Platforms/PlatformLever.h"
+#include "../../../include/Game/Levers/PlatformLever.h"
 
 /**
  * @file PlatformLever.cpp

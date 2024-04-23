@@ -21,6 +21,7 @@ private:
     float direction = 1; /**< The direction of the crusher's movement. */
     bool isCrushing = false; /**< Flag indicating if the crusher is currently crushing. */
     bool isMoving = true; /** Flag indicating if the crusher is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the crusher is currently on screen. */
 
     // TIME ATTRIBUTES
     int timer = 0; /**< The timer of the crusher. */
@@ -80,6 +81,12 @@ public:
     [[nodiscard]] bool getIsMoving() const;
 
     /**
+     * @brief Return the isOnScreen attribute.
+     * @return The value of the isOnScreen attribute.
+     */
+    [[nodiscard]] bool getIsOnScreen() const;
+
+    /**
      * @brief Get the bounding box of the crusher.
      * @return SDL_Rect representing the crusher box.
      */
@@ -99,6 +106,12 @@ public:
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state);
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state);
 
 
     /* METHODS */

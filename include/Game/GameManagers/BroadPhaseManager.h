@@ -42,10 +42,6 @@ private:
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<Coin> coins; /**< Collection of Coin representing coins. */
 
-    // APPLICATION CONSOLE
-    bool enable_platforms_movement = true; /**< Flag to enable platform movement. */
-    bool enable_crushers_movement = true; /**< Flag to enable crusher movement. */
-
 
 public:
 
@@ -73,12 +69,6 @@ public:
     [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUps();
     [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUps();
     [[nodiscard]] std::vector<Coin> &getCoins();
-
-
-    /* MODIFIERS */
-
-    void setEnablePlatformsMovement(bool state);
-    void setEnableCrushersMovement(bool state);
 
 
     /* METHODS */

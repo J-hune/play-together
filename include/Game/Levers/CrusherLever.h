@@ -2,8 +2,8 @@
 #define PLAY_TOGETHER_CRUSHERLEVER_H
 
 #include <vector>
-#include "../Lever.h"
-#include "Crusher.h"
+#include "Lever.h"
+#include "../Traps/Crusher.h"
 
 /**
  * @file CrusherLever.h

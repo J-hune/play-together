@@ -55,6 +55,10 @@ void WeightPlatform::setIsMoving(bool state) {
     isMoving = state;
 }
 
+void WeightPlatform::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
 void WeightPlatform::increaseWeight() {
     weight++;
 }
@@ -67,7 +71,7 @@ void WeightPlatform::decreaseWeight() {
 /* METHODS */
 
 void WeightPlatform::applyMovement(double delta_time) {
-    if (isMoving) {
+    if (isMoving && isOnScreen && weight != 0) {
         auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
         float targetY = startY + weight * stepDistance;
         move = std::lerp(y, targetY, blend) - y;
@@ -77,13 +81,17 @@ void WeightPlatform::applyMovement(double delta_time) {
 }
 
 void WeightPlatform::render(SDL_Renderer *renderer, Point camera) const {
-    SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
-    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    if (isOnScreen) {
+        SDL_Rect src_rect = texture.getSize();
+        SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y,w + textureOffsets.w, h + textureOffsets.h};
+        SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    }
 }
 
 void WeightPlatform::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

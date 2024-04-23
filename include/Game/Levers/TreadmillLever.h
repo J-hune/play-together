@@ -1,8 +1,8 @@
 #ifndef PLAY_TOGETHER_TREADMILLLEVER_H
 #define PLAY_TOGETHER_TREADMILLLEVER_H
 
-#include "../Lever.h"
-#include "Treadmill.h"
+#include "Lever.h"
+#include "../Platforms/Treadmill.h"
 
 /**
  * @file TreadmillLever.h

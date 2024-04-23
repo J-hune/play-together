@@ -35,6 +35,7 @@ private:
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on screen. */
     float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
 
     Texture texture; /**< The texture of the platform. */
@@ -104,6 +105,12 @@ public:
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
 
     /* PUBLIC METHODS */

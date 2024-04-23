@@ -76,11 +76,15 @@ void MovingPlatform2D::setIsMoving(bool state) {
     isMoving = state;
 }
 
+void MovingPlatform2D::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
 
 /* METHODS */
 
 void MovingPlatform2D::applyMovement(double delta_time) {
-    if (isMoving) {
+    if (isMoving && isOnScreen) {
         // Add basic movement
         moveX = 150;
         moveY = 150;
@@ -123,13 +127,17 @@ void MovingPlatform2D::applyMovement(double delta_time) {
 }
 
 void MovingPlatform2D::render(SDL_Renderer *renderer, Point camera) const {
-    SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
-    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    if (isOnScreen) {
+        SDL_Rect src_rect = texture.getSize();
+        SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y,w + textureOffsets.w, h + textureOffsets.h};
+        SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    }
 }
 
 void MovingPlatform2D::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

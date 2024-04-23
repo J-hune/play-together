@@ -1,4 +1,4 @@
-#include "../../include/Game/Lever.h"
+#include "../../../include/Game/Levers/Lever.h"
 
 /**
  * @file Lever.cpp
@@ -61,6 +61,10 @@ void Lever::setIsActivated(bool is_activated) {
     }
 }
 
+void Lever::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
 void Lever::toggleIsActivated() {
     setIsActivated(!isActivated);
     activationSound.play(0, -1);
@@ -78,13 +82,18 @@ bool Lever::operator==(const Lever &item) const {
 }
 
 void Lever::render(SDL_Renderer *renderer, Point camera) const {
-    SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
-    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    if (isOnScreen) {
+        SDL_Rect src_rect = texture.getSize();
+        SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y,
+                                   w + textureOffsets.w, h + textureOffsets.h};
+        SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    }
 }
 
 void Lever::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 102, 51, 0, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 102, 51, 0, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

@@ -9,7 +9,7 @@
 #include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
-#include "Lever.h"
+#include "Levers/Lever.h"
 #include "Platforms/MovingPlatform1D.h"
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
@@ -22,9 +22,9 @@
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
 #include "GameManagers/TextureManager.h"
-#include "Platforms/TreadmillLever.h"
-#include "Platforms/PlatformLever.h"
-#include "Traps/CrusherLever.h"
+#include "Levers/TreadmillLever.h"
+#include "Levers/PlatformLever.h"
+#include "Levers/CrusherLever.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -163,13 +163,13 @@ public:
      * @brief Return the platformLevers attribute.
      * @return A vector of PlatformLever.
      */
-    [[nodiscard]] std::vector<PlatformLever> getPlatformLevers() const;
+    [[nodiscard]] std::vector<PlatformLever>& getPlatformLevers();
 
     /**
      * @brief Return the crusherLevers attribute.
      * @return A vector of CrusherLever.
      */
-    [[nodiscard]] std::vector<CrusherLever> getCrusherLevers() const;
+    [[nodiscard]] std::vector<CrusherLever>& getCrusherLevers();
 
     /**
      * @brief Return the movingPlatform attribute.
@@ -211,19 +211,19 @@ public:
      * @brief Return the sizePowerUp attribute.
      * @return A vector of SizePowerUp.
      */
-    [[nodiscard]] std::vector<SizePowerUp> getSizePowerUp() const;
+    [[nodiscard]] std::vector<SizePowerUp>& getSizePowerUp();
 
     /**
      * @brief Return the speedPowerUp attribute.
      * @return A vector of SpeedPowerUp.
      */
-    [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
+    [[nodiscard]] std::vector<SpeedPowerUp>& getSpeedPowerUp();
 
     /**
      * @brief Return the coins attribute.
      * @return A vector of Coin.
      */
-    [[nodiscard]] std::vector<Coin> getCoins() const;
+    [[nodiscard]] std::vector<Coin>& getCoins();
     /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.

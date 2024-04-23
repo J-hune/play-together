@@ -1,4 +1,4 @@
-#include "../../../include/Game/Traps/CrusherLever.h"
+#include "../../../include/Game/Levers/CrusherLever.h"
 
 /**
  * @file CrusherLever.cpp

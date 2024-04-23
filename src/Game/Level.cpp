@@ -81,11 +81,11 @@ std::vector<TreadmillLever> Level::getTreadmillLevers() const {
     return treadmillLevers;
 }
 
-std::vector<PlatformLever> Level::getPlatformLevers() const {
+std::vector<PlatformLever>& Level::getPlatformLevers() {
     return platformLevers;
 }
 
-std::vector<CrusherLever> Level::getCrusherLevers() const {
+std::vector<CrusherLever>& Level::getCrusherLevers() {
     return crusherLevers;
 }
 
@@ -113,15 +113,15 @@ std::vector<Crusher>& Level::getCrushers() {
     return crushers;
 }
 
-std::vector<SizePowerUp> Level::getSizePowerUp() const {
+std::vector<SizePowerUp>& Level::getSizePowerUp() {
     return sizePowerUp;
 }
 
-std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
+std::vector<SpeedPowerUp>& Level::getSpeedPowerUp() {
     return speedPowerUp;
 }
 
-std::vector<Coin> Level::getCoins() const {
+std::vector<Coin>& Level::getCoins() {
     return coins;
 }
 

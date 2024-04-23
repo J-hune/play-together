@@ -388,7 +388,7 @@ public:
 
     // Equality operator for comparing two players
     bool operator==(const Player &other) const {
-        return (x == other.x && y == other.y && width == other.width && height == other.height);
+        return (playerID == other.playerID);
     }
 
 

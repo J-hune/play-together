@@ -28,6 +28,7 @@ private:
     float size; /**< The size of the platform. */
     float speed; /**< The speed of the platform. */
     float move = 0; /**< The number of pixel the platform has moved */
+    PlatformBuffer buffer = {0, 0}; /**< The buffer of the player */
 
     const float min; /**< The minimum x-coordinate of the platform's position. */
     const float max; /**< The maximum x-coordinate of the platform's position. */
@@ -86,6 +87,12 @@ public:
     [[nodiscard]] bool getAxis() const;
 
     /**
+     * @brief Return the direction attribute.
+     * @return The value of the direction attribute.
+     */
+    [[nodiscard]] float getDirection() const;
+
+    /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
@@ -99,6 +106,36 @@ public:
 
 
     /* MODIFIERS */
+
+    /**
+     * @brief Set the x attribute.
+     * @param value The new x-coordinate of the platform's position.
+     */
+    void setX(float value);
+
+    /**
+     * @brief Set the y attribute.
+     * @param value The new y-coordinate of the platform's position.
+     */
+    void setY(float value);
+
+    /**
+     * @brief Set the move attribute.
+     * @param value The new move of the platform.
+     */
+    void setMove(float value);
+
+    /**
+     * @brief Set the direction attribute.
+     * @param value The new direction of the platform.
+     */
+    void setDirection(float value);
+
+    /**
+    * @brief Sets the buffer attribute.
+    * @param value The new value of the buffer attribute.
+    */
+    void setBuffer(PlatformBuffer value);
 
     /**
      * @brief Set the isMoving attribute.

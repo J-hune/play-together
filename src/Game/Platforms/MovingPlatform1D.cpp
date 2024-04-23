@@ -55,6 +55,10 @@ bool MovingPlatform1D::getAxis() const {
     return axis;
 }
 
+float MovingPlatform1D::getDirection() const {
+    return direction;
+}
+
 bool MovingPlatform1D::getIsMoving() const {
     return isMoving;
 }
@@ -65,6 +69,26 @@ SDL_FRect MovingPlatform1D::getBoundingBox() const {
 
 
 /* MODIFIERS */
+
+void MovingPlatform1D::setX(float value) {
+    x = value;
+}
+
+void MovingPlatform1D::setY(float value) {
+    y = value;
+}
+
+void MovingPlatform1D::setMove(float value) {
+    move = value;
+}
+
+void MovingPlatform1D::setDirection(float value) {
+    direction = value;
+}
+
+void MovingPlatform1D::setBuffer(PlatformBuffer val) {
+    buffer = val;
+}
 
 void MovingPlatform1D::setIsMoving(bool state) {
     isMoving = state;
@@ -83,7 +107,19 @@ void MovingPlatform1D::applyXaxisMovement(double delta_time) {
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
-    x += move; // Apply movement
+    if (buffer.deltaX > 40 || buffer.deltaX < -40) {
+        x = x + buffer.deltaX;
+        buffer.deltaX = 0;
+    }
+
+    else {
+        // Add a part of the buffer to the player's position
+        float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+        x += move + bufferFraction * buffer.deltaX;
+
+        // Decrease the buffer
+        buffer.deltaX -= bufferFraction * buffer.deltaX;
+    }
 
     // If the platform has reached its minimum
     if (x < min) {
@@ -104,7 +140,19 @@ void MovingPlatform1D::applyYaxisMovement(double delta_time) {
     move *= speed; // Apply speed
     move *= direction; // Apply direction
 
-    y += move; // Apply movement
+    if (buffer.deltaY > 40 || buffer.deltaY < -40) {
+        y += buffer.deltaY;
+        buffer.deltaY = 0;
+    }
+
+    else {
+        // Add a part of the buffer to the player's position
+        float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+        y += move + bufferFraction * buffer.deltaY;
+
+        // Decrease the buffer
+        buffer.deltaY -= bufferFraction * buffer.deltaY;
+    }
 
     // If the platform has reached its minimum, change direction to left
     if (y < min) {

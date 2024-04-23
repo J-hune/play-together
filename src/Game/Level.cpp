@@ -97,7 +97,7 @@ std::vector<MovingPlatform2D>& Level::getMovingPlatforms2D() {
     return movingPlatforms2D;
 }
 
-std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
+std::vector<SwitchingPlatform>& Level::getSwitchingPlatforms() {
     return switchingPlatforms;
 }
 

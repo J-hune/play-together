@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_PLAYERMANAGER_H
 
 #include "../Game.h"
+#include "../Events/Rescue.h"
 
 
 /**
@@ -15,6 +16,7 @@ private:
     /* ATTRIBUTES */
 
     Game *game;
+    Rescue currentRescueZone;
     std::vector<Player> alivePlayers;
     std::vector<Player> deadPlayers;
 
@@ -39,7 +41,20 @@ public:
      */
     [[nodiscard]] std::vector<Player> &getDeadPlayers();
 
+    /**
+     * @brief Get the total number of players in the game.
+     * @return The total number of players in the game.
+     */
     [[nodiscard]] size_t getPlayerCount() const;
+
+
+    /* MUTATORS */
+
+    /**
+     * @brief Set the current rescue zone.
+     * @param zone The rescue zone to set.
+     */
+    void setCurrentRescueZone(AABB zone);
 
 
     /* METHODS */

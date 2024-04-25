@@ -463,7 +463,7 @@ void Player::setSpriteTextureByID(int id) {
     setSize(size);
 }
 
-void Player::teleportPlayer(float newX, float newY) {
+void Player::teleport(float newX, float newY) {
     x = newX;
     y = newY;
 }

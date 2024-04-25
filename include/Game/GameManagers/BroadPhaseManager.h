@@ -17,6 +17,7 @@ private:
 
     // ZONES
     std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
+    std::vector<AABB> rescueZones; /**< Collection of polygons representing rescue zones. */
     std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
     std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
     std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
@@ -53,6 +54,7 @@ public:
     /* ACCESSORS */
 
     [[nodiscard]] std::vector<AABB> &getSaveZones();
+    [[nodiscard]] std::vector<AABB> &getRescueZones();
     [[nodiscard]] std::vector<AABB> &getToggleGravityZones();
     [[nodiscard]] std::vector<AABB> &getIncreaseFallSpeedZones();
     [[nodiscard]] std::vector<Polygon> &getDeathZones();
@@ -83,6 +85,7 @@ private:
 
     /* SUB METHODS */
     void checkSavesZones(const SDL_FRect& broad_phase_area);
+    void checkRescueZones(const SDL_FRect& broad_phase_area);
     void checkToggleGravityZones(const SDL_FRect& broad_phase_area);
     void checkIncreaseFallSpeedZones(const SDL_FRect& broad_phase_area);
     void checkDeathZones(const std::vector<Point>& broad_phase_area);

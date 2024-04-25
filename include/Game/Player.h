@@ -600,7 +600,7 @@ public:
      * @param newX The X-coordinate of the location.
      * @param newY The Y-coordinate of the location.
      */
-    void teleportPlayer(float newX, float newY);
+    void teleport(float newX, float newY);
 
     /**
      * @brief Increase or decrease the score by adding a value.

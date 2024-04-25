@@ -8,7 +8,7 @@
 
 /* CONSTRUCTOR */
 
-AABB::AABB(float x, float y, float width, float height, AABBType type) : x(x), y(y), width(width), height(height), type(type) {}
+AABB::AABB(float x, float y, float width, float height, int id, AABBType type) : x(x), y(y), width(width), height(height), id(id), type(type) {}
 
 
 /* ACCESSORS */
@@ -27,6 +27,10 @@ float AABB::getWidth() const {
 
 float AABB::getHeight() const {
     return height;
+}
+
+int AABB::getID() const {
+    return id;
 }
 
 AABBType AABB::getType() const {

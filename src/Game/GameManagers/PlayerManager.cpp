@@ -25,6 +25,14 @@ size_t PlayerManager::getPlayerCount() const {
     return alivePlayers.size() + deadPlayers.size();
 }
 
+
+/* MUTATORS */
+
+void PlayerManager:: setCurrentRescueZone(AABB zone) {
+    currentRescueZone.setZone(zone);
+}
+
+
 /* METHODS */
 
 Player* PlayerManager::findPlayerById(int id) {
@@ -68,8 +76,9 @@ void PlayerManager::removePlayer(const Player &player) {
 
 void PlayerManager::killPlayer(Player &player) {
     player.increaseDeathCount();
-    std::erase(alivePlayers, player);
-    deadPlayers.emplace_back(player);
+    player.teleport(currentRescueZone.getNextPosition(), game->getCamera()->getY());
+    //std::erase(alivePlayers, player);
+    //deadPlayers.emplace_back(player);
 }
 
 

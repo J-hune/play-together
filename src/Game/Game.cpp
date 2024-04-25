@@ -104,6 +104,8 @@ void Game::initializeHostedGame(int slot) {
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
 
+    playerManager->setCurrentRescueZone(level.getZones(AABBType::RESCUE)[0]);
+
     // Add the initial player to the game
     Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[0];
 

@@ -120,6 +120,12 @@ private:
     void handleCollisionsWithSaveZones(Player &player);
 
     /**
+     * @brief Handles collisions between the player and rescue zones.
+     * @param player The player object.
+     */
+    void handleCollisionsWithRescueZones(const Player &player);
+
+    /**
      * @brief Handles collisions between the player and toggle gravity zones.
      * @param player The player object.
      * @param delta_time The time elapsed since the last frame.

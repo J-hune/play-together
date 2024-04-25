@@ -11,6 +11,7 @@
 
 enum class AABBType {
     SAVE,
+    RESCUE,
     TOGGLE_GRAVITY,
     INCREASE_FALL_SPEED,
 };
@@ -23,6 +24,7 @@ private:
     float y; /**< The y-coordinate of the AABB. */
     float width; /**< The width of the AABB. */
     float height; /**< The height of the AABB. */
+    int id; /**< The id of the AABB. */
     AABBType type; /**< The type of the AABB. */
 
 
@@ -30,7 +32,7 @@ public:
 
     /* CONSTRUCTORS */
 
-    AABB(float x, float y, float width, float height, AABBType type);
+    AABB(float x, float y, float width, float height, int id, AABBType type);
 
 
     /* ACCESSORS */
@@ -58,6 +60,12 @@ public:
      * @return The height of the AABB.
      */
     [[nodiscard]] float getHeight() const;
+
+    /**
+     * @brief Get the id of the AABB.
+     * @return The id of the AABB.
+     */
+    [[nodiscard]] int getID() const;
 
     /**
      * @brief Get the type of the AABB.

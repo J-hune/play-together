@@ -1,4 +1,5 @@
 #include "../../../include/Game/GameManagers/PlayerCollisionManager.h"
+#include "../../../dependencies/json.hpp"
 
 /**
  * @file PlayerCollisionManager.cpp
@@ -307,19 +308,24 @@ bool PlayerCollisionManager::handleCollisionsWithDeathZones(const Player &player
 }
 
 void PlayerCollisionManager::handleCollisionsWithSaveZones(Player &player) {
-    const std::vector<AABB> &saveZones = gamePtr->getBroadPhaseManager().getSaveZones();
-
     // Check collisions with each save zone
-    for (size_t i = 0; i < saveZones.size(); ++i) {
-        const AABB &saveZone = saveZones[i];        // If collision detected with the save zone, save the player (in local or server mode)
-        auto savePointID = static_cast<short>(i + 1);
+    for (const AABB &save_zone : gamePtr->getBroadPhaseManager().getSaveZones()) {
+        // Check a collision is detected and the zone has not yet been reached
+        if (static_cast<int>(player.getCurrentZoneID()) == (save_zone.getID() + 1)) return;
+        if (checkAABBCollision(player.getBoundingBox(), save_zone.getRect()) && gamePtr->getLevel()->getLastCheckpoint() < save_zone.getID()) {
+            gamePtr->getLevel()->setLastCheckpoint(static_cast<short>(save_zone.getID()));
+            player.setCurrentZoneID(save_zone.getID() + 1);
+            std::cout << "Checkpoint reached: " << save_zone.getID() << std::endl;
+        }
+    }
+}
 
-        // Check if the player is already in the save zone
-        if (player.getCurrentZoneID() == (i + 1)) return;
-        if (checkAABBCollision(player.getBoundingBox(), saveZone.getRect()) && gamePtr->getLevel()->getLastCheckpoint() < savePointID) {
-            gamePtr->getLevel()->setLastCheckpoint(savePointID);
-            player.setCurrentZoneID(i + 1);
-            std::cout << "Checkpoint reached: " << savePointID << std::endl;
+void PlayerCollisionManager::handleCollisionsWithRescueZones(const Player &player) {
+    // Check collisions with each rescue zone
+    for (const AABB &zone : gamePtr->getBroadPhaseManager().getRescueZones()) {
+        // Check a collision is detected
+        if (checkAABBCollision(player.getBoundingBox(), zone.getRect())) {
+            gamePtr->getPlayerManager().setCurrentRescueZone(zone);
         }
     }
 }
@@ -457,6 +463,7 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             handleCollisionsWithCoins(&player);
 
             handleCollisionsWithSaveZones(player); // Handle collisions with save zones
+            handleCollisionsWithRescueZones(player); // Handle collisions with rescue zones
             handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
             handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
         }

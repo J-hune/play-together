@@ -63,6 +63,7 @@ std::vector<AABB> Level::getZones(AABBType type) const {
     switch(type) {
         using enum AABBType;
         case SAVE: return saveZones;
+        case RESCUE: return rescueZones;
         case TOGGLE_GRAVITY: return toggleGravityZones;
         case INCREASE_FALL_SPEED: return increaseFallSpeedZones;
         default: return {};
@@ -309,6 +310,13 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
         SDL_RenderDrawRectF(renderer, &save_zone_rect);
     }
 
+    SDL_SetRenderDrawColor(renderer, 144, 190, 144, 255);
+    for (const AABB &rescue_zone: rescueZones) {
+        // Draw only the outline of the save zone
+        SDL_FRect rescue_zone_rect = {rescue_zone.getX() - camera.x, rescue_zone.getY() - camera.y, rescue_zone.getWidth(), rescue_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &rescue_zone_rect);
+    }
+
     SDL_SetRenderDrawColor(renderer, 127, 25, 230, 255);
     for (const AABB &toggle_gravity_zone: toggleGravityZones) {
         // Draw only the outline of the toggle gravity zone
@@ -483,12 +491,14 @@ int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::stri
 }
 
 int Level::loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type) {
+    int i = 0;
     for (const auto &zone : json_data[zone_name]) {
         float x = zone["x"];
         float y = zone["y"];
         float width = zone["width"];
         float height = zone["height"];
-        zones.emplace_back(x, y, width, height, type);
+        zones.emplace_back(x, y, width, height, i, type);
+        i++;
     }
 
     return (int)json_data[zone_name].size();
@@ -541,9 +551,10 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     aabbs_file.close();
 
     int save_zones_size = loadAABBFromJson(aabbs, "saveZones", saveZones, SAVE);
+    int rescue_zones_size = loadAABBFromJson(aabbs, "rescueZones", rescueZones, RESCUE);
     int toggle_gravity_zones_size = loadAABBFromJson(aabbs, "toggleGravityZones", toggleGravityZones, TOGGLE_GRAVITY);
     int increase_fall_speed_zones_size = loadAABBFromJson(aabbs, "increaseFallSpeedZones", increaseFallSpeedZones, INCREASE_FALL_SPEED);
-    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
+    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << rescue_zones_size << " rescue zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {

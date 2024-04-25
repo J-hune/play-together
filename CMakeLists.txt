@@ -65,8 +65,7 @@ file(GLOB_RECURSE HEADERS include/*.h)
 file(GLOB_RECURSE DEPENDENCIES ${DEPENDENCIES_DIR}/*)
 
 # Create the executable
-add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES}
-        include/Game/Events/Rescue.h)
+add_executable(play-together WIN32 ${SOURCES} ${HEADERS} ${DEPENDENCIES})
 
 # Link libraries
 target_link_libraries(play-together ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARY} ${SDL2_MIXER_LIBRARY})

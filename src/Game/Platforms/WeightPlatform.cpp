@@ -71,7 +71,7 @@ void WeightPlatform::decreaseWeight() {
 /* METHODS */
 
 void WeightPlatform::applyMovement(double delta_time) {
-    if (isMoving && isOnScreen && weight != 0) {
+    if (isMoving && isOnScreen) {
         auto blend = static_cast<float>(1.0f - std::pow(0.5F, delta_time * lerpSmoothingFactor));
         float targetY = startY + weight * stepDistance;
         move = std::lerp(y, targetY, blend) - y;

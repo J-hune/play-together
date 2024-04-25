@@ -97,7 +97,7 @@ void ApplicationConsole::displayHelp(int gameState) const {
 void ApplicationConsole::teleportPlayer(const std::string &command) const {
     float x; float y;
     if (sscanf(command.c_str(), "tp %f %f", &x, &y) == 2) {
-        gamePtr->getPlayerManager().findPlayerById(-1)->teleportPlayer(x, y);
+        gamePtr->getPlayerManager().findPlayerById(-1)->teleport(x, y);
     } else {
         std::cout << "Invalid syntax. Usage: tp [x] [y]\n";
     }

@@ -1,23 +1,58 @@
-//
-// Created by athena on 18/04/24.
-//
-
 #include "../../../include/Game/Events/Rescue.h"
 
-Rescue::Rescue(float x,float y,float h,float w,Point first):x(x),y(y),h(h),w(w),currentPoint(first) {}
 
-float Rescue::getX() const { return x;}
-float Rescue::getY() const { return y;}
-float Rescue::getW() const { return w;}
-float Rescue::getH() const { return h;}
+/**
+ * @file Rescue.cpp
+ * @brief Implements the Rescue class responsible for rescue zone.
+ */
 
-Point Rescue::getNextposition(){
-    Point givePoint = currentPoint;
-    currentPoint = Point(currentPoint.x+50,currentPoint.y);
-    return givePoint;
+
+/* CONSTRUCTORS */
+
+Rescue::Rescue(float x, float y, float w, float h) : x(x), y(y), w(w), h(h){}
+
+
+/* ACCESSORS */
+
+float Rescue::getX() const {
+    return x;
+
+}
+float Rescue::getY() const {
+    return y;
 }
 
+float Rescue::getW() const {
+    return w;
+}
+
+float Rescue::getH() const {
+    return h;
+}
+
+float Rescue::getNextPosition() {
+    currentSpawn += spawnStepDistance;
+    if (currentSpawn >= x + spawnStepDistance * 4) currentSpawn = x;
+    return currentSpawn;
+}
 
 SDL_FRect Rescue::getBoundingBox() const {
     return {x, y, w, h};
+}
+
+
+/* MODIFIERS */
+
+bool Rescue::setZone(AABB zone) {
+    if (zone.getID() != id) {
+        id = zone.getID();
+        x = zone.getX();
+        y = zone.getY();
+        w = zone.getWidth();
+        h = zone.getHeight();
+        currentSpawn = x + spawnStepDistance * 4;
+        return true;
+    } else {
+        return false;
+    }
 }

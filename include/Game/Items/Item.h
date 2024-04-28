@@ -87,6 +87,12 @@ public:
     virtual void applyEffect(Player &player) = 0;
 
     /**
+ * @brief Apply the item's inverse effect to a player.
+ * @param player The player the effect will be applied to.
+ */
+    virtual void inverseEffect(Player &player) = 0;
+
+    /**
      * @brief Renders the collisions by drawing a rectangle..
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.

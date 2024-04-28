@@ -28,3 +28,8 @@ void SpeedPowerUp::applyEffect(Player &player) {
         player.setSpeed(player.getSpeed() * 0.5F);
     }
 }
+
+void  SpeedPowerUp::inverseEffect(Player &player) {
+    fast = !fast;
+    applyEffect(player);
+}

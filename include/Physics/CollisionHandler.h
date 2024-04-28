@@ -1,6 +1,7 @@
 #ifndef PLAY_TOGETHER_COLLISIONHANDLER_H
 #define PLAY_TOGETHER_COLLISIONHANDLER_H
 
+#include <queue>
 #include "CollisionManager.h"
 #include "../Game/Camera.h"
 #include "../Game/Level.h"
@@ -10,8 +11,12 @@
  * @brief Declaration of functions for handling collisions behavior.
  */
 
-
 /* PLAYER NORMAL MAVITY */
+//data necessary in order to bring back to the old state the player
+typedef struct {
+    Item* item;
+    time_t t;
+} GameData;
 
 /**
  * @brief Handles collisions between a player and obstacles.
@@ -134,6 +139,6 @@ void handleCollisionsWithSizePowerUp(Player *player, Level *level, std::vector<S
  */
 void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<SpeedPowerUp> &speedPowerUp);
 
-void handleCollisionsWithItem(Player *player, Level *level, std::vector<std::reference_wrapper<Item>> &items);
+void handleCollisionsWithItem(Player *player, Level *level, std::vector<Item*> &items,std::queue<GameData*>* timeQueue);
 
 #endif //PLAY_TOGETHER_COLLISIONHANDLER_H

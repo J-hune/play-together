@@ -83,7 +83,7 @@ std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
     return speedPowerUp;
 }
 
-std::vector<std::reference_wrapper<Item>> Level::getItems() const {
+std::vector<Item*> Level::getItems() const {
     return items;
 }
 
@@ -121,7 +121,8 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
 void Level::removeItem(Item const &item) {
     // Search the item and remove it
     for (auto it = items.begin(); it != items.end(); ++it) {
-        if (&it->get() == &item) {
+        if (it != items.end() && *it == &item) {
+            std::cout<<"this item is erased"<<std::endl;
             items.erase(it);
             break; // Found and removed the item, exit the loop
         }
@@ -228,7 +229,7 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
 }
 
 void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
-
+/*
     // Draw the size power-ups
     SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
     for (const SizePowerUp &item : sizePowerUp) {
@@ -239,7 +240,14 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
     for (const SpeedPowerUp &item : speedPowerUp) {
         item.renderDebug(renderer, camera);
+    }*/
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
+    for (const Item* item : items) {
+        item->renderDebug(renderer, camera);
     }
+
+
 }
 
 void Level::applyAsteroidsMovement(double delta_time) {
@@ -457,7 +465,7 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         float height = item["height"];
         bool grow = item["grow"];
         sizePowerUp.emplace_back(x, y, width, height, grow);
-        SizePowerUp spu(x, y, width, height, grow);
+        Item* spu = new SizePowerUp (x, y, width, height, grow);
         items.emplace_back(spu);
     }
 
@@ -469,7 +477,7 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
         float height = item["height"];
         bool fast = item["fast"];
         speedPowerUp.emplace_back(x, y, width, height, fast);
-        SpeedPowerUp spu(x, y, width, height, fast);
+        Item* spu = new SpeedPowerUp(x, y, width, height, fast);
         items.emplace_back(spu);
     }
     std::cout << "Level: Loaded  items " << items.size() <<std::endl;

@@ -34,6 +34,7 @@ SDL_FRect Item::getBoundingBox() const {
     return {x, y, width, height};
 }
 
+
 bool Item::operator==(const Item &item) const {
      return x == item.getX()
             && y == item.getY()

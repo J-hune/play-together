@@ -389,15 +389,47 @@ void handleCollisionsWithSpeedPowerUp(Player *player, Level *level, std::vector<
     }
 }
 
-void handleCollisionsWithItem (Player *player, Level *level, std::vector<std::reference_wrapper<Item>> &itemsN){
+void handleCollisionsWithItem (Player *player, Level *level, std::vector<Item*> &itemsN,std::queue<GameData*>* timeQueue){
+    //section check if the time of the power has not passed
+
+    //checks if the queue is empty
+    if(!timeQueue->empty()){
+        int count = 0;
+        //keep the current size of the queue
+        int  currentSizeQueue = timeQueue->size();
+        while( count < currentSizeQueue ){
+            //we get the first element of the queue
+            GameData* current = timeQueue->front();
+            //check if the time of the power has passed
+            if (difftime(time(nullptr) ,current->t) >= 4){
+                //we remove the element form the queue since is not necessary
+                current->item->inverseEffect(*player);
+                timeQueue->pop();
+                //free the allocated memory
+                free(current);
+                //check for the rest elements of the queue
+                count++;
+            }else{
+                //in means that all the other elements have smaller time difference
+                // -> not necessary to have a further check
+                count = currentSizeQueue;
+            }
+        }
+    }
+
+    //section to get the new power
     auto items = level->getItems();
-    // Check for collisions with each item
-    for (auto item = items.begin(); item != items.end(); ++item)  {
+    for(Item* item : level->getItems()){
         // If a collision is detected, apply item's effect to the player and erase it
-        if (checkAABBCollision(player->getBoundingBox(), item->get().getBoundingBox())) {
-            std::cout<<"check :"<<item->get().getBoundingBox().x<<item->get().getBoundingBox().y<<" with p "<<player->getBoundingBox().x<<player->getBoundingBox().y<<std::endl;
-            item->get().applyEffect(*player);
-            level->removeItem(item->get());
+        if (checkAABBCollision(player->getBoundingBox(), item->getBoundingBox())) {
+            std::cout<<"checitemk :"<<item->getBoundingBox().x<<item->getBoundingBox().y<<" with p "<<player->getBoundingBox().x<<player->getBoundingBox().y<<std::endl;
+            item->applyEffect(*player);
+            GameData* data = static_cast<GameData *>(calloc(1, sizeof(GameData)));
+            //initialise the gameData
+            time(&data->t);
+            data->item = item;
+            timeQueue->push(data);
+            level->removeItem(*item);
         }
     }
 

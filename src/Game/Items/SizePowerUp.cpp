@@ -14,6 +14,11 @@ SizePowerUp::SizePowerUp(float x, float y, float w, float h, bool grow) :
 
 /* METHODS */
 
+void SizePowerUp::inverseEffect(Player &player) {
+    grow = !grow;
+    applyEffect(player);
+}
+
 void SizePowerUp::applyEffect(Player &player) {
     //Item::applyEffect(player);
 

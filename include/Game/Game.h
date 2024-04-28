@@ -9,6 +9,7 @@
 #include <cmath>
 #include <algorithm>
 #include <SDL_ttf.h>
+#include <queue>
 #include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
 #include "InputManager.h"
@@ -202,9 +203,12 @@ private:
     std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<std::reference_wrapper<Item>> items;
+    std::vector<Item*> items;
     // Debug variables used for the application console
     bool enable_platforms_movement = true;
+
+    //queue in order to keep track of the effects applied on the player
+    std::queue<GameData*> timeQueue;
 
 
     /** PRIVATE METHODS **/

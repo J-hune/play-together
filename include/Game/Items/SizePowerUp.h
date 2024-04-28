@@ -35,6 +35,12 @@ public:
      * @param player The player the effect will be applied to.
      */
     void applyEffect(Player &player) override;
+
+    /**
+    * @brief Apply the item's inverse effect to a player.
+    * @param player The player the effect will be applied to.
+    */
+    void inverseEffect(Player &player) override;
 };
 
 

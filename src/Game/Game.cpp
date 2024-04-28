@@ -289,6 +289,7 @@ void Game::broadPhase() {
         }
     }
 
+    /*
     // Check for collisions with size power-up
     for (const SizePowerUp &item: level.getSizePowerUp()) {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
@@ -301,23 +302,18 @@ void Game::broadPhase() {
         if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
             speedPowerUp.push_back(item);
         }
-    }
-/*
-    // Check for collisions
-    for (const Item &item: level.getItems()) {
-        if (!checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
+    }*/
+    /*
+    // Check for collisions with speed power-up
+    for (const Item *item: level.getItems()) {
+        if (checkAABBCollision(broadPhaseAreaBoundingBox, item->getBoundingBox())) {
             items.push_back(item);
         }
     }
-    std::cout<<"I'm the problem"<<std::endl;
+    */
 
-    for (auto item = level.getItems().begin(); item != level.getItems().end(); ++item)  {
-        if (!checkAABBCollision(broadPhaseAreaBoundingBox, item->get().getBoundingBox())){
-            items.push_back(item->get());
-        }
-    }
-    std::cout<<"I'm not the problem"<<std::endl; */
 }
+
 
 void Game::narrowPhase() {
     // Check collisions with asteroids
@@ -335,7 +331,7 @@ void Game::narrowPhase() {
         // Handle collisions with items
         //handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
         //handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
-        handleCollisionsWithItem(&character, &level, items);
+        handleCollisionsWithItem(&character, &level, items, static_cast<std::queue<GameData *> *>(&timeQueue));
 
         handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
         handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones

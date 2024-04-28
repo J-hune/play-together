@@ -188,8 +188,12 @@ public:
      * @param map_name The name of the map to load.
      * @param last_checkpoint The last checkpoint reached.
      * @param players The list of players to load.
+     * @param cameraData The camera data to load.
+     * @param movingPlatforms1D The list of 1D moving platforms to load.
+     * @param movingPlatforms2D The list of 2D moving platforms to load.
+     * @param crushers The list of crushers to load.
      */
-    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players,
+    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players, const nlohmann::json::object_t &cameraData,
                    const nlohmann::json::array_t &movingPlatforms1D, const nlohmann::json::array_t &movingPlatforms2D, const nlohmann::json::array_t &crushers);
 
     /**

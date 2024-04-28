@@ -121,10 +121,15 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &playersData,
-                     const nlohmann::json::array_t &movingPlatforms1DData, const nlohmann::json::array_t &movingPlatforms2DData,const nlohmann::json::array_t &crushersData) {
+using json = nlohmann::json;
+void Game::loadLevel(const std::string &map_name, short last_checkpoint, const json::array_t &playersData, const json::object_t &cameraData,
+                     const json::array_t &movingPlatforms1DData, const json::array_t &movingPlatforms2DData,const json::array_t &crushersData) {
     setLevel(map_name);
     level.setLastCheckpoint(last_checkpoint);
+
+    // Set the camera position
+    camera.setX(cameraData.at("x"));
+    camera.setY(cameraData.at("y"));
 
     // Add all players to the game (including the local player)
     size_t spawnIndex = 0;
@@ -228,6 +233,7 @@ void Game::run() {
                         message["mapName"],
                         message["lastCheckpoint"],
                         message["players"],
+                        message["camera"],
                         message["platforms1D"],
                         message["platforms2D"],
                         message["crushers"]

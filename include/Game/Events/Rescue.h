@@ -23,7 +23,7 @@ private :
     float h; /**< height of the rescue zone. */
     float currentSpawn = x; /**< current spawn point of the rescue zone. */
     float spawnStepDistance = 50; /**< distance between spawn points. */
-    int id = 0; /**< id of the rescue zone. */
+    int id = -1; /**< id of the rescue zone. */
 
 
 public :
@@ -60,6 +60,12 @@ public :
     [[nodiscard]] float getW() const;
 
     /**
+     * @brief Get the id of the rescue zone.
+     * @return The id of the rescue zone.
+     */
+    [[nodiscard]] int getID() const;
+
+    /**
      * @brief Get the next spawn position of the rescue zone.
      * @return The next spawn position of the rescue zone.
      */
@@ -77,9 +83,8 @@ public :
     /**
      * @biref Set the rescue zone.
      * @param zone The new zone
-     * @return True if the zone changed, false otherwise.
      */
-    bool setZone(AABB zone);
+    void setZone(AABB zone);
 
 };
 

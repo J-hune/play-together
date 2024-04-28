@@ -37,6 +37,7 @@ private:
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     float size = 2; /**< The size of the player. */
+    bool isAlive = true; /**< Flag indicating whether the player is alive. */
     Buffer buffer = {0, 0}; /**< The buffer of the player */
 
     // STATS
@@ -111,28 +112,35 @@ private:
     static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
 
     // TEXTURES OFFSETS
+    bool eggLock = false; /**< Flag indicating whether the player had already moved */
     bool lastAnimationIsRunType = false; /**< Flag indicating whether the last animation was a run animation. */
     SDL_FRect textureOffsets = normalOffsets; /**< The offsets of the player's sprite */
     SDL_FRect normalOffsets = baseNormalOffsets; /**< The normal offsets of the player's sprite */
     SDL_FRect runOffsets = baseRunOffsets; /**< The run offsets of the player's sprite */
+    SDL_FRect eggOffsets = baseEggOffsets; /**< The offsets of the egg sprite */
     float spriteWidth = BASE_SPRITE_WIDTH; /**< The width of the player's sprite */
     float spriteHeight = BASE_SPRITE_HEIGHT; /**< The height of the player's sprite */
     SDL_FRect baseNormalOffsets; /**< The base normal offsets of the player's sprite */
     SDL_FRect baseRunOffsets; /**< The base run offsets of the player's sprite */
+    SDL_FRect baseEggOffsets = {5, 4, 6, 5}; /**< The base egg offsets of the player's sprite */
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
-    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
     static constexpr Animation hit = {2, 3, 70, true}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
+    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
+    static constexpr Animation death = {5, 5, 90, true}; /**< Death animation */
+    static constexpr Animation egg = {6, 1, 1000000000, false}; /**< Egg animation */
+    static constexpr Animation eggMove = {6, 4, 50, true}; /**< Egg moving animation */
+    static constexpr Animation eggCrack = {7, 8, 85, true}; /**< Egg cracking animation */
 
     // CONSTANTS
     static constexpr int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
     static constexpr int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
     static constexpr int BASE_SPRITE_WIDTH = 24; /**< Constant for the base width of a player. */
-    static constexpr int BASE_SPRITE_HEIGHT = 18; /**< Constant for the base height of a player. */
+    static constexpr int BASE_SPRITE_HEIGHT = 24; /**< Constant for the base height of a player. */
 
 
 public:
@@ -191,6 +199,12 @@ public:
      * @return The value of the size attribute.
      */
     [[nodiscard]] float getSize() const;
+
+    /**
+     * @brief Return the isAlive attribute.
+     * @return The value of the isAlive attribute.
+     */
+    [[nodiscard]] bool getIsAlive() const;
 
     /**
      * @brief Gets the player's current score.
@@ -413,10 +427,16 @@ public:
     void setSize(float val);
 
     /**
+     * @brief Sets the isAlive attribute.
+     * @param state The new value of the isAlive attribute.
+     */
+    void setIsAlive(bool state);
+
+    /**
      * @brief Sets the deathCount attribute, used when loading a game.
      * @param val The new value of the deathCount attribute.
      */
-    void voidSetDeathCount(int val);
+    void setDeathCount(int val);
 
     /**
      * @brief Sets the moveX attribute.
@@ -483,6 +503,12 @@ public:
      * @param state The new value of the isJumping attribute.
      */
     void setIsJumping(bool state);
+
+    /**
+     * @brief Sets the JumpMaxHeight attribute.
+     * @param val The new value of the JumpMaxHeight attribute.
+     */
+    void setJumpMaxHeight(float val);
 
     /**
      * @brief Toggle the gravity to positive or negative (normal or reversed).
@@ -596,6 +622,28 @@ public:
     void setSpriteTextureByID(int id);
 
     /**
+     * @brief Set the sprite's animation to death animation.
+     */
+    void setDeathAnimation();
+
+    /**
+     * @brief Set the sprite's animation to egg cracking animation.
+     */
+    void setRespawnAnimation();
+
+    /**
+     * @brief Active the egg action of the player.
+     * @param state True if the player press egg buttons, false otherwise.
+     */
+    void eggAction(bool state);
+
+    /**
+     * @brief Update the player's sprite animation.
+     * @return True if a unique animation just ended, false otherwise.
+     */
+    bool updateSpriteAnimation();
+
+    /**
      * @brief Teleports the player to a specific location.
      * @param newX The X-coordinate of the location.
      * @param newY The Y-coordinate of the location.
@@ -618,6 +666,13 @@ public:
      * @param state True if the player press hit button, false otherwise.
      */
     void hitAction(bool state);
+
+    /**
+     * @brief Calculates the vertical movement of the player for the current frame.
+     * @param delta_time The time elapsed since the last frame in seconds.
+     * @see calculateMovement() for main use.
+     */
+    void calculateYaxisMovement(double delta_time);
 
     /**
      * @brief Calculate the new position of the player.
@@ -712,16 +767,9 @@ private:
     void calculateXaxisMovement(double delta_time);
 
     /**
-     * @brief Calculates the vertical movement of the player for the current frame.
-     * @param delta_time The time elapsed since the last frame in seconds.
-     * @see calculateMovement() for main use.
-     */
-    void calculateYaxisMovement(double delta_time);
-
-    /**
      * @brief Update the sprite animation of the player.
      */
-    void updateSpriteAnimation();
+    void updateSprite();
 
     /**
      * @brief Update the sprite orientation of the player.

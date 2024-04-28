@@ -37,6 +37,22 @@ enum class ButtonAction {
  * @brief A class representing a clickable button in SDL.
  */
 class Button {
+private:
+    SDL_Renderer *renderer;
+    TTF_Font *font;
+    std::string buttonText;
+    ButtonPosition position;
+    int value;
+    short borderRadius = 0;
+    ButtonAction buttonAction = ButtonAction::NONE;
+    SDL_Color normalColor = {0, 255, 0, 255};
+    SDL_Color hoverColor = {255, 0, 0, 255};
+    SDL_Color textColor = {0, 0, 0, 255};
+    bool clicked = false;
+    bool hovered = false;
+    SoundEffect hoverSound = SoundEffect("Menu/hover.wav", 10); /**< The sound played when the mouse goes hover a button. */
+
+
 public:
     /**
      * @brief Constructor for the Button class.
@@ -149,20 +165,6 @@ public:
      */
     void reset();
 
-private:
-    SDL_Renderer *renderer;
-    TTF_Font *font;
-    std::string buttonText;
-    ButtonPosition position;
-    int value;
-    short borderRadius = 0;
-    ButtonAction buttonAction = ButtonAction::NONE;
-    SDL_Color normalColor = {0, 255, 0, 255};
-    SDL_Color hoverColor = {255, 0, 0, 255};
-    SDL_Color textColor = {0, 0, 0, 255};
-    bool clicked = false;
-    bool hovered = false;
-    SoundEffect hoverSound = SoundEffect("Menu/hover.wav", 10); /**< The sound played when the mouse goes hover a button. */
 };
 
 #endif //PLAY_TOGETHER_BUTTON_H

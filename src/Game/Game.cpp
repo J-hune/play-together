@@ -196,7 +196,10 @@ void Game::update(double delta_time) {
     // Handle collisions
     broadPhaseManager->broadPhase();
     narrowPhase(delta_time);
+
     playerManager->setTheBestPlayer();
+    updatePlayersSpriteAnimation();
+
     if (!Mediator::isClientRunning()) level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
     renderManager->render();
 }
@@ -281,11 +284,48 @@ void Game::calculatePlayersMovement(double delta_time) {
     for (Player &player: playerManager->getAlivePlayers()) {
         player.calculateMovement(delta_time);
     }
+
+    // Apply movement to all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.calculateYaxisMovement(delta_time);
+    }
+}
+
+void Game::updatePlayersSpriteAnimation() {
+
+    // Update sprite animation for all living players
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.updateSpriteAnimation();
+    }
+
+    // Update sprite animation for all dying players
+    for (Player &player: playerManager->getNeutralPlayers()) {
+        if (player.updateSpriteAnimation()) {
+            // The player is respawning
+            if (player.getIsAlive()) {
+                playerManager->moveNeutralPlayer(player, 1);
+            }
+            // The player is dying
+            else {
+                playerManager->moveNeutralPlayer(player, -1);
+            }
+        }
+    }
+
+    // Update sprite animation for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.updateSpriteAnimation();
+    }
 }
 
 void Game::applyPlayersMovement(double delta_time) {
-    // Apply movement for all players
+    // Apply movement for all living players
     for (Player &player: playerManager->getAlivePlayers()) {
+        player.applyMovement(delta_time);
+    }
+
+    // Apply movement for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
         player.applyMovement(delta_time);
     }
 }

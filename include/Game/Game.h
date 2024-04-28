@@ -236,6 +236,11 @@ private:
     void calculatePlayersMovement(double delta_time);
 
     /**
+     * @brief Updates all the players' sprite animations.
+     */
+    void updatePlayersSpriteAnimation();
+
+    /**
      * @brief Main method that handle collisions for every player according to their mavity.
      * @param delta_time The time elapsed since the last frame in seconds.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.

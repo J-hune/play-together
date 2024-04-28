@@ -48,20 +48,23 @@ private:
     /**
      * @brief Handles collisions between a player and treadmill levers.
      * @param player The player object.
+     * @return True if the player hits a treadmill lever, false otherwise.
      */
-    void handleCollisionsWithTreadmillLevers(Player *player);
+    bool handleCollisionsWithTreadmillLevers(const Player *player);
 
     /**
      * @brief Handles collisions between a player and platform levers.
      * @param player The player object.
+     * @return True if the player hits a platform lever, false otherwise.
      */
-    void handleCollisionsWithPlatformLevers(Player *player);
+    bool handleCollisionsWithPlatformLevers(const Player *player);
 
     /**
      * @brief Handles collisions between a player and crusher levers.
      * @param player The player object.
+     * @return True if the player hits a crusher lever, false otherwise.
      */
-    void handleCollisionsWithCrusherLevers(Player *player);
+    bool handleCollisionsWithCrusherLevers(const Player *player);
 
     /**
      * @brief Handles collisions between a player and 1D moving platforms.
@@ -158,6 +161,13 @@ private:
      * @param playerManager The manager responsible for handling player-related operations.
      */
     void handleCollisionsWithCoins(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and dead players.
+     * @param player Reference to the player object.
+     * @return True if the player hits a dead player, false otherwise.
+     */
+    bool handleCollisionsWithDeadPlayers(const Player *player);
 
 };
 

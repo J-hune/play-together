@@ -42,7 +42,7 @@ void PlayerCollisionManager::handleCollisionsWithObstacles(Player *player) {
     }
 }
 
-void PlayerCollisionManager::handleCollisionsWithTreadmillLevers(Player *player) {
+bool PlayerCollisionManager::handleCollisionsWithTreadmillLevers(const Player *player) {
     // Check for collisions with each lever
     for (const TreadmillLever &lever: gamePtr->getBroadPhaseManager().getTreadmillLevers()) {
         // Check if a collision is detected
@@ -50,13 +50,14 @@ void PlayerCollisionManager::handleCollisionsWithTreadmillLevers(Player *player)
             // If the player is on the lever, activate it
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), lever.getBoundingBox())) {
                 gamePtr->getLevel()->activateTreadmillLever(lever);
-                player->setIsHitting(false);
+                return true;
             }
         }
     }
+    return false;
 }
 
-void PlayerCollisionManager::handleCollisionsWithPlatformLevers(Player *player) {
+bool PlayerCollisionManager::handleCollisionsWithPlatformLevers(const Player *player) {
     // Check for collisions with each lever
     for (const PlatformLever &lever: gamePtr->getBroadPhaseManager().getPlatformLevers()) {
         // Check if a collision is detected
@@ -64,13 +65,14 @@ void PlayerCollisionManager::handleCollisionsWithPlatformLevers(Player *player) 
             // If the player is on the lever, activate it
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), lever.getBoundingBox())) {
                 gamePtr->getLevel()->activatePlatformLever(lever);
-                player->setIsHitting(false);
+                return true;
             }
         }
     }
+    return false;
 }
 
-void PlayerCollisionManager::handleCollisionsWithCrusherLevers(Player *player) {
+bool PlayerCollisionManager::handleCollisionsWithCrusherLevers(const Player *player) {
     // Check for collisions with each lever
     for (const CrusherLever &lever: gamePtr->getBroadPhaseManager().getCrusherLevers()) {
         // Check if a collision is detected
@@ -78,10 +80,11 @@ void PlayerCollisionManager::handleCollisionsWithCrusherLevers(Player *player) {
             // If the player is on the lever, activate it
             if (checkAABBCollision(player->getGroundColliderBoundingBox(), lever.getBoundingBox())) {
                 gamePtr->getLevel()->activateCrusherLever(lever);
-                player->setIsHitting(false);
+                return true;
             }
         }
     }
+    return false;
 }
 
 void PlayerCollisionManager::handleCollisionsWithMovingPlatform1D(Player *player) {
@@ -413,7 +416,20 @@ void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
     }
 }
 
+bool PlayerCollisionManager::handleCollisionsWithDeadPlayers(const Player *player) {
+    // Check for collisions with each dead player
+    for (Player &dead_player : gamePtr->getPlayerManager().getDeadPlayers()) {
+        // If a collision is detected, respawn the dead player
+        if (checkAABBCollision(player->getHitZoneBoundingBox(), dead_player.getBoundingBox())) {
+            gamePtr->getPlayerManager().respawnPlayer(dead_player);
+            return true;
+        }
+    }
+    return false;
+}
+
 void PlayerCollisionManager::handleCollisions(double delta_time) {
+    // Handle collisions for each living player
     for (Player &player: gamePtr->getPlayerManager().getAlivePlayers()) {
         player.updateCollisionBox();
 
@@ -451,10 +467,12 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             player.setWasOnPlatform(player.getIsOnPlatform());
 
             // Handle collisions with hit zone
-            if (player.getIsHitting()) {
-                handleCollisionsWithTreadmillLevers(&player);
-                handleCollisionsWithPlatformLevers(&player);
-                handleCollisionsWithCrusherLevers(&player);
+            if (player.getIsHitting() && (handleCollisionsWithTreadmillLevers(&player)
+                                        || handleCollisionsWithPlatformLevers(&player)
+                                        || handleCollisionsWithCrusherLevers(&player)
+                                        || handleCollisionsWithDeadPlayers(&player))) {
+
+                player.setIsHitting(false);
             }
 
             // Handle collisions with items
@@ -467,5 +485,14 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             handleCollisionsWithToggleGravityZones(player, delta_time); // Handle collisions with toggle gravity zones
             handleCollisionsWithIncreaseFallSpeedZones(player); // Handle collisions with increase fall speed zones
         }
+    }
+
+    // Handle collisions for each dead player
+    for (Player &player: gamePtr->getPlayerManager().getDeadPlayers()) {
+        player.setRoofCollider(false);
+        player.setGroundCollider(false);
+        player.setIsGrounded(false);
+
+        handleCollisionsWithObstacles(&player); // Handle collisions with obstacles
     }
 }

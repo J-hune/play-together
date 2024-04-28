@@ -73,7 +73,10 @@ public:
      */
     [[nodiscard]] AABBType getType() const;
 
-
+    /**
+     * @brief Get the SDL_FRect representation of the AABB.
+     * @return The SDL_FRect representation of the AABB.
+     */
     [[nodiscard]] SDL_FRect getRect() const;
 
 

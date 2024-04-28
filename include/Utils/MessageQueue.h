@@ -6,6 +6,11 @@
 #include <mutex>
 
 class MessageQueue {
+private:
+    std::queue<std::pair<std::string, std::vector<std::string>>> queue;
+    mutable std::mutex mutex;
+
+    
 public:
     MessageQueue() = default;
 
@@ -28,9 +33,6 @@ public:
      */
     [[nodiscard]] bool empty() const;
 
-private:
-    std::queue<std::pair<std::string, std::vector<std::string>>> queue;
-    mutable std::mutex mutex;
 };
 
 #endif //PLAY_TOGETHER_MESSAGEQUEUE_H

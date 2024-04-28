@@ -58,11 +58,14 @@ void Sprite::setAnimationIndexX(int index) {
 
 /* METHODS */
 
-void Sprite::updateAnimation() {
-    // If the animation was unique and is ended, switch to next animation
+bool Sprite::updateAnimation() {
+    bool check = false;
+
+    // If the animation was unique and is ended, switch to the next animation
     if (animation.unique && nbFrameDisplayed == animation.frames) {
         uniqueAnimationIsDisplayed = false;
         setAnimation(nextAnimation);
+        check = true;
     }
 
     // Update x position animation
@@ -75,4 +78,6 @@ void Sprite::updateAnimation() {
     // Apply animation
     srcRect.x = srcRect.w * animationIndexX;
     srcRect.y = srcRect.h * animation.indexY;
+
+    return check;
 }

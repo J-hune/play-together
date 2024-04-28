@@ -59,6 +59,11 @@ float Player::getSize() const {
     return size;
 }
 
+bool Player::getIsAlive() const {
+    return isAlive;
+
+}
+
 int Player::getScore() const {
     return score;
 }
@@ -264,13 +269,25 @@ void Player::setSize(float val) {
     hitZone = baseHitZone;
     normalOffsets = {baseNormalOffsets.x * size, baseNormalOffsets.y * size, baseNormalOffsets.w * size, baseNormalOffsets.h * size};
     runOffsets = {baseRunOffsets.x * size, baseRunOffsets.y * size, baseRunOffsets.w * size, baseRunOffsets.h * size};
+    eggOffsets = {baseEggOffsets.x * size, baseEggOffsets.y * size, baseEggOffsets.w * size, baseEggOffsets.h * size};
     spriteWidth = BASE_SPRITE_WIDTH * size;
     spriteHeight = BASE_SPRITE_HEIGHT * size;
 
     updateCollisionBox();
 }
 
-void Player::voidSetDeathCount(int val) {
+void Player::setIsAlive(bool state) {
+    isAlive = state;
+    if (!state) {
+        sprite.setAnimation(egg);
+        textureOffsets.x = eggOffsets.x;
+        textureOffsets.y = eggOffsets.y;
+        textureOffsets.w = eggOffsets.w;
+        textureOffsets.h = eggOffsets.h;
+    }
+}
+
+void Player::setDeathCount(int val) {
     deathCount = val;
 }
 
@@ -327,6 +344,10 @@ void Player::setWantToJump(bool state) {
 
 void Player::setIsJumping(bool state) {
     isJumping = state;
+}
+
+void Player::setJumpMaxHeight(float val) {
+    jumpMaxHeight = val;
 }
 
 void Player::toggleMavity() {
@@ -429,36 +450,36 @@ void Player::setSpriteTextureByID(int id) {
         sprite.setTexture(*spriteTexture1Ptr);
         defaultTexture = spriteTexture1Ptr;
         medalTexture = spriteTexture1MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 2){ // Texture 2
         sprite.setTexture(*spriteTexture2Ptr);
         defaultTexture = spriteTexture2Ptr;
         medalTexture = spriteTexture2MedalPtr;
-        baseNormalOffsets = {6, 1, 3, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {6, 4, 3, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 3) { // Texture 3
         sprite.setTexture(*spriteTexture3Ptr);
         defaultTexture = spriteTexture3Ptr;
         medalTexture = spriteTexture3MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 4) { // Texture 4
         sprite.setTexture(*spriteTexture4Ptr);
         defaultTexture = spriteTexture4Ptr;
         medalTexture = spriteTexture4MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else {
         sprite.setTexture(*baseSpriteTexturePtr);
         defaultTexture = baseSpriteTexturePtr;
         medalTexture = baseSpriteTexturePtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     setSize(size);
 }
@@ -604,7 +625,7 @@ void Player::updateHitZone() {
 }
 
 void Player::updateCollisionBox() {
-    updateSpriteAnimation();
+    updateSprite();
     updateSpriteOrientation();
 
     // Normal texture offsets
@@ -660,7 +681,6 @@ void Player::updateCollisionBox() {
     // Update collision box
     width = spriteWidth - (textureOffsets.x + textureOffsets.w);
     height = spriteHeight - (textureOffsets.y + textureOffsets.h);
-
     updateHitZone();
 }
 
@@ -694,7 +714,7 @@ void Player::applyMovement(double delta_time) {
     }
 }
 
-void Player::updateSpriteAnimation() {
+void Player::updateSprite() {
     // If the player doesn't move, play idle or sneak animation
     if (wantToMoveLeft == 0 && wantToMoveRight == 0) {
         if (sprintMultiplier == 1) sprite.setAnimation(idle);
@@ -716,6 +736,27 @@ void Player::updateSpriteAnimation() {
     }
 }
 
+void Player::setDeathAnimation() {
+    sprite.setAnimation(death);
+}
+
+void Player::setRespawnAnimation() {
+    sprite.setAnimation(eggCrack);
+}
+
+void Player::eggAction(bool state) {
+    if (!state) {
+        eggLock = false;
+    } else if (!eggLock) {
+        sprite.setAnimation(eggMove);
+        eggLock = true;
+    }
+}
+
+bool Player::updateSpriteAnimation() {
+    return sprite.updateAnimation();
+}
+
 void Player::updateSpriteOrientation() {
      if (directionX == PLAYER_LEFT) {
         sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
@@ -726,7 +767,6 @@ void Player::updateSpriteOrientation() {
 
 
 void Player::render(SDL_Renderer *renderer, Point camera) {
-    sprite.updateAnimation();
     SDL_Rect srcRect = sprite.getSrcRect();
 
     float x_rect = x - camera.x - textureOffsets.x;

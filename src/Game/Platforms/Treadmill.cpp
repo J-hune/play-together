@@ -49,7 +49,6 @@ float Treadmill::getDirection() const {
 }
 
 float Treadmill::getMove() const {
-    printf("Move: %f\n", move);
     return move;
 }
 

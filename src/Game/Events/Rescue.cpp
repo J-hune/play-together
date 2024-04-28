@@ -30,6 +30,10 @@ float Rescue::getH() const {
     return h;
 }
 
+int Rescue::getID() const {
+    return id;
+}
+
 float Rescue::getNextPosition() {
     currentSpawn += spawnStepDistance;
     if (currentSpawn >= x + spawnStepDistance * 4) currentSpawn = x;
@@ -43,16 +47,11 @@ SDL_FRect Rescue::getBoundingBox() const {
 
 /* MODIFIERS */
 
-bool Rescue::setZone(AABB zone) {
-    if (zone.getID() != id) {
-        id = zone.getID();
-        x = zone.getX();
-        y = zone.getY();
-        w = zone.getWidth();
-        h = zone.getHeight();
-        currentSpawn = x + spawnStepDistance * 4;
-        return true;
-    } else {
-        return false;
-    }
+void Rescue::setZone(AABB zone) {
+    id = zone.getID();
+    x = zone.getX();
+    y = zone.getY();
+    w = zone.getWidth();
+    h = zone.getHeight();
+    currentSpawn = x + spawnStepDistance * 4;
 }

@@ -140,6 +140,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
                         message["mapName"],
                         message["lastCheckpoint"],
                         message["players"],
+                        message["camera"],
                         message["platforms1D"],
                         message["platforms2D"],
                         message["crushers"]

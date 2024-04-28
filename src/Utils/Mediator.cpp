@@ -185,11 +185,16 @@ void Mediator::getGameProperties(nlohmann::json &properties) {
         crushers.push_back(crusherProperties);
     }
 
+    // Set the game properties
     properties["mapName"] = level->getMapName();
     properties["lastCheckpoint"] = level->getLastCheckpoint();
     properties["platforms1D"] = platforms1D;
     properties["platforms2D"] = platforms2D;
     properties["crushers"] = crushers;
+    properties["camera"] = {
+        {"x", gamePtr->getCamera()->getX()},
+        {"y", gamePtr->getCamera()->getY()}
+    };
 }
 
 std::vector<Player> const &Mediator::getAlivePlayers() {

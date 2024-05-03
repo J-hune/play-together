@@ -101,7 +101,7 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_nam
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(remove_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(main_menu_button4);
 
-    auto text_input = TextBox(renderer, 200,500,400,50);
+    auto text_input = TextBox(renderer, {200, 500, 400, 50}, "Enter the IP address of the host");
     textInputs[{GameState::STOPPED, MenuAction::PLAY}].push_back(text_input);
 }
 

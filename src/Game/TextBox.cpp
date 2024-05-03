@@ -1,143 +1,207 @@
-//
-// Created by anais on 27/03/24.
-//
+#include <utility>
 
-#include <iostream>
 #include "../../include/Game/TextBox.h"
-#include "../../dependencies/SDL2_gfx/SDL2_gfxPrimitives.h"
 
 
-void TextBox::setText(std::string t)
-{
-    this->text += t;
+/** CONSTRUCTORS **/
+
+TextBox::TextBox(SDL_Renderer *renderer, SDL_Rect rect, std::string placeholder) : renderer(renderer), rect(rect), placeholder(std::move(placeholder)) {
+    fonts = RenderManager::getFonts();
+    font = fonts[0];
+
+    // Set the initial cursor position to the left edge of the textbox
+    cursorPosition.x = rect.x;
 }
-void TextBox::emptyText()
-{
-    this->text.clear();
+
+
+/** ACCESSORS **/
+
+std::string TextBox::getText() const {
+    return text;
+}
+
+
+/** MODIFIERS **/
+
+void TextBox::setText(const std::string& value) {
+    text = value;
+}
+
+void TextBox::emptyText() {
+    text.clear();
+}
+
+int TextBox::getTextWidth(const std::string& val) const {
+    int width = 0;
+    TTF_SizeUTF8(font, val.c_str(), &width, nullptr);
+    return width;
 }
 
 void TextBox::handleEvent(const SDL_Event &e) {
+    // Handle text input (SDL_TEXTINPUT) and key press (SDL_KEYDOWN)
+    if (e.type == SDL_TEXTINPUT) {
+        // Split the text into two parts: before and after the cursor
+        std::string textBeforeCursor = text.substr(0, cursorIndex);
+        std::string textAfterCursor = text.substr(cursorIndex);
 
-    if (e.type == SDL_TEXTINPUT ) {
-        setText(e.text.text);
-        std::cout << "Texte saisi : " << text << std::endl;
-    } else if (e.type == SDL_KEYDOWN) {
-        if (e.key.keysym.sym == SDLK_BACKSPACE && text.length() > 0) {
+        // Insert the input character between the two parts
+        text = textBeforeCursor + e.text.text + textAfterCursor;
+        moveCursorRight();
+    }
+
+    // Handle backspace, left and right arrow keys, and copy-paste shortcuts
+    else if (e.type == SDL_KEYDOWN) {
+        if (e.key.keysym.sym == SDLK_BACKSPACE && !text.empty()) {
             text.pop_back();
-            std::cout << "Texte après suppression : " << text << std::endl; // Afficher dans le terminal
-        }else if (e.key.keysym.sym == SDLK_LEFT) {
+            moveCursorLeft();
+
+            // If the text is longer than the rectangle, scroll the text
+            if (scrollOffset > 0) scrollTextRight();
+        }
+
+        // Delete key to remove character to the right of the cursor
+        else if (e.key.keysym.sym == SDLK_DELETE && !text.empty() && cursorIndex < text.length()) {
+            text.erase(cursorIndex, 1);
+        }
+
+        // Move the cursor left or right
+        else if (e.key.keysym.sym == SDLK_LEFT) {
             moveCursorLeft();
         } else if (e.key.keysym.sym == SDLK_RIGHT) {
             moveCursorRight();
         }
+
+        // Shortcut for copying text to the clipboard
+        else if (e.key.keysym.sym == SDLK_c && SDL_GetModState() & KMOD_CTRL) {
+            SDL_SetClipboardText(text.c_str());
+        }
+
+        // Shortcut for pasting text from the clipboard
+        else if (e.key.keysym.sym == SDLK_v && SDL_GetModState() & KMOD_CTRL) {
+            char *clipboardText = SDL_GetClipboardText();
+            setText(text + clipboardText);
+            SDL_free(clipboardText);
+
+            // Si le texte est plus long que le rectangle, on scroll le texte de la taille du texte qui dépasse
+            while (getTextWidth(text) - scrollOffset > rect.w) {
+                scrollTextLeft();
+            }
+
+            cursorIndex = static_cast<Uint32>(text.length());
+            cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+        }
     }
 }
 
+void TextBox::moveCursor(int x, int y) {
+    cursorPosition.x = x - rect.x;
+    cursorPosition.y = y - rect.y;
+}
+
+void TextBox::moveCursorLeft() {
+    if (cursorIndex > 0 && static_cast<int>(cursorPosition.x) > scrollOffset) {
+        cursorIndex--;
+        cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+    }
+
+    else if (cursorIndex > 0) {
+        cursorIndex--;
+        scrollTextRight();
+        cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+    }
+}
+
+void TextBox::moveCursorRight() {
+    // If there's more text to the right and moving the cursor right would exceed the textbox width
+    if (cursorIndex < text.length() && static_cast<int>(cursorPosition.x) - scrollOffset + getTextWidth(text.substr(cursorIndex, 1)) > rect.w) {
+        cursorIndex++;
+        scrollTextLeft();
+        cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+    }
+
+    // If there's more text to the right and moving the cursor right would not exceed the textbox width
+    else if (cursorIndex < text.length()) {
+        cursorIndex++;
+        cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+    }
+}
+
+void TextBox::scrollTextRight() {
+    // Scroll the text to the right by the width of the first character
+    int firstCharWidth = getTextWidth(text.substr(0, 1));
+    scrollOffset -= firstCharWidth;
+}
+
+void TextBox::scrollTextLeft() {
+    // Scroll the text to the left by the width of the last character
+    int lastCharWidth = getTextWidth(text.substr(text.length() - 1));
+    scrollOffset += lastCharWidth;
+}
+
 void TextBox::render() {
-    SDL_Color backgroundColor = {125, 125, 125, 125};
-    SDL_Color textColor = {0, 0, 0, 255};
     SDL_Color textColorInit = {0, 0, 0, 125};
+    std::string displayText = (text.empty()) ? placeholder : text;
+    SDL_Color textColorFinal = (displayText == placeholder) ? textColorInit : textColor;
 
-    std::string defaultText = "IP adress";
-
-    std::string displayText = (!text.empty()) ? getText() : defaultText;
-    SDL_Color textColorFinal = (displayText == defaultText) ? textColorInit : textColor;
+    // Render the background of the textbox
     roundedBoxRGBA(
             renderer,
-            static_cast<short>(box.x),
-            static_cast<short>(box.y),
-            static_cast<short>(box.x + box.w),
-            static_cast<short>(box.y + box.h),
+            static_cast<Sint16>(rect.x),
+            static_cast<Sint16>(rect.y),
+            static_cast<Sint16>(rect.x + rect.w),
+            static_cast<Sint16>(rect.y + rect.h),
             0,
             backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a
     );
 
+    // Calculate the position to render the text (align left, but not glued to the left edge)
+    int textX = rect.x - scrollOffset; // Adjust this value to add some padding from the left edge
+    int textY = rect.y + rect.h / 2; // Center vertically within the textbox
+
+    // Create a surface and texture for the text
     SDL_Surface *textSurface = TTF_RenderUTF8_Blended(font, displayText.c_str(), textColorFinal);
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
+    // Update the text rendering rectangle
     SDL_Rect textRect = {
-            box.x + box.w / 2 - textSurface->w / 2,
-            box.y + box.h / 2 - textSurface->h / 2,
-            textSurface->w, textSurface->h
+            textX,
+            textY - textSurface->h / 2, // Center vertically within the textbox
+            textSurface->w,
+            textSurface->h
     };
 
+    // Clip the text rendering rectangle with SDL_RenderSetClipRect
+    SDL_RenderSetClipRect(renderer, &rect);
     SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
     renderCursor();
     SDL_SetTextInputRect(&textRect);
+
+    SDL_RenderSetClipRect(renderer, nullptr);
 
     SDL_FreeSurface(textSurface);
     SDL_DestroyTexture(textTexture);
 }
 
-void TextBox::moveCursor(int x, int y) {
-    cursorPosition.x = x - box.x;
-    cursorPosition.y = y - box.y;
-}
-
-void TextBox::moveCursorLeft() {
-    if (cursorPosition.x > 0) {
-        cursorPosition.x --;
-    }
-}
-
-void TextBox::moveCursorRight() {
-    if (cursorPosition.x < text.length()) {
-        cursorPosition.x ++;
-    }
-}
-
-int TextBox::getTextWidth() {
-    int textWidth = 0;
-    if (!text.empty()) {
-        TTF_SizeUTF8(font, text.c_str(), &textWidth, nullptr);
-    }
-    return textWidth;
-}
 
 void TextBox::renderCursor() {
-
-    if (text.empty() || cursorPosition.x < 0 || cursorPosition.y < 0 || cursorPosition.x > box.w ||
-        cursorPosition.y > box.h) {
+    if (text.empty() || cursorIndex > text.length() || static_cast<int>(cursorPosition.y) > rect.h) {
         return;
     }
 
-    bool showCursor = true;
-    int cursorToggleInterval = 500;
-    int lastToggleTime = SDL_GetTicks();
-
-    if (SDL_GetTicks() - lastToggleTime >= cursorToggleInterval)
-    {
-        showCursor = !showCursor;
-        lastToggleTime = SDL_GetTicks();
+    if (SDL_GetTicks() - lastCursorBlink >= blinkDuration) {
+        cursorVisible = !cursorVisible;
+        lastCursorBlink = SDL_GetTicks();
     }
 
-    if (showCursor)
-    {
-        SDL_Rect CursorQuad = {200, 200, 10, 20};
-        SDL_Color cursorColor = {0,0,0,255};
-        SDL_RenderFillRect(renderer, &CursorQuad);
-        SDL_Surface* text_surface = TTF_RenderText_Blended(font, "|", cursorColor);
-        SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer, text_surface);
-        int textWidth = getTextWidth();
-        int	TexWidth = box.x + box.w / 2 + textWidth / 2;
-        int	TexHeight = box.y + box.h - 2;;
-        SDL_QueryTexture(pTexture,NULL,NULL, &TexWidth, &TexHeight);
-        SDL_Rect positionQuad = {box.x + box.w / 2 + textWidth / 2,box.y+10, TexWidth, TexHeight};
-        SDL_RenderCopy(renderer, pTexture, NULL, &positionQuad);
-
-        SDL_DestroyTexture(pTexture);
-        SDL_FreeSurface(text_surface);
-
-
+    if (cursorVisible) {
+        // Calculate the cursor position based on the text width
+        SDL_Rect cursorRect = {
+                rect.x + static_cast<int>(cursorPosition.x) - scrollOffset,
+                rect.y + rect.h / 4,
+                2,
+                static_cast<int>(rect.h * 0.5)
+        };
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &cursorRect);
     }
-
-}
-
-
-TextBox::TextBox(SDL_Renderer *renderer, int x, int y, int width, int height) {
-    box.x = x;
-    box.y = y;
-    box.w = width;
-    box.h = height;
-    this->renderer = renderer;
 }

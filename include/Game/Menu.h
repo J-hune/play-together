@@ -46,6 +46,7 @@ private:
     SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
     SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
     MessageQueue *messageQueue; /**< Pointer to the message queue for communication between objects. */
+    std::map<GameStateKey, std::vector<TextBox>> textInputs;
 
 public:
     /** CONSTRUCTOR **/
@@ -124,19 +125,6 @@ public:
     void onServerDisconnect();
 
 private:
-    /** ATTRIBUTES **/
-
-    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-    bool displayMenu = true; /**< Flag indicating whether the menu should be displayed. */
-    bool *quitPtr; /**< Pointer to a boolean controlling the game loop. */
-    MenuAction currentMenuAction = MenuAction::MAIN; /**< Current menu action. */
-    std::map<GameStateKey, std::vector<Button>> buttons; /**< Map storing buttons for different game states and menu actions. */
-    std::map<GameStateKey, std::vector<TextBox>> textInputs;
-    short gameMode = 0; /** < The game mode to be used. (0 for single player, 1 for multiplayer) */
-    Music music; /**< The music played when the menu is displayed. */
-    SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
-    SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
-
     /** ACCESSORS **/
 
     /**

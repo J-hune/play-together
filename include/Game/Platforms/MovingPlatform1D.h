@@ -28,6 +28,7 @@ private:
     float size; /**< The size of the platform. */
     float speed; /**< The speed of the platform. */
     float move = 0; /**< The number of pixel the platform has moved */
+    PlatformBuffer buffer = {0, 0}; /**< The buffer of the player */
 
     const float min; /**< The minimum x-coordinate of the platform's position. */
     const float max; /**< The maximum x-coordinate of the platform's position. */
@@ -35,13 +36,14 @@ private:
     float direction; /**< The current direction of the platform : -1 for left/up, 1 for right/bottom */
     bool axis; /**< The axis on which the platform moves : 0 for x-axis, 1 for y-axis */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on screen. */
     float smoothingLimit = 2; /**< The smoothing limit of the platform movement */
 
     Texture texture; /**< The texture of the platform. */
     SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
 
 public:
-    /* CONSTRUCTOR */
+    /* CONSTRUCTORS */
 
     MovingPlatform1D(float x, float y, float size, float speed, float min, float max, bool start, bool axis, const Texture& texture);
 
@@ -85,6 +87,12 @@ public:
     [[nodiscard]] bool getAxis() const;
 
     /**
+     * @brief Return the direction attribute.
+     * @return The value of the direction attribute.
+     */
+    [[nodiscard]] float getDirection() const;
+
+    /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
@@ -100,10 +108,46 @@ public:
     /* MODIFIERS */
 
     /**
+     * @brief Set the x attribute.
+     * @param value The new x-coordinate of the platform's position.
+     */
+    void setX(float value);
+
+    /**
+     * @brief Set the y attribute.
+     * @param value The new y-coordinate of the platform's position.
+     */
+    void setY(float value);
+
+    /**
+     * @brief Set the move attribute.
+     * @param value The new move of the platform.
+     */
+    void setMove(float value);
+
+    /**
+     * @brief Set the direction attribute.
+     * @param value The new direction of the platform.
+     */
+    void setDirection(float value);
+
+    /**
+    * @brief Sets the buffer attribute.
+    * @param value The new value of the buffer attribute.
+    */
+    void setBuffer(PlatformBuffer value);
+
+    /**
      * @brief Set the isMoving attribute.
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
 
     /* PUBLIC METHODS */

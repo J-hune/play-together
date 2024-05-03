@@ -136,7 +136,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
             if (mainMessage == "InitializeClientGame") {
                 nlohmann::json message = nlohmann::json::parse(parameters[0]);
-                game.loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+                game.loadLevel(
+                        message["mapName"],
+                        message["lastCheckpoint"],
+                        message["players"],
+                        message["camera"],
+                        message["platforms1D"],
+                        message["platforms2D"],
+                        message["crushers"]
+                );
             }
         }
 

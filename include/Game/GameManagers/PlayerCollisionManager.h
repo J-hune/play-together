@@ -46,6 +46,27 @@ private:
     void handleCollisionsWithObstacles(Player *player);
 
     /**
+     * @brief Handles collisions between a player and treadmill levers.
+     * @param player The player object.
+     * @return True if the player hits a treadmill lever, false otherwise.
+     */
+    bool handleCollisionsWithTreadmillLevers(const Player *player);
+
+    /**
+     * @brief Handles collisions between a player and platform levers.
+     * @param player The player object.
+     * @return True if the player hits a platform lever, false otherwise.
+     */
+    bool handleCollisionsWithPlatformLevers(const Player *player);
+
+    /**
+     * @brief Handles collisions between a player and crusher levers.
+     * @param player The player object.
+     * @return True if the player hits a crusher lever, false otherwise.
+     */
+    bool handleCollisionsWithCrusherLevers(const Player *player);
+
+    /**
      * @brief Handles collisions between a player and 1D moving platforms.
      * @param player The player object.
      */
@@ -70,6 +91,19 @@ private:
     void handleCollisionsWithWeightPlatform(Player *player);
 
     /**
+     * @brief Handles collisions between a player and treadmills.
+     * @param player The player object.
+     */
+    void handleCollisionsWithTreadmills(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and crushers.
+     * @param player The player object.
+     * @return True if the player dies, false otherwise.
+     */
+    bool handleCollisionsWithCrushers(Player *player);
+
+    /**
      * @brief Handles collisions between the player and camera borders.
      * @return True if the player dies, false otherwise.
      */
@@ -87,6 +121,12 @@ private:
      * @param player The player object.
      */
     void handleCollisionsWithSaveZones(Player &player);
+
+    /**
+     * @brief Handles collisions between the player and rescue zones.
+     * @param player The player object.
+     */
+    void handleCollisionsWithRescueZones(const Player &player);
 
     /**
      * @brief Handles collisions between the player and toggle gravity zones.
@@ -121,6 +161,13 @@ private:
      * @param playerManager The manager responsible for handling player-related operations.
      */
     void handleCollisionsWithCoins(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and dead players.
+     * @param player Reference to the player object.
+     * @return True if the player hits a dead player, false otherwise.
+     */
+    bool handleCollisionsWithDeadPlayers(const Player *player);
 
 };
 

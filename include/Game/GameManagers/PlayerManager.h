@@ -2,6 +2,7 @@
 #define PLAY_TOGETHER_PLAYERMANAGER_H
 
 #include "../Game.h"
+#include "../Events/Rescue.h"
 
 
 /**
@@ -15,7 +16,9 @@ private:
     /* ATTRIBUTES */
 
     Game *game;
+    Rescue currentRescueZone;
     std::vector<Player> alivePlayers;
+    std::vector<Player> neutralPlayers;
     std::vector<Player> deadPlayers;
 
 
@@ -34,12 +37,31 @@ public:
     [[nodiscard]] std::vector<Player> &getAlivePlayers();
 
     /**
+     * @brief Get the neutral players in the game.
+     * @return A vector of Player objects representing the neutral players in the game.
+     */
+    [[nodiscard]] std::vector<Player> &getNeutralPlayers();
+
+    /**
      * @brief Get the dead players in the game.
      * @return A vector of Player objects representing the dead players in the game.
      */
     [[nodiscard]] std::vector<Player> &getDeadPlayers();
 
+    /**
+     * @brief Get the total number of players in the game.
+     * @return The total number of players in the game.
+     */
     [[nodiscard]] size_t getPlayerCount() const;
+
+
+    /* MUTATORS */
+
+    /**
+     * @brief Set the current rescue zone.
+     * @param zone The rescue zone to set.
+     */
+    void setCurrentRescueZone(AABB zone);
 
 
     /* METHODS */
@@ -92,6 +114,13 @@ public:
      * @param player The player to respawn.
      */
     void respawnPlayer(Player &player);
+
+    /**
+     * @brief Move a player to a neutral state between life and death.
+     * @param player The player to move.
+     * @param state -1 to move to dead player, 1 to move to alive player.
+     */
+    void moveNeutralPlayer(Player &player, int state);
 
     /**
      * @brief Clear all players from the game.

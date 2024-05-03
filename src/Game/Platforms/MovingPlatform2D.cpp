@@ -61,6 +61,14 @@ float MovingPlatform2D::getMoveY() const {
     return moveY;
 }
 
+float MovingPlatform2D::getDirectionX() const {
+    return directionX;
+}
+
+float MovingPlatform2D::getDirectionY() const {
+    return directionY;
+}
+
 bool MovingPlatform2D::getIsMoving() const {
     return isMoving;
 }
@@ -72,15 +80,47 @@ SDL_FRect MovingPlatform2D::getBoundingBox() const {
 
 /* MODIFIERS */
 
+void MovingPlatform2D::setX(float value) {
+    x = value;
+}
+
+void MovingPlatform2D::setY(float value) {
+    y = value;
+}
+
+void MovingPlatform2D::setMoveX(float value) {
+    moveX = value;
+}
+
+void MovingPlatform2D::setMoveY(float value) {
+    moveY = value;
+}
+
+void MovingPlatform2D::setDirectionX(float value) {
+    directionX = value;
+}
+
+void MovingPlatform2D::setDirectionY(float value) {
+    directionY = value;
+}
+
+void MovingPlatform2D::setBuffer(PlatformBuffer value) {
+    buffer = value;
+}
+
 void MovingPlatform2D::setIsMoving(bool state) {
     isMoving = state;
+}
+
+void MovingPlatform2D::setIsOnScreen(bool state) {
+    isOnScreen = state;
 }
 
 
 /* METHODS */
 
 void MovingPlatform2D::applyMovement(double delta_time) {
-    if (isMoving) {
+    if (isMoving && isOnScreen) {
         // Add basic movement
         moveX = 150;
         moveY = 150;
@@ -90,17 +130,36 @@ void MovingPlatform2D::applyMovement(double delta_time) {
         moveX *= speed; // Apply speed
         moveX *= directionX; // Apply direction
 
-        // Calculate y-axis movement
-        moveY *= static_cast<float>(delta_time); // Apply movement per second
-        moveY *= speed; // Apply speed
-        moveY *= directionY; // Apply direction
+        // If the buffer is too big, move the platform and reset the buffer
+        if (buffer.deltaX > 40 || buffer.deltaX < -40 || buffer.deltaY > 40 || buffer.deltaY < -40) {
+            x = x + buffer.deltaX;
+            y = y + buffer.deltaY;
 
-        // Apply ratio
-        ratio > 1 ? moveY /= ratio : moveX *= ratio;
+            buffer.deltaX = 0;
+            buffer.deltaY = 0;
+        }
 
-        // Apply movement to the platform
-        x += moveX;
-        y += moveY;
+        else {
+            // Calculate y-axis movement
+            moveY *= static_cast<float>(delta_time); // Apply movement per second
+            moveY *= speed; // Apply speed
+            moveY *= directionY; // Apply direction
+
+            // Apply ratio
+            ratio > 1 ? moveY /= ratio : moveX *= ratio;
+
+
+            // Add a part of the buffer to the platform's position
+            float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+
+            // Apply movement to the platform
+            x += moveX + bufferFraction * buffer.deltaX;
+            y += moveY + bufferFraction * buffer.deltaY;
+
+            // Decrease the buffer
+            buffer.deltaX -= bufferFraction * buffer.deltaX;
+            buffer.deltaY -= bufferFraction * buffer.deltaY;
+        }
 
         // If the platform has reached its minimum point
         if (x < left.x) {
@@ -123,13 +182,17 @@ void MovingPlatform2D::applyMovement(double delta_time) {
 }
 
 void MovingPlatform2D::render(SDL_Renderer *renderer, Point camera) const {
-    SDL_Rect src_rect = texture.getSize();
-    SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y, w + textureOffsets.w, h + textureOffsets.h};
-    SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    if (isOnScreen) {
+        SDL_Rect src_rect = texture.getSize();
+        SDL_FRect platform_rect = {x - camera.x - textureOffsets.x, y - camera.y - textureOffsets.y,w + textureOffsets.w, h + textureOffsets.h};
+        SDL_RenderCopyExF(renderer, texture.getTexture(), &src_rect, &platform_rect, 0.0, nullptr, texture.getFlip());
+    }
 }
 
 void MovingPlatform2D::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
-    SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
-    SDL_RenderFillRectF(renderer, &platform_rect);
+    if (isOnScreen) {
+        SDL_SetRenderDrawColor(renderer, 145, 0, 145, 255);
+        SDL_FRect platform_rect = {x - camera.x, y - camera.y, w, h};
+        SDL_RenderFillRectF(renderer, &platform_rect);
+    }
 }

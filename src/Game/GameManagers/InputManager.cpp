@@ -6,7 +6,7 @@
  */
 
 
-/* CONSTRUCTOR */
+/* CONSTRUCTORS */
 
 InputManager::InputManager(Game *game) : gamePtr(game) {}
 
@@ -68,24 +68,42 @@ void InputManager::handleKeyUpEvent(Player *player, const SDL_KeyboardEvent &key
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
             if (player == nullptr) break;
-
-            // Reset horizontal movement if moving left
-            if (player->getMoveX() < 0) player->setMoveX(0);
-            player->setWantToMoveLeft(false); // Disable left movement
+            if (player->getIsAlive()) {
+                // Reset horizontal movement if moving left
+                if (player->getMoveX() < 0) player->setMoveX(0);
+                player->setWantToMoveLeft(false); // Disable left movement
+            } else {
+                player->eggAction(false);
+            }
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
             if (player == nullptr) break;
-
-            // Reset horizontal movement if moving right
-            if (player->getMoveX() > 0) {
-                player->setMoveX(0);
+            if (player->getIsAlive()) {
+                // Reset horizontal movement if moving right
+                if (player->getMoveX() > 0) {
+                    player->setMoveX(0);
+                }
+                player->setWantToMoveRight(false); // Disable right movement
+            } else {
+                player->eggAction(false);
             }
-            player->setWantToMoveRight(false); // Disable right movement
+            break;
+        case SDL_SCANCODE_F:
+            if (player == nullptr) break;
+            if (player->getIsAlive()) {
+                player->hitAction(false);
+            } else {
+                player->eggAction(false);
+            }
             break;
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
-            player->setSprint(false);
+            if (player->getIsAlive()) {
+                player->setSprint(false);
+            } else {
+                player->eggAction(false);
+            }
             break;
         default:
             break;
@@ -108,12 +126,28 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
             if (player == nullptr) break;
-            player->setWantToMoveLeft(true);
+            if (player->getIsAlive()) {
+                player->setWantToMoveLeft(true);
+            } else {
+                player->eggAction(true);
+            }
             break;
         case SDL_SCANCODE_RIGHT:
         case SDL_SCANCODE_D:
             if (player == nullptr) break;
-            player->setWantToMoveRight(true);
+            if (player->getIsAlive()) {
+                player->setWantToMoveRight(true);
+            } else {
+                player->eggAction(true);
+            }
+            break;
+        case SDL_SCANCODE_F:
+            if (player == nullptr) break;
+            if (player->getIsAlive()) {
+                player->hitAction(true);
+            } else {
+                player->eggAction(true);
+            }
             break;
         case SDL_SCANCODE_G:
             gamePtr->switchMavity(); // Switch mavity for all players
@@ -124,7 +158,11 @@ void InputManager::handleKeyDownEvent(Player *player, const SDL_KeyboardEvent &k
             break;
         case SDL_SCANCODE_LSHIFT:
             if (player == nullptr) break;
-            player->setSprint(true);
+            if (player->getIsAlive()) {
+                player->setSprint(true);
+            } else {
+                player->eggAction(true);
+            }
             break;
         default:
             break;

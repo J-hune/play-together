@@ -96,7 +96,6 @@ void RenderManager::toggleRenderFps() {
 void RenderManager::render() {
     Level *level = gamePtr->getLevel();
     PlayerManager &playerManager = gamePtr->getPlayerManager();
-    std::vector<Player> &players = playerManager.getAlivePlayers();
 
     Point camera_point = gamePtr->getCamera()->getRenderingPoint();
 
@@ -110,14 +109,16 @@ void RenderManager::render() {
 
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
         level->renderItems(renderer, camera_point); // Draw the items
+        level->renderLevers(renderer, camera_point); // Draw the levers
 
-        // Draw the characters
-        for (Player &player : players) {
-            player.render(renderer, camera_point);
-        }
+        // Draw the players
+        for (Player &player : playerManager.getDeadPlayers()) player.render(renderer, camera_point);
+        for (Player &player : playerManager.getNeutralPlayers()) player.render(renderer, camera_point);
+        for (Player &player : playerManager.getAlivePlayers()) player.render(renderer, camera_point);
 
         level->renderAsteroids(renderer, camera_point); // Draw the asteroids
         level->renderPlatforms(renderer, camera_point); // Draw the platforms
+        level->renderTraps(renderer, camera_point); // Draw the traps
 
         level->renderMiddleground(renderer, camera_point); // Draw the middleground
         level->renderForegrounds(renderer, camera_point); // Draw the foreground
@@ -127,13 +128,16 @@ void RenderManager::render() {
     else {
         level->renderAsteroidsDebug(renderer, camera_point); // Draw the asteroids
         level->renderPolygonsDebug(renderer, camera_point); // Draw the obstacles
+        level->renderLeversDebug(renderer, camera_point); // Draw the levers
         level->renderPlatformsDebug(renderer, camera_point); // Draw the platforms
+        level->renderTrapsDebug(renderer, camera_point); // Draw the traps
         level->renderItemsDebug(renderer, camera_point); // Draw the items
 
-        // Draw the characters
-        for (Player const& player : players) {
-            player.renderDebug(renderer, camera_point);
-        }
+        // Draw the players
+        for (const Player &player : playerManager.getDeadPlayers()) player.renderDebug(renderer, camera_point);
+        for (const Player &player : playerManager.getNeutralPlayers()) player.renderDebug(renderer, camera_point);
+        for (const Player &player : playerManager.getAlivePlayers()) player.renderDebug(renderer, camera_point);
+
     }
 
     // Render the fps counter
@@ -160,9 +164,9 @@ void RenderManager::render() {
 
     // Render the player colliders
     if (render_player_colliders) {
-        for (Player const& player : players) {
-            player.renderColliders(renderer, camera_point);
-        }
+        for (const Player &player : playerManager.getAlivePlayers()) player.renderColliders(renderer, camera_point);
+        for (const Player &player : playerManager.getNeutralPlayers()) player.renderColliders(renderer, camera_point);
+        for (const Player &player : playerManager.getDeadPlayers()) player.renderColliders(renderer, camera_point);
     }
 
     // If the game is paused, render the menu

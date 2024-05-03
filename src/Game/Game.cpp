@@ -69,6 +69,12 @@ int Game::getEffectiveFrameRate() const {
     return effectiveFrameFps;
 }
 
+Uint32 Game::getPlaytime() {
+    playtime += SDL_GetTicks() - lastPlaytimeUpdate;
+    lastPlaytimeUpdate = SDL_GetTicks();
+    return playtime;
+}
+
 
 /* MODIFIERS */
 
@@ -77,7 +83,12 @@ void Game::setLevel(std::string const &map_name) {
 }
 
 void Game::setFrameRate(int fps) {
-    this->frameRate = fps;
+    frameRate = fps;
+}
+
+void Game::setPlaytime(Uint32 new_playtime) {
+    lastPlaytimeUpdate = SDL_GetTicks();
+    playtime = new_playtime;
 }
 
 
@@ -88,9 +99,12 @@ void Game::initializeHostedGame(int slot) {
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
+        setPlaytime(0);
         level = Level("diversity", renderer, textureManager.get());
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
+
+    playerManager->setCurrentRescueZone(level.getZones(AABBType::RESCUE)[0]);
 
     // Add the initial player to the game
     Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[0];
@@ -107,13 +121,19 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players) {
+using json = nlohmann::json;
+void Game::loadLevel(const std::string &map_name, short last_checkpoint, const json::array_t &playersData, const json::object_t &cameraData,
+                     const json::array_t &movingPlatforms1DData, const json::array_t &movingPlatforms2DData,const json::array_t &crushersData) {
     setLevel(map_name);
     level.setLastCheckpoint(last_checkpoint);
 
+    // Set the camera position
+    camera.setX(cameraData.at("x"));
+    camera.setY(cameraData.at("y"));
+
     // Add all players to the game (including the local player)
     size_t spawnIndex = 0;
-    for (const auto &player: players) {
+    for (const auto &player: playersData) {
         int receivedPlayerID = player["playerID"];
 
         Point spawnPoint = level.getSpawnPoints(last_checkpoint)[spawnIndex];
@@ -133,6 +153,37 @@ void Game::loadLevel(const std::string &map_name, short last_checkpoint, const n
         Mediator::setDisplayMenu(false);
     }
 
+    // For each 1D moving platform, set the position and direction
+    std::vector<MovingPlatform1D> movingPlatforms1D = level.getMovingPlatforms1D();
+    for (size_t i = 0; i < movingPlatforms1DData.size(); i++) {
+        const auto &platform = movingPlatforms1DData[i];
+        movingPlatforms1D[i].setX(platform["x"]);
+        movingPlatforms1D[i].setY(platform["y"]);
+        movingPlatforms1D[i].setMove(platform["move"]);
+        movingPlatforms1D[i].setDirection(platform["direction"]);
+    }
+
+    // For each 2D moving platform, set the position and direction
+    std::vector<MovingPlatform2D> &movingPlatforms2D = level.getMovingPlatforms2D();
+    for (size_t i = 0; i < movingPlatforms2DData.size(); i++) {
+        const auto &platform = movingPlatforms2DData[i];
+        movingPlatforms2D[i].setX(platform["x"]);
+        movingPlatforms2D[i].setY(platform["y"]);
+        movingPlatforms2D[i].setMoveX(platform["moveX"]);
+        movingPlatforms2D[i].setMoveY(platform["moveY"]);
+        movingPlatforms2D[i].setDirectionX(platform["directionX"]);
+        movingPlatforms2D[i].setDirectionY(platform["directionY"]);
+    }
+
+    // For each crusher, set the position and direction
+    std::vector<Crusher> &crushers = level.getCrushers();
+    for (size_t i = 0; i < crushersData.size(); i++) {
+        const auto &crusher = crushersData[i];
+        crushers[i].setX(crusher["x"]);
+        crushers[i].setY(crusher["y"]);
+        crushers[i].setDirection(crusher["direction"]);
+    }
+
     music = level.getMusicById(0);
     music.play(-1);
 }
@@ -140,6 +191,7 @@ void Game::loadLevel(const std::string &map_name, short last_checkpoint, const n
 void Game::update(double delta_time) {
     inputManager->handleKeyboardEvents();
     calculatePlayersMovement(delta_time);
+    if (level.applyTrapsMovement(delta_time)) camera.setShake(150);
 
     level.applyPlatformsMovement(delta_time);
     level.applyAsteroidsMovement(delta_time);
@@ -149,7 +201,10 @@ void Game::update(double delta_time) {
     // Handle collisions
     broadPhaseManager->broadPhase();
     narrowPhase(delta_time);
+
     playerManager->setTheBestPlayer();
+    updatePlayersSpriteAnimation();
+
     if (!Mediator::isClientRunning()) level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
     renderManager->render();
 }
@@ -174,7 +229,15 @@ void Game::run() {
 
             if (mainMessage == "InitializeClientGame") {
                 nlohmann::json message = nlohmann::json::parse(parameters[0]);
-                loadLevel(message["mapName"], message["lastCheckpoint"], message["players"]);
+                loadLevel(
+                        message["mapName"],
+                        message["lastCheckpoint"],
+                        message["players"],
+                        message["camera"],
+                        message["platforms1D"],
+                        message["platforms2D"],
+                        message["crushers"]
+                );
             }
         }
 
@@ -227,11 +290,48 @@ void Game::calculatePlayersMovement(double delta_time) {
     for (Player &player: playerManager->getAlivePlayers()) {
         player.calculateMovement(delta_time);
     }
+
+    // Apply movement to all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.calculateYaxisMovement(delta_time);
+    }
+}
+
+void Game::updatePlayersSpriteAnimation() {
+
+    // Update sprite animation for all living players
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.updateSpriteAnimation();
+    }
+
+    // Update sprite animation for all dying players
+    for (Player &player: playerManager->getNeutralPlayers()) {
+        if (player.updateSpriteAnimation()) {
+            // The player is respawning
+            if (player.getIsAlive()) {
+                playerManager->moveNeutralPlayer(player, 1);
+            }
+            // The player is dying
+            else {
+                playerManager->moveNeutralPlayer(player, -1);
+            }
+        }
+    }
+
+    // Update sprite animation for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.updateSpriteAnimation();
+    }
 }
 
 void Game::applyPlayersMovement(double delta_time) {
-    // Apply movement for all players
+    // Apply movement for all living players
     for (Player &player: playerManager->getAlivePlayers()) {
+        player.applyMovement(delta_time);
+    }
+
+    // Apply movement for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
         player.applyMovement(delta_time);
     }
 }

@@ -20,13 +20,22 @@
  * @brief The TCPClient class provides functionality to create and manage a TCP client.
  */
 class TCPClient {
+private:
+    /* ATTRIBUTES */
+
+    int socketFileDescriptor = -1; /**< The client socket file descriptor. */
+    bool stopRequested = false; /**< Flag to indicate if the client should stop. */
+    bool shouldSendDisconnect = true; /**< Flag to indicate if the client should send a disconnect message. */
+    std::function<void()> disconnectCallback; /**< Callback function to notify menu on server disconnect. */
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     TCPClient();
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Gets the socket file descriptor.
@@ -35,7 +44,7 @@ public:
     [[nodiscard]] int getSocketFileDescriptor() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set a callback function to notify menu on server disconnect.
@@ -44,7 +53,7 @@ public:
     void setDisconnectCallback(std::function<void()> callback);
 
 
-    /** PUBLIC METHODS **/
+    /* METHODS */
 
     /**
      * @brief Connects to the specified server.
@@ -81,13 +90,6 @@ public:
      */
     void stop();
 
-private:
-    /** ATTRIBUTES **/
-
-    int socketFileDescriptor = -1; /**< The client socket file descriptor. */
-    bool stopRequested = false; /**< Flag to indicate if the client should stop. */
-    bool shouldSendDisconnect = true; /**< Flag to indicate if the client should send a disconnect message. */
-    std::function<void()> disconnectCallback; /**< Callback function to notify menu on server disconnect. */
 };
 
 #endif //PLAY_TOGETHER_TCPCLIENT_H

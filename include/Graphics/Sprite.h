@@ -79,8 +79,9 @@ public:
 
     /**
      * @brief Update the sprite animation.
+     * @return True if a unique animation just ended, false otherwise.
      */
-    void updateAnimation();
+    bool updateAnimation();
 
 };
 

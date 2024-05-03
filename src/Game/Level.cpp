@@ -6,7 +6,7 @@
  */
 
 
-/* CONSTRUCTOR */
+/* CONSTRUCTORS */
 
 Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager *textureManager) : textureManagerPtr(textureManager) {
     std::cout << "Level: Loading level " << map_name << "..." << std::endl;
@@ -21,6 +21,8 @@ Level::Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager
     loadEnvironmentFromMap(map_name);
     loadPolygonsFromMap(map_name);
     loadPlatformsFromMap(map_name);
+    loadTrapsFromMap(map_name);
+    loadLeversFromMap(map_name);
     loadItemsFromMap(map_name);
 }
 
@@ -61,6 +63,7 @@ std::vector<AABB> Level::getZones(AABBType type) const {
     switch(type) {
         using enum AABBType;
         case SAVE: return saveZones;
+        case RESCUE: return rescueZones;
         case TOGGLE_GRAVITY: return toggleGravityZones;
         case INCREASE_FALL_SPEED: return increaseFallSpeedZones;
         default: return {};
@@ -75,31 +78,51 @@ std::vector<Asteroid> Level::getAsteroids() const {
     return asteroids;
 }
 
-std::vector<MovingPlatform1D> Level::getMovingPlatforms1D() const {
+std::vector<TreadmillLever> Level::getTreadmillLevers() const {
+    return treadmillLevers;
+}
+
+std::vector<PlatformLever>& Level::getPlatformLevers() {
+    return platformLevers;
+}
+
+std::vector<CrusherLever>& Level::getCrusherLevers() {
+    return crusherLevers;
+}
+
+std::vector<MovingPlatform1D>& Level::getMovingPlatforms1D() {
     return movingPlatforms1D;
 }
 
-std::vector<MovingPlatform2D> Level::getMovingPlatforms2D() const {
+std::vector<MovingPlatform2D>& Level::getMovingPlatforms2D() {
     return movingPlatforms2D;
 }
 
-std::vector<SwitchingPlatform> Level::getSwitchingPlatforms() const {
+std::vector<SwitchingPlatform>& Level::getSwitchingPlatforms() {
     return switchingPlatforms;
 }
 
-std::vector<WeightPlatform> Level::getWeightPlatforms() const {
+std::vector<WeightPlatform>& Level::getWeightPlatforms() {
     return weightPlatforms;
 }
 
-std::vector<SizePowerUp> Level::getSizePowerUp() const {
+std::vector<Treadmill>& Level::getTreadmills() {
+    return treadmills;
+}
+
+std::vector<Crusher>& Level::getCrushers() {
+    return crushers;
+}
+
+std::vector<SizePowerUp>& Level::getSizePowerUp() {
     return sizePowerUp;
 }
 
-std::vector<SpeedPowerUp> Level::getSpeedPowerUp() const {
+std::vector<SpeedPowerUp>& Level::getSpeedPowerUp() {
     return speedPowerUp;
 }
 
-std::vector<Coin> Level::getCoins() const {
+std::vector<Coin>& Level::getCoins() {
     return coins;
 }
 
@@ -116,6 +139,30 @@ void Level::setLastCheckpoint(short checkpoint) {
 
 void Level::setAsteroids(std::vector<Asteroid> const &value) {
     this->asteroids = value;
+}
+
+void Level::activateTreadmillLever(const TreadmillLever &lever) {
+    // Search the lever and activate it
+    auto it = std::ranges::find(treadmillLevers, lever);
+    if (it != treadmillLevers.end()) {
+        it->toggleIsActivated();
+    }
+}
+
+void Level::activatePlatformLever(const PlatformLever &lever) {
+    // Search the lever and activate it
+    auto it = std::ranges::find(platformLevers, lever);
+    if (it != platformLevers.end()) {
+        it->toggleIsActivated();
+    }
+}
+
+void Level::activateCrusherLever(const CrusherLever &lever) {
+    // Search the lever and activate it
+    auto it = std::ranges::find(crusherLevers, lever);
+    if (it != crusherLevers.end()) {
+        it->toggleIsActivated();
+    }
 }
 
 void Level::increaseWeightForPlatform(const WeightPlatform &platform) {
@@ -152,11 +199,10 @@ void Level::removeItemFromSpeedPowerUp(SpeedPowerUp const &item) {
 
 void Level::removeItemFromCoins(Coin const &item) {
     // Search the item and remove it
-    size_t i = 0;
-    while (i < coins.size() && item != coins[i]) {
-        i++;
+    auto it = std::ranges::find(coins, item);
+    if (it != coins.end()) {
+        coins.erase(it);
     }
-    coins.erase(coins.begin() + i);
 }
 
 
@@ -185,6 +231,37 @@ void Level::togglePlatformsMovement(bool state){
     for (MovingPlatform2D &platform: movingPlatforms2D) platform.setIsMoving(state);
     for (SwitchingPlatform &platform: switchingPlatforms) platform.setIsMoving(state);
     for (WeightPlatform &platform: weightPlatforms) platform.setIsMoving(state);
+    for (Treadmill &treadmill: treadmills) treadmill.setIsMoving(state);
+}
+
+void Level::toggleCrushersMovement(bool state){
+    for (Crusher &crusher: crushers) crusher.setIsMoving(state);
+}
+
+void Level::applyAsteroidsMovement(double delta_time) {
+    // Apply movement to all players
+    for (Asteroid &asteroid: asteroids) {
+        asteroid.applyMovement(delta_time);
+    }
+}
+
+void Level::applyPlatformsMovement(double delta_time) {
+    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
+    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
+    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
+    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
+    for (Treadmill &treadmill: treadmills) treadmill.calculateMovement(delta_time); // Calculate movement for treadmills
+}
+
+bool Level::applyTrapsMovement(double delta_time) {
+    bool check = false;
+
+    // Apply movement to all crushers
+    for (Crusher &crusher: crushers) {
+        if (crusher.applyMovement(delta_time)) check = true;
+    }
+
+    return check;
 }
 
 void Level::renderBackgrounds(SDL_Renderer *renderer, const Point camera) const {
@@ -233,6 +310,13 @@ void Level::renderPolygonsDebug(SDL_Renderer *renderer, Point camera) const {
         SDL_RenderDrawRectF(renderer, &save_zone_rect);
     }
 
+    SDL_SetRenderDrawColor(renderer, 144, 190, 144, 255);
+    for (const AABB &rescue_zone: rescueZones) {
+        // Draw only the outline of the save zone
+        SDL_FRect rescue_zone_rect = {rescue_zone.getX() - camera.x, rescue_zone.getY() - camera.y, rescue_zone.getWidth(), rescue_zone.getHeight()};
+        SDL_RenderDrawRectF(renderer, &rescue_zone_rect);
+    }
+
     SDL_SetRenderDrawColor(renderer, 127, 25, 230, 255);
     for (const AABB &toggle_gravity_zone: toggleGravityZones) {
         // Draw only the outline of the toggle gravity zone
@@ -260,11 +344,24 @@ void Level::renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const {
     }
 }
 
-void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) const {
+void Level::renderLevers(SDL_Renderer *renderer, Point camera) const {
+    for (const TreadmillLever &lever : treadmillLevers) lever.render(renderer, camera);
+    for (const PlatformLever &lever : platformLevers) lever.render(renderer, camera);
+    for (const CrusherLever &lever : crusherLevers) lever.render(renderer, camera);
+}
+
+void Level::renderLeversDebug(SDL_Renderer *renderer, Point camera) const {
+    for (const TreadmillLever &lever : treadmillLevers) lever.renderDebug(renderer, camera);
+    for (const PlatformLever &lever : platformLevers) lever.renderDebug(renderer, camera);
+    for (const CrusherLever &lever : crusherLevers) lever.renderDebug(renderer, camera);
+}
+
+void Level::renderPlatforms(SDL_Renderer *renderer, Point camera) {
     for (const MovingPlatform1D &platform: movingPlatforms1D) platform.render(renderer, camera);
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.render(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.render(renderer, camera);
     for (const WeightPlatform &platform: weightPlatforms) platform.render(renderer, camera);
+    for (Treadmill &treadmill: treadmills) treadmill.render(renderer, camera);
 }
 
 void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
@@ -272,7 +369,16 @@ void Level::renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const {
     for (const MovingPlatform2D &platform: movingPlatforms2D) platform.renderDebug(renderer, camera);
     for (const SwitchingPlatform &platform: switchingPlatforms) platform.renderDebug(renderer, camera);
     for (const WeightPlatform &platform: weightPlatforms) platform.renderDebug(renderer, camera);
+    for (const Treadmill &treadmill: treadmills) treadmill.renderDebug(renderer, camera);
 
+}
+
+void Level::renderTraps(SDL_Renderer *renderer, Point camera) const {
+    for (const Crusher &crusher: crushers) crusher.render(renderer, camera); // Draw the crushers
+}
+
+void Level::renderTrapsDebug(SDL_Renderer *renderer, Point camera) const {
+    for (const Crusher &crusher: crushers) crusher.renderDebug(renderer, camera); // Draw the crushers
 }
 
 void Level::renderItems(SDL_Renderer *renderer, Point camera) {
@@ -295,21 +401,6 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 255, 64, 255);
     for (const Coin &item : coins) item.renderDebug(renderer, camera);
 }
-
-void Level::applyAsteroidsMovement(double delta_time) {
-    // Apply movement to all players
-    for (Asteroid &asteroid: asteroids) {
-        asteroid.applyMovement(delta_time);
-    }
-}
-
-void Level::applyPlatformsMovement(double delta_time) {
-    for (MovingPlatform1D &platform: movingPlatforms1D) platform.applyMovement(delta_time); // Apply movement for 1D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) platform.applyMovement(delta_time); // Apply movement for 2D platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) platform.applyMovement(delta_time); // Apply movement for switching platforms
-    for (WeightPlatform &platform: weightPlatforms) platform.applyMovement(delta_time); // Apply movement for weight platforms
-}
-
 
 void Level::loadMapProperties(const std::string &map_file_name) {
     musics.clear();
@@ -400,12 +491,14 @@ int Level::loadPolygonsFromJson(const nlohmann::json &json_data, const std::stri
 }
 
 int Level::loadAABBFromJson(const nlohmann::json &json_data, const std::string &zone_name, std::vector<AABB> &zones, AABBType type) {
+    int i = 0;
     for (const auto &zone : json_data[zone_name]) {
         float x = zone["x"];
         float y = zone["y"];
         float width = zone["width"];
         float height = zone["height"];
-        zones.emplace_back(x, y, width, height, type);
+        zones.emplace_back(x, y, width, height, i, type);
+        i++;
     }
 
     return (int)json_data[zone_name].size();
@@ -458,9 +551,10 @@ void Level::loadPolygonsFromMap(const std::string &map_file_name) {
     aabbs_file.close();
 
     int save_zones_size = loadAABBFromJson(aabbs, "saveZones", saveZones, SAVE);
+    int rescue_zones_size = loadAABBFromJson(aabbs, "rescueZones", rescueZones, RESCUE);
     int toggle_gravity_zones_size = loadAABBFromJson(aabbs, "toggleGravityZones", toggleGravityZones, TOGGLE_GRAVITY);
     int increase_fall_speed_zones_size = loadAABBFromJson(aabbs, "increaseFallSpeedZones", increaseFallSpeedZones, INCREASE_FALL_SPEED);
-    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
+    std::cout << "Level: Loaded " << save_zones_size << " save zones, " << rescue_zones_size << " rescue zones, " << toggle_gravity_zones_size << " toggle gravity zones and " << increase_fall_speed_zones_size << " increase fall speed zones." << std::endl;
 }
 
 void Level::loadPlatformsFromMap(const std::string &mapFileName) {
@@ -534,7 +628,116 @@ void Level::loadPlatformsFromMap(const std::string &mapFileName) {
         weightPlatforms.emplace_back(x, y, size, stepDistance, textures[texture_id]);
     }
 
+    // Load all treadmills
+    for (const auto &treadmill : j["treadmills"]) {
+        float x = treadmill["x"];
+        float y = treadmill["y"];
+        float size = treadmill["size"];
+        float speed = treadmill["speed"];
+        float direction = treadmill["direction"];
+        Uint32 spriteSpeed = treadmill["spriteSpeed"];
+        treadmills.emplace_back(x, y, size, speed, direction, spriteSpeed);
+    }
+
     std::cout << "Level: Loaded " << movingPlatforms1D.size() << " 1D moving platforms, " << movingPlatforms2D.size() << " 2D moving platforms, " << switchingPlatforms.size() << " switching platforms and " << weightPlatforms.size() << "weight platforms." << std::endl;
+}
+
+void Level::loadTrapsFromMap(const std::string &mapFileName) {
+    crushers.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + mapFileName + "/traps.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the traps file. Please check the file path." << std::endl;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    const std::vector<Texture> &textures = textureManagerPtr->getCrushers();
+
+    // Load all crushers
+    for (const auto &crusher : j["crushers"]) {
+        float x = crusher["x"];
+        float y = crusher["y"];
+        float size = crusher["size"];
+        float min = crusher["min"];
+        float max = crusher["max"];
+        Uint32 moveUpTime = crusher["moveUpTime"];
+        Uint32 waitUpTime = crusher["waitUpTime"];
+        Uint32 waitDownTime = crusher["waitDownTime"];
+        int texture_id = crusher["texture"];
+        crushers.emplace_back(x, y, size, min, max, moveUpTime, waitUpTime, waitDownTime, textures[texture_id]);
+    }
+
+    std::cout << "Level: Loaded " << crushers.size() << " crushers." << std::endl;
+}
+
+void Level::loadLeversFromMap(const std::string &map_file_name) {
+    treadmillLevers.clear();
+
+    std::string file_path = std::string(MAPS_DIRECTORY) + map_file_name + "/levers.json";
+    std::ifstream file(file_path);
+
+    if (!file.is_open()) {
+        std::cerr << "Level: Unable to open the levers file. Please check the file path." << std::endl;
+    }
+
+    nlohmann::json j;
+    file >> j;
+    file.close();
+
+    // Load all treadmill levers
+    for (const auto &lever : j["treadmillLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        int type = lever["type"];
+        std::vector<Treadmill*> platforms_pointers;
+        for (const auto &id : lever["platformsID"]) {
+            platforms_pointers.push_back(&treadmills[id]);
+        }
+        treadmillLevers.emplace_back(x, y, size, is_activated, type, texture, platforms_pointers);
+    }
+
+    // Load all platform levers
+    for (const auto &lever : j["platformLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        std::vector<MovingPlatform1D*> platforms_1D_pointers;
+        std::vector<MovingPlatform2D*> platforms_2D_pointers;
+        for (const auto &id : lever["1DMovingPlatformsID"]) {
+            platforms_1D_pointers.push_back(&movingPlatforms1D[id]);
+        }
+        for (const auto &id : lever["2DMovingPlatformsID"]) {
+            platforms_2D_pointers.push_back(&movingPlatforms2D[id]);
+        }
+        platformLevers.emplace_back(x, y, size, is_activated, texture, platforms_1D_pointers, platforms_2D_pointers);
+    }
+
+    // Load all crusher levers
+    for (const auto &lever : j["crusherLevers"]) {
+        auto texture = Texture(textureManagerPtr->getLever());
+        float x = lever["x"];
+        float y = lever["y"];
+        float size = lever["size"];
+        bool is_activated = lever["isActivated"];
+        std::vector<Crusher*> crusher_pointers;
+        for (const auto &id : lever["crushersID"]) {
+            crusher_pointers.push_back(&crushers[id]);
+        }
+        crusherLevers.emplace_back(x, y, size, is_activated, texture, crusher_pointers);
+    }
+
+
+    std::cout << "Level: Loaded " << treadmillLevers.size() << " treadmill levers." << std::endl;
 }
 
 void Level::loadItemsFromMap(const std::string &mapFileName) {

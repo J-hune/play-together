@@ -26,7 +26,6 @@ Player::Player(int playerID, Point spawnPoint, float size)
 
     sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_SPRITE_WIDTH, BASE_SPRITE_HEIGHT);
     setSpriteTextureByID(playerID);
-    setSize(size);
 }
 
 
@@ -60,8 +59,17 @@ float Player::getSize() const {
     return size;
 }
 
+bool Player::getIsAlive() const {
+    return isAlive;
+
+}
+
 int Player::getScore() const {
     return score;
+}
+
+int Player::getDeathCount() const {
+    return deathCount;
 }
 
 Sprite *Player::getSprite() {
@@ -124,6 +132,9 @@ bool Player::getWasOnPlatform() const {
     return wasOnPlatform;
 }
 
+bool Player::getIsHitting() const {
+    return isHitting;
+}
 
 /* SPECIFIC ACCESSORS */
 
@@ -198,6 +209,15 @@ std::vector<Point> Player::getRoofColliderVertices() const {
         };
 }
 
+std::vector<Point> Player::getHitZoneVertices() const {
+    return {
+            {x + hitZone.x, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y + hitZone.h},
+            {x + hitZone.x, y + hitZone.y + hitZone.h}
+    };
+}
+
 SDL_FRect Player::getHorizontalColliderBoundingBox() const {
     return directionX == PLAYER_LEFT ? getLeftColliderBoundingBox() : getRightColliderBoundingBox();
 }
@@ -218,6 +238,10 @@ SDL_FRect Player::getGroundColliderBoundingBox() const {
 SDL_FRect Player::getRoofColliderBoundingBox() const {
     if (mavity > 0) return {x, y - 1, width, 1};
     else return {x, y + height, width, 1};
+}
+
+SDL_FRect Player::getHitZoneBoundingBox() const {
+    return {x + hitZone.x, y + hitZone.y, hitZone.w, hitZone.h};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -241,12 +265,30 @@ void Player::setY(float val) {
 
 void Player::setSize(float val) {
     size = val;
+    baseHitZone = {BASE_HIT_ZONE.x * size, BASE_HIT_ZONE.y * size, BASE_HIT_ZONE.w * size, BASE_HIT_ZONE.h * size};
+    hitZone = baseHitZone;
     normalOffsets = {baseNormalOffsets.x * size, baseNormalOffsets.y * size, baseNormalOffsets.w * size, baseNormalOffsets.h * size};
     runOffsets = {baseRunOffsets.x * size, baseRunOffsets.y * size, baseRunOffsets.w * size, baseRunOffsets.h * size};
+    eggOffsets = {baseEggOffsets.x * size, baseEggOffsets.y * size, baseEggOffsets.w * size, baseEggOffsets.h * size};
     spriteWidth = BASE_SPRITE_WIDTH * size;
     spriteHeight = BASE_SPRITE_HEIGHT * size;
 
     updateCollisionBox();
+}
+
+void Player::setIsAlive(bool state) {
+    isAlive = state;
+    if (!state) {
+        sprite.setAnimation(egg);
+        textureOffsets.x = eggOffsets.x;
+        textureOffsets.y = eggOffsets.y;
+        textureOffsets.w = eggOffsets.w;
+        textureOffsets.h = eggOffsets.h;
+    }
+}
+
+void Player::setDeathCount(int val) {
+    deathCount = val;
 }
 
 void Player::setMoveX(float val) {
@@ -304,6 +346,10 @@ void Player::setIsJumping(bool state) {
     isJumping = state;
 }
 
+void Player::setJumpMaxHeight(float val) {
+    jumpMaxHeight = val;
+}
+
 void Player::toggleMavity() {
     mavity *= -1;
 }
@@ -322,6 +368,11 @@ void Player::setCurrentZoneID(size_t id) {
 
 void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
+}
+
+void Player::setIsHitting(bool state) {
+    isHitting = state;
+    if (state) hitTimer = 0;
 }
 
 void Player::setLeftCollider(bool state) {
@@ -392,54 +443,70 @@ void Player::useDefaultTexture() {
 }
 void Player::useMedalTexture(){
     sprite.setTexture(*medalTexture);
-};
+}
 
 void Player::setSpriteTextureByID(int id) {
     if (id == 1){ // Texture 1
         sprite.setTexture(*spriteTexture1Ptr);
         defaultTexture = spriteTexture1Ptr;
         medalTexture = spriteTexture1MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 2){ // Texture 2
         sprite.setTexture(*spriteTexture2Ptr);
         defaultTexture = spriteTexture2Ptr;
         medalTexture = spriteTexture2MedalPtr;
-        baseNormalOffsets = {6, 1, 3, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {6, 4, 3, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 3) { // Texture 3
         sprite.setTexture(*spriteTexture3Ptr);
         defaultTexture = spriteTexture3Ptr;
         medalTexture = spriteTexture3MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else if (id == 4) { // Texture 4
         sprite.setTexture(*spriteTexture4Ptr);
         defaultTexture = spriteTexture4Ptr;
         medalTexture = spriteTexture4MedalPtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     else {
         sprite.setTexture(*baseSpriteTexturePtr);
         defaultTexture = baseSpriteTexturePtr;
         medalTexture = baseSpriteTexturePtr;
-        baseNormalOffsets = {4, 1, 5, 0};
-        baseRunOffsets = {6, 4, 0, 0};
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
     }
     setSize(size);
 }
 
-void Player::teleportPlayer(float newX, float newY) {
+void Player::teleport(float newX, float newY) {
     x = newX;
     y = newY;
 }
 
 void Player::addToScore(int val) {
     score += val;
+}
+
+void Player::increaseDeathCount() {
+    deathCount++;
+}
+
+void Player::hitAction(bool state) {
+    if (!state) {
+        hitLock = false;
+    } else if (!hitLock) {
+        isHitting = true;
+        sprite.setAnimation(hit);
+        hitLock = true;
+        hitTimer = HIT_TIME;
+        lastHitTimeUpdate = SDL_GetTicks();
+    }
 }
 
 bool Player::canJump() const {
@@ -533,12 +600,36 @@ void Player::calculateMovement(double delta_time) {
     calculateYaxisMovement(delta_time);
 }
 
+void Player::updateHitZone() {
+    if (hitTimer > 0) {
+        hitTimer -= static_cast<int>(SDL_GetTicks() - lastHitTimeUpdate);
+        lastHitTimeUpdate = SDL_GetTicks();
+
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            hitZone.x = baseHitZone.x;
+        } else {
+            hitZone.x = - (baseHitZone.w - (width - baseHitZone.x));
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            hitZone.y = baseHitZone.y;
+        } else {
+            hitZone.y = - (baseHitZone.h - (height - baseHitZone.y));
+        }
+
+        if (hitTimer <= 0) {
+            isHitting = false;
+        }
+    }
+}
+
 void Player::updateCollisionBox() {
-    updateSpriteAnimation();
+    updateSprite();
     updateSpriteOrientation();
 
     // Normal texture offsets
-    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk) {
+    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk || sprite.getAnimation() == hit) {
         // Check horizontal orientation
         if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
             textureOffsets.x = normalOffsets.x;
@@ -551,16 +642,18 @@ void Player::updateCollisionBox() {
         }
         // Check vertical orientation
         if (mavity > 0) {
-            y -= textureOffsets.y - normalOffsets.y;
+            if (lastAnimationIsRunType) y -= textureOffsets.y - normalOffsets.y;
             textureOffsets.y = normalOffsets.y;
             textureOffsets.h = normalOffsets.h;
         } else {
             textureOffsets.y = normalOffsets.h;
             textureOffsets.h = normalOffsets.y;
         }
+
+        lastAnimationIsRunType = false;
     }
     // Run texture offsets
-    else if (sprite.getAnimation() == run || sprite.getAnimation() == sneak) {
+    else if (sprite.getAnimation() == sneak || sprite.getAnimation() == run) {
         // Check horizontal orientation
         if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
             if (rightCollider) x -= textureOffsets.w - runOffsets.w;
@@ -574,18 +667,21 @@ void Player::updateCollisionBox() {
         }
         // Check vertical orientation
         if (mavity > 0) {
-            y -= textureOffsets.y - runOffsets.y;
+            if (!lastAnimationIsRunType) y -= textureOffsets.y - runOffsets.y;
             textureOffsets.y = runOffsets.y;
             textureOffsets.h = runOffsets.h;
         } else {
             textureOffsets.y = runOffsets.h;
             textureOffsets.h = runOffsets.y;
         }
+
+        lastAnimationIsRunType = true;
     }
 
     // Update collision box
     width = spriteWidth - (textureOffsets.x + textureOffsets.w);
     height = spriteHeight - (textureOffsets.y + textureOffsets.h);
+    updateHitZone();
 }
 
 bool Player::hasMoved() const {
@@ -618,7 +714,7 @@ void Player::applyMovement(double delta_time) {
     }
 }
 
-void Player::updateSpriteAnimation() {
+void Player::updateSprite() {
     // If the player doesn't move, play idle or sneak animation
     if (wantToMoveLeft == 0 && wantToMoveRight == 0) {
         if (sprintMultiplier == 1) sprite.setAnimation(idle);
@@ -640,6 +736,27 @@ void Player::updateSpriteAnimation() {
     }
 }
 
+void Player::setDeathAnimation() {
+    sprite.setAnimation(death);
+}
+
+void Player::setRespawnAnimation() {
+    sprite.setAnimation(eggCrack);
+}
+
+void Player::eggAction(bool state) {
+    if (!state) {
+        eggLock = false;
+    } else if (!eggLock) {
+        sprite.setAnimation(eggMove);
+        eggLock = true;
+    }
+}
+
+bool Player::updateSpriteAnimation() {
+    return sprite.updateAnimation();
+}
+
 void Player::updateSpriteOrientation() {
      if (directionX == PLAYER_LEFT) {
         sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
@@ -650,7 +767,6 @@ void Player::updateSpriteOrientation() {
 
 
 void Player::render(SDL_Renderer *renderer, Point camera) {
-    sprite.updateAnimation();
     SDL_Rect srcRect = sprite.getSrcRect();
 
     float x_rect = x - camera.x - textureOffsets.x;
@@ -669,36 +785,48 @@ void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
 }
 
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
-    //Draw the right collider
+    // Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = getRightColliderVertices();
-    for (size_t i = 0; i < vertexRight.size(); ++i) {
-        const auto &vertex1 = vertexRight[i];
-        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+    std::vector<Point> vertex_right = getRightColliderVertices();
+    for (size_t i = 0; i < vertex_right.size(); ++i) {
+        const auto &vertex1 = vertex_right[i];
+        const auto &vertex2 = vertex_right[(i + 1) % vertex_right.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the left collider
+    // Draw the left collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = getLeftColliderVertices();
-    for (size_t i = 0; i < vertexLeft.size(); ++i) {
-        const auto &vertex1 = vertexLeft[i];
-        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+    std::vector<Point> vertex_left = getLeftColliderVertices();
+    for (size_t i = 0; i < vertex_left.size(); ++i) {
+        const auto &vertex1 = vertex_left[i];
+        const auto &vertex2 = vertex_left[(i + 1) % vertex_left.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the roof collider
+    // Draw the roof collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = getRoofColliderVertices();
-    for (size_t i = 0; i < vertex.size(); ++i) {
-        const auto &vertex1 = vertex[i];
-        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+    std::vector<Point> vertex_roof = getRoofColliderVertices();
+    for (size_t i = 0; i < vertex_roof.size(); ++i) {
+        const auto &vertex1 = vertex_roof[i];
+        const auto &vertex2 = vertex_roof[(i + 1) % vertex_roof.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the ground collider
+    // Draw the ground collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = getGroundColliderVertices();
-    for (size_t i = 0; i < vertexGround.size(); ++i) {
-        const auto &vertex1 = vertexGround[i];
-        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+    std::vector<Point> vertex_ground = getGroundColliderVertices();
+    for (size_t i = 0; i < vertex_ground.size(); ++i) {
+        const auto &vertex1 = vertex_ground[i];
+        const auto &vertex2 = vertex_ground[(i + 1) % vertex_ground.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+
+    // Draw the hitting collider
+    if (isHitting) {
+        SDL_SetRenderDrawColor(renderer, 230, 0, 0, 255);
+        std::vector<Point> vertex_hit_zone = getHitZoneVertices();
+        for (size_t i = 0; i < vertex_hit_zone.size(); ++i) {
+            const auto &vertex1 = vertex_hit_zone[i];
+            const auto &vertex2 = vertex_hit_zone[(i + 1) % vertex_hit_zone.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x,
+                                vertex2.y - camera.y);
+        }
     }
 }

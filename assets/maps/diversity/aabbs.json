@@ -2,6 +2,10 @@
     "saveZones": [
         {"x": 1070, "y": -400, "width": 80, "height": 400}
     ],
+    "rescueZones": [
+        {"x": 180, "y": -855, "width": 200, "height": 1000},
+        {"x": 860, "y": -1000, "width": 200, "height": 1000}
+    ],
     "toggleGravityZones": [
         {"x": 1300, "y":40, "width": 300, "height": 20}
     ],

@@ -14,6 +14,12 @@
  * @brief Defines the Platform interface representing a platform.
  */
 
+
+struct PlatformBuffer {
+    float deltaX;
+    float deltaY;
+};
+
 /**
  * @interface IPlatform
  * @brief Represents a platform in a 2D game.
@@ -32,8 +38,9 @@ public:
     [[nodiscard]] virtual bool getIsMoving() const = 0;
     [[nodiscard]] virtual SDL_FRect getBoundingBox() const = 0;
 
-    // ACCESSORS
+    // MODIFIERS
     virtual void setIsMoving(bool state) = 0;
+    virtual void setIsOnScreen(bool state) = 0;
 
     // METHODS
     virtual void applyMovement(double delta_time) = 0;

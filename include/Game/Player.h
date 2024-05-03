@@ -37,8 +37,12 @@ private:
     float width; /**< The width of the player. (in pixels) */
     float height; /**< The height of the player. */
     float size = 2; /**< The size of the player. */
-    int score = 0; /**< The score of the player. */
+    bool isAlive = true; /**< Flag indicating whether the player is alive. */
     Buffer buffer = {0, 0}; /**< The buffer of the player */
+
+    // STATS
+    int score = 0; /**< The score of the player. */
+    int deathCount = 0; /**< The death count of the player. */
 
     // SPRITE ATTRIBUTES
     Sprite sprite; /**< The sprite of the player. */
@@ -80,6 +84,16 @@ private:
     bool isOnPlatform = false; /**< Flag indicating whether the player is currently on a weight platform. */
     bool wasOnPlatform = false; /**< Flag indicating whether the player was on a weight platform during the last frame. */
 
+    // HIT ATTRIBUTES
+    bool isHitting = false; /**< Flag indicating whether the player is currently hitting. */
+    bool hitLock = false; /**< Flag indicating whether the player has already hit. */
+    int hitTimer = 0; /**< The timer of the hit action. */
+    Uint32 lastHitTimeUpdate = 0; /**< The last time the player hit. */
+    SDL_FRect hitZone; /**< The hit zone of the player. */
+    SDL_FRect baseHitZone = BASE_HIT_ZONE; /**< The base hit zone of the player. */
+    static constexpr SDL_FRect BASE_HIT_ZONE = {6, 8, 14, 9}; /**< The rectangle of the hit zone (according to the player's x and y). */
+    static constexpr int HIT_TIME = 300; /**< The time the player will hit. */
+
     // COLLIDERS
     bool leftCollider = false; /**< Flag indicating whether the player's left collider is active. */
     bool rightCollider = false; /**< Flag indicating whether the player's right collider is active. */
@@ -98,27 +112,35 @@ private:
     static SDL_Texture *spriteTexture4MedalPtr;/**< The medal's texture 4 of players */
 
     // TEXTURES OFFSETS
+    bool eggLock = false; /**< Flag indicating whether the player had already moved */
+    bool lastAnimationIsRunType = false; /**< Flag indicating whether the last animation was a run animation. */
     SDL_FRect textureOffsets = normalOffsets; /**< The offsets of the player's sprite */
     SDL_FRect normalOffsets = baseNormalOffsets; /**< The normal offsets of the player's sprite */
     SDL_FRect runOffsets = baseRunOffsets; /**< The run offsets of the player's sprite */
+    SDL_FRect eggOffsets = baseEggOffsets; /**< The offsets of the egg sprite */
     float spriteWidth = BASE_SPRITE_WIDTH; /**< The width of the player's sprite */
     float spriteHeight = BASE_SPRITE_HEIGHT; /**< The height of the player's sprite */
     SDL_FRect baseNormalOffsets; /**< The base normal offsets of the player's sprite */
     SDL_FRect baseRunOffsets; /**< The base run offsets of the player's sprite */
+    SDL_FRect baseEggOffsets = {5, 4, 6, 5}; /**< The base egg offsets of the player's sprite */
 
     // SPRITE ANIMATIONS
     static constexpr Animation idle = {0, 4, 100, false}; /**< Idle animation */
-    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation walk = {1, 6, 70, false}; /**< Walk animation */
-    static constexpr Animation hit = {2, 3, 10, true}; /**< Hit animation */
+    static constexpr Animation hit = {2, 3, 70, true}; /**< Hit animation */
     static constexpr Animation hurt = {3, 4, 100, true}; /**< Hurt animation */
+    static constexpr Animation sneak = {4, 1, 1000000000, false}; /**< Sneak animation */
     static constexpr Animation run = {4, 7, 100, false}; /**< Run animation */
+    static constexpr Animation death = {5, 5, 90, true}; /**< Death animation */
+    static constexpr Animation egg = {6, 1, 1000000000, false}; /**< Egg animation */
+    static constexpr Animation eggMove = {6, 4, 50, true}; /**< Egg moving animation */
+    static constexpr Animation eggCrack = {7, 8, 85, true}; /**< Egg cracking animation */
 
     // CONSTANTS
     static constexpr int PLAYER_RIGHT = 1; /**< Constant for the player's right direction. */
     static constexpr int PLAYER_LEFT = -1; /**< Constant for the player's left direction. */
     static constexpr int BASE_SPRITE_WIDTH = 24; /**< Constant for the base width of a player. */
-    static constexpr int BASE_SPRITE_HEIGHT = 18; /**< Constant for the base height of a player. */
+    static constexpr int BASE_SPRITE_HEIGHT = 24; /**< Constant for the base height of a player. */
 
 
 public:
@@ -179,10 +201,22 @@ public:
     [[nodiscard]] float getSize() const;
 
     /**
+     * @brief Return the isAlive attribute.
+     * @return The value of the isAlive attribute.
+     */
+    [[nodiscard]] bool getIsAlive() const;
+
+    /**
      * @brief Gets the player's current score.
      * @return The player's score as an integer.
      */
     [[nodiscard]] int getScore() const;
+
+    /**
+     * @brief Gets the player's current death count.
+     * @return The player's death count as an integer.
+     */
+    [[nodiscard]] int getDeathCount() const;
 
     /**
      * @brief Return the sprite attribute.
@@ -274,6 +308,12 @@ public:
      */
     [[nodiscard]] bool getWasOnPlatform() const;
 
+    /**
+     * @brief Return the isHitting attribute.
+     * @return The current state of the isHitting attribute.
+     */
+    [[nodiscard]] bool getIsHitting() const;
+
 
 
     /* SPECIFIC ACCESSORS */
@@ -312,6 +352,13 @@ public:
     [[nodiscard]] std::vector<Point> getRoofColliderVertices() const;
 
     /**
+     * @brief Gets the vertices of the player's hit zone.
+     * @return A vector of Point representing the vertices.
+     * @see getHitZoneBoundingBox() to get the bounding box of the hit zone.
+     */
+    [[nodiscard]] std::vector<Point> getHitZoneVertices() const;
+
+    /**
      * @brief Gets the horizontal collider bounding box of the player's, based on its current direction.
      * @return SDL_Rect representing the bounding box.
      * @see getLeftColliderBoundingBox() and getRightColliderBoundingBox() for detailed usage.
@@ -333,6 +380,13 @@ public:
     [[nodiscard]] SDL_FRect getRoofColliderBoundingBox() const;
 
     /**
+     * @brief Gets the hit zone of the player.
+     * @return SDL_Rect representing the hit zone.
+     * @see getHitZoneVertices() to get the vertices of the hit zone.
+     */
+    [[nodiscard]] SDL_FRect getHitZoneBoundingBox() const;
+
+    /**
      * @brief Gets the bounding box of the player.
      * @return SDL_Rect representing the bounding box.
      * @see getVertices() to get the vertices of the player.
@@ -348,7 +402,7 @@ public:
 
     // Equality operator for comparing two players
     bool operator==(const Player &other) const {
-        return (x == other.x && y == other.y && width == other.width && height == other.height);
+        return (playerID == other.playerID);
     }
 
 
@@ -371,6 +425,18 @@ public:
      * @param val The new value of the size attribute.
      */
     void setSize(float val);
+
+    /**
+     * @brief Sets the isAlive attribute.
+     * @param state The new value of the isAlive attribute.
+     */
+    void setIsAlive(bool state);
+
+    /**
+     * @brief Sets the deathCount attribute, used when loading a game.
+     * @param val The new value of the deathCount attribute.
+     */
+    void setDeathCount(int val);
 
     /**
      * @brief Sets the moveX attribute.
@@ -439,6 +505,12 @@ public:
     void setIsJumping(bool state);
 
     /**
+     * @brief Sets the JumpMaxHeight attribute.
+     * @param val The new value of the JumpMaxHeight attribute.
+     */
+    void setJumpMaxHeight(float val);
+
+    /**
      * @brief Toggle the gravity to positive or negative (normal or reversed).
      */
     void toggleMavity();
@@ -478,6 +550,12 @@ public:
      * @param val The new value of the mavity attribute.
      */
     void setMaxFallSpeed(float val);
+
+    /**
+     * @brief Set the isHitting attribute.
+     * @param state The new value of the isHitting attribute.
+     */
+    void setIsHitting(bool state);
 
     /**
      * @brief Set the ground collider attribute.
@@ -544,17 +622,57 @@ public:
     void setSpriteTextureByID(int id);
 
     /**
+     * @brief Set the sprite's animation to death animation.
+     */
+    void setDeathAnimation();
+
+    /**
+     * @brief Set the sprite's animation to egg cracking animation.
+     */
+    void setRespawnAnimation();
+
+    /**
+     * @brief Active the egg action of the player.
+     * @param state True if the player press egg buttons, false otherwise.
+     */
+    void eggAction(bool state);
+
+    /**
+     * @brief Update the player's sprite animation.
+     * @return True if a unique animation just ended, false otherwise.
+     */
+    bool updateSpriteAnimation();
+
+    /**
      * @brief Teleports the player to a specific location.
      * @param newX The X-coordinate of the location.
      * @param newY The Y-coordinate of the location.
      */
-    void teleportPlayer(float newX, float newY);
+    void teleport(float newX, float newY);
 
     /**
      * @brief Increase or decrease the score by adding a value.
      * @param val The value to add to the score.
      */
     void addToScore(int val);
+
+    /**
+     * @brief Increase the death count by one.
+     */
+    void increaseDeathCount();
+
+    /**
+     * @brief Active the hit action of the player.
+     * @param state True if the player press hit button, false otherwise.
+     */
+    void hitAction(bool state);
+
+    /**
+     * @brief Calculates the vertical movement of the player for the current frame.
+     * @param delta_time The time elapsed since the last frame in seconds.
+     * @see calculateMovement() for main use.
+     */
+    void calculateYaxisMovement(double delta_time);
 
     /**
      * @brief Calculate the new position of the player.
@@ -564,7 +682,8 @@ public:
     void calculateMovement(double delta_time);
 
     /**
-     * @brief Update the player's collision box according to its current sprite animation.
+     * @brief Update the player's collision boxes according to its current sprite animation.
+     * @see updateHitZone() for sub-function.
      */
     void updateCollisionBox();
 
@@ -648,22 +767,21 @@ private:
     void calculateXaxisMovement(double delta_time);
 
     /**
-     * @brief Calculates the vertical movement of the player for the current frame.
-     * @param delta_time The time elapsed since the last frame in seconds.
-     * @see calculateMovement() for main use.
-     */
-    void calculateYaxisMovement(double delta_time);
-
-    /**
      * @brief Update the sprite animation of the player.
      */
-    void updateSpriteAnimation();
+    void updateSprite();
 
     /**
      * @brief Update the sprite orientation of the player.
      * @param direction The current x-axis direction of the player.
      */
     void updateSpriteOrientation();
+
+    /**
+     * @brief Update the hit zone of the player.
+     * @see updateCollisionBox() for main use.
+     */
+    void updateHitZone();
 
 };
 

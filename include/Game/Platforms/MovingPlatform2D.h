@@ -27,6 +27,7 @@ private:
     float speed; /**< The speed of the platform. */
     float moveX = 0; /**< The number of pixel the platform has moved on the x-axis. */
     float moveY = 0; /**< The number of pixel the platform has moved on the y-axis. */
+    PlatformBuffer buffer = {0, 0}; /**< The buffer of the player */
 
     const Point left; /**< A Point representing the minimum position of the platform. */
     const Point right; /**< A Point representing the maximum position of the platform. */
@@ -35,6 +36,7 @@ private:
     float directionX; /**< The current direction of the platform on x-axis : -1 for left/up, 1 for right/bottom. */
     float directionY; /**< The current direction of the platform on y-axis : -1 for left/up, 1 for right/bottom. */
     bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on screen. */
 
     float smoothingLimit = 3; /**< The smoothing limit of the platform movement. */
 
@@ -87,13 +89,22 @@ public:
     [[nodiscard]] float getMoveY() const;
 
     /**
+     * @brief Return the directionX attribute.
+     * @return The value of the directionX attribute.
+     */
+    [[nodiscard]] float getDirectionX() const;
+
+    /**
+     * @brief Return the directionY attribute.
+     * @return The value of the directionY attribute.
+     */
+    [[nodiscard]] float getDirectionY() const;
+
+    /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
     [[nodiscard]] bool getIsMoving() const override;
-
-
-    /* SPECIFIC ACCESSORS */
 
     /**
      * @brief Get the bounding box of the platform.
@@ -105,10 +116,58 @@ public:
     /* MODIFIERS */
 
     /**
+     * @brief Set the x attribute.
+     * @param value The new value of the x attribute.
+     */
+    void setX(float value);
+
+    /**
+     * @brief Set the y attribute.
+     * @param value The new value of the y attribute.
+     */
+    void setY(float value);
+
+    /**
+     * @brief Set the moveX attribute.
+     * @param value The new value of the moveX attribute.
+     */
+    void setMoveX(float value);
+
+    /**
+     * @brief Set the moveY attribute.
+     * @param value The new value of the moveY attribute.
+     */
+    void setMoveY(float value);
+
+    /**
+     * @brief Set the directionX attribute.
+     * @param value The new value of the directionX attribute.
+     */
+    void setDirectionX(float value);
+
+    /**
+     * @brief Set the directionY attribute.
+     * @param value The new value of the directionY attribute.
+     */
+    void setDirectionY(float value);
+
+    /**
+     * @brief Set the buffer attribute.
+     * @param value The new value of the buffer attribute.
+     */
+    void setBuffer(PlatformBuffer value);
+
+    /**
      * @brief Set the isMoving attribute.
      * @param state The new state of the isMoving attribute.
      */
     void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
 
     /* PUBLIC METHODS */

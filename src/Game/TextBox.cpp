@@ -216,7 +216,6 @@ void TextBox::render() {
     SDL_DestroyTexture(text_texture);
 }
 
-
 void TextBox::renderCursor() {
     if (text.empty() || cursorIndex > text.length() || static_cast<int>(cursorPosition.y) > rect.h) {
         return;
@@ -238,4 +237,13 @@ void TextBox::renderCursor() {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderFillRect(renderer, &cursor_rect);
     }
+}
+
+void TextBox::reset() {
+    text.clear();
+    cursorIndex = 0;
+    cursorPosition.x = rect.x;
+    scrollOffset = 0;
+    cursorVisible = true;
+    lastCursorBlink = SDL_GetTicks();
 }

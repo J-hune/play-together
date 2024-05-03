@@ -55,8 +55,8 @@ void Mediator::startServers() {
     Mediator::networkManagerPtr->startServers();
 }
 
-void Mediator::startClients() {
-    Mediator::networkManagerPtr->startClients();
+void Mediator::startClients(const std::string& serverIP, short serverPort) {
+    Mediator::networkManagerPtr->startClients(serverIP, serverPort);
 }
 
 void Mediator::stopServers() {

@@ -52,14 +52,14 @@ void NetworkManager::startServers() {
     }
 }
 
-void NetworkManager::startClients() {
+void NetworkManager::startClients(const std::string& ip, short port) {
     unsigned short clientPort;
     try {
-        tcpClient.connect("127.0.0.1", 8080, clientPort);
+        tcpClient.connect(ip, port, clientPort);
         std::cout << "TCPClient: Connected to server" << std::endl;
         clientTCPThreadPtr = std::make_unique<std::jthread>(&TCPClient::start, &tcpClient);
 
-        udpClient.initialize("127.0.0.1", 8080, clientPort);
+        udpClient.initialize(ip, port, clientPort);
         std::cout << "UDPClient: Client initialized and running on port " << clientPort << std::endl;
         clientUDPThreadPtr = std::make_unique<std::jthread>(&UDPClient::start, &udpClient);
     } catch (const NetworkError &) {

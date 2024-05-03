@@ -1,7 +1,5 @@
 #include "../../include/Game/Menu.h"
-#include "../../include/Network/TCPError.h"
-#include "../../include/Network/UDPError.h"
-#include "../../include/Game/TextBox.h"
+
 
 /** FUNCTIONS **/
 
@@ -53,19 +51,20 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_nam
 
 
     // Add buttons to the play menu
-    ButtonPosition host_game_button_position = {200, 60, 400, 100};
-    ButtonPosition join_game_button_position = {200, 180, 400, 100};
-    ButtonPosition start_new_game_button_position = {200, 300, 400, 100};
-    ButtonPosition main_menu_button_position = {200, 420, 400, 100};
+    ButtonPosition host_game_button_position = {200, 50, 400, 100};
+    ButtonPosition join_game_button_position = {200, 220, 400, 80};
+    ButtonPosition start_new_game_button_position = {200, 320, 400, 100};
+    ButtonPosition main_menu_button_position = {200, 440, 400, 100};
     auto host_game_button = Button(renderer, fonts[1], host_game_button_position, 1, "Host Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color,hover_color, text_color, 10);
     auto join_game_button = Button(renderer, fonts[1], join_game_button_position, 0, "Join Hosted Game", ButtonAction::JOIN_HOSTED_GAME, normal_color,hover_color, text_color, 10);
     auto start_new_game_button = Button(renderer, fonts[1], start_new_game_button_position, 0, "Start Local Game", ButtonAction::CREATE_OR_LOAD_GAME, normal_color, hover_color,text_color, 10);
     auto main_menu_button = Button(renderer, fonts[1], main_menu_button_position, 0, "Main Menu",  ButtonAction::NAVIGATE_TO_MENU_MAIN, normal_color,hover_color, text_color, 10);
+    auto text_input = TextBox(renderer, {200, 170, 400, 40}, "Enter the IP address of the host (ip:port)", 80);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(host_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(join_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(start_new_game_button);
     buttons[{GameState::STOPPED, MenuAction::PLAY}].push_back(main_menu_button);
-
+    textInputs[{GameState::STOPPED, MenuAction::PLAY}].push_back(text_input);
 
     // Add buttons to paused menu
     ButtonPosition resume_button_position = {200, 100, 400, 100};
@@ -100,9 +99,6 @@ Menu::Menu(SDL_Renderer *renderer, bool *quit, const std::string& music_file_nam
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(save_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(remove_slot3_button);
     buttons[{GameState::STOPPED, MenuAction::CREATE_OR_LOAD_GAME}].push_back(main_menu_button4);
-
-    auto text_input = TextBox(renderer, {200, 500, 400, 50}, "Enter the IP address of the host", 80);
-    textInputs[{GameState::STOPPED, MenuAction::PLAY}].push_back(text_input);
 }
 
 
@@ -147,8 +143,9 @@ void Menu::render() {
     for (Button &button: buttons[{Mediator::getGameState(), getCurrentMenuAction()}]) {
         button.render();
     }
-    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}])
-    {
+
+    // Render text inputs
+    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}]) {
         text_input.render();
     }
 }
@@ -173,7 +170,6 @@ void Menu::onServerDisconnect() {
 
 void Menu::handleEvent(const SDL_Event &event) {
     auto &current_buttons = getCurrentMenuButtons();
-
     for (Button &button: current_buttons) {
         button.handleEvent(event);
 
@@ -181,9 +177,9 @@ void Menu::handleEvent(const SDL_Event &event) {
             handleButtonAction(button);
         }
     }
+
     auto &current_text_inputs = textInputs[{Mediator::getGameState(), getCurrentMenuAction()}];
-    for (TextBox &text_input: current_text_inputs)
-    {
+    for (TextBox &text_input: current_text_inputs) {
         text_input.handleEvent(event);
     }
 }
@@ -283,15 +279,27 @@ void Menu::handleCreateOrLoadGameButton(Button &button) {
     button.reset();
 }
 
-void Menu::handleJoinHostedGameButton(Button &button) const {
+void Menu::handleJoinHostedGameButton(Button &button) {
     Mediator::stopServers();
     Music::stop();
-    try {
-        Mediator::startClients();
-    } catch (const TCPError &e) {
-        std::cerr << "(TCPError) " << e.what() << std::endl;
-    } catch (const UDPError &e) {
-        std::cerr << "(UDPError) " << e.what() << std::endl;
+
+    TextBox server_address = textInputs[{Mediator::getGameState(), getCurrentMenuAction()}][0];
+    std::string address = server_address.getText();
+
+    // Check if the address is valid (in the form ip:port)
+    if (std::regex_match(address, std::regex("([0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,5}"))) {
+        std::string ip = address.substr(0, address.find(':'));
+        int port = std::stoi(address.substr(address.find(':') + 1));
+
+        try {
+            Mediator::startClients(ip, static_cast<short>(port));
+        } catch (const TCPError &e) {
+            std::cerr << "(TCPError) " << e.what() << std::endl;
+        } catch (const UDPError &e) {
+            std::cerr << "(UDPError) " << e.what() << std::endl;
+        }
+    } else {
+        std::cerr << "Invalid IP address, format should be xxx.xxx.xxx.xxx:xxxxx" << std::endl;
     }
 
     button.reset();
@@ -307,10 +315,8 @@ void Menu::handleDeleteSaveButton(Button &button) {
 }
 
 void Menu::handleNavigateToMainMenuButton(Button &button) {
-    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}])
-    {
-        text_input.emptyText();
-        std::cout << text_input.getText() << std::endl;
+    for (TextBox &text_input: textInputs[{Mediator::getGameState(), getCurrentMenuAction()}]) {
+        text_input.reset();
     }
     setMenuAction(MenuAction::MAIN);
     button.reset();

@@ -77,6 +77,11 @@ public:
      */
     void render();
 
+    /**
+     * @brief Reset the TextBox.
+     */
+    void reset();
+
 
 private:
 

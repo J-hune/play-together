@@ -81,7 +81,7 @@ public:
     static bool isServerRunning();
     static bool isClientRunning();
     static void startServers();
-    static void startClients();
+    static void startClients(const std::string& serverIP, short serverPort);
     static void stopServers();
     static void stopClients();
     static void sendPlayerUpdate(uint16_t keyboardStateMask);

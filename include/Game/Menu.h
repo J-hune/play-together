@@ -6,12 +6,15 @@
 #include <map>
 #include <thread>
 #include <format>
+#include <regex>
 
+#include "TextBox.h"
 #include "../Graphics/Button.h"
 #include "../Utils/Mediator.h"
-#include "TextBox.h"
 #include "../Sounds/Music.h"
 #include "GameManagers/RenderManager.h"
+#include "../../include/Network/TCPError.h"
+#include "../../include/Network/UDPError.h"
 
 enum class MenuAction {
     MAIN,
@@ -143,7 +146,7 @@ private:
     void handleSaveButton(Button &button) const;
     void handleStopButton(Button &button);
     void handleCreateOrLoadGameButton(Button &button);
-    void handleJoinHostedGameButton(Button &button) const;
+    void handleJoinHostedGameButton(Button &button);
     void handleDeleteSaveButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);
     void handleNavigateToPlayMenuButton(Button &button);

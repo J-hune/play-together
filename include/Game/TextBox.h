@@ -22,7 +22,9 @@ private:
     SDL_Renderer* renderer;
     SDL_Rect rect;
     std::string text;
+    size_t maxLength = 2000;
     std::string placeholder;
+    int margin = 10;
     std::vector<TTF_Font *> fonts;
     TTF_Font *font = nullptr;
     SDL_Color textColor = {0, 0, 0, 255};
@@ -36,7 +38,7 @@ private:
 
 public:
     /** CONSTRUCTORS **/
-    TextBox(SDL_Renderer *renderer, SDL_Rect rect, std::string placeholder);
+    TextBox(SDL_Renderer *renderer, SDL_Rect rect, std::string placeholder, size_t maxLength);
 
 
     /** ACCESSORS **/
@@ -75,13 +77,6 @@ public:
      */
     void render();
 
-
-    /**
-     * @brief Move the cursor to the specified position.
-     * @param x The x position.
-     * @param y The y position.
-     */
-    void moveCursor(int x, int y);
 
 private:
 

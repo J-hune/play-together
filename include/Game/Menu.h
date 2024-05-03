@@ -6,11 +6,15 @@
 #include <map>
 #include <thread>
 #include <format>
+#include <regex>
 
+#include "TextBox.h"
 #include "../Graphics/Button.h"
 #include "../Utils/Mediator.h"
 #include "../Sounds/Music.h"
 #include "GameManagers/RenderManager.h"
+#include "../../include/Network/TCPError.h"
+#include "../../include/Network/UDPError.h"
 
 enum class MenuAction {
     MAIN,
@@ -45,6 +49,7 @@ private:
     SoundEffect forwardSound = SoundEffect("Menu/forward.wav"); /**< The sound played when the mouse click on a forward button. */
     SoundEffect backSound = SoundEffect("Menu/back.wav"); /**< The sound played when the mouse click on a back button. */
     MessageQueue *messageQueue; /**< Pointer to the message queue for communication between objects. */
+    std::map<GameStateKey, std::vector<TextBox>> textInputs;
 
 public:
     /** CONSTRUCTOR **/
@@ -141,7 +146,7 @@ private:
     void handleSaveButton(Button &button) const;
     void handleStopButton(Button &button);
     void handleCreateOrLoadGameButton(Button &button);
-    void handleJoinHostedGameButton(Button &button) const;
+    void handleJoinHostedGameButton(Button &button);
     void handleDeleteSaveButton(Button &button);
     void handleNavigateToMainMenuButton(Button &button);
     void handleNavigateToPlayMenuButton(Button &button);

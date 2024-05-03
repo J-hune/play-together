@@ -76,8 +76,10 @@ public:
 
     /**
      * @brief Starts the TCP and UDP clients.
+     * @param ip The IP address of the server.
+     * @param port The port of the server.
      */
-    void startClients();
+    void startClients(const std::string& ip, short port);
 
     /**
      * @brief Stops the TCP and UDP servers.

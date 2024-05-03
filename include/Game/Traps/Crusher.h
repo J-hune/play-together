@@ -1,6 +1,7 @@
 #ifndef PLAY_TOGETHER_CRUSHER_H
 #define PLAY_TOGETHER_CRUSHER_H
 
+#include <cmath>
 #include "../../Graphics/Texture.h"
 #include "../Point.h"
 #include "../../Sounds/SoundEffect.h"

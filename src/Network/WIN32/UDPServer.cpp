@@ -156,7 +156,7 @@ bool UDPServer::sendSyncCorrection(int clientSocket, sockaddr_in address, nlohma
         if (playerID == -1) playerID = 0; // The server player has ID 0
         if (playerID == clientSocket) playerID = -1; // The client itself has ID -1
 
-        playerData["id"] = playerID;
+        playerData["playerID"] = playerID;
         playerData["x"] = player.getX();
         playerData["y"] = player.getY();
         playerData["moveX"] = player.getMoveX();

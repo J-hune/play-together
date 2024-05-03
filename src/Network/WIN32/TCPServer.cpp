@@ -273,6 +273,24 @@ bool TCPServer::sendGameProperties(SOCKET clientSocket) const {
     message["messageType"] = "gameProperties";
     Mediator::getGameProperties(message);
 
+    // Add all connected clients to the player list
+    message["players"] = json::array();
+    for (std::vector<Player> players = Mediator::getAlivePlayers(); const auto &player : players) {
+        int playerID = player.getPlayerID();
+        if (playerID == -1) playerID = 0; // The server player has ID 0
+        if (playerID == static_cast<int>(clientSocket)) playerID = -1; // The client itself has ID -1
+
+        // Replace the client socket with -1 for the client itself
+        json playerInfo;
+        playerInfo["playerID"] = playerID;
+        playerInfo["x"] = player.getX();
+        playerInfo["y"] = player.getY();
+        playerInfo["moveX"] = player.getMoveX();
+        playerInfo["moveY"] = player.getMoveY();
+
+        message["players"].push_back(playerInfo);
+    }
+
     return send(clientSocket, message.dump());
 }
 

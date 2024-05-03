@@ -14,7 +14,7 @@ SOCKET TCPClient::getSocketFileDescriptor() const {
 }
 
 
-/** ACCESSORS **/
+/** MODIFIERS **/
 
 void TCPClient::setDisconnectCallback(std::function<void()> callback) {
     disconnectCallback = std::move(callback);

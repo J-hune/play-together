@@ -37,12 +37,11 @@ int TextBox::getTextWidth(const std::string& val) const {
 }
 
 void TextBox::handleEvent(const SDL_Event &e) {
-    lastCursorBlink = SDL_GetTicks();
-    cursorVisible = true;
-
     // Handle text input (SDL_TEXTINPUT) and key press (SDL_KEYDOWN)
     if (e.type == SDL_TEXTINPUT) {
-        if (text.length() >= maxLength) return;
+        if (text.length() >= maxLength || !active) return;
+        lastCursorBlink = SDL_GetTicks();
+        cursorVisible = true;
 
         // Split the text into two parts: before and after the cursor
         std::string text_before_cursor = text.substr(0, cursorIndex);
@@ -55,6 +54,10 @@ void TextBox::handleEvent(const SDL_Event &e) {
 
     // Handle backspace, left and right arrow keys, and copy-paste shortcuts
     else if (e.type == SDL_KEYDOWN) {
+        if (!active) return;
+        lastCursorBlink = SDL_GetTicks();
+        cursorVisible = true;
+
         if (e.key.keysym.sym == SDLK_BACKSPACE && !text.empty()) {
             // Remove the character to the left of the cursor and move the cursor left
             if (cursorIndex > 0) {
@@ -108,11 +111,19 @@ void TextBox::handleEvent(const SDL_Event &e) {
     }
 
     else if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_LEFT) {
+        lastCursorBlink = SDL_GetTicks();
+        cursorVisible = true;
         int mouseX; int mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
 
         // Check if the click happened within the textbox boundaries
         if (mouseX >= rect.x && mouseX <= rect.x + rect.w && mouseY >= rect.y && mouseY <= rect.y + rect.h) {
+            if (!active) {
+                active = true;
+                lastCursorBlink = SDL_GetTicks();
+                return;
+            }
+
             // Calculate cursor position based on click position
             int clickX = mouseX - rect.x + scrollOffset;
 
@@ -127,6 +138,8 @@ void TextBox::handleEvent(const SDL_Event &e) {
             // Update cursor index and position
             cursorIndex = index;
             cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+        } else {
+            active = false;
         }
     }
 }
@@ -177,15 +190,12 @@ void TextBox::render() {
     SDL_Color text_color_final = (display_text == placeholder) ? placeholder_color : textColor;
 
     // Render the background of the textbox
-    roundedBoxRGBA(
-            renderer,
-            static_cast<Sint16>(rect.x),
-            static_cast<Sint16>(rect.y),
-            static_cast<Sint16>(rect.x + rect.w),
-            static_cast<Sint16>(rect.y + rect.h),
-            0,
-            backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a
-    );
+    SDL_SetRenderDrawColor(renderer, backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+    SDL_Rect textbox_rect = {rect.x, rect.y, rect.w, rect.h};
+    SDL_RenderDrawRect(renderer, &textbox_rect);
+
+    SDL_Rect inner_textbox_rect = {rect.x + 1, rect.y + 1, rect.w - 2 * 1, rect.h - 2 * 1};
+    if (active) SDL_RenderDrawRect(renderer, &inner_textbox_rect);
 
     // Calculate the position to render the text (align left, but not glued to the left edge)
     int textX = rect.x + margin - scrollOffset; // Adjust this value to add some padding from the left edge
@@ -226,7 +236,7 @@ void TextBox::renderCursor() {
         lastCursorBlink = SDL_GetTicks();
     }
 
-    if (cursorVisible) {
+    if (cursorVisible && active) {
         // Calculate the cursor position based on the text width
         SDL_Rect cursor_rect = {
                 rect.x + static_cast<int>(cursorPosition.x) - scrollOffset + margin,

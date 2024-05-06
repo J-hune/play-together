@@ -24,6 +24,7 @@ private:
     std::string text;
     size_t maxLength = 2000;
     std::string placeholder;
+    bool active = false;
     int margin = 10;
     std::vector<TTF_Font *> fonts;
     TTF_Font *font = nullptr;

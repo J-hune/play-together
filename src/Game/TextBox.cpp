@@ -97,16 +97,18 @@ void TextBox::handleEvent(const SDL_Event &e) {
                 clipboard_text[maxLength - text.length()] = '\0';
             }
 
-            setText(text + clipboard_text);
-            SDL_free(clipboard_text);
+            std::string text_before_cursor = text.substr(0, cursorIndex);
+            std::string text_after_cursor = text.substr(cursorIndex);
+            setText(text_before_cursor + clipboard_text + text_after_cursor);
 
             // Si le texte est plus long que le rectangle, on scroll le texte de la taille du texte qui dépasse
             while (getTextWidth(text) - scrollOffset > rect.w - margin) {
                 scrollTextLeft();
             }
 
-            cursorIndex = static_cast<Uint32>(text.length());
+            cursorIndex += strlen(clipboard_text);
             cursorPosition.x = getTextWidth(text.substr(0, cursorIndex));
+            SDL_free(clipboard_text);
         }
     }
 

@@ -92,7 +92,7 @@ private:
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     std::vector<Coin> coins; /**< Collection of Coin representing coins. */
-    std::vector<Item*> items; /**< Collection of items.
+    std::vector<Item*> items; /**< Collection of items. */
 
 
 public:

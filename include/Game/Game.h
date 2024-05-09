@@ -74,9 +74,6 @@ private:
     Music music; /**< Represents the music that is currently played in the game. */
     size_t seed;
 
-    //queue in order to keep track of the effects applied on the player
-    std::queue<GameData*> timeQueue;
-
 
 public:
     /* CONSTRUCTORS */

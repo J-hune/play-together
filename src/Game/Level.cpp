@@ -213,7 +213,6 @@ void Level::removeItem(Item const &item) {
     // Search the item and remove it
     for (auto it = items.begin(); it != items.end(); ++it) {
         if (it != items.end() && *it == &item) {
-            std::cout<<"this item is erased"<<std::endl;
             items.erase(it);
             break; // Found and removed the item, exit the loop
         }
@@ -397,8 +396,11 @@ void Level::renderTrapsDebug(SDL_Renderer *renderer, Point camera) const {
 }
 
 void Level::renderItems(SDL_Renderer *renderer, Point camera) {
-    for (SizePowerUp &item : sizePowerUp) item.render(renderer, camera); // Draw the size power-ups
-    for (SpeedPowerUp &item : speedPowerUp) item.render(renderer, camera); // Draw the speed power-ups
+    SDL_SetRenderDrawColor(renderer, 0, 255, 120, 255);
+    for (const Item* item : items) {
+        item->renderDebug(renderer, camera);
+    }
+
     for (Coin &item : coins) item.render(renderer, camera); // Draw the coins
 }
 
@@ -412,30 +414,6 @@ void Level::renderItemsDebug(SDL_Renderer *renderer, Point camera) const {
     SDL_SetRenderDrawColor(renderer, 255, 255, 64, 255);
     for (const Coin &item : coins) item.renderDebug(renderer, camera);
 
-}
-
-void Level::applyAsteroidsMovement(double delta_time) {
-    // Apply movement to all players
-    for (Asteroid &asteroid: asteroids) {
-        asteroid.applyMovement(delta_time);
-    }
-}
-
-void Level::applyPlatformsMovement(double delta_time) {
-    // Apply movement for 1D platforms
-    for (MovingPlatform1D &platform: movingPlatforms1D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for 2D platforms
-    for (MovingPlatform2D &platform: movingPlatforms2D) {
-        if(platform.getIsMoving()) platform.applyMovement(delta_time);
-    }
-
-    // Apply movement for switching platforms
-    for (SwitchingPlatform &platform: switchingPlatforms) {
-        if(platform.getIsMoving()) platform.applyMovement();
-    }
 }
 
 void Level::loadMapProperties(const std::string &map_file_name) {
@@ -826,6 +804,6 @@ void Level::loadItemsFromMap(const std::string &mapFileName) {
     }
 
 
-    std::cout << "Level: Loaded  items " << items.size() <<std::endl;
-    std::cout << "Level: Loaded " << sizePowerUp.size() << " size power-up, " << speedPowerUp.size() << " speed power-up and " << coins.size() << " coins." << std::endl;
+    std::cout << "Level: Loaded " << items.size() << " items." << std::endl;
+    std::cout << "Level: Loaded " << coins.size() << " coins." << std::endl;
 }

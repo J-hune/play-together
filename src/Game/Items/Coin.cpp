@@ -50,6 +50,10 @@ void Coin::applyEffect(Player &player) {
     player.addToScore(value);
 }
 
+void Coin::inverseEffect([[maybe_unused]] Player &player) {
+    // Do nothing
+}
+
 void Coin::render(SDL_Renderer *renderer, Point camera) {
     sprite.updateAnimation();
     SDL_Rect srcRect = (*spritePtr).getSrcRect();

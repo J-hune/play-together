@@ -42,6 +42,7 @@ private:
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<Coin> coins; /**< Collection of Coin representing coins. */
+    std::vector<Item*> items; /**< Collection of items. */
 
 
 public:
@@ -71,6 +72,7 @@ public:
     [[nodiscard]] std::vector<SizePowerUp> &getSizePowerUps();
     [[nodiscard]] std::vector<SpeedPowerUp> &getSpeedPowerUps();
     [[nodiscard]] std::vector<Coin> &getCoins();
+    [[nodiscard]] std::vector<Item*> &getItems();
 
 
     /* METHODS */
@@ -101,6 +103,7 @@ private:
     void checkCrushers(const SDL_FRect& broad_phase_area);
     void checkPowerUps(const SDL_FRect& broad_phase_area);
     void checkCoins(const SDL_FRect& broad_phase_area);
+    void checkItems(const SDL_FRect& broad_phase_area);
 
 };
 

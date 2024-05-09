@@ -416,6 +416,50 @@ void PlayerCollisionManager::handleCollisionsWithCoins(Player *player) {
     }
 }
 
+void PlayerCollisionManager::handleCollisionsWithItem(Player *player) {
+    //section check if the time of the power has not passed
+
+    //checks if the queue is empty
+    if(!timeQueue.empty()){
+        int count = 0;
+        //keep the current size of the queue
+        int  currentSizeQueue = timeQueue.size();
+        while( count < currentSizeQueue ){
+            //we get the first element of the queue
+            GameData* current = timeQueue.front();
+            //check if the time of the power has passed
+            if (difftime(time(nullptr) ,current->t) >= 4){
+                //we remove the element form the queue since is not necessary
+                current->item->inverseEffect(*player);
+                timeQueue.pop();
+                //free the allocated memory
+                free(current);
+                //check for the rest elements of the queue
+                count++;
+            }else{
+                //in means that all the other elements have smaller time difference
+                // -> not necessary to have a further check
+                count = currentSizeQueue;
+            }
+        }
+    }
+
+    //section to get the new power
+    for(Item* item : gamePtr->getLevel()->getItems()){
+        // If a collision is detected, apply item's effect to the player and erase it
+        if (checkAABBCollision(player->getBoundingBox(), item->getBoundingBox())) {
+            item->applyEffect(*player);
+            auto* data = static_cast<GameData *>(calloc(1, sizeof(GameData)));
+            //initialise the gameData
+            time(&data->t);
+            data->item = item;
+            timeQueue.push(data);
+            gamePtr->getLevel()->removeItem(*item);
+        }
+    }
+
+}
+
 bool PlayerCollisionManager::handleCollisionsWithDeadPlayers(const Player *player) {
     // Check for collisions with each dead player
     for (Player &dead_player : gamePtr->getPlayerManager().getDeadPlayers()) {
@@ -476,8 +520,7 @@ void PlayerCollisionManager::handleCollisions(double delta_time) {
             }
 
             // Handle collisions with items
-            handleCollisionsWithSizePowerUps(&player);
-            handleCollisionsWithSpeedPowerUps(&player);
+            handleCollisionsWithItem(&player);
             handleCollisionsWithCoins(&player);
 
             handleCollisionsWithSaveZones(player); // Handle collisions with save zones

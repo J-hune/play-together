@@ -1,6 +1,7 @@
 #ifndef PLAY_TOGETHER_PLAYERCOLLISIONMANAGER_H
 #define PLAY_TOGETHER_PLAYERCOLLISIONMANAGER_H
 
+#include <queue>
 #include "../../Physics/Collision.h"
 #include "../Level.h"
 #include "../Game.h"
@@ -11,11 +12,19 @@
  */
 
 
+//data necessary to bring back to the old state the player
+typedef struct {
+    Item* item;
+    time_t t;
+} GameData;
+
 class PlayerCollisionManager {
 private:
     /* ATTRIBUTES */
 
     Game *gamePtr; /**< A pointer to the game object. */
+    // Queue in order to keep track of the effects applied on the player
+    std::queue<GameData*> timeQueue;
 
 
 
@@ -161,6 +170,12 @@ private:
      * @param playerManager The manager responsible for handling player-related operations.
      */
     void handleCollisionsWithCoins(Player *player);
+
+    /**
+     * @brief Handles collisions between the player and items.
+     * @param player The player object.
+     */
+    void handleCollisionsWithItem(Player *player);
 
     /**
      * @brief Handles collisions between the player and dead players.

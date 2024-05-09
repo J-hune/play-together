@@ -52,7 +52,6 @@ void Item::setIsOnScreen(bool state) {
 /* METHODS */
 
 void Item::applyEffect(Player &player) {
-    // Set the best player
     player.addToScore(5);
     collectSound.play(0, -1);
 }

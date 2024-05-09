@@ -34,11 +34,18 @@ public:
     void applyEffect(Player &player) override;
 
     /**
+    * @brief Apply the item's inverse effect to a player.
+    * @param player The player the effect will be applied to.
+    */
+    void inverseEffect(Player &player) override;
+
+    /**
      * @brief Renders the power-up's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
     void render(SDL_Renderer *renderer, Point camera) override;
+
 };
 
 

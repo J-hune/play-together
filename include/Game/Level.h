@@ -92,6 +92,7 @@ private:
     std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
     std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
     std::vector<Coin> coins; /**< Collection of Coin representing coins. */
+    std::vector<Item*> items; /**< Collection of items. */
 
 
 public:
@@ -225,6 +226,13 @@ public:
      * @return A vector of Coin.
      */
     [[nodiscard]] std::vector<Coin>& getCoins();
+
+    /**
+     * @brief Return an Item from the items attribute.
+     * @return An item.
+     */
+    [[nodiscard]] std::vector<Item*> getItems() const;
+
     /**
      * @brief Return the last checkpoint reached by the player.
      * @return A short representing the last checkpoint reached by the player.
@@ -293,6 +301,12 @@ public:
      * @param item The item to remove.
      */
     void removeItemFromCoins(Coin const &item);
+
+    /**
+     * @brief Remove an item.
+     * @param item The item to remove.
+     */
+    void removeItem(Item const &item);
 
 
     /* PUBLIC METHODS */

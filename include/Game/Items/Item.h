@@ -89,10 +89,16 @@ public:
     /* METHODS */
 
     /**
-    * @brief Apply the item's effect to a player.
-    * @param player The player the effect will be applied to.
-    */
-    virtual void applyEffect(Player &player);
+     * @brief Apply the item's effect to a player.
+     * @param player The player the effect will be applied to.
+     */
+    virtual void applyEffect(Player &player) = 0;
+
+    /**
+     * @brief Apply the item's inverse effect to a player.
+     * @param player The player the effect will be applied to.
+     */
+    virtual void inverseEffect(Player &player) = 0;
 
     /**
      * @brief Pure virtual method to renders the item's sprite.

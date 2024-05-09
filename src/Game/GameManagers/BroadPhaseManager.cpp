@@ -85,6 +85,10 @@ std::vector<Coin> &BroadPhaseManager::getCoins() {
     return coins;
 }
 
+std::vector<Item*> &BroadPhaseManager::getItems() {
+    return items;
+}
+
 
 /* METHODS */
 
@@ -316,6 +320,20 @@ void BroadPhaseManager::checkCoins(const SDL_FRect &broad_phase_area) {
     }
 }
 
+void BroadPhaseManager::checkItems(const SDL_FRect &broad_phase_area) {
+    items.clear(); // Empty old items
+
+    // Check for collisions with items
+    for (Item *item: gamePtr->getLevel()->getItems()) {
+        if (checkAABBCollision(broad_phase_area, item->getBoundingBox())) {
+            item->setIsOnScreen(true);
+            items.push_back(item);
+        } else {
+            item->setIsOnScreen(false);
+        }
+    }
+}
+
 void BroadPhaseManager::broadPhase() {
 
     std::vector<Point> broad_phase_area_vertices = gamePtr->getCamera()->getBroadPhaseAreaVertices();
@@ -333,8 +351,8 @@ void BroadPhaseManager::broadPhase() {
     checkWeightPlatforms(broad_phase_area_bounding_box);
     checkTreadmills(broad_phase_area_bounding_box);
     checkCrushers(broad_phase_area_bounding_box);
-    checkPowerUps(broad_phase_area_bounding_box);
     checkCoins(broad_phase_area_bounding_box);
+    checkItems(broad_phase_area_bounding_box);
 
     // Check if a player is hitting
     bool player_is_hitting = false;

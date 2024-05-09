@@ -9,6 +9,7 @@
 #include <cmath>
 #include <algorithm>
 #include <SDL_ttf.h>
+#include <queue>
 #include "../Utils/Mediator.h"
 #include "../Utils/MessageQueue.h"
 #include "Level.h"

@@ -64,6 +64,11 @@ public:
     void applyEffect(Player &player) override;
 
     /**
+     * @brief Do not use this method.
+     */
+    [[maybe_unused]] void inverseEffect(Player &player) override;
+
+    /**
      * @brief Renders the coin's sprite.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.

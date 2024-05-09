@@ -76,6 +76,14 @@ public:
     [[nodiscard]] std::string receive(sockaddr_in& clientAddress, int timeout) const;
 
     /**
+     * @brief Sends a synchronous correction message to the client.
+     * @param clientSocket The client socket file descriptor.
+     * @param message The message to send.
+     * @return True if the message is sent successfully, false otherwise.
+     */
+    bool sendSyncCorrection(int clientSocket, sockaddr_in address, nlohmann::json &message) const;
+
+    /**
      * @brief Shuts down the server.
      */
     void stop();

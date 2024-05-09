@@ -24,7 +24,6 @@ private:
     Mix_Music* music; /**< The music file to be played. */
 
 public:
-    /* ATTRIBUTES */
 
     static int volume; /**< The music volume. */
 
@@ -33,7 +32,6 @@ public:
 
     Music() = default;
     explicit Music(const std::string& file_name);
-    ~Music();
 
 
     /* METHODS */

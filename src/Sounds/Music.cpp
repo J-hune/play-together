@@ -21,11 +21,6 @@ Music::Music(const std::string& file_name) {
     }
 }
 
-Music::~Music() {
-    if (Mix_QuerySpec(0, 0, 0) == 0) Mix_FreeMusic(music);
-}
-
-
 /* METHODS */
 
 void Music::stop() {

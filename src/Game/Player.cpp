@@ -5,6 +5,7 @@
  * @brief Implements the Player class representing a player in a 2D game.
  */
 
+
 // Initialize textures pointers
 SDL_Texture *Player::baseSpriteTexturePtr = nullptr;
 SDL_Texture *Player::spriteTexture1Ptr = nullptr;
@@ -12,17 +13,23 @@ SDL_Texture *Player::spriteTexture2Ptr = nullptr;
 SDL_Texture *Player::spriteTexture3Ptr = nullptr;
 SDL_Texture *Player::spriteTexture4Ptr = nullptr;
 
+SDL_Texture *Player::spriteTexture1MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture2MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture3MedalPtr = nullptr;
+SDL_Texture *Player::spriteTexture4MedalPtr = nullptr;
 
-/** CONSTRUCTORS **/
 
-Player::Player(int playerID, Point spawnPoint, float playerWidth, float playerHeight)
-        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), width(playerWidth), height(playerHeight) {
+/* CONSTRUCTORS */
 
-    sprite = Sprite(Player::idle, *baseSpriteTexturePtr, 24, 18);
+Player::Player(int playerID, Point spawnPoint, float size)
+        : playerID(playerID), x(spawnPoint.x), y(spawnPoint.y), size(size) {
+
+    sprite = Sprite(*baseSpriteTexturePtr, Player::idle, BASE_SPRITE_WIDTH, BASE_SPRITE_HEIGHT);
+    setSpriteTextureByID(playerID);
 }
 
 
-/** BASIC ACCESSORS **/
+/* BASIC ACCESSORS */
 
 int Player::getPlayerID() const {
     return playerID;
@@ -46,6 +53,23 @@ float Player::getW() const {
 
 float Player::getH() const {
     return height;
+}
+
+float Player::getSize() const {
+    return size;
+}
+
+bool Player::getIsAlive() const {
+    return isAlive;
+
+}
+
+int Player::getScore() const {
+    return score;
+}
+
+int Player::getDeathCount() const {
+    return deathCount;
 }
 
 Sprite *Player::getSprite() {
@@ -88,8 +112,8 @@ int Player::getDirectionY() const {
     return (int)directionY;
 }
 
-bool Player::getIsOnPlatform() const {
-    return isOnPlatform;
+bool Player::getIsGrounded() const {
+    return isGrounded;
 }
 
 bool Player::getIsJumping() const {
@@ -100,8 +124,19 @@ size_t Player::getCurrentZoneID() const {
     return currentZoneID;
 }
 
+bool Player::getIsOnPlatform() const {
+    return isOnPlatform;
+}
 
-/** SPECIFIC ACCESSORS **/
+bool Player::getWasOnPlatform() const {
+    return wasOnPlatform;
+}
+
+bool Player::getIsHitting() const {
+    return isHitting;
+}
+
+/* SPECIFIC ACCESSORS */
 
 std::vector<Point> Player::getVertices() const {
     // Return the vertices of the player's bounding box.
@@ -145,20 +180,41 @@ std::vector<Point> Player::getRightColliderVertices() const {
 }
 
 std::vector<Point> Player::getGroundColliderVertices() const {
-    return {
+    if (mavity > 0) return {
             {x, y + height},
             {x + width, y + height},
             {x + width, y + height + 1},
             {x, y + height + 1}
     };
+    else return {
+                {x, y - 1},
+                {x + width, y - 1},
+                {x + width, y},
+                {x, y}
+        };
 }
 
 std::vector<Point> Player::getRoofColliderVertices() const {
-    return {
+    if (mavity > 0) return {
             {x, y - 1},
             {x + width, y - 1},
             {x + width, y},
             {x, y}
+    };
+    else return {
+                {x, y + height},
+                {x + width, y + height},
+                {x + width, y + height + 1},
+                {x, y + height + 1}
+        };
+}
+
+std::vector<Point> Player::getHitZoneVertices() const {
+    return {
+            {x + hitZone.x, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y},
+            {x + hitZone.x + hitZone.w, y + hitZone.y + hitZone.h},
+            {x + hitZone.x, y + hitZone.y + hitZone.h}
     };
 }
 
@@ -175,11 +231,17 @@ SDL_FRect Player::getRightColliderBoundingBox() const {
 }
 
 SDL_FRect Player::getGroundColliderBoundingBox() const {
-    return {x, y + height, width, 1};
+    if (mavity > 0) return  {x, y + height, width, 1};
+    else return {x, y - 1, width, 1};
 }
 
 SDL_FRect Player::getRoofColliderBoundingBox() const {
-    return {x, y - 1, width, 1};
+    if (mavity > 0) return {x, y - 1, width, 1};
+    else return {x, y + height, width, 1};
+}
+
+SDL_FRect Player::getHitZoneBoundingBox() const {
+    return {x + hitZone.x, y + hitZone.y, hitZone.w, hitZone.h};
 }
 
 SDL_FRect Player::getBoundingBox() const {
@@ -191,7 +253,7 @@ SDL_FRect Player::getBoundingBoxNextFrame() const {
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Player::setX(float val) {
     x = val;
@@ -201,12 +263,32 @@ void Player::setY(float val) {
     y = val;
 }
 
-void Player::setW(float val) {
-    width = val;
+void Player::setSize(float val) {
+    size = val;
+    baseHitZone = {BASE_HIT_ZONE.x * size, BASE_HIT_ZONE.y * size, BASE_HIT_ZONE.w * size, BASE_HIT_ZONE.h * size};
+    hitZone = baseHitZone;
+    normalOffsets = {baseNormalOffsets.x * size, baseNormalOffsets.y * size, baseNormalOffsets.w * size, baseNormalOffsets.h * size};
+    runOffsets = {baseRunOffsets.x * size, baseRunOffsets.y * size, baseRunOffsets.w * size, baseRunOffsets.h * size};
+    eggOffsets = {baseEggOffsets.x * size, baseEggOffsets.y * size, baseEggOffsets.w * size, baseEggOffsets.h * size};
+    spriteWidth = BASE_SPRITE_WIDTH * size;
+    spriteHeight = BASE_SPRITE_HEIGHT * size;
+
+    updateCollisionBox();
 }
 
-void Player::setH(float val) {
-    height = val;
+void Player::setIsAlive(bool state) {
+    isAlive = state;
+    if (!state) {
+        sprite.setAnimation(egg);
+        textureOffsets.x = eggOffsets.x;
+        textureOffsets.y = eggOffsets.y;
+        textureOffsets.w = eggOffsets.w;
+        textureOffsets.h = eggOffsets.h;
+    }
+}
+
+void Player::setDeathCount(int val) {
+    deathCount = val;
 }
 
 void Player::setMoveX(float val) {
@@ -215,6 +297,10 @@ void Player::setMoveX(float val) {
 
 void Player::setMoveY(float val) {
     moveY = val;
+}
+
+void Player::setBuffer(Buffer val) {
+    buffer = val;
 }
 
 void Player::setCanMove(bool state) {
@@ -241,8 +327,8 @@ void Player::setSprint(bool state) {
     }
 }
 
-void Player::setIsOnPlatform(bool state) {
-    isOnPlatform = state;
+void Player::setIsGrounded(bool state) {
+    isGrounded = state;
     if (state) {
         lastTimeOnPlatform = SDL_GetTicks();
     }
@@ -258,6 +344,10 @@ void Player::setWantToJump(bool state) {
 
 void Player::setIsJumping(bool state) {
     isJumping = state;
+}
+
+void Player::setJumpMaxHeight(float val) {
+    jumpMaxHeight = val;
 }
 
 void Player::toggleMavity() {
@@ -280,34 +370,121 @@ void Player::setMaxFallSpeed(float val) {
     maxFallSpeed = val;
 }
 
+void Player::setIsHitting(bool state) {
+    isHitting = state;
+    if (state) hitTimer = 0;
+}
 
-/** METHODS **/
+void Player::setLeftCollider(bool state) {
+    leftCollider = state;
+}
+
+void Player::setRightCollider(bool state) {
+    rightCollider = state;
+}
+
+void Player::setRoofCollider(bool state) {
+    roofCollider = state;
+}
+
+void Player::setGroundCollider(bool state) {
+    groundCollider = state;
+}
+
+void Player::setIsOnPlatform(bool state) {
+    isOnPlatform = state;
+}
+
+void Player::setWasOnPlatform(bool state) {
+    wasOnPlatform = state;
+}
+
+void Player::setDefaultTexture(SDL_Texture* newTexture) {
+    defaultTexture = newTexture;
+}
+void Player::setMedalTexture(SDL_Texture* newTexture) {
+    medalTexture = newTexture;
+}
+
+
+
+/* METHODS */
 
 bool Player::loadTextures(SDL_Renderer &renderer) {
     // Load players' sprite texture
     baseSpriteTexturePtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player.png");
+
+    // Player 1
     spriteTexture1Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1.png");
+    spriteTexture1MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player1Medal.png");
+
+    //Player 2
     spriteTexture2Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2.png");
+    spriteTexture2MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player2Medal.png");
+
+    //Player 3
     spriteTexture3Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3.png");
+    spriteTexture3MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player3Medal.png");
+
+    //Player 4
     spriteTexture4Ptr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4.png");
+    spriteTexture4MedalPtr = IMG_LoadTexture(&renderer, "assets/sprites/players/player4Medal.png");
 
     // Check errors
-    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr) {
+    if (baseSpriteTexturePtr == nullptr || spriteTexture1Ptr == nullptr || spriteTexture2Ptr == nullptr || spriteTexture3Ptr == nullptr || spriteTexture4Ptr == nullptr || spriteTexture1MedalPtr == nullptr || spriteTexture2MedalPtr == nullptr || spriteTexture3MedalPtr == nullptr || spriteTexture4MedalPtr == nullptr) {
         return false; // Return failure
     }
 
     return true; // Return success
 }
 
-void Player::setSpriteTextureByID(int id) {
-    if (id == 0) sprite.setTexture(*baseSpriteTexturePtr); // Base texture
-    else if (id == 1) sprite.setTexture(*spriteTexture1Ptr); // Texture 1
-    else if (id == 2) sprite.setTexture(*spriteTexture2Ptr); // Texture 2
-    else if (id == 3) sprite.setTexture(*spriteTexture3Ptr); // Texture 3
-    else if (id == 4) sprite.setTexture(*spriteTexture4Ptr); // Texture 4
+void Player::useDefaultTexture() {
+    sprite.setTexture(*defaultTexture);
+}
+void Player::useMedalTexture(){
+    sprite.setTexture(*medalTexture);
 }
 
-void Player::teleportPlayer(float newX, float newY) {
+void Player::setSpriteTextureByID(int id) {
+    if (id == 1){ // Texture 1
+        sprite.setTexture(*spriteTexture1Ptr);
+        defaultTexture = spriteTexture1Ptr;
+        medalTexture = spriteTexture1MedalPtr;
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
+    }
+    else if (id == 2){ // Texture 2
+        sprite.setTexture(*spriteTexture2Ptr);
+        defaultTexture = spriteTexture2Ptr;
+        medalTexture = spriteTexture2MedalPtr;
+        baseNormalOffsets = {6, 4, 3, 3};
+        baseRunOffsets = {6, 7, 0, 3};
+    }
+    else if (id == 3) { // Texture 3
+        sprite.setTexture(*spriteTexture3Ptr);
+        defaultTexture = spriteTexture3Ptr;
+        medalTexture = spriteTexture3MedalPtr;
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
+    }
+    else if (id == 4) { // Texture 4
+        sprite.setTexture(*spriteTexture4Ptr);
+        defaultTexture = spriteTexture4Ptr;
+        medalTexture = spriteTexture4MedalPtr;
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
+    }
+    else {
+        sprite.setTexture(*baseSpriteTexturePtr);
+        defaultTexture = baseSpriteTexturePtr;
+        medalTexture = baseSpriteTexturePtr;
+        baseNormalOffsets = {4, 4, 5, 3};
+        baseRunOffsets = {6, 7, 0, 3};
+    }
+    setSize(size);
+}
+
+void Player::teleport(float newX, float newY) {
     x = newX;
     y = newY;
 }
@@ -316,11 +493,27 @@ void Player::addToScore(int val) {
     score += val;
 }
 
-bool Player::canJump() const {
-    return isOnPlatform || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
+void Player::increaseDeathCount() {
+    deathCount++;
 }
 
-void Player::calculateXaxisMovement(double deltaTime) {
+void Player::hitAction(bool state) {
+    if (!state) {
+        hitLock = false;
+    } else if (!hitLock) {
+        isHitting = true;
+        sprite.setAnimation(hit);
+        hitLock = true;
+        hitTimer = HIT_TIME;
+        lastHitTimeUpdate = SDL_GetTicks();
+    }
+}
+
+bool Player::canJump() const {
+    return isGrounded || ((static_cast<float>(SDL_GetTicks()) - static_cast<float>(lastTimeOnPlatform)) / 1000.0f <= coyoteTime);
+}
+
+void Player::calculateXaxisMovement(double delta_time) {
 
     // Determine the desired direction
     float wantedDirection = 0;
@@ -334,67 +527,66 @@ void Player::calculateXaxisMovement(double deltaTime) {
     if (wantedDirection != 0) {
         directionX = wantedDirection;
         if (directionX != previousDirectionX && speedCurveX != 0) {
-            // If direction changed, reset speed curve
+            // If the direction changed, reset the speed curve
             speedCurveX = initialSpeedCurveX;
         } else {
-            // Gradually increase speed curve for smooth acceleration
-            speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * deltaTime, 1.0));
+            // Gradually increase the speed curve for smooth acceleration
+            speedCurveX = static_cast<float>(std::min(speedCurveX + accelerationFactorX * delta_time, 1.0));
         }
     } else {
-        // If no input, gradually decrease speed curve for smooth deceleration
-        speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * deltaTime, 0.0));
+        // If no input, gradually decrease the speed curve for smooth deceleration
+        speedCurveX = static_cast<float>(std::max(speedCurveX - decelerationFactorX * delta_time, 0.0));
     }
 
     // Calculate movement based on speed curve and direction
-    moveX = static_cast<float>(baseMovementX * sprintMultiplier * deltaTime * speedCurveX * directionX * speed);
+    moveX = static_cast<float>(baseMovementX * sprintMultiplier * delta_time * speedCurveX * directionX * speed);
 
     // Remember previous direction
     previousDirectionX = directionX;
 }
 
-void Player::calculateYaxisMovement(double deltaTime) {
+void Player::calculateYaxisMovement(double delta_time) {
 
     // If the player wants to jump and can jump, start the jump
     if (!jumpLock && wantToJump && canJump() && !isJumping) {
         isJumping = true;
         jumpLock = true;
-        jumpStartTime = SDL_GetPerformanceCounter(); // Record the time at the beginning of the jump
+        jumpStartHeight = y; // Record the height at the beginning of the jump
         jumpVelocity = jumpInitialVelocity; // Set the initial jump velocity
     }
 
     // If the player is jumping, calculate the jump movement for this frame
     else if (isJumping) {
-        // Calculate the time since the beginning of the jump in seconds
-        Uint64 now = SDL_GetPerformanceCounter();
-        float jumpTime = static_cast<float>(now - jumpStartTime) / static_cast<float>(SDL_GetPerformanceFrequency());
+        // Calculate the jump height
+        float jumpHeight = jumpStartHeight - y;
 
         // Check if the player has finished the jump (with a very very very small margin of error)
-        if (jumpTime - 0.00755 >= jumpMaxDuration || jumpVelocity <= 0 || !wantToJump) {
+        if (std::abs(jumpStartHeight - y) > jumpMaxHeight || jumpVelocity <= 0 || !wantToJump) {
             isJumping = false;
-            jumpStartTime = 0;
+            jumpStartHeight = 0;
             jumpVelocity = 0;
             wantToJump = false;
         }
 
         // The player is still jumping, calculate the jump movement for this frame
         else {
-            jumpVelocity = jumpInitialVelocity - mavity * jumpTime;
+            jumpVelocity = jumpInitialVelocity - mavity * jumpHeight * 0.02f;
 
             // Calculate vertical movement based on jump velocity and time
-            moveY = static_cast<float>((jumpVelocity * deltaTime - 0.5f * mavity * deltaTime * deltaTime) * (mavity < 0 ? 1 : -1));
+            moveY = static_cast<float>((jumpVelocity * delta_time - 0.5f * mavity * delta_time * delta_time) * (mavity < 0 ? 1 : -1));
 
             // Update jump velocity for the next frame
-            jumpVelocity -= mavity * static_cast<float>(deltaTime);
+            jumpVelocity -= mavity * static_cast<float>(delta_time);
         }
     }
 
     // If the player is not jumping, calculate the fall movement for this frame (if not on a platform)
-    else if (!isOnPlatform)  {
-        moveY += static_cast<float>(fallSpeedFactor * mavity * deltaTime * deltaTime);
+    else if (!isGrounded)  {
+        moveY += static_cast<float>(fallSpeedFactor * mavity * delta_time * delta_time);
         if (mavity > 0) {
-            moveY = std::min(moveY, static_cast<float>(maxFallSpeed * deltaTime));
+            moveY = std::min(moveY, static_cast<float>(maxFallSpeed * delta_time));
         } else {
-            moveY = std::max(moveY, static_cast<float>(-maxFallSpeed * deltaTime));
+            moveY = std::max(moveY, static_cast<float>(-maxFallSpeed * delta_time));
         }
     }
 
@@ -403,21 +595,126 @@ void Player::calculateYaxisMovement(double deltaTime) {
     else directionY = moveY < 0 ? -1 : 1;
 }
 
-void Player::calculateMovement(double deltaTime) {
-    calculateXaxisMovement(deltaTime);
-    calculateYaxisMovement(deltaTime);
+void Player::calculateMovement(double delta_time) {
+    calculateXaxisMovement(delta_time);
+    calculateYaxisMovement(delta_time);
+}
+
+void Player::updateHitZone() {
+    if (hitTimer > 0) {
+        hitTimer -= static_cast<int>(SDL_GetTicks() - lastHitTimeUpdate);
+        lastHitTimeUpdate = SDL_GetTicks();
+
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            hitZone.x = baseHitZone.x;
+        } else {
+            hitZone.x = - (baseHitZone.w - (width - baseHitZone.x));
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            hitZone.y = baseHitZone.y;
+        } else {
+            hitZone.y = - (baseHitZone.h - (height - baseHitZone.y));
+        }
+
+        if (hitTimer <= 0) {
+            isHitting = false;
+        }
+    }
+}
+
+void Player::updateCollisionBox() {
+    updateSprite();
+    updateSpriteOrientation();
+
+    // Normal texture offsets
+    if (sprite.getAnimation() == idle || sprite.getAnimation() == walk || sprite.getAnimation() == hit) {
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            textureOffsets.x = normalOffsets.x;
+            textureOffsets.w = normalOffsets.w;
+        }
+        else {
+            x -= textureOffsets.x - normalOffsets.w;
+            textureOffsets.x = normalOffsets.w;
+            textureOffsets.w = normalOffsets.x;
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            if (lastAnimationIsRunType) y -= textureOffsets.y - normalOffsets.y;
+            textureOffsets.y = normalOffsets.y;
+            textureOffsets.h = normalOffsets.h;
+        } else {
+            textureOffsets.y = normalOffsets.h;
+            textureOffsets.h = normalOffsets.y;
+        }
+
+        lastAnimationIsRunType = false;
+    }
+    // Run texture offsets
+    else if (sprite.getAnimation() == sneak || sprite.getAnimation() == run) {
+        // Check horizontal orientation
+        if (sprite.getFlipHorizontal() == SDL_FLIP_NONE) {
+            if (rightCollider) x -= textureOffsets.w - runOffsets.w;
+            textureOffsets.x = runOffsets.x;
+            textureOffsets.w = runOffsets.w;
+        }
+        else {
+            if (!leftCollider) x -= textureOffsets.x - runOffsets.w;
+            textureOffsets.x = runOffsets.w;
+            textureOffsets.w = runOffsets.x;
+        }
+        // Check vertical orientation
+        if (mavity > 0) {
+            if (!lastAnimationIsRunType) y -= textureOffsets.y - runOffsets.y;
+            textureOffsets.y = runOffsets.y;
+            textureOffsets.h = runOffsets.h;
+        } else {
+            textureOffsets.y = runOffsets.h;
+            textureOffsets.h = runOffsets.y;
+        }
+
+        lastAnimationIsRunType = true;
+    }
+
+    // Update collision box
+    width = spriteWidth - (textureOffsets.x + textureOffsets.w);
+    height = spriteHeight - (textureOffsets.y + textureOffsets.h);
+    updateHitZone();
 }
 
 bool Player::hasMoved() const {
     return moveX != 0 || moveY != 0;
 }
 
-void Player::applyMovement(double ratio) {
-    x += static_cast<float>(moveX * ratio);
-    y += static_cast<float>(moveY * ratio);
+void Player::applyMovement(double delta_time) {
+
+    // If the buffer is too big, move the player and decrease the buffer by the full amount
+    if (buffer.deltaX > 40 || buffer.deltaX < -40 || buffer.deltaY > 40 || buffer.deltaY < -40) {
+        std::cout << "Player: Buffer too big: " << buffer.deltaX << ", " << buffer.deltaY << std::endl;
+
+        x = x + buffer.deltaX;
+        y = y + buffer.deltaY;
+
+        buffer.deltaX = 0;
+        buffer.deltaY = 0;
+    }
+
+    else {
+        // Add a part of the buffer to the player's position
+        float bufferFraction = static_cast<float>(delta_time) * 1000.0f / 50.0f;
+
+        x += moveX + bufferFraction * buffer.deltaX;
+        y += moveY + bufferFraction * buffer.deltaY;
+
+        // Decrease the buffer
+        buffer.deltaX -= bufferFraction * buffer.deltaX;
+        buffer.deltaY -= bufferFraction * buffer.deltaY;
+    }
 }
 
-void Player::updateSpriteAnimation() {
+void Player::updateSprite() {
     // If the player doesn't move, play idle or sneak animation
     if (wantToMoveLeft == 0 && wantToMoveRight == 0) {
         if (sprintMultiplier == 1) sprite.setAnimation(idle);
@@ -439,6 +736,27 @@ void Player::updateSpriteAnimation() {
     }
 }
 
+void Player::setDeathAnimation() {
+    sprite.setAnimation(death);
+}
+
+void Player::setRespawnAnimation() {
+    sprite.setAnimation(eggCrack);
+}
+
+void Player::eggAction(bool state) {
+    if (!state) {
+        eggLock = false;
+    } else if (!eggLock) {
+        sprite.setAnimation(eggMove);
+        eggLock = true;
+    }
+}
+
+bool Player::updateSpriteAnimation() {
+    return sprite.updateAnimation();
+}
+
 void Player::updateSpriteOrientation() {
      if (directionX == PLAYER_LEFT) {
         sprite.setFlipHorizontal(SDL_FLIP_HORIZONTAL);
@@ -449,14 +767,15 @@ void Player::updateSpriteOrientation() {
 
 
 void Player::render(SDL_Renderer *renderer, Point camera) {
-    // Update sprite
-    updateSpriteAnimation();
-    updateSpriteOrientation();
-    sprite.updateAnimation();
-
     SDL_Rect srcRect = sprite.getSrcRect();
-    SDL_FRect playerRect = {x - camera.x, y - camera.y, width, height};
-    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &playerRect, 0.0, nullptr, sprite.getFlip());
+
+    float x_rect = x - camera.x - textureOffsets.x;
+    float y_rect = y - camera.y - textureOffsets.y;
+    float w_rect = width + textureOffsets.x + textureOffsets.w;
+    float h_rect = height + textureOffsets.y + textureOffsets.h;
+
+    SDL_FRect player_rect = {x_rect, y_rect, w_rect, h_rect};
+    SDL_RenderCopyExF(renderer, sprite.getTexture(), &srcRect, &player_rect, 0.0, nullptr, sprite.getFlip());
 }
 
 void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
@@ -466,36 +785,48 @@ void Player::renderDebug(SDL_Renderer *renderer, Point camera) const {
 }
 
 void Player::renderColliders(SDL_Renderer *renderer, Point camera) const {
-    //Draw the right collider
+    // Draw the right collider
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    std::vector<Point> vertexRight = getRightColliderVertices();
-    for (size_t i = 0; i < vertexRight.size(); ++i) {
-        const auto &vertex1 = vertexRight[i];
-        const auto &vertex2 = vertexRight[(i + 1) % vertexRight.size()];
+    std::vector<Point> vertex_right = getRightColliderVertices();
+    for (size_t i = 0; i < vertex_right.size(); ++i) {
+        const auto &vertex1 = vertex_right[i];
+        const auto &vertex2 = vertex_right[(i + 1) % vertex_right.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the left collider
+    // Draw the left collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-    std::vector<Point> vertexLeft = getLeftColliderVertices();
-    for (size_t i = 0; i < vertexLeft.size(); ++i) {
-        const auto &vertex1 = vertexLeft[i];
-        const auto &vertex2 = vertexLeft[(i + 1) % vertexLeft.size()];
+    std::vector<Point> vertex_left = getLeftColliderVertices();
+    for (size_t i = 0; i < vertex_left.size(); ++i) {
+        const auto &vertex1 = vertex_left[i];
+        const auto &vertex2 = vertex_left[(i + 1) % vertex_left.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the roof collider
+    // Draw the roof collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertex = getRoofColliderVertices();
-    for (size_t i = 0; i < vertex.size(); ++i) {
-        const auto &vertex1 = vertex[i];
-        const auto &vertex2 = vertex[(i + 1) % vertex.size()];
+    std::vector<Point> vertex_roof = getRoofColliderVertices();
+    for (size_t i = 0; i < vertex_roof.size(); ++i) {
+        const auto &vertex1 = vertex_roof[i];
+        const auto &vertex2 = vertex_roof[(i + 1) % vertex_roof.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
     }
-    //Draw the ground collider
+    // Draw the ground collider
     SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    std::vector<Point> vertexGround = getGroundColliderVertices();
-    for (size_t i = 0; i < vertexGround.size(); ++i) {
-        const auto &vertex1 = vertexGround[i];
-        const auto &vertex2 = vertexGround[(i + 1) % vertexGround.size()];
+    std::vector<Point> vertex_ground = getGroundColliderVertices();
+    for (size_t i = 0; i < vertex_ground.size(); ++i) {
+        const auto &vertex1 = vertex_ground[i];
+        const auto &vertex2 = vertex_ground[(i + 1) % vertex_ground.size()];
         SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x, vertex2.y - camera.y);
+    }
+
+    // Draw the hitting collider
+    if (isHitting) {
+        SDL_SetRenderDrawColor(renderer, 230, 0, 0, 255);
+        std::vector<Point> vertex_hit_zone = getHitZoneVertices();
+        for (size_t i = 0; i < vertex_hit_zone.size(); ++i) {
+            const auto &vertex1 = vertex_hit_zone[i];
+            const auto &vertex2 = vertex_hit_zone[(i + 1) % vertex_hit_zone.size()];
+            SDL_RenderDrawLineF(renderer, vertex1.x - camera.x, vertex1.y - camera.y, vertex2.x - camera.x,
+                                vertex2.y - camera.y);
+        }
     }
 }

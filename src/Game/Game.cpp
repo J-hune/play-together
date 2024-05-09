@@ -5,15 +5,21 @@
  * @brief Implements the Game class responsible for handling the main game logic.
  */
 
-/** CONSTRUCTORS **/
 
-Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag)
-        : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag) {
+/* CONSTRUCTORS */
 
+Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag, MessageQueue *messageQueue)
+        : window(window), renderer(renderer), frameRate(frameRate), quitFlagPtr(quitFlag), messageQueue(messageQueue) {
+
+    // Initialize managers
     inputManager = std::make_unique<InputManager>(this);
     renderManager = std::make_unique<RenderManager>(renderer, this);
+    textureManager = std::make_unique<TextureManager>();
     saveManager = std::make_unique<SaveManager>(this);
+    broadPhaseManager = std::make_unique<BroadPhaseManager>(this);
     playerManager = std::make_unique<PlayerManager>(this);
+    playerCollisionManager = std::make_unique<PlayerCollisionManager>(this);
+    eventCollisionManager = std::make_unique<EventCollisionManager>(this);
 
     // Create the game seed
     std::random_device rd;
@@ -21,7 +27,7 @@ Game::Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quit
 }
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 GameState Game::getGameState() const {
     return gameState;
@@ -29,6 +35,10 @@ GameState Game::getGameState() const {
 
 InputManager &Game::getInputManager() {
     return *inputManager;
+}
+
+TextureManager &Game::getTextureManager() {
+    return *textureManager;
 }
 
 RenderManager &Game::getRenderManager() {
@@ -43,53 +53,63 @@ PlayerManager &Game::getPlayerManager() {
     return *playerManager;
 }
 
+BroadPhaseManager &Game::getBroadPhaseManager() {
+    return *broadPhaseManager;
+}
+
 Camera *Game::getCamera() {
     return &camera;
 }
 
-Level &Game::getLevel() {
-    return level;
-}
-
-int Game::getTickRate() const {
-    return tickRate;
+Level *Game::getLevel() {
+    return &level;
 }
 
 int Game::getEffectiveFrameRate() const {
     return effectiveFrameFps;
 }
 
-
-/** MODIFIERS **/
-
-void Game::setLevel(std::string const &map_name) {
-    level = Level(map_name);
+Uint32 Game::getPlaytime() {
+    playtime += SDL_GetTicks() - lastPlaytimeUpdate;
+    lastPlaytimeUpdate = SDL_GetTicks();
+    return playtime;
 }
 
-void Game::setEnablePlatformsMovement(bool state) {
-    enable_platforms_movement = state;
+
+/* MODIFIERS */
+
+void Game::setLevel(std::string const &map_name) {
+    level = Level(map_name, renderer, textureManager.get());
 }
 
 void Game::setFrameRate(int fps) {
-    this->frameRate = fps;
+    frameRate = fps;
+}
+
+void Game::setPlaytime(Uint32 new_playtime) {
+    lastPlaytimeUpdate = SDL_GetTicks();
+    playtime = new_playtime;
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 void Game::initializeHostedGame(int slot) {
     saveManager->setSlot(slot);
 
     // Try to load the game state from the save slot
     if (!saveManager->loadGameState()) {
-        level = Level("diversity");
+        setPlaytime(0);
+        level = Level("diversity", renderer, textureManager.get());
         std::cout << "Game: No save file found in slot " << slot << ", starting new game at level: " << level.getMapName() << std::endl;
     }
+
+    playerManager->setCurrentRescueZone(level.getZones(AABBType::RESCUE)[0]);
 
     // Add the initial player to the game
     Point spawnPoint = level.getSpawnPoints(level.getLastCheckpoint())[0];
 
-    Player initialPlayer(-1, spawnPoint, 48, 36);
+    Player initialPlayer(-1, spawnPoint, 2);
     camera.initializePosition(spawnPoint);
     music = level.getMusicById(0);
     music.play(-1);
@@ -101,35 +121,91 @@ void Game::initializeHostedGame(int slot) {
     playerManager->addPlayer(initialPlayer);
 }
 
-void Game::initializeClientGame(const std::string& map_name, short last_checkpoint) {
+using json = nlohmann::json;
+void Game::loadLevel(const std::string &map_name, short last_checkpoint, const json::array_t &playersData, const json::object_t &cameraData,
+                     const json::array_t &movingPlatforms1DData, const json::array_t &movingPlatforms2DData,const json::array_t &crushersData) {
     setLevel(map_name);
     level.setLastCheckpoint(last_checkpoint);
+
+    // Set the camera position
+    camera.setX(cameraData.at("x"));
+    camera.setY(cameraData.at("y"));
+
+    // Add all players to the game (including the local player)
+    size_t spawnIndex = 0;
+    for (const auto &player: playersData) {
+        int receivedPlayerID = player["playerID"];
+
+        Point spawnPoint = level.getSpawnPoints(last_checkpoint)[spawnIndex];
+        Player newPlayer(receivedPlayerID, spawnPoint, 2);
+        if (player.contains("x")) newPlayer.setX(player["x"]);
+        if (player.contains("y")) newPlayer.setY(player["y"]);
+        if (player.contains("moveX")) newPlayer.setMoveX(player["moveX"]);
+        if (player.contains("moveY")) newPlayer.setMoveY(player["moveY"]);
+
+        if (receivedPlayerID == -1) newPlayer.setSpriteTextureByID(3);
+        else if (receivedPlayerID == 0) newPlayer.setSpriteTextureByID(2);
+
+        playerManager->addPlayer(newPlayer);
+        spawnIndex++;
+
+        // Enter the game loop
+        Mediator::setDisplayMenu(false);
+    }
+
+    // For each 1D moving platform, set the position and direction
+    std::vector<MovingPlatform1D> movingPlatforms1D = level.getMovingPlatforms1D();
+    for (size_t i = 0; i < movingPlatforms1DData.size(); i++) {
+        const auto &platform = movingPlatforms1DData[i];
+        movingPlatforms1D[i].setX(platform["x"]);
+        movingPlatforms1D[i].setY(platform["y"]);
+        movingPlatforms1D[i].setMove(platform["move"]);
+        movingPlatforms1D[i].setDirection(platform["direction"]);
+    }
+
+    // For each 2D moving platform, set the position and direction
+    std::vector<MovingPlatform2D> &movingPlatforms2D = level.getMovingPlatforms2D();
+    for (size_t i = 0; i < movingPlatforms2DData.size(); i++) {
+        const auto &platform = movingPlatforms2DData[i];
+        movingPlatforms2D[i].setX(platform["x"]);
+        movingPlatforms2D[i].setY(platform["y"]);
+        movingPlatforms2D[i].setMoveX(platform["moveX"]);
+        movingPlatforms2D[i].setMoveY(platform["moveY"]);
+        movingPlatforms2D[i].setDirectionX(platform["directionX"]);
+        movingPlatforms2D[i].setDirectionY(platform["directionY"]);
+    }
+
+    // For each crusher, set the position and direction
+    std::vector<Crusher> &crushers = level.getCrushers();
+    for (size_t i = 0; i < crushersData.size(); i++) {
+        const auto &crusher = crushersData[i];
+        crushers[i].setX(crusher["x"]);
+        crushers[i].setY(crusher["y"]);
+        crushers[i].setDirection(crusher["direction"]);
+    }
+
     music = level.getMusicById(0);
     music.play(-1);
 }
 
-void Game::fixedUpdate() {
+void Game::update(double delta_time) {
     inputManager->handleKeyboardEvents();
-    calculatePlayersMovement(1.0 / tickRate);
-}
+    calculatePlayersMovement(delta_time);
+    if (level.applyTrapsMovement(delta_time)) camera.setShake(150);
 
-void Game::update(double deltaTime, double ratio) {
-    if (enable_platforms_movement) level.applyPlatformsMovement(deltaTime);
-
-    if (!Mediator::isClientRunning()) {
-        level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
-    }
-
-    level.applyAsteroidsMovement(deltaTime);
-
-    // Apply players movement directly with the calculated ratio
-    applyPlayersMovement(ratio);
+    level.applyPlatformsMovement(delta_time);
+    level.applyAsteroidsMovement(delta_time);
+    applyPlayersMovement(delta_time);
+    camera.applyMovement(playerManager->getAveragePlayerPosition(), delta_time);
 
     // Handle collisions
-    broadPhase();
-    narrowPhase();
+    broadPhaseManager->broadPhase();
+    narrowPhase(delta_time);
 
-    camera.applyMovement(playerManager->getAveragePlayerPosition(), deltaTime);
+    playerManager->setTheBestPlayer();
+    updatePlayersSpriteAnimation();
+
+    if (!Mediator::isClientRunning()) level.generateAsteroid(0, {camera.getX(), camera.getY()}, seed);
     renderManager->render();
 }
 
@@ -140,287 +216,139 @@ void Game::run() {
     Uint64 lastFrameTime = SDL_GetPerformanceCounter(); // Time at the start of the game frame
     Uint64 frequency = SDL_GetPerformanceFrequency();
     double accumulatedTime = 0.0; // Accumulated time since last effective game FPS update
-    double accumulatedTickRateTime = 0.0; // Accumulated time since last game physics update
     int frameCounter = 0;
 
     double elapsedTimeSinceLastReset = 0.0; // Time elapsed since last reset
 
     // Game loop
     while (gameState != GameState::STOPPED) {
+
+        // Process messages from other threads in the queue
+        if (!messageQueue->empty()) {
+            auto [mainMessage, parameters] = messageQueue->pop();
+
+            if (mainMessage == "InitializeClientGame") {
+                nlohmann::json message = nlohmann::json::parse(parameters[0]);
+                loadLevel(
+                        message["mapName"],
+                        message["lastCheckpoint"],
+                        message["players"],
+                        message["camera"],
+                        message["platforms1D"],
+                        message["platforms2D"],
+                        message["crushers"]
+                );
+            }
+        }
+
         // Calculate delta time for game logic
         Uint64 currentFrameTime = SDL_GetPerformanceCounter();
         Uint64 frameTicks = currentFrameTime - lastFrameTime;
-        float deltaTime = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds for game logic
+        float delta_time = static_cast<float>(frameTicks) / static_cast<float>(frequency); // Delta time in seconds for game logic
         lastFrameTime = currentFrameTime;
 
         // Accumulate time for game logic and rendering
-        accumulatedTime += deltaTime;
-        accumulatedTickRateTime += deltaTime;
-        elapsedTimeSinceLastReset += deltaTime;
-
-        // Calculate game physics at the specified rate (tickRate)
-        if (accumulatedTickRateTime >= 1.0 / tickRate) {
-            fixedUpdate();
-
-            // Reset accumulated time for game physics
-            accumulatedTickRateTime -= 1.0 / tickRate;
-        }
+        accumulatedTime += delta_time;
+        elapsedTimeSinceLastReset += delta_time;
 
         // Calculate game rendering at the specified rate (frameRate)
         if (accumulatedTime >= 1.0 / frameRate) {
             frameCounter++;
+            update(delta_time);
 
-            // Calculate the ratio for applying players movement
-            double ratio = static_cast<double>(frameTicks) / (static_cast<double>(frequency) / static_cast<double>(tickRate));
-            update(deltaTime, ratio);
+            // Every 1/60 seconds or more, send the keyboard state to the network
+            if (elapsedTimeSinceLastReset > networkInputSendIntervalSeconds) {
+                inputManager->sendKeyboardStateToNetwork();
+            }
 
-            // Reset accumulated time for rendering
-            accumulatedTime -= 1.0 / frameRate;
+            // Every 20 seconds or more, send the sync correction to the network
+            if (Mediator::isServerRunning() && elapsedTimeSinceLastReset > networkSyncCorrectionIntervalSeconds) {
+                inputManager->sendSyncCorrectionToNetwork();
+            }
 
             // Check if one second has passed since the last reset, and if so, reset frame counters and elapsed time
-            if (elapsedTimeSinceLastReset >= 1.0) {
+            if (elapsedTimeSinceLastReset >= effectiveFrameRateUpdateIntervalSeconds) {
                 effectiveFrameFps = frameCounter;
                 frameCounter = 0;
                 elapsedTimeSinceLastReset -= 1.0;
             }
+
+            // Reset accumulated time for rendering
+            accumulatedTime -= 1.0 / frameRate;
         }
 
         // Waiting to maintain the desired game FPS
-        Uint64 desiredTicksPerFrame = frequency / std::max(tickRate, frameRate);
+        Uint64 desiredTicksPerFrame = frequency / frameRate;
         Uint64 elapsedGameTicks = SDL_GetPerformanceCounter() - currentFrameTime;
         Uint64 ticksToWait = desiredTicksPerFrame > elapsedGameTicks ? desiredTicksPerFrame - elapsedGameTicks : 0;
         SDL_Delay(static_cast<Uint32>(ticksToWait * 1000 / frequency));
     }
 }
 
-void Game::calculatePlayersMovement(double deltaTime) {
+void Game::calculatePlayersMovement(double delta_time) {
     // Apply movement to all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.calculateMovement(deltaTime);
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.calculateMovement(delta_time);
+    }
+
+    // Apply movement to all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.calculateYaxisMovement(delta_time);
     }
 }
 
-void Game::applyPlayersMovement(double ratio) {
-    // Apply movement for all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.applyMovement(ratio);
+void Game::updatePlayersSpriteAnimation() {
+
+    // Update sprite animation for all living players
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.updateSpriteAnimation();
+    }
+
+    // Update sprite animation for all dying players
+    for (Player &player: playerManager->getNeutralPlayers()) {
+        if (player.updateSpriteAnimation()) {
+            // The player is respawning
+            if (player.getIsAlive()) {
+                playerManager->moveNeutralPlayer(player, 1);
+            }
+            // The player is dying
+            else {
+                playerManager->moveNeutralPlayer(player, -1);
+            }
+        }
+    }
+
+    // Update sprite animation for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.updateSpriteAnimation();
+    }
+}
+
+void Game::applyPlayersMovement(double delta_time) {
+    // Apply movement for all living players
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.applyMovement(delta_time);
+    }
+
+    // Apply movement for all dead players
+    for (Player &player: playerManager->getDeadPlayers()) {
+        player.applyMovement(delta_time);
     }
 }
 
 void Game::switchMavity() {
-    // Change mavity for all player
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.setIsOnPlatform(false);
-        character.getSprite()->toggleFlipVertical();
-        character.toggleMavity();
+    // Change mavity for all players
+    for (Player &player: playerManager->getAlivePlayers()) {
+        player.setIsGrounded(false);
+        player.getSprite()->toggleFlipVertical();
+        player.toggleMavity();
     }
 }
 
-void Game::broadPhase() {
-    // Empty old broad phase elements
-    saveZones.clear();
-    toggleGravityZones.clear();
-    increaseFallSpeedZones.clear();
-    deathZones.clear();
-    obstacles.clear();
-    movingPlatforms1D.clear();
-    movingPlatforms2D.clear();
-    switchingPlatforms.clear();
-    sizePowerUp.clear();
-    speedPowerUp.clear();
-    items.clear();
-
-    std::vector<Point> broadPhaseAreaVertices = camera.getBroadPhaseAreaVertices();
-    SDL_FRect broadPhaseAreaBoundingBox = camera.getBroadPhaseArea();
-
-    // Check collisions with each save zone
-    for (const AABB &aabb: level.getZones(AABBType::SAVE)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            saveZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each toggle gravity zone
-    for (const AABB &aabb: level.getZones(AABBType::TOGGLE_GRAVITY)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            toggleGravityZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each increase fall speed zone
-    for (const AABB &aabb: level.getZones(AABBType::INCREASE_FALL_SPEED)) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, aabb.getRect())) {
-            increaseFallSpeedZones.push_back(aabb);
-        }
-    }
-
-    // Check collisions with each death zone
-    for (const Polygon &zone: level.getZones(PolygonType::DEATH)) {
-        if (checkSATCollision(broadPhaseAreaVertices, zone)) {
-            deathZones.push_back(zone);
-        }
-    }
-
-    // Check collisions with each obstacle
-    for (const Polygon &obstacle: level.getZones(PolygonType::COLLISION)) {
-        if (checkSATCollision(broadPhaseAreaVertices, obstacle)) {
-            obstacles.push_back(obstacle);
-        }
-    }
-
-    // Check for collisions with each 1D moving platforms
-    for (const MovingPlatform1D &platform: level.getMovingPlatforms1D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms1D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each 2D moving platforms
-    for (const MovingPlatform2D &platform: level.getMovingPlatforms2D()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            movingPlatforms2D.push_back(platform);
-        }
-    }
-
-    // Check for collisions with each switching platforms
-    for (const SwitchingPlatform &platform: level.getSwitchingPlatforms()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, platform.getBoundingBox())) {
-            switchingPlatforms.push_back(platform);
-        }
-    }
-
-    /*
-    // Check for collisions with size power-up
-    for (const SizePowerUp &item: level.getSizePowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            sizePowerUp.push_back(item);
-        }
-    }
-
-    // Check for collisions with speed power-up
-    for (const SpeedPowerUp &item: level.getSpeedPowerUp()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item.getBoundingBox())) {
-            speedPowerUp.push_back(item);
-        }
-    }*/
-    /*
-    // Check for collisions with speed power-up
-    for (const Item *item: level.getItems()) {
-        if (checkAABBCollision(broadPhaseAreaBoundingBox, item->getBoundingBox())) {
-            items.push_back(item);
-        }
-    }
-    */
-
+void Game::narrowPhase(double delta_time) {
+    eventCollisionManager->handleAsteroidsCollisions(); // Handle collisions for asteroids
+    playerCollisionManager->handleCollisions(delta_time); // Handle collisions for all players
 }
-
-
-void Game::narrowPhase() {
-    // Check collisions with asteroids
-    handleAsteroidsCollisions();
-
-    // Handle collisions for all players
-    for (Player &character: playerManager->getAlivePlayers()) {
-        character.setCanMove(true);
-        character.setIsOnPlatform(false);
-
-        // Handle collisions according to player's mavity
-        if (character.getMavity() > 0) handleCollisionsNormalMavity(character);
-        else handleCollisionsReversedMavity(character);
-
-        // Handle collisions with items
-        //handleCollisionsWithSizePowerUp(&character, &level, sizePowerUp);
-        //handleCollisionsWithSpeedPowerUp(&character, &level, speedPowerUp);
-        handleCollisionsWithItem(&character, &level, items, static_cast<std::queue<GameData *> *>(&timeQueue));
-
-        handleCollisionsWithSaveZones(character, level, saveZones); // Handle collisions with save zones
-        handleCollisionsWithToggleGravityZones(character, toggleGravityZones); // Handle collisions with toggle gravity zones
-        handleCollisionsWithIncreaseFallSpeedZones(character, increaseFallSpeedZones); // Handle collisions with increase fall speed zones
-
-        // Handle collisions with death zones and camera borders
-        if (handleCollisionsWithCameraBorders(character.getBoundingBox(), camera.getBoundingBox())
-            ||handleCollisionsWithDeathZones(character, deathZones))
-        {
-            playerManager->killPlayer(character);
-        }
-    }
-}
-
-
-/** COLLISION HANDLING **/
-
-void Game::handleCollisionsNormalMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
-    if (player.hasMoved()) {
-        handleCollisionsWithObstacles(&player, obstacles);
-    }
-
-    handleCollisionsWithMovingPlatform1D(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsWithMovingPlatform2D(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsWithSwitchingPlatform(&player, switchingPlatforms); // Handle collisions with switching platforms
-}
-
-void Game::handleCollisionsReversedMavity(Player &player) const {
-    // Check obstacles collisions only if the player has moved
-    if (player.hasMoved()) {
-        handleCollisionsSelcatsbOhtiw(&player, obstacles);
-    }
-
-    handleCollisionsD1mroftalPgnivoMhtiw(&player, movingPlatforms1D); // Handle collisions with 1D moving platforms
-    handleCollisionsD2mroftalPgnivoMhtiw(&player, movingPlatforms2D); // Handle collisions with 2D moving platforms
-    handleCollisionsMroftalPgnihctiwShtiw(&player, switchingPlatforms); // Handle collisions with switching platforms
-}
-
-void Game::handleAsteroidsCollisions() {
-    std::vector<Asteroid> asteroids = level.getAsteroids();
-    const std::vector<Polygon>& collisionObstacles = level.getZones(PolygonType::COLLISION);
-
-    for (auto asteroidIt = asteroids.begin(); asteroidIt != asteroids.end();) {
-        Asteroid& asteroid = *asteroidIt;
-        bool alreadyExplode = false;
-        std::vector<Player>& characters = playerManager->getAlivePlayers();
-
-        // Check collisions with characters
-        auto characterIt = characters.begin();
-        while (!alreadyExplode && characterIt != characters.end()) {
-            Player& character = *characterIt;
-            if (checkAABBCollision(character.getBoundingBox(), asteroid.getBoundingBox())) {
-                alreadyExplode = true;
-                playerManager->killPlayer(character);
-            }
-            ++characterIt;
-        }
-
-        // Check collisions with obstacles
-        auto obstacleIt = collisionObstacles.begin();
-        while (!alreadyExplode && obstacleIt != collisionObstacles.end()) {
-            const Polygon& obstacle = *obstacleIt;
-            if (checkSATCollision(asteroid.getVertices(), obstacle)) {
-                alreadyExplode = true;
-                break; // No need to check further obstacles if asteroid already exploded
-            }
-            ++obstacleIt;
-        }
-
-        // Check if asteroid goes out of bounds
-        if (!alreadyExplode && asteroid.getY() > camera.getY() + camera.getH() - asteroid.getH()) {
-            alreadyExplode = true;
-        }
-
-        // Handle explosion or move to the next asteroid
-        if (alreadyExplode) {
-            asteroid.explode();
-            asteroidIt = asteroids.erase(asteroidIt); // Remove the asteroid and update the iterator
-        } else {
-            ++asteroidIt; // Move to the next asteroid
-        }
-    }
-
-    level.setAsteroids(asteroids);
-}
-
-/** END COLLISION HANDLING **/
-
 
 void Game::togglePause() {
     using enum GameState;

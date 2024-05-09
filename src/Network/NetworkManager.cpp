@@ -52,14 +52,14 @@ void NetworkManager::startServers() {
     }
 }
 
-void NetworkManager::startClients() {
+void NetworkManager::startClients(const std::string& ip, short port) {
     unsigned short clientPort;
     try {
-        tcpClient.connect("127.0.0.1", 8080, clientPort);
+        tcpClient.connect(ip, port, clientPort);
         std::cout << "TCPClient: Connected to server" << std::endl;
         clientTCPThreadPtr = std::make_unique<std::jthread>(&TCPClient::start, &tcpClient);
 
-        udpClient.initialize("127.0.0.1", 8080, clientPort);
+        udpClient.initialize(ip, port, clientPort);
         std::cout << "UDPClient: Client initialized and running on port " << clientPort << std::endl;
         clientUDPThreadPtr = std::make_unique<std::jthread>(&UDPClient::start, &udpClient);
     } catch (const NetworkError &) {
@@ -147,6 +147,15 @@ void NetworkManager::sendPlayerUpdate(uint16_t keyboardStateMask) const {
     }
 
     // Otherwise, the game is local only (development mode)
+}
+
+void NetworkManager::sendSyncCorrection(nlohmann::json &message) {
+    // Send the correction message to all clients
+    std::scoped_lock<std::mutex> lock(clientAddressesMutex);
+
+    for (const auto& [clientId, clientAddress] : clientAddresses) {
+        udpServer.sendSyncCorrection(static_cast<int>(clientId), clientAddress, message);
+    }
 }
 
 void NetworkManager::sendAsteroidCreation(Asteroid const &asteroid) const {

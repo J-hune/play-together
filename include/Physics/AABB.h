@@ -11,19 +11,31 @@
 
 enum class AABBType {
     SAVE,
+    RESCUE,
     TOGGLE_GRAVITY,
     INCREASE_FALL_SPEED,
 };
 
 class AABB {
+private:
+    /* ATTRIBUTES */
+
+    float x; /**< The x-coordinate of the AABB. */
+    float y; /**< The y-coordinate of the AABB. */
+    float width; /**< The width of the AABB. */
+    float height; /**< The height of the AABB. */
+    int id; /**< The id of the AABB. */
+    AABBType type; /**< The type of the AABB. */
+
+
 public:
 
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
-    AABB(float x, float y, float width, float height, AABBType type);
+    AABB(float x, float y, float width, float height, int id, AABBType type);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Get the x-coordinate of the AABB.
@@ -50,16 +62,25 @@ public:
     [[nodiscard]] float getHeight() const;
 
     /**
+     * @brief Get the id of the AABB.
+     * @return The id of the AABB.
+     */
+    [[nodiscard]] int getID() const;
+
+    /**
      * @brief Get the type of the AABB.
      * @return The type of the AABB.
      */
     [[nodiscard]] AABBType getType() const;
 
-
+    /**
+     * @brief Get the SDL_FRect representation of the AABB.
+     * @return The SDL_FRect representation of the AABB.
+     */
     [[nodiscard]] SDL_FRect getRect() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the x-coordinate of the AABB.
@@ -97,14 +118,6 @@ public:
      */
     void setPosition(const Point &position);
 
-private:
-    /** ATTRIBUTES **/
-
-    float x; /**< The x-coordinate of the AABB. */
-    float y; /**< The y-coordinate of the AABB. */
-    float width; /**< The width of the AABB. */
-    float height; /**< The height of the AABB. */
-    AABBType type; /**< The type of the AABB. */
 };
 
 

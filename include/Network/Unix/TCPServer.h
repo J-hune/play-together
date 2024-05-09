@@ -25,13 +25,24 @@
  * @brief The TCPServer class provides functionality to create and manage a TCP server.
  */
 class TCPServer {
+private:
+    /* ATTRIBUTES */
+
+    int socketFileDescriptor = -1; /**< The server socket file descriptor. */
+    unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
+    std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
+    std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
+    std::map<int, sockaddr_in> *clientAddressesPtr = nullptr; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
+    std::mutex *clientAddressesMutexPtr = nullptr; /**< Pointer to the mutex to protect the client addresses map. */
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     TCPServer();
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Returns the server socket file descriptor.
@@ -40,7 +51,7 @@ public:
     [[nodiscard]] int getSocketFileDescriptor() const;
 
 
-    /** PUBLIC METHODS **/
+    /* METHODS */
 
     /**
      * @brief Initializes the TCP server with the given port.
@@ -86,13 +97,6 @@ public:
     bool sendGameProperties(int clientSocket) const;
 
     /**
-     * @brief Sends the list of players to the specified client.
-     * @param clientSocket The client socket file descriptor.
-     * @return
-     */
-    bool sendPlayerList(int clientSocket) const;
-
-    /**
      * Relay the client connection to all clients.
      * @param clientSocket The client socket file descriptor
      * @return
@@ -112,17 +116,6 @@ public:
     void stop();
 
 private:
-    /** ATTRIBUTES **/
-
-    int socketFileDescriptor = -1; /**< The server socket file descriptor. */
-    unsigned int maxClients = 3; /**< Maximum number of clients that can connect to the server. */
-    std::vector<std::jthread> clientThreads; /**< Threads to handle client connections. */
-    std::atomic<bool> stopRequested = false; /**< Flag to indicate if the server should stop. (exit the accept loop) */
-    std::map<int, sockaddr_in> *clientAddressesPtr = nullptr; /**< Pointer to the map of client IDs and their addresses. (file descriptor, address) */
-    std::mutex *clientAddressesMutexPtr = nullptr; /**< Pointer to the mutex to protect the client addresses map. */
-
-
-    /** PRIVATE METHODS **/
 
     /**
      * @brief Waits for a new client connection.

@@ -1,19 +1,59 @@
 #ifndef PLAY_TOGETHER_ASTEROID_H
 #define PLAY_TOGETHER_ASTEROID_H
 
-
-#include "../../Graphics/Sprite.h"
-#include "../Point.h"
-#include "../Camera.h"
-#include "../../Sounds/SoundEffect.h"
 #include <SDL_image.h>
 #include <cmath>
 #include <vector>
 #include <random>
+#include "../../Graphics/Sprite.h"
+#include "../Point.h"
+#include "../Camera.h"
+#include "../../Sounds/SoundEffect.h"
 
+
+/**
+ * @file Asteroid.h
+ * @brief Defines the Asteroid class representing an asteroid.
+ */
+
+/**
+ * @class Asteroid
+ * @brief Represents a switching asteroid in a 2D game.
+ */
 class Asteroid {
+private :
+    /* ATTRIBUTES */
+
+    float x = 0; /**< The x-coordinate of the asteroid's position. */
+    float y = 0; /**< The y-coordinate of the asteroid's position. */
+    float h = 80; /**< The height of the asteroid. */
+    float w = 80; /**< The width of the asteroid.*/
+
+    float speed = 0; /**< The speed of the asteroid. */
+    float horizontalSpeed = 0;/**< The horizontal speed of the asteroid. */
+    float verticalSpeed = 0; /**< The vertical speed of the asteroid. */
+
+    float angle = 0; /**< The angle of the asteroid. */
+    float angle_radians = 0; /**< The angle radians of the asteroid. */
+
+    Sprite sprite; /**< The sprite of the player. */
+    SoundEffect explosionSound = SoundEffect("Events/explosion.wav"); /**< The sound effect associated to asteroid's explosion. */
+
+    static std::vector<float> positions; /** Possible position array for the asteroid.*/
+    static std::vector<int> positionsLock; /** Array of locked asteroid positions. */
+    static std::vector<float> angles; /** Possible angle array for the asteroid.*/
+    static std::vector<int> anglesLock; /** Array of locked asteroid angles. */
+
+    // LOADED TEXTURE
+    static SDL_Texture *spriteTexturePtr; /**< The texture of asteroid. */
+
+    // SPRITE ANIMATIONS
+    static constexpr Animation idle = {0, 8, 100, false}; /**< Idle animation */
+    static constexpr Animation explosion = {6, 6, 70, true}; /**< Explosion animation */
+
+
 public :
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
     /**
      * @brief Constructor for the Asteroid class.
@@ -33,7 +73,7 @@ public :
     Asteroid(float x, float y, float speed, float h, float w, float angle);
 
 
-    /** BASIC ACCESSORS **/
+    /* BASIC ACCESSORS */
 
     /**
      * @brief Return the x attribute.
@@ -79,7 +119,7 @@ public :
     [[nodiscard]] Sprite *getSprite();
 
 
-    /** SPECIFIC ACCESSORS **/
+    /* SPECIFIC ACCESSORS */
 
     /**
      * @brief Get the bounding box of the asteroid.
@@ -94,7 +134,7 @@ public :
     [[nodiscard]] std::vector<Point> getVertices() const;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the x attribute.
@@ -128,7 +168,7 @@ public :
     void setAngle(float val);
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Load all asteroid textures.
@@ -156,7 +196,7 @@ public :
      *        Updates the current position coordinates accordingly.
      * TODO: correct the movement according to the delta time
      */
-    void applyMovement(double deltaTime);
+    void applyMovement(double delta_time);
 
 
     /**
@@ -196,34 +236,6 @@ public :
       */
     void explode();
 
-
-private :
-    float x = 0; /**< The x-coordinate of the asteroid's position. */
-    float y = 0; /**< The y-coordinate of the asteroid's position. */
-    float h = 80; /**< The height of the asteroid. */
-    float w = 80; /**< The width of the asteroid.*/
-
-    float speed = 0; /**< The speed of the asteroid. */
-    float horizontalSpeed = 0;/**< The horizontal speed of the asteroid. */
-    float verticalSpeed = 0; /**< The vertical speed of the asteroid. */
-
-    float angle = 0; /**< The angle of the asteroid. */
-    float angle_radians = 0; /**< The angle radians of the asteroid. */
-
-    Sprite sprite; /**< The sprite of the player. */
-    SoundEffect explosionSound; /**< The sound effect associated to asteroid's explosion. */
-
-    static std::vector<float> positions; /** Possible position array for the asteroid.*/
-    static std::vector<int> positionsLock; /** Array of locked asteroid positions. */
-    static std::vector<float> angles; /** Possible angle array for the asteroid.*/
-    static std::vector<int> anglesLock; /** Array of locked asteroid angles. */
-
-    // LOADED TEXTURE
-    static SDL_Texture *spriteTexturePtr; /**< The texture of asteroid. */
-
-    // SPRITE ANIMATIONS
-    static constexpr Animation idle = {0, 8, 100, false}; /**< Idle animation */
-    static constexpr Animation explosion = {6, 6, 70, true}; /**< Explosion animation */
 
 };
 

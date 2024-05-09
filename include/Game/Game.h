@@ -10,36 +10,81 @@
 #include <algorithm>
 #include <SDL_ttf.h>
 #include <queue>
-#include "../Physics/CollisionHandler.h"
 #include "../Utils/Mediator.h"
-#include "InputManager.h"
-#include "RenderManager.h"
-#include "SaveManager.h"
-#include "PlayerManager.h"
+#include "../Utils/MessageQueue.h"
+#include "Level.h"
+#include "GameManagers/PlayerCollisionManager.h"
+#include "GameManagers/InputManager.h"
+#include "GameManagers/TextureManager.h"
+#include "GameManagers/RenderManager.h"
+#include "GameManagers/SaveManager.h"
+#include "GameManagers/PlayerManager.h"
+#include "GameManagers/BroadPhaseManager.h"
+#include "GameManagers/EventCollisionManager.h"
+
 
 /**
  * @file Game.h
  * @brief Defines the Game class responsible for handling the main game logic.
  */
 
-// Forward declaration of InputManager, CollisionHandler
+// Forward declaration of managers
 class InputManager;
 class RenderManager;
 class SaveManager;
+class BroadPhaseManager;
 class PlayerManager;
+class PlayerCollisionManager;
+class EventCollisionManager;
+
 
 /**
  * @class Game
  * @brief Represents the main game logic including initialization, event handling, collision detection, and rendering.
  */
 class Game {
+private:
+    /* ATTRIBUTES */
+    static constexpr float effectiveFrameRateUpdateIntervalSeconds = 1.0f;
+    static constexpr float networkInputSendIntervalSeconds = 1.0f / 60.0f;
+    static constexpr float networkSyncCorrectionIntervalSeconds = 0.50f;
+
+    SDL_Window *window; /**< SDL window for rendering. */
+    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
+
+    std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
+    std::unique_ptr<TextureManager> textureManager; /**< Texture manager for handling texture loading. */
+    std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
+    std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
+    std::unique_ptr<BroadPhaseManager> broadPhaseManager; /**< Broad phase manager for handling the collision broad phase in the game. */
+    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
+    std::unique_ptr<PlayerCollisionManager> playerCollisionManager; /**< Player collision manager for handling the player collisions in the game. */
+    std::unique_ptr<EventCollisionManager> eventCollisionManager; /**< Event collision manager for handling the event collisions in the game. */
+
+    int frameRate = 60; /**< The refresh rate of the game. */
+    int effectiveFrameFps = frameRate; /**< The effective fps. */
+    Uint32 lastPlaytimeUpdate = SDL_GetTicks(); /**< The last time that playtime was updated. */
+    Uint32 playtime = 0; /**< The time in milliseconds elapsed since the game started. */
+
+    GameState gameState = GameState::STOPPED; /**< The current game state. */
+    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
+    MessageQueue *messageQueue; /**< The message queue for communication between threads. */
+    Camera camera; /**< The camera object */
+    Level level; /**< The level object */
+    Music music; /**< Represents the music that is currently played in the game. */
+    size_t seed;
+
+    //queue in order to keep track of the effects applied on the player
+    std::queue<GameData*> timeQueue;
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
-    Game(SDL_Window *window, SDL_Renderer *renderer, int refreshRate, bool *quitFlag);
+    Game(SDL_Window *window, SDL_Renderer *renderer, int frameRate, bool *quitFlag, MessageQueue *messageQueue);
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Returns the current game state.
@@ -54,8 +99,14 @@ public:
     [[nodiscard]] InputManager &getInputManager();
 
     /**
-     * @brief Returns the render object of the game.
-     * @return A pointer of Renderer object representing the render object of the game.
+     * @brief Returns the texture manager of the game.
+     * @return A pointer of TextureManager representing the render manager of the game.
+     */
+    [[nodiscard]] TextureManager &getTextureManager();
+
+    /**
+     * @brief Returns the render manager of the game.
+     * @return A pointer of RenderManager representing the render manager of the game.
      */
     [[nodiscard]] RenderManager &getRenderManager();
 
@@ -72,6 +123,12 @@ public:
     [[nodiscard]] PlayerManager &getPlayerManager();
 
     /**
+     * @brief Returns the broad phase manager of the game.
+     * @return A pointer of BroadPhaseManager object representing the broad phase manager of the game.
+     */
+    [[nodiscard]] BroadPhaseManager &getBroadPhaseManager();
+
+    /**
      * @brief Returns the camera of the game.
      * @return A pointer of Camera object representing the camera of the game.
      */
@@ -81,14 +138,7 @@ public:
      * @brief Get the level object.
      * @return The level object.
      */
-    [[nodiscard]] Level &getLevel();
-
-    /**
-     *
-     * @brief Get the tick rate of the game.
-     * @return The tick rate of the game.
-     */
-    [[nodiscard]] int getTickRate() const;
+    [[nodiscard]] Level* getLevel();
 
     /**
      * @brief Get the frame rate of the game.
@@ -96,8 +146,14 @@ public:
      */
     [[nodiscard]] int getEffectiveFrameRate() const;
 
+    /**
+     * @brief Update and get the playtime of the game in milliseconds.
+     * @return The playtime of the game.
+     */
+    [[nodiscard]] Uint32 getPlaytime();
 
-    /** MODIFIERS **/
+
+    /* MODIFIERS */
 
     /**
      * @brief Set the level attribute.
@@ -106,24 +162,24 @@ public:
     void setLevel(std::string const &map_name);
 
     /**
-     * @brief Set a new state to enable_platforms_movement
-     * @param state the state of enable_platforms_movement
-     */
-    void setEnablePlatformsMovement(bool state);
-
-    /**
      * @brief Set the frame rate of the game.
-     * @param frameRate The frame rate to set.
+     * @param fps The frame rate to set.
      */
-    void setFrameRate(int frameRate);
+    void setFrameRate(int fps);
 
     /**
-    * @brief Switch mavity between normal and reversed.
-    */
+     * @brief Set the playtime of the game.
+     * @param new_playtime The playtime to set.
+     */
+    void setPlaytime(Uint32 new_playtime);
+
+    /**
+     * @brief Switch mavity between normal and reversed.
+     */
     void switchMavity();
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Initializes the game by loading the level and the character.
@@ -132,22 +188,23 @@ public:
     void initializeHostedGame(int slot = 0);
 
     /**
-     * @brief Initializes a client game by loading the level and setting music.
-     * @param slot The save slot to use when loading the game. (0 by default)
+     * @brief Initializes a new game by loading the level data received from the server.
+     * @param map_name The name of the map to load.
+     * @param last_checkpoint The last checkpoint reached.
+     * @param players The list of players to load.
+     * @param cameraData The camera data to load.
+     * @param movingPlatforms1D The list of 1D moving platforms to load.
+     * @param movingPlatforms2D The list of 2D moving platforms to load.
+     * @param crushers The list of crushers to load.
      */
-    void initializeClientGame(const std::string& map_name, short last_checkpoint);
-
-    /**
-     * @brief Updates the game logic in a fixed time step.
-     */
-    void fixedUpdate();
+    void loadLevel(const std::string &map_name, short last_checkpoint, const nlohmann::json::array_t &players, const nlohmann::json::object_t &cameraData,
+                   const nlohmann::json::array_t &movingPlatforms1D, const nlohmann::json::array_t &movingPlatforms2D, const nlohmann::json::array_t &crushers);
 
     /**
      * @brief Updates the game logic.
-     * @param deltaTime The time elapsed since the last frame in seconds.
-     * @param ratio The ratio of the movement to apply.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void update(double deltaTime, double ratio);
+    void update(double delta_time);
 
     /**
      * @brief Runs the game loop.
@@ -169,90 +226,34 @@ public:
      */
     void exitGame();
 
+
 private:
-    /** ATTRIBUTES **/
 
-    SDL_Window *window; /**< SDL window for rendering. */
-    SDL_Renderer *renderer; /**< SDL renderer for rendering graphics. */
-
-    std::unique_ptr<InputManager> inputManager; /**< Input manager for handling input events. */
-    std::unique_ptr<RenderManager> renderManager; /**< Renderer object for rendering the game. */
-    std::unique_ptr<SaveManager> saveManager; /**< Save manager for saving and loading the game state. */
-    std::unique_ptr<PlayerManager> playerManager; /**< Player manager for handling the players in the game. */
-
-    int frameRate = 60; /**< The refresh rate of the game. */
-    const int tickRate = 30; /**< The tick rate of the game. */
-    int effectiveFrameFps = frameRate; /**< The effective fps. */
-
-    GameState gameState = GameState::STOPPED; /**< The current game state. */
-    bool *quitFlagPtr = nullptr; /**< Reference to the quit flag. */
-    Camera camera; /**< The camera object */
-    Level level; /**< The level object */
-    Music music; /**< Represents the music that is currently played in the game. */
-    size_t seed;
-
-
-    // Broad phase attributes
-    std::vector<AABB> saveZones; /**< Collection of AABB representing save zones. */
-    std::vector<AABB> toggleGravityZones; /**< Collection of AABB representing toggle gravity zones. */
-    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABB representing increase fall speed zones. */
-    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
-    std::vector<Polygon> obstacles; /**< Collection of polygons representing obstacles. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
-    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<Item*> items;
-    // Debug variables used for the application console
-    bool enable_platforms_movement = true;
-
-    //queue in order to keep track of the effects applied on the player
-    std::queue<GameData*> timeQueue;
-
-
-    /** PRIVATE METHODS **/
+    /* PRIVATE METHODS */
 
     /**
      * @brief Applies the movement to all players in the game.
-     * @param ratio The ratio of the movement to apply.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void applyPlayersMovement(double ratio);
+    void applyPlayersMovement(double delta_time);
 
     /**
      * @brief Calculates the movement of all players in the game.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
-    void calculatePlayersMovement(double deltaTime);
+    void calculatePlayersMovement(double delta_time);
 
     /**
-     * @brief Handles collisions between the asteroid and obstacles.
+     * @brief Updates all the players' sprite animations.
      */
-    void handleAsteroidsCollisions();
-
-    /**
-     * @brief Broad phase collision detection, detects objects that could potentially collide with each other.
-     */
-    void broadPhase();
-
-    /**
-     * @brief Handles collisions between a player and every object.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsNormalMavity(Player &player) const;
-
-    /**
-     * @brief Handles collisions between a player and every object when the mavity is reversed.
-     * @param player The player to handle collisions for.
-     */
-    void handleCollisionsReversedMavity(Player &player) const;
+    void updatePlayersSpriteAnimation();
 
     /**
      * @brief Main method that handle collisions for every player according to their mavity.
+     * @param delta_time The time elapsed since the last frame in seconds.
      * @see handleCollisionsNormalMavity() and handleCollisionsReversedMavity() for sub-functions.
-     * TODO: add collision behavior for moving objects
      */
-    void narrowPhase();
+    void narrowPhase(double delta_time);
 
 };
 

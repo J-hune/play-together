@@ -1,11 +1,15 @@
 {
     "movingPlatforms1D": [
-        {"x": 150, "y": 0, "width": 80, "height": 20, "speed": 1, "min": 100, "max": 400, "start": false, "axis": false}
+        {"x": 150, "y": 0, "size": 0.25, "speed": 1, "min": 100, "max": 400, "start": false, "axis": false, "texture": 1}
     ],
     "movingPlatforms2D": [
-        {"x": 150, "y": 0, "width": 80, "height": 20, "speed": 1, "left": [400, -100], "right": [700, -170], "start": false}
+        {"x": 150, "y": 0, "size": 0.42, "speed": 1, "left": [400, -100], "right": [700, -170], "start": false, "texture": 0}
     ],
-    "switchingPlatforms": [
-        {"x": 0, "y": -70, "width": 80, "height": 20, "bpm": 60, "steps": [[20, -100], [120, -100], [220, -100]]}
+    "switchingPlatforms": [],
+    "weightPlatforms": [
+        {"x": -150, "y": 15, "size": 0.25, "stepDistance": 50, "texture": 1}
+    ],
+    "treadmills": [
+        {"x": -400, "y": -300, "size": 2, "speed": 1, "direction": 1, "spriteSpeed":  24}
     ]
 }

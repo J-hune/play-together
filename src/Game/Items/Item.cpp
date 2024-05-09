@@ -34,7 +34,6 @@ SDL_FRect Item::getBoundingBox() const {
     return {x, y, width, height};
 }
 
-
 bool Item::operator==(const Item &item) const {
      return x == item.getX()
             && y == item.getY()
@@ -43,14 +42,23 @@ bool Item::operator==(const Item &item) const {
 }
 
 
+/* MUTATORS */
+
+void Item::setIsOnScreen(bool state) {
+    isOnScreen = state;
+}
+
+
 /* METHODS */
 
-/*void Item::applyEffect(Player &player) {
+void Item::applyEffect(Player &player) {
     player.addToScore(5);
     collectSound.play(0, -1);
-}*/
+}
 
 void Item::renderDebug(SDL_Renderer *renderer, Point camera) const {
-    SDL_FRect itemRect = {x - camera.x, y - camera.y, width, height};
-    SDL_RenderFillRectF(renderer, &itemRect);
+    if (isOnScreen) {
+        SDL_FRect itemRect = {x - camera.x, y - camera.y, width, height};
+        SDL_RenderFillRectF(renderer, &itemRect);
+    }
 }

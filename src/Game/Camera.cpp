@@ -5,12 +5,16 @@
  * @brief Implements the Camera class responsible for handling camera logic.
  */
 
-/** CONSTRUCTORS **/
+/* CONSTRUCTORS */
 
-Camera::Camera() = default;
+Camera::Camera() {
+    // Create the camera seed
+    std::random_device rd;
+    seed = std::mt19937(rd());
+}
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 float Camera::getX() const {
     return x;
@@ -28,25 +32,29 @@ float Camera::getH() const {
     return h;
 }
 
+Point Camera::getRenderingPoint() const {
+    return {x + shakeX, y + shakeY};
+}
+
 SDL_FRect Camera::getBoundingBox() const {
     return {x, y, w, h};
 }
 
 SDL_FRect Camera::getBroadPhaseArea() const {
-    return {x - 500, y - 500, w + 1000, h + 1000};
+    return {x - 1000, y - 1000, w + 2000, h + 2000};
 }
 
 std::vector<Point> Camera::getBroadPhaseAreaVertices() const {
     return {
-            {x - 500, y - 500},
-            {x + w + 1000, y - 500},
-            {x + w + 1000, y + h + 1000},
-            {x - 500, y + h + 1000}
+            {x - 1000, y - 1000},
+            {x + w + 2000, y - 1000},
+            {x + w + 2000, y + h + 2000},
+            {x - 1000, y + h + 2000}
     };
 }
 
 
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Camera::setX(float val) {
     x = val;
@@ -56,16 +64,17 @@ void Camera::setY(float val) {
     y = val;
 }
 
-void Camera::setIsShaking(bool state) {
-    isShaking = state;
+void Camera::setShake(int time, float amplitude) {
+    // Change shakeTime only if the new time is greater
+    if (time > shakeTime || time < 0) {
+        shakeTime = time;
+        lastShakeUpdate = SDL_GetTicks();
+        shakeAmplitude = amplitude;
+    }
 }
 
-void Camera::toggleIsShaking() {
-    isShaking = !isShaking;
-}
 
-
-/** METHODS **/
+/* METHODS */
 
 void Camera::initializePosition(Point camera_point) {
     // Initialize the camera so that players are bottom left
@@ -87,6 +96,33 @@ void Camera::initializePosition(Point camera_point) {
     // The point is on the top of the area
     else if (camera_point.y < y + area.y) {
         y -= (y + area.y) - camera_point.y;
+    }
+}
+
+void Camera::makeCameraShake() {
+    // Calculating target offsets for camera shake
+    float targetX = rand_float(seed) * shakeAmplitude;
+    float targetY = rand_float(seed) * shakeAmplitude;
+
+    // Applying camera shake by randomly adding or subtracting target offsets
+    rand_bool(seed) ? shakeX += targetX : shakeX -= targetX;
+    rand_bool(seed) ? shakeY += targetY : shakeY -= targetY;
+}
+
+void Camera::checkShake() {
+    shakeX = 0;
+    shakeY = 0;
+
+    // Shake for a given time
+    if (shakeTime > 0) {
+        makeCameraShake();
+        shakeTime -= static_cast<int>(SDL_GetTicks() - lastShakeUpdate);
+        lastShakeUpdate = SDL_GetTicks();
+        if (shakeTime < 0) shakeTime = 0;
+    }
+    // Shake indefinitely
+    else if (shakeTime < 0) {
+        makeCameraShake();
     }
 }
 
@@ -117,25 +153,7 @@ void Camera::applyMovement(Point camera_point, double delta_time) {
         y += (camera_point.y - area_top) * blend - 0.1F;
     }
 
-    if (isShaking) makeCameraShake();
-}
-
-void Camera::makeCameraShake() {
-    // Creating a random number generator
-    std::random_device rd;
-    std::minstd_rand gen(rd()); // Using the Linear Congruential Generator
-
-    // Defining uniform distributions for generating random boolean and float values
-    std::uniform_int_distribution rand_bool(0, 1);
-    std::uniform_real_distribution<float> rand_float(0.0, 1.0);
-
-    // Calculating target offsets for camera shake
-    float targetX = rand_float(gen) * shakeAmplitude;
-    float targetY = rand_float(gen) * shakeAmplitude;
-
-    // Applying camera shake by randomly adding or subtracting target offsets
-    rand_bool(gen) ? x += targetX : x -= targetX;
-    rand_bool(gen) ? y += targetY : y -= targetY;
+    checkShake();
 }
 
 void Camera::renderCameraPoint(SDL_Renderer *renderer, Point camera_point) const {

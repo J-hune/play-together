@@ -1,5 +1,6 @@
 {
     "saveZones": [],
+    "rescueZones": [],
     "toggleGravityZones": [],
     "increaseFallSpeedZone" : []
 }

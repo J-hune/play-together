@@ -14,13 +14,11 @@
  */
 class SpeedPowerUp : public Item {
 private:
-
     /* ATTRIBUTES */
 
     bool fast; /**< Flag indicating whether the power-up makes the player faster or slower. */
 
 public:
-
     /* CONSTRUCTORS */
 
     SpeedPowerUp(float x, float y, float w, float h, bool fast);
@@ -30,9 +28,9 @@ public:
     /* METHODS */
 
     /**
-     * @brief Apply the item's effect to a player.
-     * @param player The player the effect will be applied to.
-     */
+    * @brief Apply the item's effect to a player.
+    * @param player The player the effect will be applied to.
+    */
     void applyEffect(Player &player) override;
 
     /**
@@ -40,6 +38,14 @@ public:
     * @param player The player the effect will be applied to.
     */
     void inverseEffect(Player &player) override;
+
+    /**
+     * @brief Renders the power-up's sprite.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera) override;
+
 };
 
 

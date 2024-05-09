@@ -26,13 +26,33 @@
  * @brief Class that manages the network communication.
  */
 class NetworkManager {
+private:
+    /** ATTRIBUTES **/
+
+    TCPServer tcpServer; /**< TCP server instance for network communication. */
+    TCPClient tcpClient; /**< TCP client instance for network communication. */
+    UDPServer udpServer; /**< UDP server instance for network communication. */
+    UDPClient udpClient; /**< UDP client instance for network communication. */
+    std::unique_ptr<std::jthread> serverTCPThreadPtr; /**< Pointer to the TCP server thread. */
+    std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
+    std::unique_ptr<std::jthread> serverUDPThreadPtr; /**< Pointer to the UDP server thread. */
+    std::unique_ptr<std::jthread> clientUDPThreadPtr; /**< Pointer to the UDP client thread. */
+    std::mutex clientAddressesMutex = {}; /**< Mutex to protect the client addresses map. */
+
+#ifdef _WIN32
+    std::map<SOCKET, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
+#else
+    std::map<int, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
+#endif
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     NetworkManager();
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Checks if the server is running.
@@ -47,7 +67,7 @@ public:
     [[nodiscard]] bool isClientRunning() const;
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Starts the TCP and UDP servers.
@@ -56,8 +76,10 @@ public:
 
     /**
      * @brief Starts the TCP and UDP clients.
+     * @param ip The IP address of the server.
+     * @param port The port of the server.
      */
-    void startClients();
+    void startClients(const std::string& ip, short port);
 
     /**
      * @brief Stops the TCP and UDP servers.
@@ -84,29 +106,17 @@ public:
     void sendPlayerUpdate(uint16_t keyboardStateMask) const;
 
     /**
+     * @brief Sends the sync correction to all clients (UDP).
+     * @param message The message to send.
+     */
+    void sendSyncCorrection(nlohmann::json &message);
+
+    /**
      * @brief Sends the creation of an asteroid to all clients (UDP).
      * @param asteroid The asteroid to create.
      */
     void sendAsteroidCreation(Asteroid const &asteroid) const;
 
-private:
-    /** ATTRIBUTES **/
-
-    TCPServer tcpServer; /**< TCP server instance for network communication. */
-    TCPClient tcpClient; /**< TCP client instance for network communication. */
-    UDPServer udpServer; /**< UDP server instance for network communication. */
-    UDPClient udpClient; /**< UDP client instance for network communication. */
-    std::unique_ptr<std::jthread> serverTCPThreadPtr; /**< Pointer to the TCP server thread. */
-    std::unique_ptr<std::jthread> clientTCPThreadPtr; /**< Pointer to the TCP client thread. */
-    std::unique_ptr<std::jthread> serverUDPThreadPtr; /**< Pointer to the UDP server thread. */
-    std::unique_ptr<std::jthread> clientUDPThreadPtr; /**< Pointer to the UDP client thread. */
-    std::mutex clientAddressesMutex = {}; /**< Mutex to protect the client addresses map. */
-
-#ifdef _WIN32
-    std::map<SOCKET, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
-#else
-    std::map<int, sockaddr_in> clientAddresses; /**< Map storing client addresses. */
-#endif
 };
 
 #endif //PLAY_TOGETHER_NETWORKMANAGER_H

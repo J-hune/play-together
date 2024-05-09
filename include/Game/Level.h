@@ -1,22 +1,30 @@
 #ifndef PLAY_TOGETHER_LEVEL_H
 #define PLAY_TOGETHER_LEVEL_H
 
-#include <string>
-#include <fstream>
 #include <sstream>
-#include <iostream>
+#include <fstream>
+#include "../Graphics/Layer.h"
 #include "../Physics/Polygon.h"
 #include "../Physics/AABB.h"
 #include "../Sounds/Music.h"
 #include "Camera.h"
 #include "Events/Asteroid.h"
+#include "Levers/Lever.h"
 #include "Platforms/MovingPlatform1D.h"
 #include "Platforms/MovingPlatform2D.h"
 #include "Platforms/SwitchingPlatform.h"
+#include "Platforms/WeightPlatform.h"
+#include "Platforms/Treadmill.h"
+#include "Traps/Crusher.h"
 #include "Items/SizePowerUp.h"
 #include "Items/SpeedPowerUp.h"
+#include "Items/Coin.h"
 #include "../Utils/Mediator.h"
 #include "../../dependencies/json.hpp"
+#include "GameManagers/TextureManager.h"
+#include "Levers/TreadmillLever.h"
+#include "Levers/PlatformLever.h"
+#include "Levers/CrusherLever.h"
 
 // Define constants for directories and file names
 constexpr char MAPS_DIRECTORY[] = "assets/maps/";
@@ -31,13 +39,76 @@ constexpr char MAPS_DIRECTORY[] = "assets/maps/";
  * @brief Represents the level object including obstacles.
  */
 class Level {
-public:
-    /** CONSTRUCTOR **/
+private:
+    /* ATTRIBUTES */
 
-    explicit Level(const std::string &map_name);
+    // PROPERTIES
+    int worldID = -1; /**< Represents the ID of the world. */
+    int mapID = 0; /**< Represents the ID of the map. */
+    short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
+    std::string mapName; /**< Represents the name of the map. */
+    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
+    std::vector<Music> musics; /**< Represents the musics of the map. */
+
+    // GRAPHICS
+    TextureManager *textureManagerPtr; /**< A pointer to the game texture manager. */
+    std::vector<Layer> backgrounds; /**< Collection of layers representing the backgrounds, arranged from farthest to nearest. */
+    Texture middleground; /**< Layer representing the middle ground. */
+    std::vector<Layer> foregrounds; /**< Collection of layers representing the foregrounds, arranged from farthest to nearest */
+
+    // ZONES
+    std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
+    std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
+    std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
+    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
+    std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
+    std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
+    std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
+    std::vector<AABB> saveZones; /**< Collection of AABBs representing save zones. */
+    std::vector<AABB> rescueZones; /**< Collection of AABBs representing rescue zones. */
+    std::vector<AABB> toggleGravityZones; /**< Collection of AABBs representing toggle gravity zones. */
+    std::vector<AABB> increaseFallSpeedZones; /**< Collection of AABBs representing increase fall speed zones. */
+
+
+    // EVENTS
+    std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
+
+    // LEVERS
+    std::vector<TreadmillLever> treadmillLevers; /**< Collection of TreadmillLever representing treadmill levers. */
+    std::vector<PlatformLever> platformLevers; /**< Collection of PlatformLever representing platform levers. */
+    std::vector<CrusherLever> crusherLevers; /**< Collection of CrusherLever representing crusher levers. */
+
+    // PLATFORMS
+    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
+    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
+    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of SwitchingPlatform representing switching platforms. */
+    std::vector<WeightPlatform> weightPlatforms; /**< Collection of WeightPlatform representing weight platforms. */
+    std::vector<Treadmill> treadmills; /**< Collection of Treadmill representing treadmills. */
+
+    // TRAPS
+    std::vector<Crusher> crushers; /**< Collection of Crusher representing crushers. */
+
+    // ITEMS
+    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
+    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
+    std::vector<Coin> coins; /**< Collection of Coin representing coins. */
+    std::vector<Item*> items; /**< Collection of items.
+
+
+public:
+    /* CONSTRUCTORS */
+
+    explicit Level(const std::string &map_name, SDL_Renderer *renderer, TextureManager *textureManagerPtr);
     Level() = default;
 
-    /** ACCESSORS **/
+
+    /* ACCESSORS */
+
+    /**
+     * @brief Return the ID of the world.
+     * @return An integer representing the ID of the world.
+     */
+    [[nodiscard]] int getWorldID() const;
 
     /**
      * @brief Return the ID of the map.
@@ -85,35 +156,81 @@ public:
     [[nodiscard]] std::vector<Asteroid> getAsteroids() const;
 
     /**
+     * @brief Return the treadmillLevers attribute.
+     * @return A vector of TreadmillLever.
+     */
+    [[nodiscard]] std::vector<TreadmillLever> getTreadmillLevers() const;
+
+    /**
+     * @brief Return the platformLevers attribute.
+     * @return A vector of PlatformLever.
+     */
+    [[nodiscard]] std::vector<PlatformLever>& getPlatformLevers();
+
+    /**
+     * @brief Return the crusherLevers attribute.
+     * @return A vector of CrusherLever.
+     */
+    [[nodiscard]] std::vector<CrusherLever>& getCrusherLevers();
+
+    /**
      * @brief Return the movingPlatform attribute.
      * @return A vector of MovingPlatform1D.
      */
-    [[nodiscard]] std::vector<MovingPlatform1D> getMovingPlatforms1D() const;
+    [[nodiscard]] std::vector<MovingPlatform1D>& getMovingPlatforms1D();
 
     /**
      * @brief Return the movingPlatform2D attribute.
      * @return A vector of MovingPlatform2D.
      */
-    [[nodiscard]] std::vector<MovingPlatform2D> getMovingPlatforms2D() const;
+    [[nodiscard]] std::vector<MovingPlatform2D>& getMovingPlatforms2D();
 
     /**
      * @brief Return the switchingPlatforms attribute.
      * @return A vector of SwitchingPlatform.
      */
-    [[nodiscard]] std::vector<SwitchingPlatform> getSwitchingPlatforms() const;
+    [[nodiscard]] std::vector<SwitchingPlatform>& getSwitchingPlatforms();
+
+    /**
+     * @brief Return the weightPlatform attribute.
+     * @return A vector of WeightPlatform.
+     */
+    [[nodiscard]] std::vector<WeightPlatform>& getWeightPlatforms();
+
+    /**
+     * @brief Return the treadmills attribute.
+     * @return A vector of Treadmill.
+     */
+    [[nodiscard]] std::vector<Treadmill>& getTreadmills();
+
+    /**
+     * @brief Return the crushers attribute.
+     * @return A vector of Crusher.
+     */
+    [[nodiscard]] std::vector<Crusher>& getCrushers();
 
     /**
      * @brief Return the sizePowerUp attribute.
      * @return A vector of SizePowerUp.
      */
-    [[nodiscard]] std::vector<SizePowerUp> getSizePowerUp() const;
+    [[nodiscard]] std::vector<SizePowerUp>& getSizePowerUp();
 
     /**
      * @brief Return the speedPowerUp attribute.
      * @return A vector of SpeedPowerUp.
      */
-    [[nodiscard]] std::vector<SpeedPowerUp> getSpeedPowerUp() const;
+    [[nodiscard]] std::vector<SpeedPowerUp>& getSpeedPowerUp();
 
+    /**
+     * @brief Return the coins attribute.
+     * @return A vector of Coin.
+     */
+    [[nodiscard]] std::vector<Coin>& getCoins();
+
+    /**
+     * @brief Return an Item from the items attribute.
+     * @return An item.
+     */
     [[nodiscard]] std::vector<Item*> getItems() const;
 
     /**
@@ -123,7 +240,7 @@ public:
     [[nodiscard]] short getLastCheckpoint() const;
 
 
-    /** MUTATORS **/
+    /* MUTATORS */
 
     /**
      * @brief Set the last checkpoint reached by the player.
@@ -138,6 +255,36 @@ public:
     void setAsteroids(const std::vector<Asteroid> &value);
 
     /**
+     * @brief Activate a lever from treadmillLevers.
+     * @param lever The lever to activate.
+     */
+    void activateTreadmillLever(const TreadmillLever &lever);
+
+    /**
+     * @brief Activate a lever from platformLevers.
+     * @param lever The lever to activate.
+     */
+    void activatePlatformLever(const PlatformLever &lever);
+
+    /**
+     * @brief Activate a lever from crusherLevers.
+     * @param lever The lever to activate.
+     */
+    void activateCrusherLever(const CrusherLever &lever);
+
+    /**
+     * @brief Increase the weight of a platform in weightPlatforms attribute.
+     * @param platform The platform to increase the weight.
+     */
+    void increaseWeightForPlatform(const WeightPlatform &platform);
+
+    /**
+     * @brief Decrease the weight of a platform in weightPlatforms attribute.
+     * @param platform The platform to decrease the weight.
+     */
+    void decreaseWeightForPlatform(const WeightPlatform &platform);
+
+    /**
      * @brief Remove an item from sizePowerUp attribute.
      * @param item The item to remove.
      */
@@ -149,9 +296,20 @@ public:
      */
     void removeItemFromSpeedPowerUp(SpeedPowerUp const &item);
 
+    /**
+     * @brief Remove an item from coins attribute.
+     * @param item The item to remove.
+     */
+    void removeItemFromCoins(Coin const &item);
+
+    /**
+     * @brief Remove an item.
+     * @param item The item to remove.
+     */
     void removeItem(Item const &item);
 
-    /** PUBLIC METHODS **/
+
+    /* PUBLIC METHODS */
 
     /**
      * @brief Applies the movement to all asteroid in the game.
@@ -162,9 +320,16 @@ public:
 
     /**
      * @brief Applies the movement of every platforms in the level.
-     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @param delta_time The time elapsed since the last frame in seconds.
      */
     void applyPlatformsMovement(double delta_time);
+
+    /**
+     * @brief Applies the movement of every traps in the level.
+     * @param deltaTime The time elapsed since the last frame in seconds.
+     * @return Returns true if a crusher reach the end of his down movement to make camera shake, false otherwise.
+     */
+    bool applyTrapsMovement(double delta_time);
 
     /**
      * @brief Generates a specified number of asteroids in the game.
@@ -177,6 +342,37 @@ public:
      * @param asteroid The asteroid to add.
      */
     void addAsteroid(Asteroid const &asteroid);
+
+    /**
+     * @brief Disable or enable all platforms movement.
+     */
+    void togglePlatformsMovement(bool state);
+
+    /**
+     * @brief Disable or enable all crushers movement.
+     */
+    void toggleCrushersMovement(bool state);
+
+    /**
+     * @brief Renders the background textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderBackgrounds(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the midleground texture.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderMiddleground(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the midleground texture.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderForegrounds(SDL_Renderer *renderer, Point camera) const;
 
     /**
      * @brief Renders the collisions by drawing obstacles.
@@ -200,11 +396,53 @@ public:
     void renderAsteroidsDebug(SDL_Renderer *renderer, Point camera) const;
 
     /**
+     * @brief Renders the levers by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderLevers(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the levers by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderLeversDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the platforms by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderPlatforms(SDL_Renderer *renderer, Point camera);
+
+    /**
      * @brief Renders the platforms by drawing collisions boxes.
      * @param renderer Represents the renderer of the game.
      * @param camera Represents the camera of the game.
      */
     void renderPlatformsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the crushers by drawing textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderTraps(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the crushers by drawing collisions boxes.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderTrapsDebug(SDL_Renderer *renderer, Point camera) const;
+
+    /**
+     * @brief Renders the items by sprites.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderItems(SDL_Renderer *renderer, Point camera);
 
     /**
      * @brief Renders the items by drawing rectangles.
@@ -213,41 +451,22 @@ public:
      */
     void renderItemsDebug(SDL_Renderer *renderer, Point camera) const;
 
+
 private:
-    /** ATTRIBUTES **/
 
-    int mapID = 0; /**< Represents the ID of the map. */
-    std::string mapName; /**< Represents the name of the map. */
-    std::vector<std::array<Point, 4>> spawnPoints; /**< Represents the spawn points of the map. */
-    std::vector<Music> musics; /**< Represents the musics of the map. */
-
-    std::vector<Polygon> collisionZones; /**< Collection of polygons representing obstacles. */
-    std::vector<Polygon> iceZones; /**< Collection of polygons representing ice zones. */
-    std::vector<Polygon> sandZones; /**< Collection of polygons representing sand zones. */
-    std::vector<Polygon> deathZones; /**< Collection of polygons representing death zones. */
-    std::vector<Polygon> cinematicZones; /**< Collection of polygons representing cinematic zones. */
-    std::vector<Polygon> bossZones; /**< Collection of polygons representing boss zones. */
-    std::vector<Polygon> eventZones; /**< Collection of polygons representing event zones. */
-    std::vector<AABB> saveZones; /**< Collection of polygons representing save zones. */
-    std::vector<AABB> toggleGravityZones; /**< Collection of polygons representing toggle gravity zones. */
-    std::vector<AABB> increaseFallSpeedZones; /**< Collection of polygons representing increase fall speed zones. */
-    std::vector<Asteroid> asteroids; /**< Collection of Asteroid representing asteroids. */
-    std::vector<MovingPlatform1D> movingPlatforms1D; /**< Collection of MovingPlatform1D representing 1D platforms. */
-    std::vector<MovingPlatform2D> movingPlatforms2D; /**< Collection of MovingPlatform2D representing 2D platforms. */
-    std::vector<SwitchingPlatform> switchingPlatforms; /**< Collection of switchingPlatform representing switching platforms. */
-    std::vector<SizePowerUp> sizePowerUp; /**< Collection of SizePowerUp representing size power-up. */
-    std::vector<SpeedPowerUp> speedPowerUp; /**< Collection of SpeedPowerUp representing speed power-up. */
-    short lastCheckpoint = 0; /**< Represents the last checkpoint reached by the player. */
-
-    std::vector<Item*> items;
-
-    /** PRIVATE METHODS **/
+    /* PRIVATE METHODS  */
 
     /**
      * @brief Load the properties of the map.
      * @param map_file_name Represents the name of the map file.
      */
     void loadMapProperties(const std::string &map_file_name);
+
+    /**
+     * @brief Load the environment of the map.
+     * @param map_file_name Represents the name of the map file.
+     */
+    void loadEnvironmentFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the polygons from a JSON file.
@@ -275,10 +494,22 @@ private:
     void loadPolygonsFromMap(const std::string &map_file_name);
 
     /**
-     * @brief Load the platforms from a map. (1D, 2D and switching platforms)
+     * @brief Load the platforms from a map. (1D, 2D, switching and weight platforms)
      * @param map_file_name Represents the name of the map.
      */
     void loadPlatformsFromMap(const std::string &map_file_name);
+
+    /**
+     * @brief Load the traps from a map.
+     * @param map_file_name Represents the name of the map.
+     */
+    void loadTrapsFromMap(const std::string &map_file_name);
+
+    /**
+     * @brief Load the levers from a map.
+     * @param map_file_name Represents the name of the map.
+     */
+    void loadLeversFromMap(const std::string &map_file_name);
 
     /**
      * @brief Load the items from a map.

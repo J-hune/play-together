@@ -5,12 +5,13 @@
  * @brief Implements the Polygon class functions for handling polygons in 2D space.
  */
 
-/** CONSTRUCTOR **/
+
+/* CONSTRUCTOR */
 
 Polygon::Polygon(const std::vector<Point> &vertices, PolygonType type) : vertices(vertices), type(type) {}
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 std::vector<Point> Polygon::getVertices() const {
     return vertices;
@@ -21,7 +22,7 @@ PolygonType Polygon::getType() const {
 }
 
 
-/** METHODS **/
+/* METHODS */
 
 double Polygon::distance(const Point &a, const Point &b) {
     return std::hypot(b.x - a.x, b.y - a.y);

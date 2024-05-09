@@ -5,32 +5,25 @@
  * @brief Implements the Sprite class responsible for handling sprite logic.
  */
 
-/** CONSTRUCTORS **/
 
-Sprite::Sprite(Animation animation, SDL_Texture &texture, int width, int height) :
-        animation(animation), texturePtr(&texture), srcRect({0, 0, width, height}) {}
+/* CONSTRUCTORS */
+
+Sprite::Sprite(SDL_Texture &texture, Animation animation, int width, int height) :
+        Texture(texture), animation(animation), srcRect({0, 0, width, height}) {}
 
 
-/** ACCESSORS **/
+/* ACCESSORS */
 
 Animation Sprite::getAnimation() const {
     return animation;
-}
-
-SDL_Texture* Sprite::getTexture() const {
-    return texturePtr;
 }
 
 SDL_Rect Sprite::getSrcRect() const {
     return srcRect;
 }
 
-SDL_RendererFlip Sprite::getFlip() const {
-    return static_cast<SDL_RendererFlip>(flipVertical + flipHorizontal);
-}
 
-
-/** MODIFIERS **/
+/* MODIFIERS */
 
 void Sprite::setAnimation(const Animation& newAnimation) {
     // Change animation only if it's different
@@ -62,30 +55,17 @@ void Sprite::setAnimationIndexX(int index) {
     animationIndexX = index;
 }
 
-void Sprite::setTexture(SDL_Texture &newTexture) {
-    texturePtr = &newTexture;
-}
 
-void Sprite::setFlipHorizontal(SDL_RendererFlip flip) {
-    flipHorizontal = flip;
-}
+/* METHODS */
 
-void Sprite::setFlipVertical(SDL_RendererFlip flip) {
-    flipVertical = flip;
-}
+bool Sprite::updateAnimation() {
+    bool check = false;
 
-void Sprite::toggleFlipVertical() {
-    flipVertical = (flipVertical == SDL_FLIP_VERTICAL) ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
-}
-
-
-/** METHODS **/
-
-void Sprite::updateAnimation() {
-    // If the animation was unique and is ended, switch to next animation
+    // If the animation was unique and is ended, switch to the next animation
     if (animation.unique && nbFrameDisplayed == animation.frames) {
         uniqueAnimationIsDisplayed = false;
         setAnimation(nextAnimation);
+        check = true;
     }
 
     // Update x position animation
@@ -98,4 +78,6 @@ void Sprite::updateAnimation() {
     // Apply animation
     srcRect.x = srcRect.w * animationIndexX;
     srcRect.y = srcRect.h * animation.indexY;
+
+    return check;
 }

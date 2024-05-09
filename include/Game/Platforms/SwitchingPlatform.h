@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <ranges>
 #include <vector>
-#include "../Point.h"
+#include "IPlatform.h"
 
 /**
  * @file SwitchingPlatform.h
@@ -16,81 +16,106 @@
  * @class SwitchingPlatform
  * @brief Represents a switching platform in a 2D game.
  */
-class SwitchingPlatform {
+class SwitchingPlatform : public IPlatform {
+private:
+    /* ATTRIBUTES */
+
+    float x; /**< The x-coordinate of the platform's position. */
+    float y; /**< The y-coordinate of the platform's position. */
+    float w; /**< The width of the platform. (in pixels) */
+    float h; /**< The height of the platform. */
+    float size; /**< The size of the platform. */
+    double bpm; /**< The beat per minute of the platform. */
+    Uint32 startTime = SDL_GetTicks(); /**< The time set at the beginning of every beat */
+    int actualPoint = 0; /**< The current point the platform's position. */
+    std::vector<Point> steps; /** Collection of Point representing every possible position of the platform. */
+    bool isMoving = true; /** Flag indicating if the platform is currently moving. */
+    bool isOnScreen = true; /**< Flag indicating if the platform is on the screen. */
+
+    Texture texture; /**< The texture of the platform. */
+    SDL_FRect textureOffsets; /**< The texture offsets of the platform adapted to the size. */
+
+
 public:
-    /** CONSTRUCTOR **/
+    /* CONSTRUCTORS */
 
-    SwitchingPlatform(float x, float y, float w, float h, Uint32 bpm, std::vector<Point> steps);
+    SwitchingPlatform(float x, float y, float size, Uint32 bpm, std::vector<Point> steps, const Texture& texture);
 
 
-    /** BASIC ACCESSORS **/
+    /* ACCESSORS */
 
     /**
      * @brief Return the x attribute.
      * @return The value of the x attribute.
      */
-    [[nodiscard]] float getX() const;
+    [[nodiscard]] float getX() const override;
 
     /**
      * @brief Return the y attribute.
      * @return The value of the y attribute.
      */
-    [[nodiscard]] float getY() const;
+    [[nodiscard]] float getY() const override;
 
     /**
      * @brief Return the weight attribute.
      * @return The value of the weight attribute.
      */
-    [[nodiscard]] float getW() const;
+    [[nodiscard]] float getW() const override;
 
     /**
      * @brief Return the height attribute.
      * @return The value of the height attribute.
      */
-    [[nodiscard]] float getH() const;
+    [[nodiscard]] float getH() const override;
 
     /**
      * @brief Return the isMoving attribute.
      * @return The value of the isMoving attribute.
      */
-    [[nodiscard]] bool getIsMoving() const;
-
-
-    /** SPECIFIC ACCESSORS **/
+    [[nodiscard]] bool getIsMoving() const override;
 
     /**
      * @brief Get the bounding box of the platform.
      * @return SDL_Rect representing the platform box.
      */
-    [[nodiscard]] SDL_FRect getBoundingBox() const;
+    [[nodiscard]] SDL_FRect getBoundingBox() const override;
 
 
-    /** MODIFIERS **/
+    /* MODIFIERS */
 
     /**
      * @brief Set the isMoving attribute.
      * @param state The new state of the isMoving attribute.
      */
-    void setIsMoving(bool state);
+    void setIsMoving(bool state) override;
+
+    /**
+     * @brief Set the isOnScreen attribute.
+     * @param state The new state of the isOnScreen attribute.
+     */
+    void setIsOnScreen(bool state) override;
 
 
-    /** PUBLIC METHODS **/
+    /* PUBLIC METHODS */
 
     /**
      * @brief Calculate the new position of the platform according to its bpm.
      */
-    void applyMovement();
+    void applyMovement([[maybe_unused]] double delta_time) override;
 
-private:
-    float x; /**< The x-coordinate of the platform's position. */
-    float y; /**< The y-coordinate of the platform's position. */
-    float w; /**< The width of the platform. (in pixels) */
-    float h; /**< The height of the platform. */
-    double bpm; /**< The beat per minute of the platform. */
-    Uint32 startTime; /**< The time set at the beginning of every beat */
-    int actualPoint = 0; /**< The current point the platform's position. */
-    std::vector<Point> steps; /** Collection of Point representing every possible position of the platform. */
-    bool isMoving = true;
+    /**
+     * @brief Renders the platforms by drawing its textures.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void render(SDL_Renderer *renderer, Point camera) const override;
+
+    /**
+     * @brief Renders the platforms by its drawing its collision box.
+     * @param renderer Represents the renderer of the game.
+     * @param camera Represents the camera of the game.
+     */
+    void renderDebug(SDL_Renderer *renderer, Point camera) const override;
 
 };
 

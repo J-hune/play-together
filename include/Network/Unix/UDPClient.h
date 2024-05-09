@@ -20,13 +20,21 @@
  * @brief The UDPClient class provides functionality to create and manage a UDP client.
  */
 class UDPClient {
+private:
+    /* ATTRIBUTES */
+
+    int socketFileDescriptor = -1; /**< The client socket file descriptor. */
+    bool stopRequested = false; /**< Flag to indicate if the client should stop. */
+    struct sockaddr_in serverAddress{}; /**< The server address structure. */
+
+
 public:
-    /** CONSTRUCTORS **/
+    /* CONSTRUCTORS */
 
     UDPClient();
 
 
-    /** ACCESSORS **/
+    /* ACCESSORS*/
 
     /**
      * @brief Gets the socket file descriptor.
@@ -35,7 +43,7 @@ public:
     [[nodiscard]] int getSocketFileDescriptor() const;
 
 
-    /** PUBLIC METHODS **/
+    /* METHODS */
 
     /**
      * @brief Initializes the UDP client with the given server address and port.
@@ -47,7 +55,7 @@ public:
     /**
      * @brief Starts the client to handle incoming messages.
      */
-    void start() const;
+    void start();
 
     /**
      * @brief Handles incoming messages from the server.
@@ -72,12 +80,6 @@ public:
      */
     void stop();
 
-private:
-    /** ATTRIBUTES **/
-
-    int socketFileDescriptor = -1; /**< The client socket file descriptor. */
-    bool stopRequested = false; /**< Flag to indicate if the client should stop. */
-    struct sockaddr_in serverAddress{}; /**< The server address structure. */
 };
 
 #endif //PLAY_TOGETHER_UDPCLIENT_H

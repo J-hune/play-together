@@ -1,5 +1,6 @@
 {
-    "id": 1,
+    "worldID": 1,
+    "levelID": 1,
     "name": "diversity",
     "displayName": "Diversity",
     "spawnPoints": [

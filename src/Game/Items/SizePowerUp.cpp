@@ -24,13 +24,17 @@ void SizePowerUp::applyEffect(Player &player) {
 
     // The item is a growth power-up
     if (grow) {
-        player.setY(player.getY() - (player.getH() * 2 - player.getH())); // Move player up to avoid collision with ground
-        player.setW(player.getW() * 2);
-        player.setH(player.getH() * 2);
+        player.setY(player.getY() - (player.getH() * 2 - player.getH())); // Move player up to avoid collision with the ground
+        player.setSize(player.getSize() * 2);
     }
     // The item is a shrink power-up
     else {
-        player.setW(player.getW() / 2);
-        player.setH(player.getH() / 2);
+        player.setSize(player.getSize() / 2);
     }
+}
+
+void SizePowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 180, 255);
+    Item::renderDebug(renderer, camera);
 }

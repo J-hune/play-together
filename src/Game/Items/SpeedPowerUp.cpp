@@ -5,8 +5,6 @@
  * @brief Implements the SpeedPowerUp class responsible for SpeedPowerUp object.
  */
 
-// Static member initialization
-
 
 /* CONSTRUCTORS */
 
@@ -17,7 +15,7 @@ SpeedPowerUp::SpeedPowerUp(float x, float y, float w, float h, bool fast) :
 /* METHODS */
 
 void SpeedPowerUp::applyEffect(Player &player) {
-    //Item::applyEffect(player);
+    Item::applyEffect(player);
 
     // The item is a fast power-up
     if (fast) {
@@ -32,4 +30,10 @@ void SpeedPowerUp::applyEffect(Player &player) {
 void  SpeedPowerUp::inverseEffect(Player &player) {
     fast = !fast;
     applyEffect(player);
+}
+
+void SpeedPowerUp::render(SDL_Renderer *renderer, Point camera) {
+    // Temporary render until sprite is implemented
+    SDL_SetRenderDrawColor(renderer, 0, 255, 100, 255);
+    Item::renderDebug(renderer, camera);
 }

@@ -1,12 +1,11 @@
 #include "../../include/Utils/ApplicationConsole.h"
 
-/** CONSTRUCTOR **/
+/* CONSTRUCTORS */
 
-// Constructor for ApplicationConsole, takes a pointer to the associated Game object.
 ApplicationConsole::ApplicationConsole(Game *game) : gamePtr(game) {}
 
 
-/** METHODS **/
+/* METHODS */
 
 // Runs the console in a loop, waiting for user input and executing commands.
 void ApplicationConsole::run() const {
@@ -83,8 +82,8 @@ void ApplicationConsole::displayHelp(int gameState) const {
         std::cout << "tp [x] [y] - Teleport the player to the specified coordinates\n";
         std::cout << "show [all | camera_point | camera_area | player_colliders] - Show debug information\n";
         std::cout << "hide [all | camera_point | camera_area | player_colliders] - Hide debug information\n";
-        std::cout << "enable [all | camera_shake | platforms] - Enable game mechanic\n";
-        std::cout << "disable [all | camera_shake| platforms] - Disable game mechanic\n";
+        std::cout << "enable [all | camera_shake | platforms | crushers] - Enable game mechanic\n";
+        std::cout << "disable [all | camera_shake | platforms | crushers] - Disable game mechanic\n";
         std::cout << "render - Toggle rendering between textures and collisions box\n";
     } else {
         std::cout << "ping - Test the console\n";
@@ -93,12 +92,12 @@ void ApplicationConsole::displayHelp(int gameState) const {
 }
 
 
-/** GAME RUNNING COMMANDS METHODS **/
+/* GAME RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::teleportPlayer(const std::string &command) const {
     float x; float y;
     if (sscanf(command.c_str(), "tp %f %f", &x, &y) == 2) {
-        gamePtr->getPlayerManager().findPlayerById(-1)->teleportPlayer(x, y);
+        gamePtr->getPlayerManager().findPlayerById(-1)->teleport(x, y);
     } else {
         std::cout << "Invalid syntax. Usage: tp [x] [y]\n";
     }
@@ -198,17 +197,22 @@ void ApplicationConsole::enableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(true);
-        gamePtr->setEnablePlatformsMovement(true);
+        gamePtr->getCamera()->setShake(-1);
+        gamePtr->getLevel()->togglePlatformsMovement(true);
+        gamePtr->getLevel()->toggleCrushersMovement(true);
         std::cout << "Enabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(true);
+        gamePtr->getCamera()->setShake(-1);
         std::cout << "Enabling camera shaking.\n";
     }
     else if (option == "platforms") {
-        gamePtr->setEnablePlatformsMovement(true);
+        gamePtr->getLevel()->togglePlatformsMovement(true);
         std::cout << "Enabling platforms movement.\n";
+    }
+    else if (option == "crushers") {
+        gamePtr->getLevel()->toggleCrushersMovement(true);
+        std::cout << "Enabling crushers movement.\n";
     }
     else {
         std::cout << "Invalid option. Usage: enable [all | camera_shake | platforms]\n";
@@ -227,17 +231,22 @@ void ApplicationConsole::disableMechanics(const std::string &command) const {
     }
 
     if (option == "all") {
-        gamePtr->getCamera()->setIsShaking(false);
-        gamePtr->setEnablePlatformsMovement(false);
+        gamePtr->getCamera()->setShake(0);
+        gamePtr->getLevel()->togglePlatformsMovement(false);
+        gamePtr->getLevel()->toggleCrushersMovement(false);
         std::cout << "Disabling all mechanics.\n";
     }
     else if (option == "camera_shake") {
-        gamePtr->getCamera()->setIsShaking(false);
+        gamePtr->getCamera()->setShake(0);
         std::cout << "Disabling camera shaking.\n";
     }
     else if (option == "platforms") {
-        gamePtr->setEnablePlatformsMovement(false);
+        gamePtr->getLevel()->togglePlatformsMovement(false);
         std::cout << "Disabling platforms' movement.\n";
+    }
+    else if (option == "crushers") {
+        gamePtr->getLevel()->toggleCrushersMovement(false);
+        std::cout << "Disabling crushers movement.\n";
     }
     else {
         std::cout << "Invalid option. Usage: disable [all | camera_shake | platforms]\n";
@@ -255,7 +264,7 @@ void ApplicationConsole::toggleFPSRendering() const {
 }
 
 
-/** GAME NOT RUNNING COMMANDS METHODS **/
+/* GAME NOT RUNNING COMMANDS METHODS */
 
 void ApplicationConsole::changeMaxFrameRate(const std::string& command) const {
     int fps;
@@ -264,12 +273,6 @@ void ApplicationConsole::changeMaxFrameRate(const std::string& command) const {
         return;
     }
 
-    if (fps < gamePtr->getTickRate()) {
-        std::cout << "Invalid frame rate. Frame rate must be greater or equal to 30.\n";
-        return;
-    }
-
     gamePtr->setFrameRate(fps);
     std::cout << "Max frame rate set to " << fps << ".\n";
 }
-
